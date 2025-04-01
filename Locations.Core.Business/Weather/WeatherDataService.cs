@@ -51,7 +51,7 @@ namespace Locations.Core.Business.Weather
 
         public async Task<Placemark> GetPlacemarkAsync()
         {
-            Location location = await Geolocation.Default.GetLocationAsync();
+            var location = await Geolocation.Default.GetLocationAsync();
 
             IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(this.latitude, this.longitude);
             Placemark placemark = placemarks?.FirstOrDefault();

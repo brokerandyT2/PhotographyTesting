@@ -16,12 +16,10 @@
 
   <ItemGroup>
 
-    <ProjectReference Include="..\..\..\Locations\Locations.Photography.Business\Locations.Core.Business.csproj" />
-
-    <ProjectReference Include="..\..\..\Locations\Locations.Photography.Data\Locations.Core.Data.csproj" />
-
     <ProjectReference Include="..\Location.Photography.Data\Location.Photography.Data.csproj" />
     <ProjectReference Include="..\Location.Photography.Shared\Location.Photography.Shared.csproj" />
+    <ProjectReference Include="..\Locations.Core.Business\Locations.Core.Business.csproj" />
+    <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
   </ItemGroup>
 
 </Project>

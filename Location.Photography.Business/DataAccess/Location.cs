@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Locations.Core.Business;
+
 namespace Location.Photography.Business.DataAccess
 {
 #if PHOTOGRAPHY

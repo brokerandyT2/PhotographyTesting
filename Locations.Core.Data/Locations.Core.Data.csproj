@@ -20,7 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Locations.Shared\Locations.Core.Shared.csproj" />
+    <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
+
   </ItemGroup>
 
   <ItemGroup>

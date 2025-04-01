@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Location.Photography.Shared\Location.Photography.Shared.csproj" />
+    <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Location.Photography.Business.DataAccess
 {
-    public class LocationService : ILocationService<LocationViewModel>
+    public class LocationService : Locations.Core.Business.DataAccess.LocationsService, ILocationService<LocationViewModel>
     {
         LocationsQuery<LocationViewModel> LocationsQuery = new LocationsQuery<LocationViewModel>();
         public bool Delete(LocationViewModel model)
@@ -40,10 +40,6 @@ namespace Location.Photography.Business.DataAccess
         public LocationViewModel Save(LocationViewModel model, bool returnNew)
         {
             throw new NotImplementedException();
-        }
-        public List<LocationViewModel> GetAll()
-        {
-            return (List<LocationViewModel>)LocationsQuery.GetItems<LocationViewModel>();
         }
     }
 }

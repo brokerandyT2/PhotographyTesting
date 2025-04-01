@@ -68,5 +68,15 @@ namespace Location.Photography.Business.DataAccess
         {
             throw new NotImplementedException();
         }
+
+        SettingsViewModel ISettingService<SettingViewModel>.GetAllSettings()
+        {
+            throw new NotImplementedException();
+        }
+
+        SettingViewModel ISettingService<SettingViewModel>.GetSettingByName(string name)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
