@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
+             x:Class="Location.Core.Views.ListLocations"
+             Title="List Locations">
+    <ContentPage.BindingContext>
+        <models:LocationViewModel />
+    </ContentPage.BindingContext>
+    <CollectionView 
+     VerticalOptions="Fill"
+    Header=" " 
+       ItemsSource="{Binding Items}"
+       SelectionMode="Single"
+       SelectionChanged="CollectionView_SelectionChanged">
+        <CollectionView.ItemTemplate>
+
+            <DataTemplate x:DataType="models:LocationViewModel">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Image HeightRequest="100" Grid.Column="0" Source="{Binding Photo}" ></Image>
+                    <Label Text="{Binding Title}" Grid.Column="1" FontSize="Medium"/>
+                    <Label Text="{Binding TimestampFormatted}" Grid.Column="2" FontSize="Medium"/>
+                    <ImageButton Source="map.svg" Pressed="ImageButton_Pressed"  CommandParameter="{Binding Id}" Grid.Column="3"></ImageButton>
+
+
+                </Grid>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentPage>

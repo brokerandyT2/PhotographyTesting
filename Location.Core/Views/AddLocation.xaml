@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Location.Core.Views.AddLocation"
+             xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
+             xmlns:strings="clr-namespace:Location.Core.Resources"
+             Title="Add Location">
+    <ContentPage.BindingContext>
+        <models:LocationViewModel/>
+    </ContentPage.BindingContext>
+    <Grid x:Name="EntryGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <!-- 0 -->
+            <RowDefinition Height="25" />
+            <!-- 1 -->
+            <RowDefinition Height="50" />
+            <!-- 2 -->
+            <RowDefinition Height="25" />
+            <!-- 3 -->
+            <RowDefinition Height="50" />
+            <!-- 4 -->
+            <RowDefinition Height="50" />
+            <!-- 5 -->
+            <RowDefinition Height="150" />
+            <!--    6 -->
+            <RowDefinition Height="200" />
+            <!-- 7 -->
+            <RowDefinition Height="50" />
+            <!-- 8 -->
+            <RowDefinition Height="50" />
+            <!-- 9 -->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <!-- Row 0 -->
+
+        <!-- Row 1-->
+        <Label Grid.Row="1" Grid.Column="0" Text="{x:Static strings:AppResources.Latitude}" FontSize="Medium" x:Name="Latitude" HorizontalOptions="Start" FontFamily="Quicksand"/>
+        <Label Grid.Row="1" Grid.Column="1" Text="{x:Static strings:AppResources.Longitude}" FontSize="Medium" x:Name="Longitude" HorizontalOptions="Start" FontFamily="Quicksand"/>
+        <!--Row 2-->
+        <Entry Grid.Row="2" Grid.Column="0" x:Name="lat" IsEnabled="False" Text="{Binding Lattitude}" />
+        <Entry Grid.Row="2" Grid.Column="1" x:Name="lon" IsEnabled="False" Text="{Binding Longitude}" />
+        <!-- Row 3  -->
+        <Label Grid.Row="3" Grid.ColumnSpan="2" x:Name="Title" FontSize="Medium" Text="{x:Static strings:AppResources.Title}" HorizontalOptions="Start"/>
+        <!-- Row 4 -->
+        <Entry Grid.Row="4" Grid.ColumnSpan="2"  IsSpellCheckEnabled="True" IsTextPredictionEnabled="True" x:Name="LocationTitle" Text="{Binding Title}" HeightRequest="50"/>
+        <!-- Row 5 -->
+        <Label Grid.Row="5" Grid.ColumnSpan="2" x:Name="Description" HeightRequest="50" Text="{x:Static strings:AppResources.Description}" FontSize="Medium" HorizontalOptions="Start"/>
+        <!-- Row 6 -->
+        <Editor Grid.Row="6" Grid.ColumnSpan="2" HeightRequest="150" x:Name="DescriptionText" Text="{Binding Description}" />
+        <!-- Row 7 -->
+        <Image Source="{Binding Photo}" Aspect="AspectFit" HeightRequest="200" Grid.Row="7" Grid.ColumnSpan="2"/>
+        <!-- Row 8 -->
+        <Button x:Name="Save" Text="Save" Grid.Column="0" Grid.Row="8" Pressed="Save_Pressed" />
+        <Button x:Name="AddPhoto" ImageSource="/Resources/Images/addphoto.svg" Grid.Column="1" Grid.Row="8" Pressed="AddPhoto_Pressed" />
+        <Button x:Name="CloseModal" Text="{x:Static strings:AppResources.CloseLocationDetails}" Pressed="CloseModal_Pressed" Grid.Row="9" Grid.ColumnSpan="2" IsVisible="False"/>
+
+    </Grid>
+</ContentPage>

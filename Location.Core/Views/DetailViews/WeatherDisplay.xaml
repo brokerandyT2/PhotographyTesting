@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Location.Core.Views.DetailViews.WeatherDisplay"
+             xmlns:maui="clr-namespace:epj.Expander.Maui;assembly=epj.Expander.Maui"
+             xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:strings="clr-namespace:Location.Core.Resources"
+             Title="WeatherDisplay">
+    <ContentPage.BindingContext>
+        <models:WeatherViewModel/>
+    </ContentPage.BindingContext>
+    <ScrollView>
+        <VerticalStackLayout x:Name="Accordion">
+            <maui:Expander Animated="True">
+                <maui:Expander.HeaderContent>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+
+                        </Grid.ColumnDefinitions>
+                        <Label Text="{Binding DayOne}" Grid.ColumnSpan="2"  />
+                    </Grid>
+                </maui:Expander.HeaderContent>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="1" Grid.Column="2"></Label>
+                    <Label Text="{Binding Forecast_Day_One}" Grid.Row="2" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="3" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Wind}" Grid.Row="4" Grid.ColumnSpan="4"/>
+                    <Label Text="{Binding WindSpeedDay_One}" Grid.Row="5" Grid.Column="1"/>
+                    <Label Text="-" Grid.Row="5" Grid.Column="2"/>
+                    <Label Text="{Binding WindGustDay_One}" Grid.Row="5" Grid.Column="3"/>
+                    <Image Source="arrow_up_custom.png" Rotation="{Binding WindDirectionDay_One}" Grid.Row="5" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="6" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Sunrise}" Grid.Row="7" Grid.Column="2"/>
+                    <Label Text="{x:Static strings:AppResources.Sunset}" Grid.Row="7" Grid.Column="4"/>
+                    <Label Text="{Binding Sunrise_Day_One}" Grid.Row="8" Grid.Column="2"/>
+                    <Label Text="{Binding Sunset_Day_One}" Grid.Row="8" Grid.Column="4"/>
+
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="9" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Low}" Grid.Row="10" Grid.Column="2"/>
+                    <Label Text="{x:Static strings:AppResources.High}" Grid.Row="10" Grid.Column="4"/>
+                    <Label Text="{Binding Temperature_Day_One_Low}" Grid.Row="11" Grid.Column="2"/>
+                    <Label Text="{Binding Temperature_Day_One}" Grid.Row="11" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="12" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="13" Grid.ColumnSpan="4"/>
+                    <Label Text="{Binding Forecast_Day_One}" Grid.Row="14" Grid.ColumnSpan="4"/>
+                </Grid>
+            </maui:Expander>
+            <maui:Expander Animated="True">
+                <maui:Expander.HeaderContent>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+
+                        </Grid.ColumnDefinitions>
+                        <Label Text="{Binding DayTwo}" Grid.ColumnSpan="2"  />
+                    </Grid>
+                </maui:Expander.HeaderContent>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="1" Grid.Column="2"></Label>
+                    <Label Text="{Binding Forecast_Day_Two}" Grid.Row="2" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="3" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Wind}" Grid.Row="4" Grid.ColumnSpan="4"/>
+                    <Label Text="{Binding WindSpeedDay_Two}" Grid.Row="5" Grid.Column="1"/>
+                    <Label Text="-" Grid.Row="5" Grid.Column="2"/>
+                    <Label Text="{Binding WindGustDay_Two}" Grid.Row="5" Grid.Column="3"/>
+                    <Image Source="arrow_up_custom.png" Rotation="{Binding WindDirectionDay_Two}" Grid.Row="5" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="6" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Sunrise}" Grid.Row="7" Grid.Column="2"/>
+                    <Label Text="{x:Static strings:AppResources.Sunset}" Grid.Row="7" Grid.Column="4"/>
+                    <Label Text="{Binding Sunrise_Day_Two}" Grid.Row="8" Grid.Column="2"/>
+                    <Label Text="{Binding Sunset_Day_Two}" Grid.Row="8" Grid.Column="4"/>
+
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="9" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Low}" Grid.Row="10" Grid.Column="2"/>
+                    <Label Text="{x:Static strings:AppResources.High}" Grid.Row="10" Grid.Column="4"/>
+                    <Label Text="{Binding Temperature_Day_Two_Low}" Grid.Row="11" Grid.Column="2"/>
+                    <Label Text="{Binding Temperature_Day_Two}" Grid.Row="11" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="12" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="13" Grid.ColumnSpan="4"/>
+                    <Label Text="{Binding Forecast_Day_Two}" Grid.Row="14" Grid.ColumnSpan="4"/>
+                </Grid>
+            </maui:Expander>
+            <maui:Expander Animated="True">
+                <maui:Expander.HeaderContent>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+
+                        </Grid.ColumnDefinitions>
+                        <Label Text="{Binding DayThree}" Grid.ColumnSpan="2"  />
+                    </Grid>
+                </maui:Expander.HeaderContent>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="1" Grid.Column="2"></Label>
+                    <Label Text="{Binding Forecast_Day_Three}" Grid.Row="2" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="3" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Wind}" Grid.Row="4" Grid.ColumnSpan="4"/>
+                    <Label Text="{Binding WindSpeedDay_Three}" Grid.Row="5" Grid.Column="1"/>
+                    <Label Text="-" Grid.Row="5" Grid.Column="2"/>
+                    <Label Text="{Binding WindGustDay_Three}" Grid.Row="5" Grid.Column="3"/>
+                    <Image Source="arrow_up_custom.png" Rotation="{Binding WindDirectionDay_Three}" Grid.Row="5" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="6" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Sunrise}" Grid.Row="7" Grid.Column="2"/>
+                    <Label Text="{x:Static strings:AppResources.Sunset}" Grid.Row="7" Grid.Column="4"/>
+                    <Label Text="{Binding Sunrise_Day_Three}" Grid.Row="8" Grid.Column="2"/>
+                    <Label Text="{Binding Sunset_Day_Three}" Grid.Row="8" Grid.Column="4"/>
+
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="9" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Low}" Grid.Row="10" Grid.Column="2"/>
+                    <Label Text="{x:Static strings:AppResources.High}" Grid.Row="10" Grid.Column="4"/>
+                    <Label Text="{Binding Temperature_Day_Three_Low}" Grid.Row="11" Grid.Column="2"/>
+                    <Label Text="{Binding Temperature_Day_Three}" Grid.Row="11" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="12" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="13" Grid.ColumnSpan="4"/>
+                    <Label Text="{Binding Forecasts_Day_Three}" Grid.Row="14" Grid.ColumnSpan="4"/>
+                </Grid>
+            </maui:Expander>
+            <maui:Expander Animated="True">
+                <maui:Expander.HeaderContent>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+
+                        </Grid.ColumnDefinitions>
+                        <Label Text="{Binding DayFour}" Grid.ColumnSpan="2"  />
+                    </Grid>
+                </maui:Expander.HeaderContent>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="1" Grid.Column="2"></Label>
+                    <Label Text="{Binding Forecast_Day_Four}" Grid.Row="2" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="3" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Wind}" Grid.Row="4" Grid.ColumnSpan="4"/>
+                    <Label Text="{Binding WindSpeedDay_Four}" Grid.Row="5" Grid.Column="1"/>
+                    <Label Text="-" Grid.Row="5" Grid.Column="2"/>
+                    <Label Text="{Binding WindGustDay_Four}" Grid.Row="5" Grid.Column="3"/>
+                    <Image Source="arrow_up_custom.png" Rotation="{Binding WindDirectionDay_Four}" Grid.Row="5" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="6" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Sunrise}" Grid.Row="7" Grid.Column="2"/>
+                    <Label Text="{x:Static strings:AppResources.Sunset}" Grid.Row="7" Grid.Column="4"/>
+                    <Label Text="{Binding Sunrise_Day_Four}" Grid.Row="8" Grid.Column="2"/>
+                    <Label Text="{Binding Sunset_Day_Four}" Grid.Row="8" Grid.Column="4"/>
+
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="9" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Low}" Grid.Row="10" Grid.Column="2"/>
+                    <Label Text="{x:Static strings:AppResources.High}" Grid.Row="10" Grid.Column="4"/>
+                    <Label Text="{Binding Temperature_Day_Four_Low}" Grid.Row="11" Grid.Column="2"/>
+                    <Label Text="{Binding Temperature_Day_Four}" Grid.Row="11" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="12" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="13" Grid.ColumnSpan="4"/>
+                    <Label Text="{Binding Forecasts_Day_Four}" Grid.Row="14" Grid.ColumnSpan="4"/>
+                </Grid>
+            </maui:Expander>
+            <maui:Expander Animated="True">
+                <maui:Expander.HeaderContent>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+
+                        </Grid.ColumnDefinitions>
+                        <Label Text="{Binding DayFive}" Grid.ColumnSpan="2"  />
+                    </Grid>
+                </maui:Expander.HeaderContent>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="1" Grid.Column="2"></Label>
+                    <Label Text="{Binding Forecast_Day_Five}" Grid.Row="2" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="3" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Wind}" Grid.Row="4" Grid.ColumnSpan="4"/>
+                    <Label Text="{Binding WindSpeedDay_Five}" Grid.Row="5" Grid.Column="1"/>
+                    <Label Text="-" Grid.Row="5" Grid.Column="2"/>
+                    <Label Text="{Binding WindGustDay_Five}" Grid.Row="5" Grid.Column="3"/>
+                    <Image Source="arrow_up_custom.png" Rotation="{Binding WindDirectionDay_Five}" Grid.Row="5" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="6" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Sunrise}" Grid.Row="7" Grid.Column="2"/>
+                    <Label Text="{x:Static strings:AppResources.Sunset}" Grid.Row="7" Grid.Column="4"/>
+                    <Label Text="{Binding Sunrise_Day_Five}" Grid.Row="8" Grid.Column="2"/>
+                    <Label Text="{Binding Sunset_Day_Five}" Grid.Row="8" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="9" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Low}" Grid.Row="10" Grid.Column="2"/>
+                    <Label Text="{x:Static strings:AppResources.High}" Grid.Row="10" Grid.Column="4"/>
+                    <Label Text="{Binding Temperature_Day_Five_Low}" Grid.Row="11" Grid.Column="2"/>
+                    <Label Text="{Binding Temperature_Day_Five}" Grid.Row="11" Grid.Column="4"/>
+                    <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="12" Grid.ColumnSpan="4"/>
+                    <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="13" Grid.ColumnSpan="4"/>
+                    <Label Text="{Binding Forecasts_Day_Five}" Grid.Row="14" Grid.ColumnSpan="4"/>
+                </Grid>
+            </maui:Expander>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

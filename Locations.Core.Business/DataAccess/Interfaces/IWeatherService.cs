@@ -1,0 +1,14 @@
+﻿using Locations.Core.Shared.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Locations.Core.Business.DataAccess.Interfaces
+{
+    public interface IWeatherService : IBaseService<WeatherViewModel>
+    {
+        public WeatherViewModel GetWeather(double latitude, double longitude);
+    }
+}
