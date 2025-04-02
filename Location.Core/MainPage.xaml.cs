@@ -53,6 +53,8 @@ namespace Location.Core
             this.Children.Add(new AddLocation());
             this.Children.Add(new ListLocations());
             this.Children.Add(new Tips());
+            this.Children.Add(new Settings());
+
             SettingsService ss = new SettingsService();
             var z = ss.GetSetting(MagicStrings.AppOpenCounter);
             var x = Convert.ToInt32(z.Value);
@@ -61,8 +63,12 @@ namespace Location.Core
 
             var language = CultureInfo.CurrentCulture.Name;
             var setting =  ss.GetSettingByName(MagicStrings.DefaultLanguage);
-            //var devInfo = ss.GetSettingByName(MagicStrings.DeviceInfo);
-
+            var adSupport = Convert.ToBoolean(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).Value);
+#if RELEASE
+            var subscription = ss.GetSettingByName(MagicStrings.SubscriptionType).Value;
+#else
+            var subscription = SubscriptionTypeEnum.Premium.Name();
+#endif
             if (setting.Value != language)
             {
                 setting.Value = language;
@@ -70,18 +76,26 @@ namespace Location.Core
             }
             if (IsLoggedIn)
             {
-                if (_subType == SubscriptionTypeEnum.Professional || _subType == SubscriptionTypeEnum.Premium)
+                if ((subscription == SubscriptionTypeEnum.Professional.Name() || subscription == SubscriptionTypeEnum.Premium.Name() ) || adSupport)
                 {
 #if PHOTOGRAPHY
+                    this.Children.Add(new Views.Pro.SceneEvaluation());
+                    this.Children.Add(new Views.Pro.SunCalculation());
 
 #endif
-                    if (_subType == SubscriptionTypeEnum.Premium)
+                    if ((subscription == SubscriptionTypeEnum.Premium.Name()) || adSupport)
                     {
 #if PHOTOGRAPHY
-
+                        this.Children.Add(new Views.Premium.ExposureCalculator());
+                        this.Children.Add(new Views.Premium.LightMeter());
+                        this.Children.Add(new Views.Premium.SunLocation());
 #endif
                     }
                 }
+            }
+            else
+            {
+                this.Children.Add(new Login());
             }
 
 

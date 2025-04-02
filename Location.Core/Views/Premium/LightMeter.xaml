@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Location.Core.Views.Premium.LightMeter"
+             xmlns:models="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:strings="clr-namespace:Location.Core.Resources"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Core;assembly=CommunityToolkit.Maui.Core"
+             xmlns:cv="clr-namespace:Camera.MAUI;assembly=Camera.MAUI"
+             Title="LightMeter">
+    <ContentPage.BindingContext>
+        <models:LightMeter />
+    </ContentPage.BindingContext>
+    <Grid>
+        <!-- Camera Preview -->
+        <cv:CameraView x:Name="cameraView" IsEnabled="True" IsVisible="False"/>
+
+        <Label Text="{x:Static strings:AppResources.baseexposure}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="5" Grid.ColumnSpan="4"></Label>
+        <Label Text="{x:Static strings:AppResources.shutterspeed}" TextColor="#CC0000" FontSize="Medium" FontAttributes="Bold" Grid.Row="6" Grid.Column="1"/>
+        <Label Text="{x:Static strings:AppResources.fStop}" TextColor="#CC0000" FontSize="Medium" FontAttributes="Bold" Grid.Row="6" Grid.Column="2"/>
+        <Label Text="{x:Static strings:AppResources.iso}" TextColor="#CC0000" FontSize="Medium" FontAttributes="Bold" Grid.Row="6" Grid.Column="3" />
+
+        <Picker ItemsSource="{Binding ShutterSpeed}" SelectedIndexChanged="ShutterSpeed_Picker_SelectedIndexChanged" x:Name="ShutterSpeed_Picker"/>
+        <Picker ItemsSource="{Binding FStops}" SelectedIndexChanged="fstop_Picker_SelectedIndexChanged" x:Name="fstop_Picker"/>
+        <Picker ItemsSource="{Binding ISOs}" SelectedIndexChanged="ISO_Picker_SelectedIndexChanged" x:Name="ISO_Picker"/>
+        <!-- Exposure Reading Overlay -->
+        <Label x:Name="ExposureReading"
+           Text="EV: --"
+           BackgroundColor="Black"
+           TextColor="White"
+           Padding="10"
+           VerticalOptions="End"
+           HorizontalOptions="Center"/>
+    </Grid>
+</ContentPage>

@@ -1,12 +1,12 @@
-﻿using  Locations.Core.Shared.ViewModels;
-using  Locations.Core.Shared.ViewModels.Interface;
+﻿using Locations.Core.Shared.ViewModels;
+using Locations.Core.Shared.ViewModels.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace  Locations.Photography.Data.Queries.Interfaces
+namespace Location.Photography.Data.Queries.Interfaces
 {
     public interface IDataAccessBase
     {

@@ -1,40 +1,97 @@
-using Location.Photography.Business.DataAccess;
-using Location.Photography.Business.ExposureCalculator.Interface;
-using lps = Location.Photography.Shared;
+
+using Locations.Core.Business.Advertising;
 using Locations.Core.Business.DataAccess;
-using Location.Co
-namespace Location.Photography.UI.Views.Premium;
+using Locations.Core.Shared;
+using lps = Location.Photography.Shared;
+using lpv = Location.Photography.Shared.ViewModels;
+namespace Location.Core.Views.Premium;
 
 public partial class ExposureCalculator : ContentPage
 {
-    Business.DataAccess.TipService ts = new Business.DataAccess.TipService();
+    private bool _skipCalculations = true;
+    private SettingsService ss = new SettingsService();
+    TipService ts = new TipService();
+    private bool _adSupport;
     public ExposureCalculator()
     {
+        _adSupport = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean();
         InitializeComponent();
         closeButton.IsVisible = false;
-    }
-    public ExposureCalculator(lps.ViewModels.Interfaces.IExposureCalculator model)
-    {
-        BindingContext = model;
-        closeButton.IsVisible = true;
+        ShutterSpeed_Picker.IsEnabled = false;
+
+        var x = (lpv.ExposureCalculator)BindingContext;
+        ShutterSpeed_Picker.SelectedIndex = 0;
+        fstop_Picker.SelectedIndex = 0;
+        ISO_Picker.SelectedIndex = 0;
+        x.ISOSelected = ISO_Picker.SelectedItem.ToString();
+        x.OldISO = ISO_Picker.Items[1].ToString();
+        x.FStopSelected = fstop_Picker.SelectedItem.ToString();
+        x.OldFstop = fstop_Picker.Items[1].ToString();
+        x.ShutterSpeedSelected = ShutterSpeed_Picker.SelectedItem.ToString();
+        x.OldShutterSpeed = ShutterSpeed_Picker.Items[1].ToString();
+        try
+        {
+
+            //BindingContext = x;
+            x.FullHalfThirds = lpv.ExposureCalculator.Divisions.Full;
+            x.Calculate();
+        }
+        catch
+        {
+            //Yup . . swallowing another exception
+        }
+        _skipCalculations = false;
+        exposurefull.IsChecked = true;
+        shutter.IsChecked = true;
+        //((lpv.ExposureCalculator)BindingContext).Calculate();
     }
     public ExposureCalculator(int tipID)
-    { 
+    {
+
         var x = ts.Get(tipID);
         lps.ViewModels.ExposureCalculator ec = new lps.ViewModels.ExposureCalculator();
+        ec.OldISO = (ISO_Picker.SelectedIndex = ISO_Picker.SelectedIndex + 1).ToString();
+        ec.FStopSelected = fstop_Picker.SelectedItem.ToString();
+        ec.OldFstop = (fstop_Picker.SelectedIndex = fstop_Picker.SelectedIndex + 1).ToString();
+        ec.ShutterSpeedSelected = ShutterSpeed_Picker.SelectedItem.ToString();
+        ec.OldShutterSpeed = (ec.ShutterSpeedSelected = ec.ShutterSpeedSelected + 1).ToString();
         ec.FStopSelected = x.Fstop;
         ec.ISOSelected = x.ISO;
-        ec.ShutterSpeedSelected=x.Shutterspeed;
+        ec.ShutterSpeedSelected = x.Shutterspeed;
         fstop_Picker.SelectedItem = ec.FStopSelected;
         ShutterSpeed_Picker.SelectedItem = ec.ShutterSpeedSelected;
         ISO_Picker.SelectedItem = ec.ISOSelected;
-    
+        _skipCalculations = false;
+        ec.Calculate();
+
+    }
+
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+
+        if (_adSupport)
+        {
+            Advertising a = new Advertising();
+
+            //display ad
+            //set seen??
+        }
+
+
+    }
+
+    private void closeButton_Pressed(object sender, EventArgs e)
+    {
+        Navigation.PopModalAsync();
     }
     private void calculate_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
-        RadioButton rb = (RadioButton)sender;
+        if(_skipCalculations)
+        {  return; }
+            Microsoft.Maui.Controls.RadioButton rb = (Microsoft.Maui.Controls.RadioButton)sender;
         var x = rb.Content;
-        Shared.ViewModels.ExposureCalculator ec = (lps.ViewModels.ExposureCalculator)BindingContext;
+        lps.ViewModels.ExposureCalculator ec = (lps.ViewModels.ExposureCalculator)BindingContext;
         if (rb.IsChecked == true)
         {
             switch (Convert.ToInt32(rb.Value))
@@ -62,20 +119,25 @@ public partial class ExposureCalculator : ContentPage
                     isoresult.Text = (string)ISO_Picker.SelectedItem.ToString();
                     break;
             }
+            PopulateVM();
+            ec.Calculate();
         }
-        PopulateVM();
-        ec.Calculate();
+
     }
 
     private void exposuresteps_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
-        var x = (RadioButton)sender;
+
+        var x = (Microsoft.Maui.Controls.RadioButton)sender;
         var y = (lps.ViewModels.ExposureCalculator)BindingContext;
-        if ((int)x.Value == 1)
+        if (Convert.ToDouble(x.Value) == (double)1)
         {
             y.FullHalfThirds = lps.ViewModels.ExposureCalculator.Divisions.Full;
+           // exposurefull.IsChecked = true;
+            //exposurehalfstop.IsChecked = false;
+           // exposurethirdstop.IsChecked = false;
         }
-        else if ((double)x.Value == .5)
+        else if (Convert.ToDouble(x.Value) == .5)
         {
             y.FullHalfThirds = lps.ViewModels.ExposureCalculator.Divisions.Half;
         }
@@ -90,10 +152,13 @@ public partial class ExposureCalculator : ContentPage
 
     private void ShutterSpeed_Picker_SelectedIndexChanged(object sender, EventArgs e)
     {
+        if (_skipCalculations)
+        { return; }
         var x = (lps.ViewModels.ExposureCalculator)BindingContext;
         x.OldShutterSpeed = x.ShutterSpeedSelected;
         x.ShutterSpeedSelected = ShutterSpeed_Picker.SelectedItem.ToString();
-        
+        x.Calculate();
+
     }
 
     private void PopulateVM()
@@ -116,20 +181,23 @@ public partial class ExposureCalculator : ContentPage
 
     private void fstop_Picker_SelectedIndexChanged(object sender, EventArgs e)
     {
+        if (_skipCalculations)
+        { return; }
         var x = (lps.ViewModels.ExposureCalculator)BindingContext;
         x.OldFstop = x.FStopSelected;
         x.FStopSelected = fstop_Picker.SelectedItem.ToString();
+        x.Calculate();
     }
 
     private void ISO_Picker_SelectedIndexChanged(object sender, EventArgs e)
     {
+        if (_skipCalculations)
+        { return; }
         var x = (lps.ViewModels.ExposureCalculator)BindingContext;
         x.OldISO = x.ISOSelected;
         x.ISOSelected = ISO_Picker.SelectedItem.ToString();
+        x.Calculate();
     }
 
-    private void closeButton_Pressed(object sender, EventArgs e)
-    {
-       Navigation.PopAsync();
-    }
+
 }

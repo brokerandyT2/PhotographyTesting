@@ -79,6 +79,7 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.LastName, Value = "" });
             list.Add(new() { Name = MagicStrings.Email, Value = "" });
             list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
             list.Add(new() { Name = MagicStrings.UniqueID, Value = Guid.NewGuid().ToString() });
             list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.False_string });
@@ -95,6 +96,7 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.DateFormat, Value = MagicStrings.USDateFormat });
             list.Add(new() { Name = MagicStrings.WeatherURL, Value = "https://api.openweathermap.org/data/2.5/weather" });
             list.Add(new() { Name = MagicStrings.Weather_API_Key, Value = "aa24f449cced50c0491032b2f955d610" });
+            list.Add(new() { Name = MagicStrings.FreePremiumAdSupported, Value = MagicStrings.False_string });
 
             //list.Add(new() { Name=MagicStrings.})
 

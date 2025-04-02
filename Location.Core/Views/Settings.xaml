@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Location.Core.Views.Settings"
+             xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
+             xmlns:strings="clr-namespace:Location.Core.Resources"
+             Title="Settings">
+    <ContentPage.BindingContext>
+        <models:SettingsViewModel></models:SettingsViewModel>
+    </ContentPage.BindingContext>
+    <ScrollView>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="50"/>
+            </Grid.ColumnDefinitions>
+            <Label Text="{x:Static strings:AppResources.SwitchHemisphere}" Grid.Row="0" Grid.Column="0" />
+            <Label Text="{Binding Hemisphere.Value}" Grid.Row="0" Grid.Column="1"/>
+            <Switch x:Name="Hemisphere" Grid.Row="0" Grid.Column="2" IsToggled="{Binding HemisphereNorth}" Toggled="Hemisphere_Toggled"/>
+
+            <Label Text="{x:Static strings:AppResources.SwitchClockType}" Grid.Row="1" Grid.Column="0" />
+            <Label Text="{Binding TimeFormat.Value}" Grid.Row="1" Grid.Column="1"/>
+            <Switch x:Name="Timeformat" Grid.Row="1" Grid.Column="2" IsToggled="{Binding TimeFormatToggle}" Toggled="Timeformat_Toggled"/>
+
+
+            <Label Text="{x:Static strings:AppResources.SwitchDateFormat}" Grid.Row="2" Grid.Column="0" />
+            <Label Text="{Binding DateFormat.Value}" Grid.Row="2" Grid.Column="1"/>
+            <Switch x:Name="DateFormat" Grid.Row="2" Grid.Column="2" IsToggled="{Binding DateFormatToggle}" Toggled="DateFormat_Toggled"/>
+            
+            <Label Text="{x:Static strings:AppResources.AccessIsFreeByWatchingAds}" Grid.Row="3" Grid.Column="0" />
+            <Label Text="{Binding AdSupport.Value}" Grid.Row="3" Grid.Column="1"/>
+            <Switch x:Name="AdFree" Grid.Row="3" Grid.Column="2" IsToggled="{Binding AdSupportboolean}" 
+              Toggled="AdFree_Toggled"/>
+            
+            <Label Text="{x:Static strings:AppResources.SubscriptionType}  " Grid.Row="4" Grid.Column="0" />
+            <Label Text="{Binding SubscriptionType.Value}" Grid.Row="4" Grid.Column="1" />
+            
+            <Label Text="{x:Static strings:AppResources.SubscriptionExpiration}  " Grid.Row="5" Grid.Column="0" />
+            <Label Text="{Binding SubscriptionExpiration.Value}" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" HorizontalOptions="Center" />
+            
+
+        </Grid> 
+    </ScrollView>
+</ContentPage>

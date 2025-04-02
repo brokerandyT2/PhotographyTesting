@@ -53,7 +53,8 @@ namespace Locations.Core.Shared
 
         public static string USTimeformat_Pattern = "hh:mm";
         public static string InternationalTimeFormat_Pattern = "HH:mm";
-       // public static string U
+        public static string FreePremiumAdSupported = "free_premium_ad_supported";
+        // public static string U
 #endif
 #if FISHING
 

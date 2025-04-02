@@ -13,9 +13,10 @@ namespace Location.Photography.Shared.ViewModels
 {
     public class SunLocation : ViewModelBase, ISunLocation
     {
+       
         public override event PropertyChangedEventHandler? PropertyChanged;
         public List<LocationViewModel> List_Locations { get; set; }
-        private string _imageURL;
+        private string _imageURL  ;
         public string ImageURL
         { get { return _imageURL; } set { _imageURL = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageURL))); } }
 
@@ -23,8 +24,8 @@ namespace Location.Photography.Shared.ViewModels
         private double _longitude;
         private bool _isNorthernHemisphere;
 
-        private DateOnly _selectedDate;
-        private TimeOnly _selectedTime;
+        private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Now);
+        private TimeOnly _selectedTime = TimeOnly.FromDateTime(DateTime.Now);
 
         public double Latitude
         { get => _latitude; set { _latitude = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Latitude))); } }

@@ -94,6 +94,8 @@ namespace Locations.Core.Business.DataAccess
             s.SubscriptionExpiration = GetSettingByName(MagicStrings.SubscriptionExpiration) ;
             s.TipsViewed = GetSettingByName(MagicStrings.TipsViewed);
             s.UniqeID = GetSettingByName(MagicStrings.UniqueID) ;
+            s.AdSupport = GetSettingByName(MagicStrings.FreePremiumAdSupported);
+            s.SubscriptionType = GetSettingByName(MagicStrings.SubscriptionType);
             
             return s;
         }

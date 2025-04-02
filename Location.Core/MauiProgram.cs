@@ -4,6 +4,8 @@ using epj.Expander;
 using Locations.Core.Shared.ViewModels.Interface;
 using Locations.Core.Shared.ViewModels;
 using epj.Expander.Maui;
+using CommunityToolkit.Maui;
+using Camera.MAUI;
 
 
 namespace Location.Core;
@@ -15,7 +17,8 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
-
+            .UseMauiCommunityToolkit()
+            .UseMauiCameraView()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

@@ -1,4 +1,4 @@
-﻿using Locations.Photography.Data.Queries.Interfaces;
+﻿using Location.Photography.Data.Queries.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

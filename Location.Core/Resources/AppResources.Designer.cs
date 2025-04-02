@@ -554,5 +554,32 @@ namespace Location.Core.Resources {
                 return ResourceManager.GetString("WindSpeed", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Switch Date Format.
+        /// </summary>
+        internal static string SwitchDateFormat
+        {
+            get
+            {
+                return ResourceManager.GetString("SwitchDateFormat", resourceCulture);
+            }
+        }
+        /// <summary>
+        ///   Looks up a localized string similar to Subscription Type.
+        /// </summary>
+        internal static string SubscriptionType
+        {
+            get
+            {
+                return ResourceManager.GetString("SubscriptionType", resourceCulture);
+            }
+        }
+        internal static string SubscriptionExpiration
+        {
+            get => ResourceManager.GetString("SubscriptionExpiration", resourceCulture);
+        }
+        internal static string AccessIsFreeByWatchingAds
+        { get=> ResourceManager.GetString("AccessIsFreeByWatchingAds", resourceCulture);}
     }
 }

@@ -80,7 +80,7 @@ namespace Locations.Core.Business.DataAccess
         }
         public List<LocationViewModel> GetLocations()
         {
-            return lq.GetItems<LocationViewModel>().ToList();
+            return lq.GetItems<LocationViewModel>().Where(x=>x.IsDeleted == false).ToList();
         }
     }
 }

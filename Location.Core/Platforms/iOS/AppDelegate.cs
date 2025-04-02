@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace Location.Core;
+namespace Location.Core.Platforms.iOS;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

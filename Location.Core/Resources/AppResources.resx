@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccessIsFreeByWatchingAds" xml:space="preserve">
+    <value>Free Access by Watching Ads</value>
+  </data>
   <data name="AddPhoto" xml:space="preserve">
     <value>Add Photo</value>
   </data>
@@ -246,6 +249,12 @@
   <data name="SouthernHemisphere" xml:space="preserve">
     <value>Southern Hemisphere</value>
   </data>
+  <data name="SubscriptionExpiration" xml:space="preserve">
+    <value>Subscription Expiration:</value>
+  </data>
+  <data name="SubscriptionType" xml:space="preserve">
+    <value>Type of Subscription:</value>
+  </data>
   <data name="Sunrise" xml:space="preserve">
     <value>Sun Rise: </value>
   </data>
@@ -256,7 +265,10 @@
     <value>Switch</value>
   </data>
   <data name="SwitchClockType" xml:space="preserve">
-    <value>Switch Clock</value>
+    <value>Switch Clock Format</value>
+  </data>
+  <data name="SwitchDateFormat" xml:space="preserve">
+    <value>Swich Date Format</value>
   </data>
   <data name="SwitchHemisphere" xml:space="preserve">
     <value>Switch Hemisphere</value>

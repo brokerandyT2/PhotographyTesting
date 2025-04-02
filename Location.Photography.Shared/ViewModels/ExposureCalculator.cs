@@ -15,7 +15,16 @@ namespace Location.Photography.Shared.ViewModels
     public class ExposureCalculator : ViewModelBase, IExposureCalculator
     {
         public override event PropertyChangedEventHandler? PropertyChanged;
-
+        private bool _showError;
+        public bool ShowError
+        {
+            get => _showError;
+            set
+            {
+                _showError = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowError)));
+            }
+        }
         private string[] _fullStopApeature = Apetures.Full;
         private string[] _halfStopApeature = Apetures.Halves;
         private string[] _thirdStopApeature = Apetures.Thirds;
@@ -45,9 +54,28 @@ namespace Location.Photography.Shared.ViewModels
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShutterSpeedsForPicker)));
             }
         }
-        public string ISOResult { get; set; }
-        public string ShutterSpeedResult { get; set; }
-        public string FStopResult { get; set; }
+        public string ISOResult
+        {
+            get => _isoResult;
+            set
+            {
+                _isoResult = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ISOResult)));
+            }
+        }
+        private string _isoResult;
+        private string _shutterSpeedResult;
+        private string _fstopResult;
+        public string ShutterSpeedResult
+        {
+            get => _shutterSpeedResult;
+            set
+            {
+                _shutterSpeedResult = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShutterSpeedResult)));
+            }
+        }
+        public string FStopResult { get => _fstopResult; set { _fstopResult = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FStopResult))); } }
         public FixedValue ToCalculate
         {
             get { return _fixedvalue; }
@@ -61,7 +89,7 @@ namespace Location.Photography.Shared.ViewModels
         {
             get
             {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ApeaturesForPicker)));
+                //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ApeaturesForPicker)));
                 if (FullHalfThirds == Divisions.Full)
                 {
 
@@ -83,7 +111,7 @@ namespace Location.Photography.Shared.ViewModels
         {
             get
             {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ISOsForPicker)));
+                //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ISOsForPicker)));
                 if (FullHalfThirds == Divisions.Full)
                 {
 
@@ -105,7 +133,6 @@ namespace Location.Photography.Shared.ViewModels
         {
             get
             {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShutterSpeedsForPicker)));
                 if (FullHalfThirds == Divisions.Full)
                 {
 
@@ -120,6 +147,8 @@ namespace Location.Photography.Shared.ViewModels
                 {
                     return _thirdStopApeature;
                 }
+
+
             }
         }
 
@@ -241,10 +270,11 @@ namespace Location.Photography.Shared.ViewModels
             private readonly Dictionary<ExposureIncrements, IList<string>> _isos;
             private readonly Dictionary<ExposureIncrements, IList<string>> _apertures;
 
+
             public Calculator(ExposureIncrements increments)
             {
                 _increments = increments;
-                _shutterSpeeds = InitializeShutterSpeeds();
+                _shutterSpeeds = new Dictionary<ExposureIncrements, IList<string>>();
                 _isos = new Dictionary<ExposureIncrements, IList<string>>();
                 _apertures = new Dictionary<ExposureIncrements, IList<string>>();
                 var _isoFull = ISOs.Full.ToList();
@@ -259,6 +289,9 @@ namespace Location.Photography.Shared.ViewModels
                 _shutterSpeeds.Add(ExposureIncrements.Full, ShutterSpeeds.Full);
                 _shutterSpeeds.Add(ExposureIncrements.Halves, ShutterSpeeds.Halves);
                 _shutterSpeeds.Add(ExposureIncrements.Thirds, ShutterSpeeds.Thirds);
+                _apertures.Add(ExposureIncrements.Full, Apetures.Full);
+                _apertures.Add(ExposureIncrements.Halves, Apetures.Halves);
+                _apertures.Add(ExposureIncrements.Thirds, Apetures.Thirds);
             }
 
             public ExposureIncrements GetIncrements() => _increments;
@@ -347,12 +380,14 @@ namespace Location.Photography.Shared.ViewModels
             {
                 if (idx > values.Count - 1)
                 {
-                    //throw new OverexposedError(idx, values, _increments);
+
+                    throw new OverexposedError(idx, values, _increments);
                 }
 
                 if (idx < 0)
                 {
-                   // throw new UnderexposedError(idx, baseIdx, values, _increments);
+
+                    throw new UnderexposedError(idx, baseIdx, values, _increments);
                 }
 
                 return values[idx];
@@ -492,5 +527,96 @@ namespace Location.Photography.Shared.ViewModels
             }
 
         }
+    }
+}
+public class OverexposedError : Exception
+{/// <summary>
+ /// /// Constructor for OverexposedError
+ /// </summary>
+ /// <param name="requiredIdx"></param>
+ /// <param name="values"></param>
+ /// <param name="increments"></param>
+    public OverexposedError(int requiredIdx, IList<string> values, ExposureIncrements increments)
+        : base(FormatOverexposedMessage(requiredIdx, values, increments))
+    {
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="requiredIdx"></param>
+    /// <param name="values"></param>
+    /// <param name="increments"></param>
+    /// <returns></returns>
+    private static string FormatOverexposedMessage(int requiredIdx, IList<string> values, ExposureIncrements increments)
+    {
+        var diff = requiredIdx - (values.Count - 1);
+        if (increments != ExposureIncrements.Full)
+        {
+            return $"The given parameters will result in an overexposed image. Using a value of {values[values.Count - 1]} " +
+                   $"will still result in overexposure by {diff} {increments} stop increments " +
+                   $"({FormatErrorToFullStops(increments, diff)} full stop(s))";
+        }
+
+        return $"The given parameters will result in an overexposed image. Using a value of {values[values.Count - 1]} " +
+               $"will still result in overexposure by {diff} stop(s).";
+    }
+    /// <summary>
+    /// /// Formats the error message to full stops
+    /// </summary>
+    /// <param name="increments"></param>
+    /// <param name="diff"></param>
+    /// <returns></returns>
+    private static string FormatErrorToFullStops(ExposureIncrements increments, int diff)
+    {
+        if (increments == ExposureIncrements.Full)
+        {
+            return "formatErrorToFullStops received full increment type, but should only be passed ½ or ⅓";
+        }
+        return string.Empty;
+    }
+}
+/// <summary>
+/// /// Constructor for UnderexposedError
+/// </summary>
+public class UnderexposedError : Exception
+{
+    public UnderexposedError(int requiredIdx, int baseIdx, IList<string> values, ExposureIncrements increments)
+        : base(FormatUnderexposedMessage(requiredIdx, baseIdx, values, increments))
+    {
+    }
+
+    private static string FormatUnderexposedMessage(int requiredIdx, int baseIdx, IList<string> values, ExposureIncrements increments)
+    {
+        var diff = Math.Abs(baseIdx - requiredIdx);
+        if (increments != ExposureIncrements.Full)
+        {
+            return $"The given parameters will result in an underexposed image. Using a value of {values[0]} " +
+                   $"will still result in underexposure by {diff} {increments} stop increments " +
+                   $"({FormatErrorToFullStops(increments, diff)} full stop(s))";
+        }
+
+        return $"The given parameters will result in an underexposed image. Using a value of {values[0]} " +
+               $"will still result in underexposure by {diff} stop(s).";
+    }
+    private static double FormatErrorToFullStops(ExposureIncrements increments, int diff)
+    {
+        if (increments == ExposureIncrements.Full)
+        {
+            throw new ArgumentException("formatErrorToFullStops received full increment type, but should only be passed ½ or ⅓");
+        }
+
+        var baseValue = increments == ExposureIncrements.Thirds ? 3 : 2;
+
+        if (diff == baseValue)
+        {
+            return 1;
+        }
+
+        if (diff % baseValue == 0)
+        {
+            return diff / baseValue;
+        }
+
+        return Math.Round(1.0 / baseValue * diff, 1);
     }
 }
