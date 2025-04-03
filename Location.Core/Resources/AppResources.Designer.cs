@@ -581,5 +581,11 @@ namespace Location.Core.Resources {
         }
         internal static string AccessIsFreeByWatchingAds
         { get=> ResourceManager.GetString("AccessIsFreeByWatchingAds", resourceCulture);}
+        internal static string AstronomicalDawn
+        { get => ResourceManager.GetString("AstronomicalDawn", resourceCulture); }
+        internal static string AstronomicalDusk
+        {
+            get => ResourceManager.GetString("AstronomicalDusk", resourceCulture);
+        }
     }
 }

@@ -129,6 +129,12 @@
   <data name="aperturenocolon" xml:space="preserve">
     <value>Aperture</value>
   </data>
+  <data name="AstronomicalDawn" xml:space="preserve">
+    <value>Astronomical Dawn</value>
+  </data>
+  <data name="AstronomicalDusk" xml:space="preserve">
+    <value>Astronomical Dusk</value>
+  </data>
   <data name="baseexposure" xml:space="preserve">
     <value>Base Exposure:</value>
   </data>

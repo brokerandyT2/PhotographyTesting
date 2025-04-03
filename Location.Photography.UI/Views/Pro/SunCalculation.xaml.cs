@@ -22,7 +22,7 @@ public partial class SunCalculation : ContentPage
         SunCalculations x = ((SunCalculations)sunCalc);
 
         x.DateFormat = settingsService.GetSettingByName(Locations.Core.Shared.MagicStrings.DateFormat).Value;
-        x.Locations = ls.GetAll();
+        x.Locations = ls.GetLocations();
 
         LocationsPicker.SelectedIndex = 0;
     }
