@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locations.Core.Shared", "Lo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Location.Core", "Location.Core\Location.Core.csproj", "{2E897236-637C-0360-1BE6-99288DD75074}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Location.Photography.UI", "Location.Photography.UI\Location.Photography.UI.csproj", "{09007807-5528-A630-A3C8-E7CA8878B022}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,9 +53,6 @@ Global
 		{2E897236-637C-0360-1BE6-99288DD75074}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E897236-637C-0360-1BE6-99288DD75074}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2E897236-637C-0360-1BE6-99288DD75074}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{09007807-5528-A630-A3C8-E7CA8878B022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{09007807-5528-A630-A3C8-E7CA8878B022}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{09007807-5528-A630-A3C8-E7CA8878B022}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
