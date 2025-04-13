@@ -6,7 +6,7 @@ using Locations.Core.Shared.ViewModels;
 using epj.Expander.Maui;
 using CommunityToolkit.Maui;
 using Camera.MAUI;
-
+using Syncfusion.Maui.Toolkit.Hosting;
 
 namespace Location.Core;
 
@@ -19,6 +19,7 @@ public static class MauiProgram
 			.UseMauiApp<App>()
             .UseMauiCommunityToolkit()
             .UseMauiCameraView()
+            .ConfigureSyncfusionToolkit()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

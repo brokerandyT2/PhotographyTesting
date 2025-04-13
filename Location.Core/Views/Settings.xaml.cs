@@ -11,6 +11,8 @@ public partial class Settings : ContentPage
 	{
 		InitializeComponent();
 		BindingContext = _service.GetAllSettings();
+        //TODO: Add temperature choice
+
 	}
 
     private void Hemisphere_Toggled(object sender, ToggledEventArgs e)

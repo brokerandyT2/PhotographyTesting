@@ -11,6 +11,7 @@
         <models:WeatherViewModel/>
     </ContentPage.BindingContext>
     <ScrollView>
+
         <VerticalStackLayout x:Name="Accordion">
             <maui:Expander Animated="True">
                 <maui:Expander.HeaderContent>

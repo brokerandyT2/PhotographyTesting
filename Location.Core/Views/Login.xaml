@@ -4,9 +4,6 @@
              x:Class="Location.Core.Views.Login"
              Title="Login">
     <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+        <Button x:Name="lgin" Text="Login" Clicked="Login_Clicked"/>
     </VerticalStackLayout>
 </ContentPage>

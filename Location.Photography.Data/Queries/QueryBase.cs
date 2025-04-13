@@ -15,7 +15,9 @@ namespace Location.Photography.Data.Queries
         public abstract string GetValueByString<T>(string name);
 
         public abstract IList<T> GetItems<T>();
-        public T GetItemByString<T>(string name) { throw new NotImplementedException(); }
+        public T GetItemByString<T>(string name) {
+            throw new NotImplementedException();
+        }
         public int DeleteItem<T>(T item) where T : new()
         {
             try

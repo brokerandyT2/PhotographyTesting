@@ -48,7 +48,7 @@ namespace Locations.Core.Business.Weather
             WeatherDataService weatherDataService = new WeatherDataService(this._url, this.lattitude, this.longituded, this.API_KEY);
 
 
-            var returned = weatherDataService.GetDaysAsync().Result;
+            var returned =  weatherDataService.GetDaysAsync().Result;
 
             weather.Latitude = this.lattitude;
             weather.Longitude = this.longituded;
@@ -81,23 +81,7 @@ namespace Locations.Core.Business.Weather
             weather.LastUpdate = DateTime.Now;
 
 
-            weather.WindSpeedDay_One = (decimal)returned[0].Wind_speed;
-            weather.WindSpeedDay_Two = (decimal)returned[1].Wind_speed;
-            weather.WindSpeedDay_Three = (decimal)returned[2].Wind_speed;
-            weather.WindSpeedDay_Four = (decimal)returned[3].Wind_speed;
-            weather.WindSpeedDay_Five = (decimal)returned[4].Wind_speed;
 
-            weather.WindDirectionDay_One = returned[0].Wind_deg;
-            weather.WindDirectionDay_Two = returned[1].Wind_deg;
-            weather.WindDirectionDay_Three = returned[2].Wind_deg;
-            weather.WindDirectionDay_Four = returned[3].Wind_deg;
-            weather.WindDirectionDay_Five = returned[4].Wind_deg;
-
-            weather.WindGustDay_One = (decimal)returned[0].Wind_gust;
-            weather.WindGustDay_Two = (decimal)returned[1].Wind_gust;
-            weather.WindGustDay_Three = (decimal)returned[2].Wind_gust;
-            weather.WindGustDay_Four = (decimal)returned[3].Wind_gust;
-            weather.WindGustDay_Five = (decimal)returned[4].Wind_gust;
 
 
             return weather;

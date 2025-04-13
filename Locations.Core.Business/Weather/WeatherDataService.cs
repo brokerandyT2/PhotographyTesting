@@ -1,17 +1,22 @@
 ﻿
 using Locations.Core.Shared.ViewModels;
+using newtonsoft = Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
+using Microsoft.Maui.Platform;
+using Microsoft.Maui.Animations;
+
 
 namespace Locations.Core.Business.Weather
 {
     public class WeatherDataService
-    {
+    {  
         private readonly HttpClient _httpClient;
         private string endpoint;
         private double latitude;
@@ -63,7 +68,7 @@ namespace Locations.Core.Business.Weather
 
             Uri url = new(GenerateRequestUri(this.endpoint, this.latitude, this.longitude, this.API_KEY));
 
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            HttpResponseMessage response = _httpClient.GetAsync(url).Result;
 
             if (response.IsSuccessStatusCode)
             {
@@ -76,11 +81,28 @@ namespace Locations.Core.Business.Weather
 
         public static T GetDeserializedContent<T>(TypeMethod typeMethod, string content) where T : class
         {
+            var _serializerOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+            newtonsoft.JsonTextReader _reader = new newtonsoft.JsonTextReader(new StringReader(content));
+    
+
+            var POCO = newtonsoft.JsonConvert.DeserializeObject<Current>(content);
+            var PO = new Json.Net.JsonParser(); // (content);
+
+
+            var x = content;
+
+
             return typeMethod switch
             {
                 TypeMethod.GetAllWeatherDataAsync =>
                 JsonSerializer.Deserialize<WeatherViewModel>(content) as T,
-                
+                TypeMethod.GetDaysAsync => JsonSerializer.Deserialize<Current>(content) as T,
+
+
             };
         }
 
@@ -132,23 +154,6 @@ namespace Locations.Core.Business.Weather
             weather.LastUpdate = DateTime.Now;
 
 
-            weather.WindSpeedDay_One = (decimal)returned[0].Wind_speed;
-            weather.WindSpeedDay_Two = (decimal)returned[1].Wind_speed;
-            weather.WindSpeedDay_Three = (decimal)returned[2].Wind_speed;
-            weather.WindSpeedDay_Four = (decimal)returned[3].Wind_speed;
-            weather.WindSpeedDay_Five = (decimal)returned[4].Wind_speed;
-
-            weather.WindDirectionDay_One = returned[0].Wind_deg;
-            weather.WindDirectionDay_Two = returned[1].Wind_deg;
-            weather.WindDirectionDay_Three = returned[2].Wind_deg;
-            weather.WindDirectionDay_Four = returned[3].Wind_deg;
-            weather.WindDirectionDay_Five = returned[4].Wind_deg;
-
-            weather.WindGustDay_One = (decimal)returned[0].Wind_gust;
-            weather.WindGustDay_Two = (decimal)returned[1].Wind_gust;
-            weather.WindGustDay_Three = (decimal)returned[2].Wind_gust;
-            weather.WindGustDay_Four = (decimal)returned[3].Wind_gust;
-            weather.WindGustDay_Five = (decimal)returned[4].Wind_gust;
 
 
             return weather;

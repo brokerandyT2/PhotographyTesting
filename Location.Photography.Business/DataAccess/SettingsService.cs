@@ -42,7 +42,8 @@ namespace Location.Photography.Business.DataAccess
 
         public SettingViewModel GetSettingByName(string name)
         {
-            return sq.GetItemByString<SettingViewModel>(name);
+            Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
+            return ss.GetSetting(name);
         }
 
         public object GetSettingByName(object cameraRefresh)

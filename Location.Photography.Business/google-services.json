@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "335966147000",
+    "project_id": "my-photo-locations",
+    "storage_bucket": "my-photo-locations.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335966147000:android:18fe252edc6b7cb0adbf4d",
+        "android_client_info": {
+          "package_name": "com.x3squaredcircles.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "335966147000-9dqhsstkcvdmom5vcson0bra0ejidmco.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.x3squaredcircles.com",
+            "certificate_hash": "30305f48bba53f248f68e6936aba35f96724cfe5"
+          }
+        },
+        {
+          "client_id": "335966147000-j06tlukfm7gnaqf40ieop5c3fb78v3a1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApKLAXjBADEAInG-2p1ACJ4OyANrePVdU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "335966147000-j06tlukfm7gnaqf40ieop5c3fb78v3a1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

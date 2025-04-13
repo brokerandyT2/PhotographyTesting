@@ -28,7 +28,8 @@ namespace Location.Core
 #if RELEASE
                     return ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;
 #else
-                    return true;
+                    return false;
+                    //return true;
 #endif
 #endif
 
@@ -42,7 +43,32 @@ namespace Location.Core
                 
             }
         }
+        public static SubscriptionTypeEnum SubscriptionType
+        {
+            get
+            {
+                try
+                {
+#if PHOTOGRAPHY
+                    //return SubscriptionTypeEnum.Professional;
+#if RELEASE
+                    Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
+                    return _subType;
+#else
+                    return _subType;
+#endif
+#endif
 
+
+                }
+                catch
+                {
+                    //I know swallowing an Exception is wrong.  In this case the exception occurs on start up due to the setting not being available.
+                    return SubscriptionTypeEnum.Free;
+                }
+
+            }
+        }
         //private static bool st = Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
 
         public MainPage()
@@ -53,7 +79,7 @@ namespace Location.Core
             this.Children.Add(new AddLocation());
             this.Children.Add(new ListLocations());
             this.Children.Add(new Tips());
-            this.Children.Add(new Settings());
+
 
             SettingsService ss = new SettingsService();
             var z = ss.GetSetting(MagicStrings.AppOpenCounter);
@@ -95,8 +121,10 @@ namespace Location.Core
             }
             else
             {
-                this.Children.Add(new Login());
+                Navigation.PushModalAsync(new Login());
+
             }
+            this.Children.Add(new Settings());
 
 
         }
