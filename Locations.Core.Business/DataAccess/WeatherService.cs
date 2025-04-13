@@ -34,6 +34,8 @@ namespace Locations.Core.Business.DataAccess
 
                     Save(wvm);
                 }
+                wvm.DateFormat= _settingsService.GetSettingByName(MagicStrings.DateFormat).Value;
+                wvm.TimeFormat= _settingsService.GetSettingByName(MagicStrings.TimeFormat).Value;
                 return wvm;
             }
             else
@@ -98,6 +100,8 @@ namespace Locations.Core.Business.DataAccess
                         wvm.WindGustDay_One = day.SelectToken("wind_gust").ToObject<double>();
                         wvm.Temperature_Day_One_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayOne = day.SelectToken("uvi").ToObject<double>();
+                        wvm.Clouds_day_one = day.SelectToken("clouds").ToObject<int>();
+                        wvm.Rain_Day_One = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 1)
                     {
@@ -106,7 +110,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Sunset_Day_Two = dateTime.AddSeconds(day.SelectToken("sunset").ToObject<int>()).ToLocalTime();
                         wvm.MoonRise_Day_Two = dateTime.AddSeconds(day.SelectToken("moonrise").ToObject<int>()).ToLocalTime();
                         wvm.MoonSet_Day_Two = dateTime.AddSeconds(day.SelectToken("moonset").ToObject<int>()).ToLocalTime();
-                        wvm.MoonPhaseAs_Number_DayOne = day.SelectToken("moon_phase").ToObject<double>();
+                        wvm.MoonPhaseAs_Number_DayTwo = day.SelectToken("moon_phase").ToObject<double>();
                         wvm.Summary_Day_Two = day.SelectToken("summary").ToObject<string>();
                         var temps = day.SelectToken("temp");
                         var feels_likes = day.SelectToken("feels_like");
@@ -133,6 +137,8 @@ namespace Locations.Core.Business.DataAccess
                         wvm.WindGustDay_Two = day.SelectToken("wind_gust").ToObject<double>();
                         wvm.Temperature_Day_Two_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayTwo = day.SelectToken("uvi").ToObject<double>();
+                        wvm.Clouds_day_two = day.SelectToken("clouds").ToObject<int>();
+                        wvm.Rain_Day_Two = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 2)
                     {
@@ -141,7 +147,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Sunset_Day_Three = dateTime.AddSeconds(day.SelectToken("sunset").ToObject<int>()).ToLocalTime();
                         wvm.MoonRise_Day_Three = dateTime.AddSeconds(day.SelectToken("moonrise").ToObject<int>()).ToLocalTime();
                         wvm.MoonSet_Day_Three = dateTime.AddSeconds(day.SelectToken("moonset").ToObject<int>()).ToLocalTime();
-                        wvm.MoonPhaseAs_Number_DayOne = day.SelectToken("moon_phase").ToObject<double>();
+                        wvm.MoonPhaseAs_Number_DayThree = day.SelectToken("moon_phase").ToObject<double>();
                         wvm.Summary_Day_Three = day.SelectToken("summary").ToObject<string>();
                         var temps = day.SelectToken("temp");
                         var feels_likes = day.SelectToken("feels_like");
@@ -168,6 +174,8 @@ namespace Locations.Core.Business.DataAccess
                         wvm.WindGustDay_Three = day.SelectToken("wind_gust").ToObject<double>();
                         wvm.Temperature_Day_Three_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayThree = day.SelectToken("uvi").ToObject<double>();
+                        wvm.Clouds_day_Three = day.SelectToken("clouds").ToObject<int>();
+                        wvm.Rain_Day_Three = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 3)
                     {
@@ -176,7 +184,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Sunset_Day_Four = dateTime.AddSeconds(day.SelectToken("sunset").ToObject<int>()).ToLocalTime();
                         wvm.MoonRise_Day_Four = dateTime.AddSeconds(day.SelectToken("moonrise").ToObject<int>()).ToLocalTime();
                         wvm.MoonSet_Day_Four = dateTime.AddSeconds(day.SelectToken("moonset").ToObject<int>()).ToLocalTime();
-                        wvm.MoonPhaseAs_Number_DayOne = day.SelectToken("moon_phase").ToObject<double>();
+                        wvm.MoonPhaseAs_Number_DayFour = day.SelectToken("moon_phase").ToObject<double>();
                         wvm.Summary_Day_Four = day.SelectToken("summary").ToObject<string>();
                         var temps = day.SelectToken("temp");
                         var feels_likes = day.SelectToken("feels_like");
@@ -203,6 +211,8 @@ namespace Locations.Core.Business.DataAccess
                         wvm.WindGustDay_Four = day.SelectToken("wind_gust").ToObject<double>();
                         wvm.Temperature_Day_Four_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayFour = day.SelectToken("uvi").ToObject<double>();
+                        wvm.Clouds_day_Four = day.SelectToken("clouds").ToObject<int>();
+                        wvm.Rain_Day_Four = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 4) {
                         wvm.Forecasts_Day_Five = day.SelectToken("summary").ToObject<string>();
@@ -210,7 +220,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Sunset_Day_Five = dateTime.AddSeconds(day.SelectToken("sunset").ToObject<int>()).ToLocalTime();
                         wvm.MoonRise_Day_Five = dateTime.AddSeconds(day.SelectToken("moonrise").ToObject<int>()).ToLocalTime();
                         wvm.MoonSet_Day_Five = dateTime.AddSeconds(day.SelectToken("moonset").ToObject<int>()).ToLocalTime();
-                        wvm.MoonPhaseAs_Number_DayOne = day.SelectToken("moon_phase").ToObject<double>();
+                        wvm.MoonPhaseAs_Number_DayFive = day.SelectToken("moon_phase").ToObject<double>();
                         wvm.Summary_Day_Five = day.SelectToken("summary").ToObject<string>();
                         var temps = day.SelectToken("temp");
                         var feels_likes = day.SelectToken("feels_like");
@@ -237,6 +247,8 @@ namespace Locations.Core.Business.DataAccess
                         wvm.WindGustDay_Five = day.SelectToken("wind_gust").ToObject<double>();
                         wvm.Temperature_Day_Five_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayFive = day.SelectToken("uvi").ToObject<double>();
+                        wvm.Clouds_day_Five = day.SelectToken("clouds").ToObject<int>();
+                        wvm.Rain_Day_Five = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 5) {
                         wvm.Forecasts_Day_Six = day.SelectToken("summary").ToObject<string>();
@@ -244,7 +256,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Sunset_Day_Six = dateTime.AddSeconds(day.SelectToken("sunset").ToObject<int>()).ToLocalTime();
                         wvm.MoonRise_Day_Six = dateTime.AddSeconds(day.SelectToken("moonrise").ToObject<int>()).ToLocalTime();
                         wvm.MoonSet_Day_Six = dateTime.AddSeconds(day.SelectToken("moonset").ToObject<int>()).ToLocalTime();
-                        wvm.MoonPhaseAs_Number_DayOne = day.SelectToken("moon_phase").ToObject<double>();
+                        wvm.MoonPhaseAs_Number_DaySix = day.SelectToken("moon_phase").ToObject<double>();
                         wvm.Summary_Day_Six = day.SelectToken("summary").ToObject<string>();
                         var temps = day.SelectToken("temp");
                         var feels_likes = day.SelectToken("feels_like");
@@ -271,6 +283,8 @@ namespace Locations.Core.Business.DataAccess
                         wvm.WindGustDay_Six = day.SelectToken("wind_gust").ToObject<double>();
                         wvm.Temperature_Day_Six_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DaySix = day.SelectToken("uvi").ToObject<double>();
+                        wvm.Clouds_day_Six = day.SelectToken("clouds").ToObject<int>();
+                        wvm.Rain_Day_Six = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 6) {
                         wvm.Forecasts_Day_Seven = day.SelectToken("summary").ToObject<string>();
@@ -278,7 +292,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Sunset_Day_Seven = dateTime.AddSeconds(day.SelectToken("sunset").ToObject<int>()).ToLocalTime();
                         wvm.MoonRise_Day_Seven = dateTime.AddSeconds(day.SelectToken("moonrise").ToObject<int>()).ToLocalTime();
                         wvm.MoonSet_Day_Seven = dateTime.AddSeconds(day.SelectToken("moonset").ToObject<int>()).ToLocalTime();
-                        wvm.MoonPhaseAs_Number_DayOne = day.SelectToken("moon_phase").ToObject<double>();
+                        wvm.MoonPhaseAs_Number_DaySeven = day.SelectToken("moon_phase").ToObject<double>();
                         wvm.Summary_Day_Seven = day.SelectToken("summary").ToObject<string>();
                         var temps = day.SelectToken("temp");
                         var feels_likes = day.SelectToken("feels_like");
@@ -305,6 +319,8 @@ namespace Locations.Core.Business.DataAccess
                         wvm.WindGustDay_Seven = day.SelectToken("wind_gust").ToObject<double>();
                         wvm.Temperature_Day_Seven_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DaySeven = day.SelectToken("uvi").ToObject<double>();
+                        wvm.Clouds_day_Seven = day.SelectToken("clouds").ToObject<int>();
+                        wvm.Rain_Day_Seven = day.SelectToken("rain").ToObject<int>();
                     }
                     
 

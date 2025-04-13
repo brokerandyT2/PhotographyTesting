@@ -2,6 +2,7 @@ using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
 
+
 namespace Location.Core.Views.DetailViews;
 
 public partial class HoldingPage : TabbedPage
@@ -21,7 +22,9 @@ public partial class HoldingPage : TabbedPage
     {
        var x = (LocationViewModel)BindingContext;
 		this.Children.Add(new AddLocation(x.Id, true));
-		this.Children.Add(new WeatherDisplay(x));
+		WeatherService ws = new WeatherService();
+		var y = ws.GetWeather(x.Lattitude, x.Longitude);
+        this.Children.Add(new WeatherDisplay(y));
 		
     }
 

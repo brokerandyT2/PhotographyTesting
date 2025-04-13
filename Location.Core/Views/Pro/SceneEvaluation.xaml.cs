@@ -23,6 +23,7 @@ public partial class SceneEvaluation : ContentPage
     private void EvaluateSceneBtn_Clicked(object sender, EventArgs e)
 
     {
+        PermissionStatus status = Permissions.RequestAsync<Permissions.Camera>().Result;
         Task.Run(async () =>
         {
             Dispatcher.Dispatch(() =>

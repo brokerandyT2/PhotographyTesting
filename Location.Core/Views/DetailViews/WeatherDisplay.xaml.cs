@@ -12,12 +12,14 @@ public partial class WeatherDisplay : ContentPage
     {
         InitializeComponent();
     }
-
-    public WeatherDisplay(LocationViewModel name)
+    public WeatherDisplay(WeatherViewModel weather): this()
+    {
+        this.BindingContext = weather;
+    }
+    public WeatherDisplay(LocationViewModel name) : this()
     {
         var x = ws.GetWeather(name.Lattitude, name.Longitude);
-        x.DateFormat = ss.GetSettingByName(MagicStrings.DateFormat).Value;
-        
-        BindingContext = x;
+
+        this.BindingContext = x;
     }
 }

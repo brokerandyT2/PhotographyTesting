@@ -149,7 +149,7 @@ namespace Locations.Core.Shared.DTO
         private string? summary_Day_Seven;
         private DateTime moonSet_Day_Seven;
         private DateTime moonRise_Day_Seven;
-        private DateTime sunset_Day_Seven;
+        private DateTime _sunset_day_seven;
         private DateTime sunrise_Day_Seven;
         private double uV_Index_DaySix;
         private double temperature_Day_Six_Low;
@@ -174,7 +174,7 @@ namespace Locations.Core.Shared.DTO
         private double temperature_Day_Six_Min;
         private string? summary_Day_Six;
         private DateTime moonRise_Day_Six;
-        private DateTime sunset_Day_Six;
+        private DateTime _sunset_day_six;
         private DateTime moonSet_Day_Six;
         private string _timezone;
         private int _timezoneOffset;
@@ -208,26 +208,67 @@ namespace Locations.Core.Shared.DTO
         private double _windSpeedDay_Five;
         private double _windDirectionDay_Five;
         private double _windGustDay_Five;
-        private DateTime today;
-        private DateTime todayPlusOne;
-        private DateTime todayPlusTwo;
-        private DateTime todayPlusThree;
-        private DateTime todayPlusFour;
-        private DateTime todayPlusFive;
         private DateTime _lastUpdate;
-        #endregion
 
+        private int clouds_day_one;
+        private int clouds_day_two;
+        private int clouds_day_Three;
+        private int clouds_day_Four;
+        private int clouds_day_Five;
+        private int clouds_day_Six;
+        private int clouds_day_Seven;
+        private int rain_Day_One;
+        private int rain_Day_Two;
+        private int rain_Day_Three;
+        private int rain_Day_Five;
+        private int rain_Day_Six;
+        private int rain_Day_Seven;
+
+        private double moonPhaseAs_Number_DayFour;
+        private int rain_Day_Four;
+        private double moonPhaseAs_Number_DayTwo;
+        private double moonPhaseAs_Number_DayThree;
+        private double moonPhaseAs_Number_DayFive;
+        private double moonPhaseAs_Number_DaySix;
+        private double moonPhaseAs_Number_DaySeven;
+        #endregion
+        public double MoonPhaseAs_Number_DayFour { get => moonPhaseAs_Number_DayFour; set => moonPhaseAs_Number_DayFour = value; }
+
+        public int Rain_Day_Four { get => rain_Day_Four; set => rain_Day_Four = value; }
+        public double MoonPhaseAs_Number_DayTwo { get => moonPhaseAs_Number_DayTwo; set => moonPhaseAs_Number_DayTwo = value; }
+        public double MoonPhaseAs_Number_DayThree { get => moonPhaseAs_Number_DayThree; set => moonPhaseAs_Number_DayThree = value; }
+        public double MoonPhaseAs_Number_DayFive { get => moonPhaseAs_Number_DayFive; set => moonPhaseAs_Number_DayFive = value; }
+        public double MoonPhaseAs_Number_DaySix { get => moonPhaseAs_Number_DaySix; set => moonPhaseAs_Number_DaySix = value; }
+        public double MoonPhaseAs_Number_DaySeven { get => moonPhaseAs_Number_DaySeven; set => moonPhaseAs_Number_DaySeven = value; }
+    
+        public int Rain_Day_One { get => rain_Day_One; set => rain_Day_One = value; }
+        public int Rain_Day_Two { get => rain_Day_Two; set => rain_Day_Two = value; }
+        public int Rain_Day_Three { get => rain_Day_Three; set => rain_Day_Three = value; }
+        public int Rain_Day_Five { get => rain_Day_Five; set => rain_Day_Five = value; }
+        public int Rain_Day_Six { get => rain_Day_Six; set => rain_Day_Six = value; }
+        public int Rain_Day_Seven { get => rain_Day_Seven; set => rain_Day_Seven = value; }
+        public int Clouds_day_one { get => clouds_day_one; set => clouds_day_one = value; }
+        public int Clouds_day_two { get => clouds_day_two; set => clouds_day_two = value; }
+        public int Clouds_day_Three { get => clouds_day_Three; set => clouds_day_Three = value; }
+        public int Clouds_day_Four { get => clouds_day_Four; set => clouds_day_Four = value; }
+        public int Clouds_day_Five { get => clouds_day_Five; set => clouds_day_Five = value; }
+        public int Clouds_day_Six { get => clouds_day_Six; set => clouds_day_Six = value; }
+        public int Clouds_day_Seven { get => clouds_day_Seven; set => clouds_day_Seven = value; }
+        private string timeFormat;
+        [Ignore]
+        public string TimeFormat { get => timeFormat; set { timeFormat = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TimeFormat))); } }
+        [Ignore]
         public string DateFormat { get; set; }
         [Ignore]
-        public string DayOne => Sunrise_Day_One.ToShortDateString();
+        public string DayOne => Sunrise_Day_One.ToString("D");
         [Ignore]
-        public string DayTwo => Sunrise_Day_Two.ToShortDateString();
+        public string DayTwo => Sunrise_Day_Two.ToString("D");
         [Ignore]
-        public string DayThree => Sunrise_Day_Three.ToShortDateString();
+        public string DayThree => Sunrise_Day_Three.ToString("D");
         [Ignore]
-        public string DayFour => Sunrise_Day_Four.ToShortDateString();
+        public string DayFour => Sunrise_Day_Four.ToString("D");
         [Ignore]
-        public string DayFive => Sunrise_Day_Five.ToShortDateString();
+        public string DayFive => Sunrise_Day_Five.ToString("D");
         public double WindSpeedDay_One
         {
             get
@@ -570,6 +611,38 @@ namespace Locations.Core.Shared.DTO
                 }
             }
         }
+
+        private DateTime _sunrise_day_seven;
+        private DateTime _sunrise_day_six;
+
+        [Ignore]
+        public string Sunrise_Day_One_String => _sunrise_day_one.ToShortTimeString();
+        [Ignore]
+        public string Sunrise_Day_Two_String => _sunrise_day_two.ToShortTimeString();
+        [Ignore]
+        public string Sunrise_Day_Three_String => _sunrise_day_three.ToShortTimeString();
+        [Ignore]
+        public string Sunrise_Day_Four_String => _sunrise_day_four.ToShortTimeString();
+        [Ignore]
+        public string Sunrise_Day_Five_String => _sunrise_day_five.ToShortTimeString();
+        [Ignore]
+        public string Sunrise_Day_Six_String => _sunrise_day_six.ToShortTimeString();
+        [Ignore]
+        public string Sunrise_Day_Seven_String => _sunrise_day_seven.ToShortTimeString();
+        [Ignore]
+        public string Sunset_Day_One_String => _sunrise_day_one.ToShortTimeString();
+        [Ignore]
+        public string Sunset_Day_Two_String => _sunset_day_two.ToShortTimeString();
+        [Ignore]
+        public string Sunset_Day_Three_String => _sunset_day_three.ToShortTimeString();
+        [Ignore]
+        public string Sunset_Day_Four_String => _sunset_day_four.ToShortTimeString();
+        [Ignore]
+        public string Sunset_Day_Five_String => _sunset_day_five.ToShortTimeString();
+        [Ignore]
+        public string Sunset_Day_Six_String => _sunset_day_six.ToShortTimeString();
+        [Ignore]
+        public string Sunset_Day_Seven_String => _sunset_day_seven.ToShortTimeString();
         public DateTime Sunrise_Day_One
         {
             get => _sunrise_day_one;
@@ -630,6 +703,7 @@ namespace Locations.Core.Shared.DTO
                 }
             }
         }
+       
         public DateTime Sunset_Day_One
         {
             get => _sunset_day_one;
@@ -847,7 +921,7 @@ namespace Locations.Core.Shared.DTO
         public double Day_One_Dew_Point { get => day_One_Dew_Point; set { day_One_Dew_Point = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_One_Dew_Point))); } }
         public int Day_One_Humidity { get => day_One_Humidity; set { day_One_Humidity = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_One_Humidity))); } }
         public int Day_One_Pressure { get => day_One_Pressure; set { day_One_Pressure = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_One_Pressure))); } }
-        public string? Weather_Day_One_Icon { get => weather_Day_One_Icon; set { weather_Day_One_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_One_Icon))); } }
+        public string? Weather_Day_One_Icon { get => "a" + weather_Day_One_Icon + ".png"; set { weather_Day_One_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_One_Icon))); } }
         public string? Weather_Day_One_Description { get => weather_Day_One_Description; set { weather_Day_One_Description = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_One_Description))); } }
         public double Temperature_Day_One_Low_Feels_Like { get => temperature_Day_One_Low_Feels_Like; set { temperature_Day_One_Low_Feels_Like = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Temperature_Day_One_Low_Feels_Like))); } }
         public double Temperature_Day_One_Night_Feels_Like { get => temperature_Day_One_Night_Feels_Like; set { temperature_Day_One_Night_Feels_Like = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Temperature_Day_One_Night_Feels_Like))); } }
@@ -869,7 +943,7 @@ namespace Locations.Core.Shared.DTO
         public int Weather_Day_Two_ID { get => weather_Day_Two_ID; set { weather_Day_Two_ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Two_ID))); } }
         public string? Weather_Day_Two_Main { get => weather_Day_Two_Main; set { weather_Day_Two_Main = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Two_Main))); } }
         public string? Weather_Day_Two_Description { get => weather_Day_Two_Description; set { weather_Day_Two_Description = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Two_Description))); } }
-        public string? Weather_Day_Two_Icon { get => weather_Day_Two_Icon; set { weather_Day_Two_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Two_Icon))); } }
+        public string? Weather_Day_Two_Icon { get => "a" + weather_Day_Two_Icon + ".png"; set { weather_Day_Two_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Two_Icon))); } }
         public DateTime MoonRise_Day_Three { get => moonRise_Day_Three; set { moonRise_Day_Three = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoonRise_Day_Three))); } }
         public DateTime MoonSet_Day_Three { get => moonSet_Day_Three; set { moonSet_Day_Three = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoonSet_Day_Three))); } }
         public string? Summary_Day_Three { get => summary_Day_Three; set { summary_Day_Three = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Summary_Day_Three))); } }
@@ -884,7 +958,7 @@ namespace Locations.Core.Shared.DTO
         public int Weather_Day_Three_ID { get => weather_Day_Three_ID; set { weather_Day_Three_ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Three_ID))); } }
         public string? Weather_Day_Three_Main { get => weather_Day_Three_Main; set { weather_Day_Three_Main = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Three_Main))); } }
         public string? Weather_Day_Three_Description { get => weather_Day_Three_Description; set { weather_Day_Three_Description = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Three_Description))); } }
-        public string? Weather_Day_Three_Icon { get => weather_Day_Three_Icon; set { weather_Day_Three_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Three_Icon))); } }
+        public string? Weather_Day_Three_Icon { get => "a" + weather_Day_Three_Icon + ".png"; set { weather_Day_Three_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Three_Icon))); } }
         public double UV_Index_DayTwo { get => uV_Index_DayTwo; set { uV_Index_DayTwo = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UV_Index_DayTwo))); } }
         public double UV_Index_DayThree { get => uV_Index_DayThree; set { uV_Index_DayThree = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UV_Index_DayThree))); } }
         public int Day_Three_Pressure { get => day_Three_Pressure; set { day_Three_Pressure = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Three_Pressure))); } }
@@ -907,7 +981,7 @@ namespace Locations.Core.Shared.DTO
         public int Weather_Day_Four_ID { get => weather_Day_Four_ID; set { weather_Day_Four_ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Four_ID))); } }
         public string? Weather_Day_Four_Main { get => weather_Day_Four_Main; set { weather_Day_Four_Main = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Four_Main))); } }
         public string? Weather_Day_Four_Description { get => weather_Day_Four_Description; set { weather_Day_Four_Description = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Four_Description))); } }
-        public string? Weather_Day_Four_Icon { get => weather_Day_Four_Icon; set { weather_Day_Four_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Four_Icon))); } }
+        public string? Weather_Day_Four_Icon { get => "a" + weather_Day_Four_Icon + ".png"; set { weather_Day_Four_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Four_Icon))); } }
         public int Day_Four_Pressure { get => day_Four_Pressure; set { day_Four_Pressure = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Four_Pressure))); } }
         public double Day_Four_Dew_Point { get => day_Four_Dew_Point; set { day_Four_Dew_Point = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Four_Dew_Point))); } }
         public int Day_Four_Humidity { get => day_Four_Humidity; set { day_Four_Humidity = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Four_Humidity))); } }
@@ -927,12 +1001,12 @@ namespace Locations.Core.Shared.DTO
         public int Weather_Day_Five_ID { get => weather_Day_Five_ID; set { weather_Day_Five_ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Five_ID))); } }
         public string? Weather_Day_Five_Main { get => weather_Day_Five_Main; set { weather_Day_Five_Main = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Five_Main))); } }
         public string? Weather_Day_Five_Description { get => weather_Day_Five_Description; set { weather_Day_Five_Description = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Five_Description))); } }
-        public string? Weather_Day_Five_Icon { get => weather_Day_Five_Icon; set { weather_Day_Five_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Five_Icon))); } }
+        public string? Weather_Day_Five_Icon { get => "a" + weather_Day_Five_Icon + ".png"; set { weather_Day_Five_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Five_Icon))); } }
         public int Day_Five_Pressure { get => day_Five_Pressure; set { day_Five_Pressure = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Five_Pressure))); } }
         public int Day_Five_Humidity { get => day_Five_Humidity; set { day_Five_Humidity = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Five_Humidity))); } }
         public double Day_Five_Dew_Point { get => day_Five_Dew_Point; set { day_Five_Dew_Point = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Five_Dew_Point))); } }
         public double UV_Index_DayFive { get => uV_Index_DayFive; set { uV_Index_DayFive = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UV_Index_DayFive))); } }
-        public DateTime Sunrise_Day_Six { get => sunrise_Day_Six; set { sunrise_Day_Six = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunrise_Day_Six))); } }
+        public DateTime Sunrise_Day_Six { get => _sunrise_day_six; set { _sunrise_day_six = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunrise_Day_Six))); } }
         public double UV_Index_DaySeven { get => uV_Index_DaySeven; set { uV_Index_DaySeven = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UV_Index_DaySeven))); } }
         public double Temperature_Day_Seven_Low { get => temperature_Day_Seven_Low; set { temperature_Day_Seven_Low = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Temperature_Day_Seven_Low))); } }
         public double WindGustDay_Seven { get => windGustDay_Seven; set { windGustDay_Seven = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(WindGustDay_Seven))); } }
@@ -941,7 +1015,7 @@ namespace Locations.Core.Shared.DTO
         public double Day_Seven_Dew_Point { get => day_Seven_Dew_Point; set { day_Seven_Dew_Point = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Seven_Dew_Point))); } }
         public int Day_Seven_Humidity { get => day_Seven_Humidity; set { day_Seven_Humidity = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Seven_Humidity))); } }
         public int Day_Seven_Pressure { get => day_Seven_Pressure; set { day_Seven_Pressure = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Seven_Pressure))); } }
-        public string? Weather_Day_Seven_Icon { get => weather_Day_Seven_Icon; set { weather_Day_Seven_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Seven_Icon))); } }
+        public string? Weather_Day_Seven_Icon { get => "a" + weather_Day_Seven_Icon + ".png"; set { weather_Day_Seven_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Seven_Icon))); } }
         public string? Weather_Day_Seven_Description { get => weather_Day_Seven_Description; set { weather_Day_Seven_Description = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Seven_Description))); } }
         public string? Weather_Day_Seven_Main { get => weather_Day_Seven_Main; set { weather_Day_Seven_Main = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Seven_Main))); } }
         public int Weather_Day_Seven_ID { get => weather_Day_Seven_ID; set { weather_Day_Seven_ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Seven_ID))); } }
@@ -957,8 +1031,8 @@ namespace Locations.Core.Shared.DTO
         public string? Summary_Day_Seven { get => summary_Day_Seven; set { summary_Day_Seven = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Summary_Day_Seven))); } }
         public DateTime MoonSet_Day_Seven { get => moonSet_Day_Seven; set { moonSet_Day_Seven = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoonSet_Day_Seven))); } }
         public DateTime MoonRise_Day_Seven { get => moonRise_Day_Seven; set { moonRise_Day_Seven = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoonRise_Day_Seven))); } }
-        public DateTime Sunset_Day_Seven { get => sunset_Day_Seven; set { sunset_Day_Seven = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunset_Day_Seven))); } }
-        public DateTime Sunrise_Day_Seven { get => sunrise_Day_Seven; set { sunrise_Day_Seven = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunrise_Day_Seven))); } }
+        public DateTime Sunset_Day_Seven { get => _sunset_day_seven; set { _sunset_day_seven = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunset_Day_Seven))); } }
+        public DateTime Sunrise_Day_Seven { get => _sunrise_day_seven; set { _sunrise_day_seven = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunrise_Day_Seven))); } }
         public double UV_Index_DaySix { get => uV_Index_DaySix; set { uV_Index_DaySix = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UV_Index_DaySix))); } }
         public double Temperature_Day_Six_Low { get => temperature_Day_Six_Low; set { temperature_Day_Six_Low = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Temperature_Day_Six_Low))); } }
         public double WindGustDay_Six { get => windGustDay_Six; set { windGustDay_Six = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(WindGustDay_Six))); } }
@@ -967,7 +1041,7 @@ namespace Locations.Core.Shared.DTO
         public double Day_Six_Dew_Point { get => day_Six_Dew_Point; set { day_Six_Dew_Point = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Six_Dew_Point))); } }
         public int Day_Six_Humidity { get => day_Six_Humidity; set { day_Six_Humidity = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Six_Humidity))); } }
         public int Day_Six_Pressure { get => day_Six_Pressure; set { day_Six_Pressure = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_Six_Pressure))); } }
-        public string? Weather_Day_Six_Icon { get => weather_Day_Six_Icon; set { weather_Day_Six_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Six_Icon))); } }
+        public string? Weather_Day_Six_Icon { get => "a" + weather_Day_Six_Icon + ".png"; set { weather_Day_Six_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Six_Icon))); } }
         public string? Weather_Day_Six_Description { get => weather_Day_Six_Description; set { weather_Day_Six_Description = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Six_Description))); } }
         public string? Weather_Day_Six_Main { get => weather_Day_Six_Main; set { weather_Day_Six_Main = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Six_Main))); } }
         public int Weather_Day_Six_ID { get => weather_Day_Six_ID; set { weather_Day_Six_ID = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_Six_ID))); } }
@@ -982,7 +1056,7 @@ namespace Locations.Core.Shared.DTO
         public double Temperature_Day_Six { get => temperature_Day_Six; set { temperature_Day_Six = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Temperature_Day_Six))); } }
         public string? Summary_Day_Six { get => summary_Day_Six; set { summary_Day_Six = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Summary_Day_Six))); } }
         public DateTime MoonRise_Day_Six { get => moonRise_Day_Six; set { moonRise_Day_Six = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoonRise_Day_Six))); } }
-        public DateTime Sunset_Day_Six { get => sunset_Day_Six; set { sunset_Day_Six = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunset_Day_Six))); } }
+        public DateTime Sunset_Day_Six { get => _sunset_day_six; set { _sunset_day_six = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunset_Day_Six))); } }
         public DateTime MoonSet_Day_Six { get => moonSet_Day_Six; set { moonSet_Day_Six = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoonSet_Day_Six))); } }
 
         private string? forecasts_Day_Seven;

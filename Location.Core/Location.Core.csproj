@@ -25,7 +25,7 @@
 		<ApplicationTitle>My Photo Locations</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.x3squaredcirecles.locations</ApplicationId>
+		<ApplicationId>com.x3squaredcircles.locations</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -177,6 +177,10 @@
 
 	<ItemGroup>
 	  <Folder Include="Helpers\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiImage Include="Platforms\Android\appicon_old_old.png" />
 	</ItemGroup>
 
 </Project>

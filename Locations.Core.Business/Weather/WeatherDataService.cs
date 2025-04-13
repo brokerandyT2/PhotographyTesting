@@ -89,7 +89,7 @@ namespace Locations.Core.Business.Weather
             newtonsoft.JsonTextReader _reader = new newtonsoft.JsonTextReader(new StringReader(content));
     
 
-            var POCO = newtonsoft.JsonConvert.DeserializeObject<Current>(content);
+           // var POCO = newtonsoft.JsonConvert.DeserializeObject<Current>(content);
             var PO = new Json.Net.JsonParser(); // (content);
 
 
@@ -100,7 +100,7 @@ namespace Locations.Core.Business.Weather
             {
                 TypeMethod.GetAllWeatherDataAsync =>
                 JsonSerializer.Deserialize<WeatherViewModel>(content) as T,
-                TypeMethod.GetDaysAsync => JsonSerializer.Deserialize<Current>(content) as T,
+                //TypeMethod.GetDaysAsync => JsonSerializer.Deserialize<Current>(content) as T,
 
 
             };

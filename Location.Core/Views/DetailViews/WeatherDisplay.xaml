@@ -13,21 +13,96 @@
     <ScrollView>
 
         <VerticalStackLayout x:Name="Accordion">
-            <maui:Expander Animated="True">
-                <maui:Expander.HeaderContent>
+
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0" Grid.ColumnSpan="6"/>
+                <Label Text="{Binding DayOne}" FontAttributes="Bold" Grid.Row="1" Grid.ColumnSpan="6"/>
+                <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="2" Grid.ColumnSpan="6"/>
+                <Label Text="{Binding Forecast_Day_One}"  Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="6"></Label>
+                <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="4" Grid.ColumnSpan="6"/>
+                <Label Text="{x:Static strings:AppResources.Low}" Grid.Row="5" Grid.Column="0"/>
+                <Label Text="{x:Static strings:AppResources.High}" Grid.Row="5" Grid.Column="2"/>
+                <Image Source="{Binding Weather_Day_One_Icon}" Grid.Row="5" Grid.Column="5" Grid.RowSpan="2"/>
+                <Label Text="{Binding Temperature_Day_One_Min}" Grid.Row="6" Grid.Column="0"/>
+                <Label Text="{Binding Temperature_Day_One_Max}" Grid.Row="6" Grid.Column="2"/>
+                <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="7" Grid.ColumnSpan="6"/>
+                <maui:Expander Animated="True" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="6">
+                    <maui:Expander.HeaderContent>
+                        <Grid BackgroundColor="LightGray">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Text="Details" FontAttributes="Bold" Grid.ColumnSpan="2" HorizontalOptions="Center"  />
+                        </Grid>
+                    </maui:Expander.HeaderContent>
+
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
-
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Label Text="{Binding DayOne}" Grid.ColumnSpan="2"  />
+
+                        <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0" Grid.ColumnSpan="6"/>
+                        <Label Text="{x:Static strings:AppResources.Sunrise}" Grid.Row="1" Grid.Column="0"/>
+                        <Label Text="{x:Static strings:AppResources.Sunset}" Grid.Row="1" Grid.Column="2"/>
+                        <Label Text="{Binding Sunrise_Day_One_String}" Grid.Row="2" Grid.Column="0"/>
+                        <Label Text="{Binding Sunset_Day_One_String}" Grid.Row="2" Grid.Column="2"/>
+
                     </Grid>
-                </maui:Expander.HeaderContent>
-                <Grid>
+                </maui:Expander>
+                <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="9" Grid.ColumnSpan="6"/>
+                <BoxView HeightRequest="1" Color="Red" Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="6"/>
+
+            </Grid>
+
+            <!--                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
@@ -78,9 +153,9 @@
                     <Label Text="{Binding Forecast_Day_One}" Grid.Row="14" Grid.ColumnSpan="4"/>
                 </Grid>
             </maui:Expander>
-            <maui:Expander Animated="True">
+<maui:Expander Animated="True">
                 <maui:Expander.HeaderContent>
-                    <Grid>
+                    <Grid BackgroundColor="Grey">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
                         </Grid.RowDefinitions>
@@ -145,7 +220,7 @@
             </maui:Expander>
             <maui:Expander Animated="True">
                 <maui:Expander.HeaderContent>
-                    <Grid>
+                    <Grid BackgroundColor="Grey">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
                         </Grid.RowDefinitions>
@@ -210,7 +285,7 @@
             </maui:Expander>
             <maui:Expander Animated="True">
                 <maui:Expander.HeaderContent>
-                    <Grid>
+                    <Grid BackgroundColor="Grey">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
                         </Grid.RowDefinitions>
@@ -275,7 +350,7 @@
             </maui:Expander>
             <maui:Expander Animated="True">
                 <maui:Expander.HeaderContent>
-                    <Grid>
+                    <Grid BackgroundColor="Grey">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
                         </Grid.RowDefinitions>
@@ -336,7 +411,7 @@
                     <Label Text="{x:Static strings:AppResources.Forecast}" Grid.Row="13" Grid.ColumnSpan="4"/>
                     <Label Text="{Binding Forecasts_Day_Five}" Grid.Row="14" Grid.ColumnSpan="4"/>
                 </Grid>
-            </maui:Expander>
+            </maui:Expander> -->
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

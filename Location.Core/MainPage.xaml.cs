@@ -28,8 +28,8 @@ namespace Location.Core
 #if RELEASE
                     return ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;
 #else
-                    return false;
-                    //return true;
+                   // return false;
+                   return true;
 #endif
 #endif
 
@@ -79,7 +79,9 @@ namespace Location.Core
             this.Children.Add(new AddLocation());
             this.Children.Add(new ListLocations());
             this.Children.Add(new Tips());
-
+            //Get Permisssions upfront
+            PermissionStatus status = Permissions.RequestAsync<Permissions.Camera>().Result;
+            PermissionStatus stat = Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
 
             SettingsService ss = new SettingsService();
             var z = ss.GetSetting(MagicStrings.AppOpenCounter);
