@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Location.Core.Usercontrols.Controls.Weather"
+             xmlns:models="clr-namespace:Locations.Core.Shared.DTO;assembly=Locations.Core.Shared"
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+             Title="Weather">
+    <ContentPage.BindingContext>
+        <models:DailyWeatherWithDetailsDTO/>
+    </ContentPage.BindingContext>
+    <VerticalStackLayout>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0" Grid.ColumnSpan="6"/>
+            <Label Text="{Binding DayOne}" FontAttributes="Bold" Grid.Row="1" Grid.ColumnSpan="6"/>
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="2" Grid.ColumnSpan="6"/>
+            <Label Text="{Binding Forecast_Day_One}"  Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="6"></Label>
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="4" Grid.ColumnSpan="6"/>
+            <Label x:Name="LowTemp" Text="" Grid.Row="5" Grid.Column="0"/>
+            <Label x:Name="HighTemp" Text="" Grid.Row="5" Grid.Column="2"/>
+            <Image Source="{Binding Weather_Day_One_Icon}" Grid.Row="5" Grid.Column="5" Grid.RowSpan="2"/>
+            <Label Text="{Binding Temperature_Day_One_Min}" Grid.Row="6" Grid.Column="0"/>
+            <Label Text="{Binding Temperature_Day_One_Max}" Grid.Row="6" Grid.Column="2"/>
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="7" Grid.ColumnSpan="6"/>
+        </Grid>
+    </VerticalStackLayout>
+</ContentPage>

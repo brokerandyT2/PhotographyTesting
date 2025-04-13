@@ -19,7 +19,7 @@ public partial class WeatherDisplay : ContentPage
     public WeatherDisplay(LocationViewModel name) : this()
     {
         var x = ws.GetWeather(name.Lattitude, name.Longitude);
-
+       // WeatherControl.BindingContext = x;
         this.BindingContext = x;
     }
 }
