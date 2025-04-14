@@ -21,3 +21,4 @@ Conditional Compilation directives are used to keep builds small, but allow for 
                 ...
             }    
             
+This means that if Photography is defined (and it always is for the moment) then the code in the *#if RELEASE* will be included at compile time . . . if not we get the compile inclusion of the *#else* This allows for testing as a "super user" for debugging purposes.
