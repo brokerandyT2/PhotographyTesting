@@ -27,6 +27,15 @@ namespace Locations.Core.Business.DataAccess
         {  var x = _query.GetItemByString<SettingViewModel>(name);
             return x;
         }
+
+        public bool UpdatePageView(string page)
+        {
+            var s = GetSettingByName(page);
+            s.Timestamp = DateTime.Now;
+            s.Value = true.ToString();
+            _query.Update(s);
+            return true;
+        }
         public SettingViewModel GetSetting(string key)
         {
 
@@ -34,6 +43,7 @@ namespace Locations.Core.Business.DataAccess
         }
         public void UpdateSetting(SettingViewModel setting)
         {
+            setting.Timestamp = DateTime.Now;
             _query.Update(setting);
         }
         public void DeleteSetting(string key)
@@ -43,12 +53,13 @@ namespace Locations.Core.Business.DataAccess
         }
         public SettingViewModel Save(SettingViewModel model)
         {
+            model.Timestamp = DateTime.Now;
             _query.SaveItem(model);
             return model;
         }
         public SettingViewModel Save(SettingViewModel model, bool returnNew)
         {
-
+            model.Timestamp = DateTime.Now;
             _query.SaveItem(model);
             return returnNew ? new SettingViewModel() : model;
         }
@@ -101,6 +112,7 @@ namespace Locations.Core.Business.DataAccess
         }
         public SettingViewModel SaveSettingWithObjectReturn(SettingViewModel s)
         {
+            s.Timestamp = DateTime.Now;
             return _query.SaveWithIDReturn(s);
         }
 

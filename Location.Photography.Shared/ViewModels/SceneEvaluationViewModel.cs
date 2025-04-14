@@ -1,4 +1,5 @@
-﻿using Location.Photography.Shared.ViewModels.Interfaces;
+﻿using GalaSoft.MvvmLight;
+using Location.Photography.Shared.ViewModels.Interfaces;
 using Microsoft.Maui.Graphics;
 using SkiaSharp;
 using System;
@@ -29,6 +30,7 @@ namespace Location.Photography.Shared.ViewModels
         private string _greenHistogram = string.Empty;
         private string _blueHistogram = string.Empty;
         private string _contrastHistogram = string.Empty;
+
         public string RedHistogramImage
         {
             get { return _redHistogram; }
@@ -57,17 +59,17 @@ namespace Location.Photography.Shared.ViewModels
             GreenHistogram = new int[256];
             BlueHistogram = new int[256];
             ContrastHistogram = new int[256];
-            Evaluate = new Command(EvaluateScene);
+           // Evaluate = new Command(EvaluateScene);
         }
 
-        public void EvaluateScene(object obj)
+        public Task<int> EvaluateScene(object obj)
         {
-            GetImage();
+            return GetImage();
         }
 
 
 
-        private async void GetImage()
+        private async Task<int> GetImage()
         {
             string path = string.Empty;
             if (MediaPicker.Default.IsCaptureSupported)
@@ -127,101 +129,104 @@ namespace Location.Photography.Shared.ViewModels
                         _greenHistogram = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "green.png");
                         _contrastHistogram = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "contrast.png");
 
-                        GenerateHistogramImage(_redHistogram, redHistogram, SKColors.Red);
-                        GenerateHistogramImage(_greenHistogram, greenHistogram, SKColors.Green);
-                        GenerateHistogramImage(_blueHistogram, blueHistogram, SKColors.Blue);
-                        GenerateHistogramImage(_contrastHistogram, contrastHistogram, SKColors.Black);
+                        RedHistogramImage = GenerateHistogramImage(_redHistogram, redHistogram, SKColors.Red);
+                        GreenHistogramImage = GenerateHistogramImage(_greenHistogram, greenHistogram, SKColors.Green);
+                        BlueHistogramImage = GenerateHistogramImage(_blueHistogram, blueHistogram, SKColors.Blue);
+                        ContrastHistogramImage = GenerateHistogramImage(_contrastHistogram, contrastHistogram, SKColors.Black);
 
                         // GenerateHistogramImage(Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "path.png"), redHistogram, greenHistogram, blueHistogram, contrastHistogram);
 
 
                     });
                 }
-
+                
             }
-            static void NormalizeHistogram(double[] histogram, int totalPixels)
+            return 69;
+        }
+        static void NormalizeHistogram(double[] histogram, int totalPixels)
+        {
+            double maxValue = 0;
+            for (int i = 0; i < histogram.Length; i++)
             {
-                double maxValue = 0;
+                histogram[i] /= totalPixels;  // Normalize to [0,1]
+                if (histogram[i] > maxValue)
+                    maxValue = histogram[i]; // Get max value
+            }
+
+            // Scale values so the highest value is 100% of the image height
+            if (maxValue > 0)
+            {
                 for (int i = 0; i < histogram.Length; i++)
                 {
-                    histogram[i] /= totalPixels;  // Normalize to [0,1]
-                    if (histogram[i] > maxValue)
-                        maxValue = histogram[i]; // Get max value
-                }
-
-                // Scale values so the highest value is 100% of the image height
-                if (maxValue > 0)
-                {
-                    for (int i = 0; i < histogram.Length; i++)
-                    {
-                        histogram[i] /= maxValue;
-                    }
+                    histogram[i] /= maxValue;
                 }
             }
-            static void GenerateHistogramImage(string filePath, double[] histodata, SkiaSharp.SKColor color)
+        }
+        static string GenerateHistogramImage(string filePath, double[] histodata, SkiaSharp.SKColor color)
+        {
+            int width = 512;  // Histogram image width
+            int height = 256; // Histogram image height
+            int margin = 10;  // Margin for better visibility
+            string localFilePath = filePath;
+
+            using (var surface = SKSurface.Create(new SKImageInfo(width, height)))
             {
-                int width = 512;  // Histogram image width
-                int height = 256; // Histogram image height
-                int margin = 10;  // Margin for better visibility
-                string localFilePath = filePath;
+                var canvas = surface.Canvas;
+                canvas.Clear(SKColors.White);
 
-                using (var surface = SKSurface.Create(new SKImageInfo(width, height)))
+                // Draw Axes
+                using (var axisPaint = new SKPaint { Color = SKColors.Black, StrokeWidth = 2, IsAntialias = true })
                 {
-                    var canvas = surface.Canvas;
-                    canvas.Clear(SKColors.White);
-
-                    // Draw Axes
-                    using (var axisPaint = new SKPaint { Color = SKColors.Black, StrokeWidth = 2, IsAntialias = true })
-                    {
-                        canvas.DrawLine(margin, height - margin, width - margin, height - margin, axisPaint); // X-axis
-                        canvas.DrawLine(margin, height - margin, margin, margin, axisPaint); // Y-axis
-                    }
-
-                    // Draw Histograms
-                    SKColor r = color;
-
-
-                    DrawHistogramLine(canvas, histodata, r, width, height, margin);
-
-
-                    // Save Image
-                    using (var image = surface.Snapshot())
-                    using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
-                    using (var stream = File.OpenWrite(filePath))
-                    {
-                        data.SaveTo(stream);
-                    }
+                    canvas.DrawLine(margin, height - margin, width - margin, height - margin, axisPaint); // X-axis
+                    canvas.DrawLine(margin, height - margin, margin, margin, axisPaint); // Y-axis
                 }
+
+                // Draw Histograms
+                SKColor r = color;
+
+
+                DrawHistogramLine(canvas, histodata, r, width, height, margin);
+
+
+                // Save Image
+                using (var image = surface.Snapshot())
+                using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+                using (var stream = File.OpenWrite(filePath))
+                {
+                    data.SaveTo(stream);
+                }
+                return filePath;
             }
+        }
 
-            static void DrawHistogramLine(SKCanvas canvas, double[] histogram, SKColor color, int width, int height, int margin)
+        static void DrawHistogramLine(SKCanvas canvas, double[] histogram, SKColor color, int width, int height, int margin)
+        {
+            int graphWidth = width - (2 * margin);
+            int graphHeight = height - (2 * margin);
+
+
+
+            using (var paint = new SKPaint
             {
-                int graphWidth = width - (2 * margin);
-                int graphHeight = height - (2 * margin);
-
-
-
-                using (var paint = new SKPaint
+                Color = color,
+                StrokeWidth = 2,
+                IsAntialias = true,
+                Style = SKPaintStyle.Fill
+            })
+            {
+                for (int i = 1; i < histogram.Length; i++)
                 {
-                    Color = color,
-                    StrokeWidth = 2,
-                    IsAntialias = true,
-                    Style = SKPaintStyle.Fill
-                })
-                {
-                    for (int i = 1; i < histogram.Length; i++)
-                    {
-                        float x1 = margin + ((i - 1) * (graphWidth / 256f));
-                        float y1 = height - margin - (float)(histogram[i - 1] * graphHeight);
-                        float x2 = margin + (i * (graphWidth / 256f));
-                        float y2 = height - margin - (float)(histogram[i] * graphHeight);
+                    float x1 = margin + ((i - 1) * (graphWidth / 256f));
+                    float y1 = height - margin - (float)(histogram[i - 1] * graphHeight);
+                    float x2 = margin + (i * (graphWidth / 256f));
+                    float y2 = height - margin - (float)(histogram[i] * graphHeight);
 
-                        canvas.DrawLine(x1, y1, x2, y2, paint);
-                    }
+                    canvas.DrawLine(x1, y1, x2, y2, paint);
                 }
             }
         }
     }
 }
+
 
 

@@ -1,4 +1,5 @@
 using Locations.Core.Business.DataAccess;
+using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
 
@@ -7,6 +8,7 @@ namespace Location.Core.Views;
 public partial class AddLocation : ContentPage
 {
     LocationsService ls = new LocationsService();
+    SettingsService ss = new SettingsService();
     public AddLocation()
     {
         InitializeComponent();
@@ -34,10 +36,25 @@ public partial class AddLocation : ContentPage
 
     private void Save_Pressed(object sender, EventArgs e)
     {
-      BindingContext = ls.Save((LocationViewModel) BindingContext,true);
+        BindingContext = ls.Save((LocationViewModel)BindingContext, true);
 
     }
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        var x = ss.GetSettingByName(MagicStrings.AddLocationViewed);
+        if (x.ToBoolean() == false)
+        {
+#if RELEASE
+            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));      
+#endif
+            x.Value = MagicStrings.True_string;
+#if RELEASE
+            ss.UpdateSetting(xx);
+#endif
+        }
 
+    }
     private async void AddPhoto_Pressed(object sender, EventArgs e)
     {
         var x = (LocationViewModel)BindingContext;
@@ -63,5 +80,5 @@ public partial class AddLocation : ContentPage
         Navigation.PopModalAsync();
     }
 
-   
+
 }

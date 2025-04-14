@@ -74,7 +74,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.MoonRise_Day_One = dateTime.AddSeconds(day.SelectToken("moonrise").ToObject<int>()).ToLocalTime();
                         wvm.MoonSet_Day_One = dateTime.AddSeconds(day.SelectToken("moonset").ToObject<int>()).ToLocalTime();
                         wvm.MoonPhaseAs_Number_DayOne = day.SelectToken("moon_phase").ToObject<double>();
-                        wvm.Summary_Day_One = day.SelectToken("summary").ToObject<string>();
+                         wvm.Summary_Day_One = day.SelectToken("summary").ToObject<string>();
                         var temps = day.SelectToken("temp");
                         var feels_likes = day.SelectToken("feels_like");
                         var weather = day.SelectToken("weather");
@@ -101,7 +101,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_One_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayOne = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_one = day.SelectToken("clouds").ToObject<int>();
-                        wvm.Rain_Day_One = day.SelectToken("rain").ToObject<int>();
+                       // wvm.Rain_Day_One = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 1)
                     {
@@ -138,7 +138,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Two_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayTwo = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_two = day.SelectToken("clouds").ToObject<int>();
-                        wvm.Rain_Day_Two = day.SelectToken("rain").ToObject<int>();
+                        //wvm.Rain_Day_Two = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 2)
                     {
@@ -175,7 +175,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Three_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayThree = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_Three = day.SelectToken("clouds").ToObject<int>();
-                        wvm.Rain_Day_Three = day.SelectToken("rain").ToObject<int>();
+                       // wvm.Rain_Day_Three = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 3)
                     {
@@ -212,7 +212,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Four_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayFour = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_Four = day.SelectToken("clouds").ToObject<int>();
-                        wvm.Rain_Day_Four = day.SelectToken("rain").ToObject<int>();
+                       // wvm.Rain_Day_Four = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 4) {
                         wvm.Forecasts_Day_Five = day.SelectToken("summary").ToObject<string>();
@@ -248,7 +248,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Five_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayFive = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_Five = day.SelectToken("clouds").ToObject<int>();
-                        wvm.Rain_Day_Five = day.SelectToken("rain").ToObject<int>();
+                       // wvm.Rain_Day_Five = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 5) {
                         wvm.Forecasts_Day_Six = day.SelectToken("summary").ToObject<string>();
@@ -284,7 +284,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Six_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DaySix = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_Six = day.SelectToken("clouds").ToObject<int>();
-                        wvm.Rain_Day_Six = day.SelectToken("rain").ToObject<int>();
+                      //  wvm.Rain_Day_Six = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 6) {
                         wvm.Forecasts_Day_Seven = day.SelectToken("summary").ToObject<string>();
@@ -320,7 +320,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Seven_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DaySeven = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_Seven = day.SelectToken("clouds").ToObject<int>();
-                        wvm.Rain_Day_Seven = day.SelectToken("rain").ToObject<int>();
+                      //  wvm.Rain_Day_Seven = day.SelectToken("rain").ToObject<int>();
                     }
                     
 

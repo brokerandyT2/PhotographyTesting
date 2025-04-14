@@ -28,35 +28,53 @@ namespace Location.Photography.Shared.ViewModels
         private DateTime _astronomicalDusk;
         private DateTime _civildawn;
         private DateTime _civildusk;
+        private List<LocationViewModel> locations1 = new List<LocationViewModel>();
 
-        public List<LocationViewModel> Locations { get; set; }= new List<LocationViewModel>();
+        public List<LocationViewModel> Locations { get => locations1; set { locations1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Locations))); } }
         public void CalculateSun()
         {
             TimeZoneInfo cst = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
             SolarTimes solarTimes = new SolarTimes(_date, _latitude, _longitude);
             this._sunrise = TimeZoneInfo.ConvertTimeFromUtc(solarTimes.Sunrise.ToUniversalTime(), cst);
+            PropertyUpdater(nameof(SunRiseFormatted));
             this._sunset = TimeZoneInfo.ConvertTimeFromUtc(solarTimes.Sunset.ToUniversalTime(), cst);
+            PropertyUpdater(nameof(SunSetFormatted));
             this._solarnoon = TimeZoneInfo.ConvertTimeFromUtc(solarTimes.SolarNoon.ToUniversalTime(), cst);
+            PropertyUpdater(nameof(SolarNoonFormatted));
             this._astronomicalDawn = TimeZoneInfo.ConvertTimeFromUtc(solarTimes.DawnAstronomical.ToUniversalTime(), cst);
+            PropertyUpdater(nameof(AstronomicalDawnFormatted));
             this._nauticaldawn = TimeZoneInfo.ConvertTimeFromUtc(solarTimes.DawnNautical.ToUniversalTime(), cst);
+            PropertyUpdater(nameof(NauticalDawnFormatted));
             this._nauticaldusk = TimeZoneInfo.ConvertTimeFromUtc(solarTimes.DuskNautical.ToUniversalTime(), cst);
+            PropertyUpdater(nameof(NauticalDuskFormatted));
             this._astronomicalDusk = TimeZoneInfo.ConvertTimeFromUtc(solarTimes.DuskAstronomical.ToUniversalTime(), cst);
+            PropertyUpdater(nameof(AstronomicalDuskFormatted));
             this._civildawn = TimeZoneInfo.ConvertTimeFromUtc(solarTimes.DawnCivil.ToUniversalTime(), cst);
+            PropertyUpdater(nameof(CivilDawnFormatted));
             this._civildusk = TimeZoneInfo.ConvertTimeFromUtc(solarTimes.DuskCivil.ToUniversalTime(), cst);
+            PropertyUpdater(nameof(CivilDuskFormatted));
         }
         public string AstronomicalDawnFormatted { get => _astronomicalDawn.ToString(TimeFormat); }
         public string AstronomicalDuskFormatted { get => _astronomicalDusk.ToString(TimeFormat); }
         public DateTime AstronomicalDawn
-        { get => _astronomicalDawn; set { _astronomicalDawn = value; 
+        {
+            get => _astronomicalDawn; set
+            {
+                _astronomicalDawn = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AstronomicalDawn)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AstronomicalDawnFormatted)));
-            } }
+            }
+        }
         public DateTime AstronomicalDusk
 
-        { get => _astronomicalDusk; set { _astronomicalDusk = value; 
+        {
+            get => _astronomicalDusk; set
+            {
+                _astronomicalDusk = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AstronomicalDusk)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AstronomicalDuskFormatted)));
-            } }
+            }
+        }
 
         public string DateFormat { get; set; }
         public double Latitude
@@ -64,13 +82,27 @@ namespace Location.Photography.Shared.ViewModels
         public double Longitude
         { get { return _longitude; } set { _longitude = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Longitude))); } }
         public DateTime Date
-        { get => _date; set { _date = value;PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Date))); } } 
-       
+        { get => _date; set { _date = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Date))); } }
+
 
         public DateTime Sunrise
-        { get => _sunrise; set { _sunrise = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunrise))); } }    
+        {
+            get => _sunrise; set
+            {
+                _sunrise = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunrise)));
+                PropertyUpdater(nameof(SunRiseFormatted));
+            }
+        }
         public DateTime Sunset
-        { get => _sunset; set { _sunset = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunset))); } }
+        {
+            get => _sunset; set
+            {
+                _sunset = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunset)));
+                PropertyUpdater(nameof(SunSetFormatted));
+            }
+        }
 
         public DateTime GoldenHourMorning
         { get => _sunrise.AddHours(1); }
@@ -80,22 +112,33 @@ namespace Location.Photography.Shared.ViewModels
         public DateTime SolarNoon { get => _solarnoon; set { _solarnoon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SolarNoon))); } }
 
         public DateTime NauticalDawn
-        { get => _nauticaldawn; set { _nauticaldawn = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NauticalDawn))); } } 
+        { get => _nauticaldawn; set { _nauticaldawn = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NauticalDawn))); } }
         public DateTime NauticalDusk
         { get => _nauticaldusk; set { _nauticaldusk = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NauticalDusk))); } }
 
-        public string SunRiseFormatted { get=> _sunrise.ToString(DateFormat); }
-        public string SunSetFormatted { get=> _sunset.ToString(DateFormat); }
-        public string GoldenHourMorningFormatted { get=> _goldenhourMorning.ToString(DateFormat); }
-        public string GoldenHourEveningFormatted { get=> _goldenmhourEvening.ToString(DateFormat); }
-        public string SolarNoonFormatted { get=> _solarnoon.ToString(DateFormat); }
-        public string NauticalDawnFormatted { get=> _nauticaldawn.ToString(DateFormat); }
-        public string NauticalDuskFormatted { get=> _nauticaldusk.ToString(DateFormat); }
+        public string SunRiseFormatted { get => _sunrise.ToString(TimeFormat); }
+        public string SunSetFormatted { get => _sunset.ToString(TimeFormat); }
+        public string GoldenHourMorningFormatted { get => _sunrise.AddHours(1).ToString(TimeFormat); }
+        public string GoldenHourEveningFormatted { get => _sunset.AddHours(-1).ToString(TimeFormat); }
+        public string SolarNoonFormatted { get => _solarnoon.ToString(TimeFormat); }
+        public string NauticalDawnFormatted { get => _nauticaldawn.ToString(TimeFormat); }
+        public string NauticalDuskFormatted { get => _nauticaldusk.ToString(TimeFormat); }
         public string TimeFormat { get; set; }
-        public string CivilDawnFormatted { get=>_civildawn.ToString(DateFormat); }
-        public string CivilDuskFormatted => _civildawn.ToString(TimeFormat);
+        public string CivilDawnFormatted { get => _civildawn.ToString(TimeFormat); }
+        public string CivilDuskFormatted { get => _civildawn.ToString(TimeFormat); }
         public DateTime Civildawn { get => _civildawn; set => _civildawn = value; }
-        public DateTime Civildusk { get => _civildusk; set => _civildusk = value; }
+        public DateTime Civildusk
+        {
+            get => _civildusk; set
+            {
+                _civildusk = value;
+            }
+        }
+
+        private void PropertyUpdater(string v)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(v)));
+        }
 
         public override event PropertyChangedEventHandler? PropertyChanged;
     }

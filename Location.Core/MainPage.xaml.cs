@@ -79,9 +79,7 @@ namespace Location.Core
             this.Children.Add(new AddLocation());
             this.Children.Add(new ListLocations());
             this.Children.Add(new Tips());
-            //Get Permisssions upfront
-            PermissionStatus status = Permissions.RequestAsync<Permissions.Camera>().Result;
-            PermissionStatus stat = Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
+
 
             SettingsService ss = new SettingsService();
             var z = ss.GetSetting(MagicStrings.AppOpenCounter);
@@ -115,7 +113,7 @@ namespace Location.Core
                     {
 #if PHOTOGRAPHY
                         this.Children.Add(new Views.Premium.ExposureCalculator());
-                        this.Children.Add(new Views.Premium.LightMeter());
+                        //this.Children.Add(new Views.Premium.LightMeter());
                         this.Children.Add(new Views.Premium.SunLocation());
 #endif
                     }

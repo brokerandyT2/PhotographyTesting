@@ -22,4 +22,22 @@ public partial class WeatherDisplay : ContentPage
        // WeatherControl.BindingContext = x;
         this.BindingContext = x;
     }
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        var x = ss.GetSettingByName(MagicStrings.WeatherDisplayViewed);
+        var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
+        var isAds = z.ToBoolean();
+        if (x.ToBoolean() == false) 
+        { 
+#if RELEASE
+            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));      
+#endif       
+            x.Value = MagicStrings.True_string;
+#if RELEASE
+            ss.UpdateSetting(xx);
+#endif
+        }
+
+    }
 }

@@ -1,4 +1,5 @@
 using Locations.Core.Business.DataAccess;
+using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
 using System.Collections.ObjectModel;
@@ -9,6 +10,7 @@ namespace Location.Core.Views;
 public partial class ListLocations : ContentPage
 {
     LocationsService ls = new LocationsService();
+    SettingsService ss = new SettingsService();
     private ObservableCollection<LocationViewModel> _items = [];
     public ObservableCollection<LocationViewModel> Items { get { return _items; } set { _items = value; } }
     public ListLocations()
@@ -39,6 +41,18 @@ public partial class ListLocations : ContentPage
     {
         base.OnNavigatedTo(args);
         PopulateData();
+        var x = ss.GetSettingByName(MagicStrings.LocationListViewed);
+        if(x.ToBoolean() == false)
+        {
+#if RELEASE
+            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));      
+#endif
+            x.Value = MagicStrings.True_string;
+#if RELEASE
+            ss.UpdateSetting(xx);
+#endif
+        }
+
     }
     private void ImageButton_Pressed(object sender, EventArgs e)
     {

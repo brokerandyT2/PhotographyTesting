@@ -1,4 +1,6 @@
 using Location.Photography.Shared.ViewModels;
+using Locations.Core.Shared;
+using Syncfusion.Maui.Toolkit.Carousel;
 
 namespace Location.Core.Views.Pro;
 
@@ -13,33 +15,52 @@ public partial class SceneEvaluation : ContentPage
 
         }
     }
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
+        base.OnNavigatedTo(args);
+        var x = ss.GetSettingByName(MagicStrings.SceneEvaluationViewed);
+        var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
+        var isAds = z.ToBoolean();
+        if (x.ToBoolean() == false)
+        {
+#if RELEASE
+            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));      
+#endif     
+            x.Value = MagicStrings.True_string;
+#if RELEASE
+            ss.UpdateSetting(xx);
+#endif
+        }
 
+    }
     public SceneEvaluation()
     {
 
         InitializeComponent();
         BindingContext = this;
     }
-    private void EvaluateSceneBtn_Clicked(object sender, EventArgs e)
-
+    private async void EvaluateSceneBtn_Clicked(object sender, EventArgs e)
     {
-        PermissionStatus status = Permissions.RequestAsync<Permissions.Camera>().Result;
-        Task.Run(async () =>
-        {
-            Dispatcher.Dispatch(() =>
-            {
-                processing.IsVisible = true;
-                processing.IsRunning = true;
-            });
-            SceneEvaluationViewModel viewModel = new SceneEvaluationViewModel();
-            viewModel.EvaluateScene(sender);
-            Item = viewModel;
-            Dispatcher.Dispatch(() =>
-            {
-                processing.IsVisible = false;
-                processing.IsRunning = false;
-            });
-        });
+        SceneEvaluationViewModel viewModel = new SceneEvaluationViewModel();
+        
+        await Task.Run(async () =>
+         {
+             Dispatcher.Dispatch(() =>
+             {
+                 processing.IsVisible = true;
+                 processing.IsRunning = true;
+             });
+             await viewModel.EvaluateScene(sender);
 
+              Dispatcher.Dispatch(() =>
+              {
+                  processing.IsVisible = false;
+                  processing.IsRunning = false;
+              });
+              
+          }); 
+             Item = viewModel;
+       
     }
 }

@@ -67,6 +67,7 @@ namespace Location.Photography.Shared.ViewModels
                 return (_rotationAngle + 360) % 360;
 
             }
+            set { _rotationAngle = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RotationAngle))); }
         }
         private double _inclination;
         public double Inclination
@@ -85,8 +86,8 @@ namespace Location.Photography.Shared.ViewModels
             }
             if (!Accelerometer.IsMonitoring)
             {
-                Accelerometer.ReadingChanged += Accelerometer_ReadingChanged;
-                Accelerometer.Start(SensorSpeed.Default);
+                //Accelerometer.ReadingChanged += Accelerometer_ReadingChanged;
+                //Accelerometer.Start(SensorSpeed.Default);
             }
         }
 
@@ -115,7 +116,7 @@ namespace Location.Photography.Shared.ViewModels
             if (angleDiff > 180) angleDiff -= 360;
 
             // Apply rotation (horizontal azimuth)
-           _rotationAngle = Convert.ToDouble(angleDiff);
+           RotationAngle = Convert.ToDouble(Math.Abs(angleDiff));
 
         }
 
@@ -123,9 +124,9 @@ namespace Location.Photography.Shared.ViewModels
         {
             TimeZoneInfo cst = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
 
-            DateTime dt = this.SelectedDateTime;
+            DateTime dt = new DateTime(SelectedDate.Year, SelectedDate.Month, SelectedDate.Day, SelectedTime.Hour, SelectedTime.Minute, 0);
             SolarTimes solarTimes = new SolarTimes(dt, this._latitude, this._longitude);
-            _rotationAngle = Math.Round((double)solarTimes.SolarAzimuth, 0);
+            RotationAngle = Math.Round((double)solarTimes.SolarAzimuth, 0);
             _inclination = Math.Round ((double)solarTimes.SolarElevation, 0);
 
         }

@@ -28,41 +28,60 @@ public partial class LightMeter : ContentPage
     {
         _activate = true;
         base.OnNavigatedTo(args);
-        foreach (var camera in new CameraView().Cameras)
+        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
+        base.OnNavigatedTo(args);
+        var xx = ss.GetSettingByName(MagicStrings.SunCalculatorViewed);
+        var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
+        var isAds = z.ToBoolean();
+        if (xx.ToBoolean() == false)
         {
-            if (camera.Position == CameraPosition.Back)
+#if RELEASE
+            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));      
+#endif
+            xx.Value = MagicStrings.True_string;
+#if RELEASE
+            ss.UpdateSetting(xx);
+#endif
+        }
+        else
+        {
+
+
+            foreach (var camera in new CameraView().Cameras)
             {
-                cameraView.Camera = camera;
+                if (camera.Position == CameraPosition.Back)
+                {
+                    cameraView.Camera = camera;
+                }
+            }
+            var x = cameraView.StartCameraAsync().Result;
+            cameraView.TakeAutoSnapShot = true;
+            while (_activate == true)
+            {
+                var path = Path.Combine(FileSystem.CacheDirectory, Guid.NewGuid().ToString() + ".png");
+                var y = cameraView.SaveSnapShot(Camera.MAUI.ImageFormat.PNG, path).Result;
+
+                SkiaSharp.SKBitmap bmp = SKBitmap.Decode(path);
+
+                var exist = File.Exists(path);
+
+                if (y != null && exist)
+                {
+                    _brightness = CalculateBrightness(bmp.Bytes, bmp.Height, bmp.Width);
+                    _ev = ConvertToEV(_brightness);
+                    _exposure = CompareExposure(_ev, iso, shutterSpeed, aperture);
+                }
+
+
+                try
+                {
+                    File.Delete(path);
+                }
+                catch { }
+
+                Thread.Sleep(Convert.ToInt32(ss.GetSettingByName(MagicStrings.CameraRefresh).Value));
             }
         }
-        var x = cameraView.StartCameraAsync().Result;
-        cameraView.TakeAutoSnapShot = true;
-        while (_activate == true)
-        {
-            var path = Path.Combine(FileSystem.CacheDirectory, Guid.NewGuid().ToString() + ".png");
-            var y = cameraView.SaveSnapShot(Camera.MAUI.ImageFormat.PNG, path).Result;
-
-            SkiaSharp.SKBitmap bmp = SKBitmap.Decode(path);
-
-            var exist = File.Exists(path);
-
-            if (y != null && exist)
-            {
-                _brightness = CalculateBrightness(bmp.Bytes, bmp.Height, bmp.Width);
-                _ev = ConvertToEV(_brightness);
-                _exposure = CompareExposure(_ev, iso, shutterSpeed, aperture);
-            }
-
-
-            try
-            {
-                File.Delete(path);
-            }
-            catch { }
-
-            Thread.Sleep(Convert.ToInt32(ss.GetSettingByName(MagicStrings.CameraRefresh).Value));
-        }
-        ;
     }
 
 

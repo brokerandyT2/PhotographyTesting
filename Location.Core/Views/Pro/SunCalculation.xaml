@@ -39,21 +39,21 @@
         </Grid.ColumnDefinitions>
         <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="2" Grid.ColumnSpan="4"/>
         <Label x:Name="PickerLabel" Text="{x:Static strings:AppResources.chooseyourlocation}" Padding="0,20,0,0" TextColor="#CC0000" FontSize="Medium" Grid.Row="0" Grid.ColumnSpan="4"/>
-        <Picker x:Name="LocationsPicker" SelectedIndexChanged="LocationsPicker_SelectedIndexChanged"  ItemsSource="{Binding  }" ItemDisplayBinding="{Binding Title}" Grid.Row="1" Grid.ColumnSpan="4"/>
+        <Picker x:Name="LocationsPicker" SelectedIndexChanged="LocationsPicker_SelectedIndexChanged"  ItemsSource="{Binding Locations}" ItemDisplayBinding="{Binding Title}" Grid.Row="1" Grid.ColumnSpan="4"/>
 
-        <Label Text="{Binding Date}" TextColor="#CC0000" FontSize="Medium" Grid.Row="3" Grid.ColumnSpan="4" />
+
         <DatePicker x:Name="date" Grid.Row="4" Grid.ColumnSpan="4" DateSelected="date_DateSelected"  Format="{Binding DateFormat}"  />
 
         <!-- TODO: Fix images-->
         <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="6" Grid.ColumnSpan="4"/>
         <Image Source="Resources/AppIcon/sunrise.png" Grid.Row="7" Grid.Column="0" />
         <Label Text="{x:Static strings:AppResources.AstronomicalDawn}" TextColor="#CC0000" FontSize="Small" HorizontalOptions="Start" Grid.Row="7" Grid.Column="1" />
-        <Label FormattedText="{Binding AstronomicalDawnFormatted}" HorizontalOptions="End" Grid.Row="7" Grid.Column="2" />
+        <Label Text="{Binding AstronomicalDawnFormatted}" HorizontalOptions="End" Grid.Row="7" Grid.Column="2" />
 
         <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="8" Grid.ColumnSpan="4"/>
         <Image Source="Resources/AppIcon/sunrise.png" Grid.Row="9" Grid.Column="0" />
         <Label Text="{x:Static strings:AppResources.Sunrise}" TextColor="#CC0000" FontSize="Small" HorizontalOptions="Start" Grid.Row="9" Grid.Column="1" />
-        <Label x:Name="sunrisedisplay" FormattedText="{Binding SunRiseFormatted}" HorizontalOptions="End" Grid.Row="9" Grid.Column="2" />
+        <Label x:Name="sunrisedisplay" Text="{Binding SunRiseFormatted}" HorizontalOptions="End" Grid.Row="9" Grid.Column="2" />
 
         <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="10" Grid.ColumnSpan="4"/>
         <Image Source="Resources/AppIcon/goldenhour.png" Grid.Row="11" Grid.Column="0" />

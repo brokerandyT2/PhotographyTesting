@@ -70,12 +70,23 @@ public partial class ExposureCalculator : ContentPage
     {
         base.OnNavigatedTo(args);
 
-        if (_adSupport)
-        {
-            Advertising a = new Advertising();
+        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
 
-            //display ad
-            //set seen??
+        var x = ss.GetSettingByName(MagicStrings.ExposureCalcViewed);
+        var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
+        var isAds = z.ToBoolean();
+
+
+        if (x.ToBoolean() == false)
+        {
+#if RELEASE
+            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));      
+#endif
+            x.Value = MagicStrings.True_string;
+#if RELEASE
+            ss.UpdateSetting(x);
+        
+#endif
         }
 
 
@@ -87,9 +98,9 @@ public partial class ExposureCalculator : ContentPage
     }
     private void calculate_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
-        if(_skipCalculations)
-        {  return; }
-            Microsoft.Maui.Controls.RadioButton rb = (Microsoft.Maui.Controls.RadioButton)sender;
+        if (_skipCalculations)
+        { return; }
+        Microsoft.Maui.Controls.RadioButton rb = (Microsoft.Maui.Controls.RadioButton)sender;
         var x = rb.Content;
         lps.ViewModels.ExposureCalculator ec = (lps.ViewModels.ExposureCalculator)BindingContext;
         if (rb.IsChecked == true)
@@ -133,9 +144,9 @@ public partial class ExposureCalculator : ContentPage
         if (Convert.ToDouble(x.Value) == (double)1)
         {
             y.FullHalfThirds = lps.ViewModels.ExposureCalculator.Divisions.Full;
-           // exposurefull.IsChecked = true;
+            // exposurefull.IsChecked = true;
             //exposurehalfstop.IsChecked = false;
-           // exposurethirdstop.IsChecked = false;
+            // exposurethirdstop.IsChecked = false;
         }
         else if (Convert.ToDouble(x.Value) == .5)
         {
