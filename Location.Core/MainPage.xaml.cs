@@ -103,7 +103,7 @@ namespace Location.Core
                     {
 #if PHOTOGRAPHY
                         this.Children.Add(new Views.Premium.ExposureCalculator());
-                        this.Children.Add(new Views.Premium.LightMeter());
+                        //this.Children.Add(new Views.Premium.LightMeter());
                         this.Children.Add(new Views.Premium.SunLocation());
 #endif
                     }

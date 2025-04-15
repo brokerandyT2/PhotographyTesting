@@ -1,3 +1,5 @@
+using Location.Core.Helpers;
+using Location.Photography.Business.DataAccess;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
@@ -8,11 +10,12 @@ namespace Location.Core.Views;
 public partial class AddLocation : ContentPage
 {
     LocationsService ls = new LocationsService();
-    SettingsService ss = new SettingsService();
+    Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
     public AddLocation()
     {
         InitializeComponent();
         CloseModal.IsVisible = CloseModal.IsEnabled = false;
+
     }
     public AddLocation(ILocationViewModel viewModel)
     {
@@ -42,13 +45,8 @@ public partial class AddLocation : ContentPage
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
-        var x = ss.GetSettingByName(MagicStrings.AddLocationViewed);
-        if (x.ToBoolean() == false)
-        {
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
-            x.Value = MagicStrings.True_string;
-            ss.UpdateSetting(x);
-        }
+        PageHelpers.CheckVisit(MagicStrings.SunCalculatorViewed, PageEnums.SunCalculations, ss, Navigation);
+
 
     }
     private async void AddPhoto_Pressed(object sender, EventArgs e)

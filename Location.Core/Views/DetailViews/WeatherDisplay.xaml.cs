@@ -1,3 +1,5 @@
+using Location.Core.Helpers;
+using Location.Photography.Business.DataAccess;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
@@ -7,7 +9,7 @@ namespace Location.Core.Views.DetailViews;
 public partial class WeatherDisplay : ContentPage
 {
     WeatherService ws = new WeatherService();
-    SettingsService ss = new SettingsService();
+    Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
     public WeatherDisplay()
     {
         InitializeComponent();
@@ -28,13 +30,6 @@ public partial class WeatherDisplay : ContentPage
         var x = ss.GetSettingByName(MagicStrings.WeatherDisplayViewed);
         var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
         var isAds = z.ToBoolean();
-        if (x.ToBoolean() == false)
-        {
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
-            x.Value = MagicStrings.True_string;
-            ss.UpdateSetting(x);
-
-        }
-
+        PageHelpers.CheckVisit(MagicStrings.WeatherDisplayViewed, PageEnums.WeatherDisplay, ss, Navigation);
     }
 }

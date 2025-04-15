@@ -1,21 +1,26 @@
 using Location.Photography.Business.DataAccess;
 using Location.Photography.Business.SunCalculator.Interface;
 using lpsv = Location.Photography.Shared.ViewModels;
+using lcbd = Locations.Core.Business.DataAccess;
 using Locations.Core.Shared.ViewModels;
 using Location.Photography.Shared.ViewModels;
 using Locations.Core.Shared.DTO;
 using Locations.Core.Shared;
+using Location.Core.Helpers;
 namespace Location.Core.Views.Pro;
 
 public partial class SunCalculations : ContentPage
 {
-    SettingsService settingsService = new SettingsService();
+    lcbd.SettingsService settingsService = new lcbd.SettingsService();
     LocationService ls = new LocationService();
     public SunCalculations()
 	{
 		InitializeComponent();
         DoTheNeedful();
-        //LocationsPicker.SelectedIndex = 0;
+        LocationsPicker.SelectedIndex = 0;
+        
+        var page = settingsService.GetSettingByName(MagicStrings.SunCalculatorViewed);
+
     }
     private void DoTheNeedful()
     {
@@ -26,8 +31,8 @@ public partial class SunCalculations : ContentPage
         x.DateFormat = settingsService.GetSettingByName(Locations.Core.Shared.MagicStrings.DateFormat).Value;
         x.TimeFormat = settingsService.GetSettingByName(Locations.Core.Shared.MagicStrings.TimeFormat).Value;
         x.Locations = ls.GetLocations();
-       // x.Date = date.Date = DateTime.Now;
-       // date.Format = x.DateFormat;
+        x.Date = date.Date = DateTime.Now;
+        date.Format = x.DateFormat;
 
         x.Latitude = x.Locations[0].Lattitude;
         x.Longitude = x.Locations[0].Longitude;
@@ -55,17 +60,8 @@ public partial class SunCalculations : ContentPage
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
         base.OnNavigatedTo(args);
-        var x = ss.GetSettingByName(MagicStrings.SunCalculatorViewed);
-        var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
-        var isAds = z.ToBoolean();
-        if (x.ToBoolean() == false)
-        {
-            //Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
-            x.Value = MagicStrings.True_string;
-            ss.UpdateSetting(x);
-        }
-
+        PageHelpers.CheckVisit(MagicStrings.SunCalculatorViewed, PageEnums.SunCalculations, settingsService, Navigation);
+        PageHelpers.ShowAD(settingsService.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
     }
 }

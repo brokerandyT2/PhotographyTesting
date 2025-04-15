@@ -1,3 +1,4 @@
+using Location.Core.Helpers;
 using Location.Photography.Shared.ViewModels;
 using Locations.Core.Shared;
 using Syncfusion.Maui.Toolkit.Carousel;
@@ -22,12 +23,9 @@ public partial class SceneEvaluation : ContentPage
         var x = ss.GetSettingByName(MagicStrings.SceneEvaluationViewed);
         var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
         var isAds = z.ToBoolean();
-        if (x.ToBoolean() == false)
-        {
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
-            x.Value = MagicStrings.True_string;
-            ss.UpdateSetting(x);
-        }
+
+        PageHelpers.CheckVisit(MagicStrings.SceneEvaluationViewed, PageEnums.SceneEvaluation, ss, Navigation);
+        PageHelpers.ShowAD(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
 
     }
     public SceneEvaluation()

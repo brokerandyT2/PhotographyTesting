@@ -120,6 +120,9 @@
   <data name="AccessIsFreeByWatchingAds" xml:space="preserve">
     <value>Free Access by Watching Ads</value>
   </data>
+  <data name="AddLocationTutorial" xml:space="preserve">
+    <value>Add Location Tutorial</value>
+  </data>
   <data name="AddPhoto" xml:space="preserve">
     <value>Add Photo</value>
   </data>
@@ -168,6 +171,9 @@
   <data name="EvaluateScene" xml:space="preserve">
     <value>Evaluate Scene</value>
   </data>
+  <data name="ExposureCalculatorTutorial" xml:space="preserve">
+    <value>Exposure Calculator Tutorial</value>
+  </data>
   <data name="exposureincrements" xml:space="preserve">
     <value>Exposure Increments: </value>
   </data>
@@ -213,6 +219,12 @@
   <data name="Latitude" xml:space="preserve">
     <value>Latitude:</value>
   </data>
+  <data name="LightMeterTutorial" xml:space="preserve">
+    <value>Light Meter Tutorial</value>
+  </data>
+  <data name="ListLocationsTutorial" xml:space="preserve">
+    <value>List Locations Tutorial</value>
+  </data>
   <data name="Longitude" xml:space="preserve">
     <value>Longitude:</value>
   </data>
@@ -237,11 +249,17 @@
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="SceneEvaluationTutorial" xml:space="preserve">
+    <value>Scene Evaluation Tutorial</value>
+  </data>
   <data name="selectonetiptype" xml:space="preserve">
     <value>Please Select a Photo Tip Type: </value>
   </data>
   <data name="SendToExposureCalculator" xml:space="preserve">
     <value>Send To Exposure Calculator</value>
+  </data>
+  <data name="SettingsTutorial" xml:space="preserve">
+    <value>Settings Tutorial</value>
   </data>
   <data name="shutter" xml:space="preserve">
     <value>Shutter</value>
@@ -263,6 +281,12 @@
   </data>
   <data name="SubscriptionType" xml:space="preserve">
     <value>Type of Subscription:</value>
+  </data>
+  <data name="SunCalculationsTutorial" xml:space="preserve">
+    <value>Sun Calculations Tutorial</value>
+  </data>
+  <data name="SunLocationTutorial" xml:space="preserve">
+    <value>Sun Location Tutorial</value>
   </data>
   <data name="Sunrise" xml:space="preserve">
     <value>Sun Rise: </value>
@@ -296,6 +320,9 @@
   </data>
   <data name="TwentyFourHourClocks" xml:space="preserve">
     <value>24 Hour Clocks</value>
+  </data>
+  <data name="WeatherDisplayTutorial" xml:space="preserve">
+    <value>Weather Display Tutorial</value>
   </data>
   <data name="Wind" xml:space="preserve">
     <value>Wind Direction</value>

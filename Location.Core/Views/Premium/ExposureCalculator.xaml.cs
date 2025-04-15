@@ -1,4 +1,5 @@
 
+using Location.Core.Helpers;
 using Locations.Core.Business.Advertising;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
@@ -72,17 +73,8 @@ public partial class ExposureCalculator : ContentPage
 
         Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
 
-        var x = ss.GetSettingByName(MagicStrings.ExposureCalcViewed);
-        var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
-        var isAds = z.ToBoolean();
-
-
-        if (x.ToBoolean() == false)
-        {
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
-            x.Value = MagicStrings.True_string;
-            ss.UpdateSetting(x);
-        }
+        PageHelpers.CheckVisit(MagicStrings.ExposureCalculator, PageEnums.ExposureCalculator, ss, Navigation);
+        PageHelpers.ShowAD(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
 
 
     }

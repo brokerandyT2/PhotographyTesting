@@ -6,6 +6,7 @@ using static Microsoft.Maui.ApplicationModel.Permissions;
 using System.ComponentModel;
 using Syncfusion.Maui.Toolkit.Internals;
 using System.IO;
+using Location.Core.Helpers;
 namespace Location.Core.Views.Premium;
 
 public partial class LightMeter : ContentPage
@@ -27,6 +28,8 @@ public partial class LightMeter : ContentPage
     {
         _activate = false;
         base.OnNavigatedFrom(args);
+
+
         var y = cameraView.StopCameraAsync().Result;
         BeginCapture(false);
     }
@@ -36,22 +39,12 @@ public partial class LightMeter : ContentPage
         base.OnNavigatedTo(args);
         Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
 
-        var xx = ss.GetSettingByName(MagicStrings.SunCalculatorViewed);
-        var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
-        var isAds = z.ToBoolean();
 
-        if (xx.ToBoolean() == false)
-        {
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
-            xx.Value = MagicStrings.True_string;
-            ss.UpdateSetting(xx);
+        var isAds = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean();
 
-        }
-        else
-        {
+        PageHelpers.CheckVisit(MagicStrings.LightMeterViewed, PageEnums.LightMeter, ss, Navigation);
 
-        }
-
+        PageHelpers.ShowAD(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
         //BeginCapture(_activate);
     }
 

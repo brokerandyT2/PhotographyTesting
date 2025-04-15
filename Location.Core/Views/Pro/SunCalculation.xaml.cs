@@ -5,6 +5,7 @@ using Locations.Core.Shared.ViewModels;
 using Location.Photography.Shared.ViewModels;
 using Locations.Core.Shared.DTO;
 using Locations.Core.Shared;
+using Location.Core.Helpers;
 
 namespace Location.Core.Views.Pro;
 
@@ -69,12 +70,9 @@ public partial class SunCalculation : ContentPage
         var x = ss.GetSettingByName(MagicStrings.SunCalculatorViewed);
         var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
         var isAds = z.ToBoolean();
-        if (x.ToBoolean() == false)
-        {
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
-            x.Value = MagicStrings.True_string;
-            ss.UpdateSetting(x);
-        }
+
+        PageHelpers.CheckVisit(MagicStrings.SunCalculatorViewed, PageEnums.SunCalculations, ss, Navigation);
+        PageHelpers.ShowAD(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
 
     }
 }

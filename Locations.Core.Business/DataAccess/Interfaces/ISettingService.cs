@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Business.DataAccess.Interfaces
 {
-    interface ISettingService<T>: IBaseService<T> where T : class, new()
+    public interface ISettingService<T>: IBaseService<T> where T : class, new()
     {
         public SettingViewModel GetSettingByName(string name);
         public SettingsViewModel GetAllSettings();

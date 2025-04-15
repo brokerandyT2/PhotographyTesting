@@ -70,6 +70,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add Location Tutorial.
+        /// </summary>
+        internal static string AddLocationTutorial {
+            get {
+                return ResourceManager.GetString("AddLocationTutorial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add Photo.
         /// </summary>
         internal static string AddPhoto {
@@ -214,6 +223,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exposure Calculator Tutorial.
+        /// </summary>
+        internal static string ExposureCalculatorTutorial {
+            get {
+                return ResourceManager.GetString("ExposureCalculatorTutorial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Exposure Increments: .
         /// </summary>
         internal static string exposureincrements {
@@ -349,6 +367,24 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Light Meter Tutorial.
+        /// </summary>
+        internal static string LightMeterTutorial {
+            get {
+                return ResourceManager.GetString("LightMeterTutorial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List Locations Tutorial.
+        /// </summary>
+        internal static string ListLocationsTutorial {
+            get {
+                return ResourceManager.GetString("ListLocationsTutorial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Longitude:.
         /// </summary>
         internal static string Longitude {
@@ -421,6 +457,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Scene Evaluation Tutorial.
+        /// </summary>
+        internal static string SceneEvaluationTutorial {
+            get {
+                return ResourceManager.GetString("SceneEvaluationTutorial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please Select a Photo Tip Type: .
         /// </summary>
         internal static string selectonetiptype {
@@ -435,6 +480,15 @@ namespace Location.Core.Resources {
         internal static string SendToExposureCalculator {
             get {
                 return ResourceManager.GetString("SendToExposureCalculator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings Tutorial.
+        /// </summary>
+        internal static string SettingsTutorial {
+            get {
+                return ResourceManager.GetString("SettingsTutorial", resourceCulture);
             }
         }
         
@@ -498,6 +552,24 @@ namespace Location.Core.Resources {
         internal static string SubscriptionType {
             get {
                 return ResourceManager.GetString("SubscriptionType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sun Calculations Tutorial.
+        /// </summary>
+        internal static string SunCalculationsTutorial {
+            get {
+                return ResourceManager.GetString("SunCalculationsTutorial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sun Location Tutorial.
+        /// </summary>
+        internal static string SunLocationTutorial {
+            get {
+                return ResourceManager.GetString("SunLocationTutorial", resourceCulture);
             }
         }
         
@@ -597,6 +669,15 @@ namespace Location.Core.Resources {
         internal static string TwentyFourHourClocks {
             get {
                 return ResourceManager.GetString("TwentyFourHourClocks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weather Display Tutorial.
+        /// </summary>
+        internal static string WeatherDisplayTutorial {
+            get {
+                return ResourceManager.GetString("WeatherDisplayTutorial", resourceCulture);
             }
         }
         

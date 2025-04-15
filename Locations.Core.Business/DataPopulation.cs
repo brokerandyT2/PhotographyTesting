@@ -108,13 +108,15 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.FreePremiumAdSupported, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.TemperatureType, Value = MagicStrings.Fahrenheit });
 
+
+
 #if RELEASE
 #if ANDY
             list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
 #else
             list.Add(new() { Name = MagicStrings.Email, Value = "" });
 #endif
-
+            list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.TipsViewed, Value = MagicStrings.False_string });
@@ -126,6 +128,7 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
 #else
+            list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
             list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.True_string });

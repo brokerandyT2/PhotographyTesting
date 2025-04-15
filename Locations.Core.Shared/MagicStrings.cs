@@ -63,6 +63,8 @@ namespace Locations.Core.Shared
         public static string AddLocationViewed = "addlocationviewed";
 
         public static string WeatherDisplayViewed = "weatherdisplayviewed";
+
+        public static string SettingsViewed = "settingsviewed";
         // public static string U
 #endif
 #if FISHING

@@ -4,6 +4,8 @@ using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Enums;
 using Location.Photography.Shared.ViewModels;
+using Location.Photography.Business.DataAccess;
+using Location.Core.Helpers;
 
 namespace Location.Core.Views.Premium;
 
@@ -25,20 +27,16 @@ public partial class SunLocation : ContentPage
         base.OnNavigatedTo(args);
         var x = ss.GetSettingByName(MagicStrings.SunLocationViewed);
         var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
-        var isAds = z.ToBoolean();
-        if (x.ToBoolean() == false)
-        {
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
-            x.Value = MagicStrings.True_string;
-            ss.UpdateSetting(x);
-        }
+
+        PageHelpers.CheckVisit(MagicStrings.SunLocationViewed, PageEnums.SunLocation, ss, Navigation);
+        PageHelpers.ShowAD(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
 
     }
     public SunLocation()
     {
         InitializeComponent();
 
-        var y = new SettingsService();
+        var y = new Locations.Core.Business.DataAccess.SettingsService();
         var z = new LocationsService();
         var q = new vm.SunLocation();
         var hemi = y.GetSettingByName(MagicStrings.Hemisphere).Value;

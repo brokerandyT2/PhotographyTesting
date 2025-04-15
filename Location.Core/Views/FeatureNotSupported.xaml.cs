@@ -1,3 +1,4 @@
+using Location.Core.Helpers;
 using Location.Core.Resources;
 using Location.Photography.Business.DataAccess;
 using Locations.Core.Shared;
@@ -10,8 +11,9 @@ public partial class FeatureNotSupported : ContentPage
 	public FeatureNotSupported()
 	{
 		InitializeComponent();
+		
 	}
-
+	 
     public FeatureNotSupported(string page)
     {
 		var subscription = ss.GetSettingByName(MagicStrings.SubscriptionType).Value;
