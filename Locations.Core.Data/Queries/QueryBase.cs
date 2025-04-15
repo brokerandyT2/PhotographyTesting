@@ -57,7 +57,6 @@ namespace  Locations.Core.Data.Queries
             SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(Constants.FullDatabasePath, Constants.Flags);
             
             conn.Insert(item);
-            //var x = dataB.InsertOrReplaceAsync(item).Result;
 
             return (T)Convert.ChangeType(item, typeof(T));
         }

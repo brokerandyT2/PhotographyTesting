@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using static Locations.Core.Shared.Enums.SubscriptionType;
 using Microsoft.Maui.Platform;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel.Design;
 
 namespace Locations.Core.Business
 {
@@ -61,9 +62,9 @@ namespace Locations.Core.Business
             }
             var loc = new LocationViewModel() { Lattitude = 39.7685, Longitude = -86.1580, Title = "Soldiers and Sailors Monument", Description = "Located in the heart of downtown in Monument Circle, it was originally designed to honor Indiana’s Civil War veterans. It now commemorates the valor of Hoosier veterans who served in all wars prior to WWI, including the Revolutionary War, the War of 1812, the Mexican War, the Civil War, the Frontier Wars and the Spanish-American War. One of the most popular parts of the monument is the observation deck with a 360-degree view of the city skyline from 275 feet up.", Timestamp = DateTime.Now.AddDays(-9), Photo = "Resources/Images/s_and_sm_new.jpg" };
             var loc2 = new LocationViewModel() { Title = "The Bean", Description = "What is The Bean?\r\nThe Bean is a work of public art in the heart of Chicago. The sculpture, which is officially titled Cloud Gate, is one of the world’s largest permanent outdoor art installations. The monumental work was unveiled in 2004 and quickly became of the Chicago’s most iconic sights.", Lattitude = 41.8827, Longitude = -87.6233, Timestamp = DateTime.Now.AddDays(-2), Photo = "Resources/Images/chicagobean.jpg" };
-            var loc3 = new LocationViewModel() { Title="Golden Gate Bridge", Description = "The Golden Gate Bridge is a suspension bridge spanning the Golden Gate strait, the one-mile-wide (1.6 km) channel between San Francisco Bay and the Pacific Ocean. The strait is the entrance to San Francisco Bay from the Pacific Ocean. The bridge connects the city of San Francisco, California, to Marin County, carrying both U.S. Route 101 and California State Route 1 across the strait.", Lattitude = 37.8199, Longitude = -122.4783, Timestamp = DateTime.Now.AddDays(-6), Photo = "Resources/Images/ggbridge.jpg" };
-            
-            var loc4 = new LocationViewModel() { Title="Gateway Arch", Description = "The Gateway Arch is a 630-foot (192 m) monument in St. Louis, Missouri, that commemorates Thomas Jefferson and the westward expansion of the United States. The arch is the centerpiece of the Gateway Arch National Park and is the tallest arch in the world.", Lattitude = 38.6247, Longitude = -90.1848, Timestamp = DateTime.Now.AddDays(-35), Photo = "Resources/Images/stlarch.jpg" };
+            var loc3 = new LocationViewModel() { Title = "Golden Gate Bridge", Description = "The Golden Gate Bridge is a suspension bridge spanning the Golden Gate strait, the one-mile-wide (1.6 km) channel between San Francisco Bay and the Pacific Ocean. The strait is the entrance to San Francisco Bay from the Pacific Ocean. The bridge connects the city of San Francisco, California, to Marin County, carrying both U.S. Route 101 and California State Route 1 across the strait.", Lattitude = 37.8199, Longitude = -122.4783, Timestamp = DateTime.Now.AddDays(-6), Photo = "Resources/Images/ggbridge.jpg" };
+
+            var loc4 = new LocationViewModel() { Title = "Gateway Arch", Description = "The Gateway Arch is a 630-foot (192 m) monument in St. Louis, Missouri, that commemorates Thomas Jefferson and the westward expansion of the United States. The arch is the centerpiece of the Gateway Arch National Park and is the tallest arch in the world.", Lattitude = 38.6247, Longitude = -90.1848, Timestamp = DateTime.Now.AddDays(-35), Photo = "Resources/Images/stlarch.jpg" };
             LocationsService ls = new LocationsService();
 
             var a = ls.SaveSettingWithObjectReturn(loc);
@@ -75,24 +76,26 @@ namespace Locations.Core.Business
             SettingsService ss = new SettingsService();
 #if DEBUG
 
-            SettingViewModel y = new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() };
+            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
 #elif RELEASE
-            SettingViewModel y = new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() };
-#endif
+#if ANDY
+            SettingViewModel y = new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() };
             var q = ss.SaveSettingWithObjectReturn(y);
+
+#else
+            SettingViewModel y = new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() };
+            var q = ss.SaveSettingWithObjectReturn(y);
+#endif
+#endif
+
             list.Add(new() { Name = MagicStrings.Hemisphere, Value = Hemisphere.HemisphereChoices.North.Name() });
             list.Add(new() { Name = MagicStrings.FirstName, Value = "" });
             list.Add(new() { Name = MagicStrings.LastName, Value = "" });
-            list.Add(new() { Name = MagicStrings.Email, Value = "" });
+
             list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(-1).ToString() });
-            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
+
             list.Add(new() { Name = MagicStrings.UniqueID, Value = Guid.NewGuid().ToString() });
-            list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.TipsViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.ExposureCalcViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.LightMeterViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.SceneEvaluationViewed, Value = MagicStrings.False_string });
+
             list.Add(new() { Name = MagicStrings.LastBulkWeatherUpdate, Value = DateTime.Now.AddDays(-2).ToString() });
             list.Add(new() { Name = MagicStrings.DefaultLanguage, Value = "en-US" });
             list.Add(new() { Name = MagicStrings.WindDirection, Value = MagicStrings.TowardsWind });
@@ -104,17 +107,45 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.Weather_API_Key, Value = "aa24f449cced50c0491032b2f955d610" });
             list.Add(new() { Name = MagicStrings.FreePremiumAdSupported, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.TemperatureType, Value = MagicStrings.Fahrenheit });
-            list.Add(new() { Name = MagicStrings.AddLocationViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name= MagicStrings.WeatherDisplayViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.False_string });
 
-            //list.Add(new() { Name=MagicStrings.})
+#if RELEASE
+#if ANDY
+            list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
+#else
+            list.Add(new() { Name = MagicStrings.Email, Value = "" });
+#endif
+
+            list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Name = MagicStrings.TipsViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Name = MagicStrings.ExposureCalcViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Name = MagicStrings.LightMeterViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Name = MagicStrings.SceneEvaluationViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Name = MagicStrings.AddLocationViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Name = MagicStrings.WeatherDisplayViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
+#else
+            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
+            list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Name = MagicStrings.TipsViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Name = MagicStrings.ExposureCalcViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Name = MagicStrings.LightMeterViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Name = MagicStrings.SceneEvaluationViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Name = MagicStrings.AddLocationViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Name= MagicStrings.WeatherDisplayViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
+#endif
+
+
 
 
 
             foreach (var x in list)
             {
-               
+
                 var z = ss.SaveSettingWithObjectReturn(x);
             }
 

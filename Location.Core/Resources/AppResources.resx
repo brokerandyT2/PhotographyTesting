@@ -171,6 +171,9 @@
   <data name="exposureincrements" xml:space="preserve">
     <value>Exposure Increments: </value>
   </data>
+  <data name="ExposurePaid" xml:space="preserve">
+    <value>Exposure Calculator is a paid feature.  You may upgrade your {0} plan to the paid tier of {1}.  Or you may watch an adverstisement.</value>
+  </data>
   <data name="fixvalue" xml:space="preserve">
     <value>Fixed Value:</value>
   </data>

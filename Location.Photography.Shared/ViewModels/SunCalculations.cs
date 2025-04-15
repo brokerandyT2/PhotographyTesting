@@ -56,6 +56,7 @@ namespace Location.Photography.Shared.ViewModels
         }
         public string AstronomicalDawnFormatted { get => _astronomicalDawn.ToString(TimeFormat); }
         public string AstronomicalDuskFormatted { get => _astronomicalDusk.ToString(TimeFormat); }
+        public string GoldenHourForm { get => _sunset.AddHours(-1).ToString(TimeFormat); }
         public DateTime AstronomicalDawn
         {
             get => _astronomicalDawn; set
@@ -92,6 +93,8 @@ namespace Location.Photography.Shared.ViewModels
                 _sunrise = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunrise)));
                 PropertyUpdater(nameof(SunRiseFormatted));
+                PropertyUpdater(nameof(GoldenHourMorning));
+                PropertyUpdater(nameof(GoldenHourMorningFormatted));
             }
         }
         public DateTime Sunset
@@ -101,6 +104,9 @@ namespace Location.Photography.Shared.ViewModels
                 _sunset = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Sunset)));
                 PropertyUpdater(nameof(SunSetFormatted));
+                PropertyUpdater(nameof(GoldenHourEvening));
+                PropertyUpdater(nameof(GoldenHourEveningFormatted));
+
             }
         }
 

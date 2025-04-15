@@ -4,14 +4,19 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;Release For Andy</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
+    <DefineConstants>$(DefineConstants);PHOTOGRAPHY;ANDY</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release For Andy|AnyCPU'">
+    <DefineConstants>$(DefineConstants);PHOTOGRAPHY;ANDY</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

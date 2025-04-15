@@ -5,44 +5,35 @@ using Locations.Core.Shared.ViewModels;
 using Location.Photography.Shared.ViewModels;
 using Locations.Core.Shared.DTO;
 using Locations.Core.Shared;
-
 namespace Location.Core.Views.Pro;
 
-public partial class SunCalculation : ContentPage
+public partial class SunCalculations : ContentPage
 {
     SettingsService settingsService = new SettingsService();
     LocationService ls = new LocationService();
-    public SunCalculation()
+    public SunCalculations()
 	{
 		InitializeComponent();
         DoTheNeedful();
-        LocationsPicker.SelectedIndex = 0;
+        //LocationsPicker.SelectedIndex = 0;
     }
     private void DoTheNeedful()
     {
         DateTime no = DateTime.Now;
         var q = no.ToString("hh:mm tt");
-       
+
         var x = new lpsv.SunCalculations();
         x.DateFormat = settingsService.GetSettingByName(Locations.Core.Shared.MagicStrings.DateFormat).Value;
         x.TimeFormat = settingsService.GetSettingByName(Locations.Core.Shared.MagicStrings.TimeFormat).Value;
         x.Locations = ls.GetLocations();
-        x.Date= date.Date = DateTime.Now;
-        date.Format = x.DateFormat;
+       // x.Date = date.Date = DateTime.Now;
+       // date.Format = x.DateFormat;
 
         x.Latitude = x.Locations[0].Lattitude;
         x.Longitude = x.Locations[0].Longitude;
         x.CalculateSun();
         BindingContext = x;
-
-    
     }
-    public SunCalculation(ISunCalculator sunCalc)
-    {
-        //InitializeComponent();
-       // DoTheNeedful();
-    }
-
     private void LocationsPicker_SelectedIndexChanged(object sender, EventArgs e)
     {
         lpsv.SunCalculations x = ((lpsv.SunCalculations)BindingContext);
@@ -71,7 +62,7 @@ public partial class SunCalculation : ContentPage
         var isAds = z.ToBoolean();
         if (x.ToBoolean() == false)
         {
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
+            //Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
             x.Value = MagicStrings.True_string;
             ss.UpdateSetting(x);
         }

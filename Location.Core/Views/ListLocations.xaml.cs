@@ -44,13 +44,9 @@ public partial class ListLocations : ContentPage
         var x = ss.GetSettingByName(MagicStrings.LocationListViewed);
         if(x.ToBoolean() == false)
         {
-#if RELEASE
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));      
-#endif
+            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
             x.Value = MagicStrings.True_string;
-#if RELEASE
-            ss.UpdateSetting(xx);
-#endif
+            ss.UpdateSetting(x);
         }
 
     }

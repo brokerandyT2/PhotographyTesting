@@ -11,6 +11,7 @@ public partial class HoldingPage : TabbedPage
 	public HoldingPage()
 	{
 		InitializeComponent();
+		BindingContext = new DetailsViewModel();
 	}
 	public HoldingPage(IDetailsView locationViewModel)
 	{
@@ -20,11 +21,11 @@ public partial class HoldingPage : TabbedPage
 
     private void GetDetails()
     {
-       var x = (LocationViewModel)BindingContext;
-		this.Children.Add(new AddLocation(x.Id, true));
-		WeatherService ws = new WeatherService();
-		var y = ws.GetWeather(x.Lattitude, x.Longitude);
-        this.Children.Add(new WeatherDisplay(y));
+        var x = (LocationViewModel)BindingContext;
+		//Children.Add(new AddLocation(x.Id, true));
+		//WeatherService ws = new WeatherService();
+		//var y = ws.GetWeather(x.Lattitude, x.Longitude);
+        //Children.Add(new WeatherDisplay(y));
 		
     }
 

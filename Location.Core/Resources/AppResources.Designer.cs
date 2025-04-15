@@ -61,6 +61,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Free Access by Watching Ads.
+        /// </summary>
+        internal static string AccessIsFreeByWatchingAds {
+            get {
+                return ResourceManager.GetString("AccessIsFreeByWatchingAds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add Photo.
         /// </summary>
         internal static string AddPhoto {
@@ -84,6 +93,24 @@ namespace Location.Core.Resources {
         internal static string aperturenocolon {
             get {
                 return ResourceManager.GetString("aperturenocolon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Astronomical Dawn.
+        /// </summary>
+        internal static string AstronomicalDawn {
+            get {
+                return ResourceManager.GetString("AstronomicalDawn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Astronomical Dusk.
+        /// </summary>
+        internal static string AstronomicalDusk {
+            get {
+                return ResourceManager.GetString("AstronomicalDusk", resourceCulture);
             }
         }
         
@@ -192,6 +219,15 @@ namespace Location.Core.Resources {
         internal static string exposureincrements {
             get {
                 return ResourceManager.GetString("exposureincrements", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exposure Calculator is a paid feature.  You may upgrade your {0} plan to the paid tier of {1}.  Or you may watch an adverstisement..
+        /// </summary>
+        internal static string ExposurePaid {
+            get {
+                return ResourceManager.GetString("ExposurePaid", resourceCulture);
             }
         }
         
@@ -448,6 +484,24 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Subscription Expiration:.
+        /// </summary>
+        internal static string SubscriptionExpiration {
+            get {
+                return ResourceManager.GetString("SubscriptionExpiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type of Subscription:.
+        /// </summary>
+        internal static string SubscriptionType {
+            get {
+                return ResourceManager.GetString("SubscriptionType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sun Rise: .
         /// </summary>
         internal static string Sunrise {
@@ -475,11 +529,20 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Switch Clock.
+        ///   Looks up a localized string similar to Switch Clock Format.
         /// </summary>
         internal static string SwitchClockType {
             get {
                 return ResourceManager.GetString("SwitchClockType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Swich Date Format.
+        /// </summary>
+        internal static string SwitchDateFormat {
+            get {
+                return ResourceManager.GetString("SwitchDateFormat", resourceCulture);
             }
         }
         
@@ -553,39 +616,6 @@ namespace Location.Core.Resources {
             get {
                 return ResourceManager.GetString("WindSpeed", resourceCulture);
             }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Switch Date Format.
-        /// </summary>
-        internal static string SwitchDateFormat
-        {
-            get
-            {
-                return ResourceManager.GetString("SwitchDateFormat", resourceCulture);
-            }
-        }
-        /// <summary>
-        ///   Looks up a localized string similar to Subscription Type.
-        /// </summary>
-        internal static string SubscriptionType
-        {
-            get
-            {
-                return ResourceManager.GetString("SubscriptionType", resourceCulture);
-            }
-        }
-        internal static string SubscriptionExpiration
-        {
-            get => ResourceManager.GetString("SubscriptionExpiration", resourceCulture);
-        }
-        internal static string AccessIsFreeByWatchingAds
-        { get=> ResourceManager.GetString("AccessIsFreeByWatchingAds", resourceCulture);}
-        internal static string AstronomicalDawn
-        { get => ResourceManager.GetString("AstronomicalDawn", resourceCulture); }
-        internal static string AstronomicalDusk
-        {
-            get => ResourceManager.GetString("AstronomicalDusk", resourceCulture);
         }
     }
 }

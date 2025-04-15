@@ -12,14 +12,14 @@ public partial class WeatherDisplay : ContentPage
     {
         InitializeComponent();
     }
-    public WeatherDisplay(WeatherViewModel weather): this()
+    public WeatherDisplay(WeatherViewModel weather) : this()
     {
         this.BindingContext = weather;
     }
     public WeatherDisplay(LocationViewModel name) : this()
     {
         var x = ws.GetWeather(name.Lattitude, name.Longitude);
-       // WeatherControl.BindingContext = x;
+        // WeatherControl.BindingContext = x;
         this.BindingContext = x;
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
@@ -28,15 +28,12 @@ public partial class WeatherDisplay : ContentPage
         var x = ss.GetSettingByName(MagicStrings.WeatherDisplayViewed);
         var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
         var isAds = z.ToBoolean();
-        if (x.ToBoolean() == false) 
-        { 
-#if RELEASE
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));      
-#endif       
+        if (x.ToBoolean() == false)
+        {
+            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
             x.Value = MagicStrings.True_string;
-#if RELEASE
-            ss.UpdateSetting(xx);
-#endif
+            ss.UpdateSetting(x);
+
         }
 
     }

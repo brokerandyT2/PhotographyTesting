@@ -2,6 +2,10 @@
 using Locations.Core.Shared;
 using Locations.Core.Business.DataAccess;
 using SkiaSharp;
+using static Microsoft.Maui.ApplicationModel.Permissions;
+using System.ComponentModel;
+using Syncfusion.Maui.Toolkit.Internals;
+using System.IO;
 namespace Location.Core.Views.Premium;
 
 public partial class LightMeter : ContentPage
@@ -10,80 +14,118 @@ public partial class LightMeter : ContentPage
     private double iso;
     private double shutterSpeed;  // User-specified shutter speed (seconds)
     private double aperture; // User-specified f-stop
-    private bool _activate = true;
+    private bool _activate = false;
     private double _brightness;
     private double _ev;
     private string _exposure;
     public LightMeter()
     {
         InitializeComponent();
+        cameraView.CamerasLoaded += CameraView_CamerasLoaded;
     }
     protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
     {
         _activate = false;
         base.OnNavigatedFrom(args);
         var y = cameraView.StopCameraAsync().Result;
+        BeginCapture(false);
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         _activate = true;
         base.OnNavigatedTo(args);
         Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
-        base.OnNavigatedTo(args);
+
         var xx = ss.GetSettingByName(MagicStrings.SunCalculatorViewed);
         var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
         var isAds = z.ToBoolean();
+
         if (xx.ToBoolean() == false)
         {
-#if RELEASE
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));      
-#endif
+            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
             xx.Value = MagicStrings.True_string;
-#if RELEASE
             ss.UpdateSetting(xx);
-#endif
+
         }
         else
         {
 
+        }
 
-            foreach (var camera in new CameraView().Cameras)
+        //BeginCapture(_activate);
+    }
+
+    private void BeginCapture(bool active)
+    {
+        string localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, Guid.NewGuid() + ".png");
+        while (active)
+        {
+            if (cameraView.IsLoaded)
             {
-                if (camera.Position == CameraPosition.Back)
-                {
-                    cameraView.Camera = camera;
-                }
+                Stream stream = cameraView.TakePhotoAsync().Result;
+                using FileStream localStream = File.OpenWrite(localFilePath);
+                stream.CopyTo(localStream);
+
+                SkiaSharp.SKBitmap bmp = SKBitmap.Decode(localFilePath);
+
+                _brightness = CalculateBrightness(bmp.Bytes, bmp.Height, bmp.Width);
+                _ev = ConvertToEV(_brightness);
+                _exposure = CompareExposure(_ev, iso, shutterSpeed, aperture);
+
             }
-            var x = cameraView.StartCameraAsync().Result;
-            cameraView.TakeAutoSnapShot = true;
-            while (_activate == true)
+            Thread.Sleep(Convert.ToInt32(ss.GetSettingByName(MagicStrings.CameraRefresh).Value));
+            var x = string.Empty;
+        }
+    }
+
+    private void CameraView_CamerasLoaded(object? sender, EventArgs e)
+    {
+
+        foreach (var camera in new CameraView().Cameras)
+        {
+            if (camera.Position == CameraPosition.Back)
             {
-                var path = Path.Combine(FileSystem.CacheDirectory, Guid.NewGuid().ToString() + ".png");
-                var y = cameraView.SaveSnapShot(Camera.MAUI.ImageFormat.PNG, path).Result;
+                cameraView.Camera = camera;
+                cameraView.PropertyChanged -= CameraView_PropertyChanged;
+                // cameraView.PropertyChanged += CameraView_PropertyChanged;
 
-                SkiaSharp.SKBitmap bmp = SKBitmap.Decode(path);
-
-                var exist = File.Exists(path);
-
-                if (y != null && exist)
-                {
-                    _brightness = CalculateBrightness(bmp.Bytes, bmp.Height, bmp.Width);
-                    _ev = ConvertToEV(_brightness);
-                    _exposure = CompareExposure(_ev, iso, shutterSpeed, aperture);
-                }
+                /* cameraView.TakeAutoSnapShot = true;
+                 cameraView.AutoSnapShotAsImageSource = true;
+                 cameraView.AutoSnapShotFormat = Camera.MAUI.ImageFormat.PNG;
+                 cameraView.AutoSnapShotSeconds = TimeSpan.FromMilliseconds(Convert.ToInt32(ss.GetSettingByName(MagicStrings.CameraRefresh).Value)).Seconds; */
+                cameraView.StartCameraAsync();
 
 
-                try
-                {
-                    File.Delete(path);
-                }
-                catch { }
-
-                Thread.Sleep(Convert.ToInt32(ss.GetSettingByName(MagicStrings.CameraRefresh).Value));
             }
         }
     }
 
+    private void CameraView_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+
+        var y = (CameraView)sender;
+        var x = y.SnapShotStream;
+
+
+        if (e.PropertyName == nameof(cameraView.SnapShotStream))// && cameraView.SnapShotStream != null)
+        {
+            string localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, Guid.NewGuid() + ".png");
+
+            Stream stream = cameraView.SnapShotStream;
+            using FileStream localFileStream = File.OpenWrite(localFilePath);
+
+            stream.CopyToAsync(localFileStream);
+            SkiaSharp.SKBitmap bmp = SKBitmap.Decode(localFilePath);
+
+            _brightness = CalculateBrightness(bmp.Bytes, bmp.Height, bmp.Width);
+            _ev = ConvertToEV(_brightness);
+            _exposure = CompareExposure(_ev, iso, shutterSpeed, aperture);
+
+            var exists = File.Exists(localFilePath);
+            if (exists)
+                File.Delete(localFilePath);
+        }
+    }
 
 
     // 📌 Step 3: Calculate Brightness from Camera Frame
@@ -127,5 +169,30 @@ public partial class LightMeter : ContentPage
         iso = Convert.ToDouble(((Picker)sender).SelectedItem.ToString().Replace("f/", ""));
     }
 
+    private void Button_Pressed(object sender, EventArgs e)
+    {
+        var stream = cameraView.TakePhotoAsync().Result;
+        string localFilePath = string.Empty;
+        if (stream != null)
+        {
+            localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, Guid.NewGuid() + ".png");
+            var _ = cameraView.SaveSnapShot(Camera.MAUI.ImageFormat.PNG, localFilePath);
 
+            // save the file into local storage
+
+            /* using Stream sourceStream = photo.OpenReadAsync().Result;
+             using FileStream localFileStream = File.OpenWrite(localFilePath);
+             sourceStream.CopyToAsync(localFileStream);
+
+             SkiaSharp.SKBitmap bmp = SKBitmap.Decode(localFilePath);
+
+             _brightness = CalculateBrightness(bmp.Bytes, bmp.Height, bmp.Width);
+             _ev = ConvertToEV(_brightness);
+             _exposure = CompareExposure(_ev, iso, shutterSpeed, aperture);
+
+             var exists = File.Exists(localFilePath);
+             if (exists)
+                 File.Delete(localFilePath);*/
+        }
+    }
 }

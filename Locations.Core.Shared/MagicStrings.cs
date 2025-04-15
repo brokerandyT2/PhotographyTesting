@@ -41,6 +41,7 @@ namespace Locations.Core.Shared
         public static readonly string TowardsWind = "towardsWind";
         public static readonly string WithWind = "withwind";
         public static readonly string CameraRefresh = "camerarefresh";
+        public const string ExposureCalculator = "exposurecalculator";
         public static string LocationListViewed = "locationlistviewed";
 
         public static string TipsViewed = "tipsviewed";
