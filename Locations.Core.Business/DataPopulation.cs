@@ -142,23 +142,13 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
 #endif
 
-
-
-
-
             foreach (var x in list)
             {
-
                 var z = ss.SaveSettingWithObjectReturn(x);
             }
 
-
-            // list.Add(new() { Name = MagicStrings.DeviceInfo, Value = Constants.DevInfo_string });
             var zz = ss.SaveSettingWithObjectReturn(new SettingViewModel() { Name = MagicStrings.DeviceInfo, Value = "" });
-            //Add after saving as the Constants file is derrived from SettingsDTO
-            // SettingViewModel m = new() { Name = MagicStrings.DeviceInfo, Value = Constants.DevInfo_string };
             SettingViewModel n = new() { Name = MagicStrings.TimeFormat, Value = Constants.TimeFormat_string };
-            //ss.SaveSettingWithObjectReturn(m);
             ss.SaveSettingWithObjectReturn(n);
         }
 
