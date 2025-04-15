@@ -21,7 +21,11 @@ namespace Location.Core
             {
                 try
                 {
+#if ANDY
+                    return true;
+#else
                     return ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;
+#endif
                 }
                 catch
                 {
