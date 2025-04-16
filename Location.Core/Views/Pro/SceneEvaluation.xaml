@@ -5,8 +5,9 @@
              Title="Scene Evaluation"
              xmlns:models="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
              IconImageSource="Resources/AppIcon/sceneevaluation.png"
-              xmlns:strings="clr-namespace:Location.Core.Resources"
-                xmlns:system="clr-namespace:System;assembly=netstandard">
+             xmlns:strings="clr-namespace:Location.Core.Resources"
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+             x:DataType="models:SceneEvaluationViewModel">
     <ContentPage.BindingContext>
         <models:SceneEvaluationViewModel />
     </ContentPage.BindingContext>

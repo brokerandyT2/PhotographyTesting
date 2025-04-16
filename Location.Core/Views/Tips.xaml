@@ -5,7 +5,8 @@
              xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
              xmlns:strings="clr-namespace:Location.Core.Resources"
              xmlns:system="clr-namespace:System;assembly=netstandard"
-             Title="Tips">
+             Title="Tips"
+             x:DataType="models:TipDisplayViewModel">
     <ContentPage.BindingContext>
         <models:TipDisplayViewModel />
     </ContentPage.BindingContext>

@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
              x:Class="Location.Core.Views.ListLocations"
-             Title="List Locations">
+             Title="List Locations"
+             x:DataType="models:LocationViewModel">
     <ContentPage.BindingContext>
         <models:LocationViewModel />
     </ContentPage.BindingContext>

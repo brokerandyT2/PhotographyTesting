@@ -5,7 +5,8 @@
              xmlns:models="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
              xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:strings="clr-namespace:Location.Core.Resources"            
-             Title="SunLocation">
+             Title="SunLocation"
+             x:DataType="models:SunLocation">
     <ContentPage.BindingContext>
         <models:SunLocation/>
     </ContentPage.BindingContext>

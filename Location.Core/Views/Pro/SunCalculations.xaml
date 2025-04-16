@@ -5,7 +5,8 @@
              Title="SunCalculations"
              xmlns:models="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
              xmlns:strings="clr-namespace:Location.Core.Resources" 
-             xmlns:system="clr-namespace:System;assembly=netstandard">
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+             x:DataType="models:SunCalculations">
     <ContentPage.BindingContext>
         <models:SunCalculations/>
     </ContentPage.BindingContext>

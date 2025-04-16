@@ -212,9 +212,6 @@
 	  <MauiXaml Update="Views\Pro\SceneEvaluation.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\Pro\SunCalculation.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
 	  <MauiXaml Update="Views\Pro\SunCalculations.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

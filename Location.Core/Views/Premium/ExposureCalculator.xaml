@@ -5,7 +5,8 @@
              xmlns:models="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
              xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:strings="clr-namespace:Location.Core.Resources"
-             Title="ExposureCalculator">
+             Title="ExposureCalculator"
+             x:DataType="models:ExposureCalculator">
     <ContentPage.BindingContext>
         <models:ExposureCalculator/>
     </ContentPage.BindingContext>

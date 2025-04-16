@@ -7,7 +7,8 @@
              xmlns:system="clr-namespace:System;assembly=netstandard"
 
              xmlns:strings="clr-namespace:Location.Core.Resources"
-             Title="WeatherDisplay">
+             Title="WeatherDisplay"
+             x:DataType="models:WeatherViewModel">
     <ContentPage.BindingContext>
         <models:WeatherViewModel/>
     </ContentPage.BindingContext>

@@ -2,7 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Location.Core.Views.Settings"
-             Title="Settings">
+             xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
+             Title="Settings"
+             x:DataType="models:SettingsViewModel">
     <VerticalStackLayout>
         <Label 
             Text="Welcome to .NET MAUI!"
