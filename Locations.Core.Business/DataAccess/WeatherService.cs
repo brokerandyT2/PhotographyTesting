@@ -16,13 +16,14 @@ namespace Locations.Core.Business.DataAccess
         public WeatherService() { }
         public WeatherViewModel GetWeather(double latitude, double longitude)
         {
-
+            var update = _settingsService.GetSettingByName(MagicStrings.LastBulkWeatherUpdate);
+            var lastUpdate = new DateTime(Convert.ToInt64(update.Value));
             var x = _weatherQuery.GetWeather(latitude, longitude);
             WeatherViewModel wvm = new WeatherViewModel();
             if (x == null)
             {
                 NetworkAccess accessType = Connectivity.Current.NetworkAccess;
-                if (accessType == NetworkAccess.Internet)
+                if (accessType == NetworkAccess.Internet && lastUpdate < DateTime.Now.AddDays(-1))
                 {
                     var key = _settingsService.GetSetting(MagicStrings.Weather_API_Key).Value;
                     var url = _settingsService.GetSetting(MagicStrings.WeatherURL).Value;
@@ -31,7 +32,8 @@ namespace Locations.Core.Business.DataAccess
                     var client = new OpenWeatherAPI.OpenWeatherApiClient(key, url, tempSetting, true);
                     var output = client.GetData(latitude, longitude);
                     wvm = StringToWeatherViewModel(output);
-
+                    update.Value = DateTime.Now.ToString();
+                    _settingsService.SaveSettingWithObjectReturn(update);
                     Save(wvm);
                 }
                 wvm.DateFormat= _settingsService.GetSettingByName(MagicStrings.DateFormat).Value;

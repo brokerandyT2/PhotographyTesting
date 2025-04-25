@@ -41,12 +41,13 @@ public partial class ListLocations : ContentPage
     private void PopulateData()
     {
         var loc = ls.GetLocations();
-        _items.Clear();
+        Items.Clear();
         foreach (var z in loc)
         {
             _items.Add(z);
         }
-        BindingContext = this;
+        BindingContext = Items;
+        cv.ItemsSource = Items;
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
@@ -87,7 +88,8 @@ public partial class ListLocations : ContentPage
             return;
         var id = ((LocationViewModel)e.CurrentSelection.FirstOrDefault()).Id;
 
-        Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(id));
+        Navigation.PushModalAsync(new NavigationPage(new Views.EditLocation(id)));
+      
     }
 
 

@@ -282,6 +282,9 @@
   <data name="SubscriptionType" xml:space="preserve">
     <value>Type of Subscription:</value>
   </data>
+  <data name="SunCalculations" xml:space="preserve">
+    <value>Sun Events</value>
+  </data>
   <data name="SunCalculationsTutorial" xml:space="preserve">
     <value>Sun Calculations Tutorial</value>
   </data>
@@ -329,6 +332,9 @@
   </data>
   <data name="TwentyFourHourClocks" xml:space="preserve">
     <value>24 Hour Clocks</value>
+  </data>
+  <data name="Weather" xml:space="preserve">
+    <value>Weather</value>
   </data>
   <data name="WeatherDisplayTutorial" xml:space="preserve">
     <value>Weather Display Tutorial</value>

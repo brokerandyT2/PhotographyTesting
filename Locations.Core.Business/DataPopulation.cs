@@ -75,7 +75,7 @@ namespace Locations.Core.Business
             List<SettingViewModel> list = new List<SettingViewModel>();
             SettingsService ss = new SettingsService();
 #if DEBUG
-
+            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "12" });
             list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
             list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
 #elif RELEASE
@@ -83,11 +83,12 @@ namespace Locations.Core.Business
             SettingViewModel y = new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() };
             var q = ss.SaveSettingWithObjectReturn(y);
             list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
-
+            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "24" });
 #else
             SettingViewModel y = new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() };
             var q = ss.SaveSettingWithObjectReturn(y);
             list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "12" });
 #endif
 #endif
 
@@ -95,7 +96,7 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.FirstName, Value = "" });
             list.Add(new() { Name = MagicStrings.LastName, Value = "" });
 
-            
+
 
             list.Add(new() { Name = MagicStrings.UniqueID, Value = Guid.NewGuid().ToString() });
 
@@ -140,11 +141,18 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.LightMeterViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.SceneEvaluationViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.AddLocationViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name= MagicStrings.WeatherDisplayViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Name = MagicStrings.WeatherDisplayViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
+
 #endif
 
+            list.Add(new() { Name = MagicStrings.ExposureCalcAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Name = MagicStrings.LightMeterAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Name = MagicStrings.SceneEvaluationAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Name = MagicStrings.SunCalculatorViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Name = MagicStrings.SunLocationAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Name = MagicStrings.WeatherDisplayAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
             foreach (var x in list)
             {
                 var z = ss.SaveSettingWithObjectReturn(x);

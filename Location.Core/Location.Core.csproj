@@ -188,6 +188,9 @@
 	  <MauiXaml Update="Views\DetailViews\WeatherDisplay.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\EditLocation.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\FeatureNotSupported.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

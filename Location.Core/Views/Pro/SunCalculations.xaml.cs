@@ -62,6 +62,5 @@ public partial class SunCalculations : ContentPage
     {
         base.OnNavigatedTo(args);
         PageHelpers.CheckVisit(MagicStrings.SunCalculatorViewed, PageEnums.SunCalculations, settingsService, Navigation);
-        PageHelpers.ShowAD(settingsService.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
     }
 }

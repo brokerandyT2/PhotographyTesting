@@ -25,7 +25,6 @@ public partial class SceneEvaluation : ContentPage
         var isAds = z.ToBoolean();
 
         PageHelpers.CheckVisit(MagicStrings.SceneEvaluationViewed, PageEnums.SceneEvaluation, ss, Navigation);
-        PageHelpers.ShowAD(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
 
     }
     public SceneEvaluation()

@@ -26,10 +26,6 @@ public partial class WeatherDisplay : ContentPage
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        base.OnNavigatedTo(args);
-        var x = ss.GetSettingByName(MagicStrings.WeatherDisplayViewed);
-        var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
-        var isAds = z.ToBoolean();
         PageHelpers.CheckVisit(MagicStrings.WeatherDisplayViewed, PageEnums.WeatherDisplay, ss, Navigation);
     }
 }

@@ -44,7 +44,6 @@ public partial class LightMeter : ContentPage
 
         PageHelpers.CheckVisit(MagicStrings.LightMeterViewed, PageEnums.LightMeter, ss, Navigation);
 
-        PageHelpers.ShowAD(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
         //BeginCapture(_activate);
     }
 

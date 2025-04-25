@@ -29,7 +29,6 @@ public partial class SunLocation : ContentPage
         var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
 
         PageHelpers.CheckVisit(MagicStrings.SunLocationViewed, PageEnums.SunLocation, ss, Navigation);
-        PageHelpers.ShowAD(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
         
         var hemi = ss.GetSettingByName(MagicStrings.Hemisphere).Value;
         //q.Hemisphere = hemi;

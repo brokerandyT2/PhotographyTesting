@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Location.Core.Views.EditLocation"
+             xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
+             xmlns:strings="clr-namespace:Location.Core.Resources"
+             Title="Edit Location"
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+             x:DataType="models:LocationViewModel">
+    <ContentPage.BindingContext>
+        <models:LocationViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <Grid Padding="4,1,2,4" Margin="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="200"/>
+                <RowDefinition Height="50"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Image Source="{Binding Photo}"  Grid.Column="0" Grid.ColumnSpan="4" HeightRequest="150" Grid.Row="0"/>
+
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Column="1" Grid.ColumnSpan="4" Grid.Row="1"/>
+            <Button Text="{x:Static strings:AppResources.Weather}" Grid.Row="2" Grid.Column="1" x:Name="WeatherButton" Pressed="WeatherButton_Pressed" />
+            <Button Text="{x:Static strings:AppResources.SunCalculations}" Grid.Row="2" Grid.Column="2" x:Name="SunEvents" Pressed="SunEvents_Pressed" />
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="3"/>
+            <Label Text="{x:Static strings:AppResources.Title}" FontSize="Medium" Grid.Row="3" Grid.ColumnSpan="4" HorizontalOptions="Start"/>
+            <Entry IsPassword="False" IsSpellCheckEnabled="True" IsTextPredictionEnabled="True" Text="{Binding Title}" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4"/>
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="3"/>
+
+            <Label Grid.Row="5" Grid.Column="0" Text="{x:Static strings:AppResources.Latitude}" FontSize="Medium" x:Name="Latitude" HorizontalOptions="Start"/>
+            <Label Grid.Row="5" Grid.Column="2" Text="{x:Static strings:AppResources.Longitude}" FontSize="Medium" x:Name="Longitude" HorizontalOptions="Start"/>
+            <Label Grid.Row="6" Grid.Column="0" Text="{Binding Lattitude}" FontSize="Medium" HorizontalOptions="Start"/>
+            <Label Grid.Row="6" Grid.Column="2" Text="{Binding Longitude}" FontSize="Medium" HorizontalOptions="Start"/>
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="7"/>
+            <Label Text="{x:Static strings:AppResources.Description}" FontSize="Medium" Grid.Row="8" Grid.ColumnSpan="4" HorizontalOptions="Start"/>
+            <Editor Text="{Binding Description}" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="4"/>
+            <Button x:Name="Save" Text="Save" HeightRequest="50" Grid.Column="0" Grid.Row="10" Grid.ColumnSpan="4" />
+            <Button x:Name="CloseModal" Text="{x:Static strings:AppResources.CloseLocationDetails}" Grid.Row="10" Grid.ColumnSpan="2" IsVisible="False"/>
+        </Grid>
+    </ScrollView>
+
+
+</ContentPage>

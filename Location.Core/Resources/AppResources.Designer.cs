@@ -556,6 +556,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sun Events.
+        /// </summary>
+        internal static string SunCalculations {
+            get {
+                return ResourceManager.GetString("SunCalculations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sun Calculations Tutorial.
         /// </summary>
         internal static string SunCalculationsTutorial {
@@ -696,6 +705,15 @@ namespace Location.Core.Resources {
         internal static string TwentyFourHourClocks {
             get {
                 return ResourceManager.GetString("TwentyFourHourClocks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weather.
+        /// </summary>
+        internal static string Weather {
+            get {
+                return ResourceManager.GetString("Weather", resourceCulture);
             }
         }
         

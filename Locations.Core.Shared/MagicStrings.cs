@@ -41,6 +41,7 @@ namespace Locations.Core.Shared
         public static readonly string TowardsWind = "towardsWind";
         public static readonly string WithWind = "withwind";
         public static readonly string CameraRefresh = "camerarefresh";
+
         public const string ExposureCalculator = "exposurecalculator";
         public static string LocationListViewed = "locationlistviewed";
 
@@ -65,6 +66,14 @@ namespace Locations.Core.Shared
         public static string WeatherDisplayViewed = "weatherdisplayviewed";
 
         public static string SettingsViewed = "settingsviewed";
+
+        public static string AdGivesHours = "hoursPerAd";
+        public static string ExposureCalcAdViewed_TimeStamp = "exposureCalcAdViewedTimeStamp";
+        public static string LightMeterAdViewed_TimeStamp = "lightmeterAdViewedTimeStamp";
+        public static string SceneEvaluationAdViewed_TimeStamp = "SceneEvaluationAdViewedTimeStamp";
+        public static string SunCalculatorViewed_TimeStamp = "SunCalculatorAdViewedTimeStamp";
+        public static string SunLocationAdViewed_TimeStamp = "SunLocationAdViewedTimeStamp";
+        public static string WeatherDisplayAdViewed_TimeStamp = "WeatherDisplayAdViewedTimeStamp";
         // public static string U
 #endif
 #if FISHING

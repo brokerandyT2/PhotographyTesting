@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Locations.Core.Shared.Enums;
 using static Locations.Core.Shared.Enums.SubscriptionType;
+using Location.Core.Resources;
+using Locations.Core.Shared.ViewModels;
 
 namespace Location.Core.Helpers
 {
@@ -31,41 +33,114 @@ namespace Location.Core.Helpers
             var sub = settingService.GetSettingByName(MagicStrings.SubscriptionType);
             var exp = settingService.GetSettingByName(MagicStrings.SubscriptionExpiration);
 
-            List<PageEnums> free = new() { PageEnums.AddLocation, PageEnums.ListLocations, PageEnums.Tips, PageEnums.Settings };
+            List<PageEnums> free = new() { PageEnums.AddLocation, PageEnums.ListLocations, PageEnums.Tips, PageEnums.Settings, PageEnums.WeatherDisplay };
             List<PageEnums> premium = new() { PageEnums.ExposureCalculator, PageEnums.LightMeter, PageEnums.SunLocation };
-            List<PageEnums> pro = new List<PageEnums>() { PageEnums.SceneEvaluation, PageEnums.SunCalculations };
- 
+            List<PageEnums> pro = new List<PageEnums>() { PageEnums.SceneEvaluation, PageEnums.SunCalculations, PageEnums.WeatherDisplay };
+
             premium.AddRange(pro);
             premium.AddRange(free);
 
             pro.AddRange(free);
 
+            DateTime lastAd = GetAdTime(pageEnums);
+            var hours = settingService.GetSettingByName(MagicStrings.AdGivesHours).Value;
+            var isAdSupported = settingService.GetSettingByName(MagicStrings.FreePremiumAdSupported).Value;
 
-            if (sub.Value == SubscriptionType.SubscriptionTypeEnum.Premium.Name())
+            if (!Convert.ToBoolean(isAdSupported))
             {
-                if (!premium.Contains(pageEnums))
-                {
-                    navigation.PushModalAsync(new SubscriptionOrAdFeature(pageEnums));
-                }
 
+                if (sub.Value == SubscriptionType.SubscriptionTypeEnum.Premium.Name())
+                {
+                    if (!premium.Contains(pageEnums))
+                    {
+
+                        if (lastAd < DateTime.Now.AddHours(Convert.ToInt16(hours)))
+                        {
+                            navigation.PushModalAsync(new SubscriptionOrAdFeature(pageEnums));
+                        }
+                    }
+
+                }
+                else if (sub.Value == SubscriptionTypeEnum.Free.Name())
+                {
+                    if (!free.Contains(pageEnums))
+                    {
+
+                        if (lastAd < DateTime.Now.AddHours(Convert.ToInt16(hours)))
+                        {
+                            navigation.PushModalAsync(new SubscriptionOrAdFeature(pageEnums));
+                        }
+                    }
+
+                }
             }
-            else if (sub.Value == SubscriptionTypeEnum.Free.Name())
+            else
             {
-                if (!free.Contains(pageEnums))
-                {
-                    navigation.PushModalAsync(new SubscriptionOrAdFeature(pageEnums));
-                }
-
+                ShowAD(pageEnums, navigation);
             }
-
 
         }
 
-        internal static void ShowAD(bool isAds, INavigation navigation)
+        private static DateTime GetAdTime(PageEnums page)
         {
-            if (isAds)
+            SettingsService ss = new SettingsService();
+            SettingViewModel value = new SettingViewModel(); 
+            switch (page)
             {
-                throw new NotImplementedException();
+                case PageEnums.WeatherDisplay:
+                    value = ss.GetSettingByName(MagicStrings.WeatherDisplayAdViewed_TimeStamp);
+                    break;
+                case PageEnums.ExposureCalculator:
+                    value = ss.GetSettingByName(MagicStrings.ExposureCalcAdViewed_TimeStamp);
+                    break;
+                case PageEnums.LightMeter:
+                    value = ss.GetSettingByName(MagicStrings.LightMeterAdViewed_TimeStamp);
+                    break;
+                case PageEnums.SunLocation:
+                    value = ss.GetSettingByName(MagicStrings.SunLocationAdViewed_TimeStamp);
+                    break;
+                case PageEnums.SceneEvaluation:
+                    value = ss.GetSettingByName(MagicStrings.SceneEvaluationAdViewed_TimeStamp);
+                    break;
+                case PageEnums.SunCalculations:
+                    value = ss.GetSettingByName(MagicStrings.SunCalculatorViewed_TimeStamp);
+                    break;
+
+                default:
+
+                    break;
+            }
+            return new DateTime(Convert.ToInt16(value.Value));
+        }
+
+        internal static void ShowAD(PageEnums page, INavigation navigation)
+        {
+            SettingsService ss = new SettingsService();
+            SettingViewModel value = new SettingViewModel();
+            switch (page)
+            {
+                case PageEnums.WeatherDisplay:
+                    value = ss.GetSettingByName(MagicStrings.WeatherDisplayAdViewed_TimeStamp);
+                    break;
+                case PageEnums.ExposureCalculator:
+                    value = ss.GetSettingByName(MagicStrings.ExposureCalcAdViewed_TimeStamp);
+                    break;
+                case PageEnums.LightMeter:
+                    value = ss.GetSettingByName(MagicStrings.LightMeterAdViewed_TimeStamp);
+                    break;
+                case PageEnums.SunLocation:
+                    value = ss.GetSettingByName(MagicStrings.SunLocationAdViewed_TimeStamp);
+                    break;
+                case PageEnums.SceneEvaluation:
+                    value = ss.GetSettingByName(MagicStrings.SceneEvaluationAdViewed_TimeStamp);
+                    break;
+                case PageEnums.SunCalculations:
+                    value = ss.GetSettingByName(MagicStrings.SunCalculatorViewed_TimeStamp);
+                    break;
+
+                default:
+
+                    break;
             }
         }
     }

@@ -57,29 +57,4 @@
 
 
 
-
-    <!-- <Grid x:Name="EntryGrid">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
-           
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        
-        <Label Grid.Row="1" Grid.Column="0" Text="{x:Static strings:AppResources.Latitude}" FontSize="Medium" x:Name="Latitude" HorizontalOptions="Start" FontFamily="Quicksand"/>
-        <Label Grid.Row="1" Grid.Column="1" Text="{x:Static strings:AppResources.Longitude}" FontSize="Medium" x:Name="Longitude" HorizontalOptions="Start" FontFamily="Quicksand"/>
-        <Entry Grid.Row="2" Grid.Column="0" x:Name="lat" IsEnabled="False" Text="{Binding Lattitude}" />
-        <Entry Grid.Row="2" Grid.Column="1" x:Name="lon" IsEnabled="False" Text="{Binding Longitude}" />
-        <Label Grid.Row="3" Grid.ColumnSpan="2" x:Name="Title" FontSize="Medium" Text="{x:Static strings:AppResources.Title}" HorizontalOptions="Start"/>
-        <Entry Grid.Row="4" Grid.ColumnSpan="2"  IsSpellCheckEnabled="True" IsTextPredictionEnabled="True" x:Name="LocationTitle" Text="{Binding Title}" HeightRequest="50"/>
-        <Label Grid.Row="5" Grid.ColumnSpan="2" x:Name="Description" HeightRequest="50" Text="{x:Static strings:AppResources.Description}" FontSize="Medium" HorizontalOptions="Start"/>
-        <Editor Grid.Row="6" Grid.ColumnSpan="2" HeightRequest="150" x:Name="DescriptionText" Text="{Binding Description}" />
-        <Image Source="{Binding Photo}" Aspect="AspectFit" HeightRequest="200" Grid.Row="7" Grid.ColumnSpan="2"/>
-        <Button x:Name="Save" Text="Save" Grid.Column="0" Grid.Row="8" Pressed="Save_Pressed" />
-        <Button x:Name="AddPhoto" ImageSource="/Resources/Images/addphoto.svg" Grid.Column="1" Grid.Row="8" Pressed="AddPhoto_Pressed" />
-        <Button x:Name="CloseModal" Text="{x:Static strings:AppResources.CloseLocationDetails}" Pressed="CloseModal_Pressed" Grid.Row="9" Grid.ColumnSpan="2" IsVisible="False"/>
-
-    </Grid> -->
 </ContentPage>
