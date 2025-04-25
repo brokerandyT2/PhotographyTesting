@@ -22,11 +22,10 @@ jobs:
         dotnet-version: 9.0.x
     - name: Install Workloads
       run: dotnet workload restore
-    - name: Install iOS SDK workload
-      run: dotnet workload install maui-ios
+
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build restore
+      run: dotnet build
     - name: Test
       run: dotnet test --no-build --verbosity normal
