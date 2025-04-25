@@ -22,6 +22,8 @@ jobs:
         dotnet-version: 9.0.x
     - name: Install Workloads
       run: dotnet workload restore
+    - name: Install iOS SDK workload
+      run: dotnet workload install Microsoft.iOS.Sdk.net9.0_18.4
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
