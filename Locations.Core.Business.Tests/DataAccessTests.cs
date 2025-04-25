@@ -1,17 +1,18 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Locations.Core.Business.DataAccess;
+using Locations.Core.Shared.ViewModels;
 
 namespace Locations.Core.Business.Tests
 {
     [TestClass]
     public class DataAccessTests
     {
-        private DataAccess _dataAccess;
+        private Locations.Core.Business.DataAccess.DataAccess _dataAccess;
 
         [TestInitialize]
         public void Setup()
         {
-            _dataAccess = new DataAccess();
+            _dataAccess = new DataAccess.DataAccess();
         }
 
         [TestMethod]
