@@ -21,6 +21,7 @@ public partial class WeatherDisplay : ContentPage
     public WeatherDisplay(LocationViewModel name) : this()
     {
         var x = ws.GetWeather(name.Lattitude, name.Longitude);
+        x.WindDirectionArrow = ss.GetSettingByName(MagicStrings.WindDirection).Value;
         // WeatherControl.BindingContext = x;
         this.BindingContext = x;
     }

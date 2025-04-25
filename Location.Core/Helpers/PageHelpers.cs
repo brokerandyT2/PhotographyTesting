@@ -107,10 +107,10 @@ namespace Location.Core.Helpers
                     break;
 
                 default:
-
+                    value.Value = DateTime.Now.ToString();
                     break;
             }
-            return new DateTime(Convert.ToInt16(value.Value));
+            return DateTime.Parse(value.Value);
         }
 
         internal static void ShowAD(PageEnums page, INavigation navigation)

@@ -141,6 +141,9 @@
   <data name="baseexposure" xml:space="preserve">
     <value>Base Exposure:</value>
   </data>
+  <data name="Blue" xml:space="preserve">
+    <value>Blue</value>
+  </data>
   <data name="calculate" xml:space="preserve">
     <value>Calculate: </value>
   </data>
@@ -153,6 +156,9 @@
   <data name="CloseLocationDetails" xml:space="preserve">
     <value>Close Location Details</value>
   </data>
+  <data name="Contrast" xml:space="preserve">
+    <value>Contrast</value>
+  </data>
   <data name="Date" xml:space="preserve">
     <value>Date:</value>
   </data>
@@ -161,6 +167,12 @@
   </data>
   <data name="Description" xml:space="preserve">
     <value>Description:</value>
+  </data>
+  <data name="Detail" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
   </data>
   <data name="Direction" xml:space="preserve">
     <value>Direction</value>
@@ -200,6 +212,9 @@
   </data>
   <data name="goldenhourmorning" xml:space="preserve">
     <value>Morning Golden Hour End:</value>
+  </data>
+  <data name="Green" xml:space="preserve">
+    <value>Green</value>
   </data>
   <data name="Gusts" xml:space="preserve">
     <value>Gusts</value>
@@ -242,6 +257,9 @@
   </data>
   <data name="pleasewaitlong" xml:space="preserve">
     <value>This process will take some time.  Depending on your device, it could take several minutes.</value>
+  </data>
+  <data name="Red" xml:space="preserve">
+    <value>Red</value>
   </data>
   <data name="results" xml:space="preserve">
     <value>Results:</value>
@@ -315,6 +333,12 @@
   <data name="TemperatureFormat" xml:space="preserve">
     <value>Temperature Scale</value>
   </data>
+  <data name="Test" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="Testt" xml:space="preserve">
+    <value>testt</value>
+  </data>
   <data name="thirds" xml:space="preserve">
     <value>1/3</value>
   </data>
@@ -332,6 +356,9 @@
   </data>
   <data name="TwentyFourHourClocks" xml:space="preserve">
     <value>24 Hour Clocks</value>
+  </data>
+  <data name="ViewAll" xml:space="preserve">
+    <value>View All Graphs</value>
   </data>
   <data name="Weather" xml:space="preserve">
     <value>Weather</value>

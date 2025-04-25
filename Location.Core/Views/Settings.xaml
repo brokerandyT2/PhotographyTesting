@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Location.Core.Views.Settings"
              xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
-             Title="Settings"
+             Title="" IconImageSource="cogbox.png"
                           xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:strings="clr-namespace:Location.Core.Resources"
              x:DataType="models:SettingsViewModel">

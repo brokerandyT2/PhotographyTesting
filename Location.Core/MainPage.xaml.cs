@@ -63,7 +63,8 @@ namespace Location.Core
             this.Children.Add(new ListLocations());
             this.Children.Add(new Tips());
 
-
+            PermissionStatus ps = Permissions.RequestAsync<Permissions.Camera>().Result;
+            PermissionStatus pss = Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
             SettingsService ss = new SettingsService();
 
             //Increment the app open counter

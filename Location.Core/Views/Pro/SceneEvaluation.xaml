@@ -12,22 +12,25 @@
         <models:SceneEvaluationViewModel />
     </ContentPage.BindingContext>
 
-    <StackLayout>
-        <ScrollView VerticalOptions="FillAndExpand">
-            <StackLayout>
+    <ScrollView VerticalOptions="FillAndExpand">
 
-                <Grid RowDefinitions="Auto,*">
 
-                </Grid>
-                <Label Text="{x:Static system:Environment.NewLine}"/>
-                <Label Text="{x:Static strings:AppResources.pleasewaitlong}"/>
-                <Image x:Name="histogramRed" Source="{Binding RedHistogramImage}"/>
-                <Image x:Name="histogramBlue" Source="{Binding BlueHistogramImage}"/>
-                <Image x:Name="histogramGreen" Source="{Binding GreenHistogramImage}"/>
-                <Image x:Name="histogramContrast" Source="{Binding ContrastHistogramImage}"/>
-                <ActivityIndicator x:Name="processing" IsRunning="False" IsVisible="False" />
-                <Button x:Name="EvaluateSceneBtn" Text="{x:Static strings:AppResources.EvaluateScene}" Clicked="EvaluateSceneBtn_Clicked"/>
-            </StackLayout>
-        </ScrollView>
-    </StackLayout>
+        <Grid RowDefinitions="*">
+
+
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0"/>
+            <Label Text="{x:Static strings:AppResources.pleasewaitlong}" Grid.Row="1"/>
+            <Image x:Name="histogramRed" Source="{Binding RedHistogramImage}" IsVisible="False" Grid.Row="2"/>
+            <Image x:Name="histogramBlue" Source="{Binding BlueHistogramImage}" IsVisible="False" Grid.Row="2"/>
+            <Image x:Name="histogramGreen" Source="{Binding GreenHistogramImage}" IsVisible="False" Grid.Row="2"/>
+            <Image x:Name="histogramContrast" Source="{Binding ContrastHistogramImage}" Grid.Row="2"/>
+            
+                <RadioButton Content="{x:Static strings:AppResources.Red}" Value="R" Grid.Row="3" CheckedChanged="CheckedChanged" IsVisible="True"/>
+                
+           
+            <ActivityIndicator x:Name="processing" IsRunning="False" IsVisible="False" />
+                <Button x:Name="EvaluateSceneBtn" Text="{x:Static strings:AppResources.EvaluateScene}" HeightRequest="50" Clicked="EvaluateSceneBtn_Clicked" Grid.Row="4"/>
+        </Grid>
+    </ScrollView>
+
 </ContentPage>

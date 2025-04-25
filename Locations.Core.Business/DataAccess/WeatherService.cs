@@ -17,7 +17,7 @@ namespace Locations.Core.Business.DataAccess
         public WeatherViewModel GetWeather(double latitude, double longitude)
         {
             var update = _settingsService.GetSettingByName(MagicStrings.LastBulkWeatherUpdate);
-            var lastUpdate = new DateTime(Convert.ToInt64(update.Value));
+            var lastUpdate = DateTime.Parse(update.Value);
             var x = _weatherQuery.GetWeather(latitude, longitude);
             WeatherViewModel wvm = new WeatherViewModel();
             if (x == null)

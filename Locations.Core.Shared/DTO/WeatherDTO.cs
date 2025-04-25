@@ -284,12 +284,25 @@ namespace Locations.Core.Shared.DTO
                 }
             }
         }
+        
+        public string WindDirectionArrow { private get; set; }
+       
+        
+      
         public double WindDirectionDay_One
         {
             get
             {
-
-                return (_windDirectionDay_One + 360) % 360;
+                double angle;
+                if (WindDirectionArrow == MagicStrings.TowardsWind)
+                {
+                    angle = _windDirectionDay_One;
+                }
+                else
+                {
+                    angle = (_windDirectionDay_One + 360) % 360;
+                }
+                return angle;
             }
             set
             {
@@ -331,7 +344,16 @@ namespace Locations.Core.Shared.DTO
             get
             {
 
-                return _windDirectionDay_Two;
+                double angle;
+                if (WindDirectionArrow == MagicStrings.TowardsWind)
+                {
+                    angle = _windDirectionDay_Two;
+                }
+                else
+                {
+                    angle = (_windDirectionDay_Two + 360) % 360;
+                }
+                return angle;
             }
             set
             {
@@ -375,7 +397,16 @@ namespace Locations.Core.Shared.DTO
             get
             {
 
-                return (_windDirectionDay_Three + 360) % 360;
+                double angle;
+                if (WindDirectionArrow == MagicStrings.TowardsWind)
+                {
+                    angle = _windDirectionDay_Three;
+                }
+                else
+                {
+                    angle = (_windDirectionDay_Three + 360) % 360;
+                }
+                return angle;
             }
 
 
@@ -417,8 +448,16 @@ namespace Locations.Core.Shared.DTO
         {
             get
             {
-
-                return (_windDirectionDay_Four + 360) % 360;
+                double angle;
+                if (WindDirectionArrow == MagicStrings.TowardsWind)
+                {
+                    angle = _windDirectionDay_Four;
+                }
+                else
+                {
+                    angle = (_windDirectionDay_Four + 360) % 360;
+                }
+                return angle;
             }
             set
             {
@@ -467,8 +506,16 @@ namespace Locations.Core.Shared.DTO
         {
             get
             {
-
-                return (_windDirectionDay_Five + 360) % 360;
+                double angle;
+                if (WindDirectionArrow == MagicStrings.TowardsWind)
+                {
+                    angle = _windDirectionDay_Five;
+                }
+                else
+                {
+                    angle = (_windDirectionDay_Five + 360) % 360;
+                }
+                return angle;
             }
             set
             {
@@ -630,7 +677,7 @@ namespace Locations.Core.Shared.DTO
         [Ignore]
         public string Sunrise_Day_Seven_String => _sunrise_day_seven.ToShortTimeString();
         [Ignore]
-        public string Sunset_Day_One_String => _sunrise_day_one.ToShortTimeString();
+        public string Sunset_Day_One_String => _sunset_day_one.ToShortTimeString();
         [Ignore]
         public string Sunset_Day_Two_String => _sunset_day_two.ToShortTimeString();
         [Ignore]
