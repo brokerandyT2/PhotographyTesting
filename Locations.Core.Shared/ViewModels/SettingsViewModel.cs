@@ -78,14 +78,23 @@ namespace Locations.Core.Shared.ViewModels
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DateFormat)));
             }
         }
+
+        public SettingViewModel WindDirection { get; set; }
+       public bool WindDirectionBoolean { get { return WindDirection.Value == MagicStrings.TowardsWind ? true : false; } }
+
         private SettingViewModel _dateFormat;
         public SettingViewModel HomePageViewed { get; set; }
+        public bool HomePageViewedBool { get { return HomePageViewed.Value == MagicStrings.True_string ? true:false; } }
         public SettingViewModel ListLocationsViewed { get; set; }
-
+        public bool ListLocationsViewedBool { get { return ListLocationsViewed.Value == MagicStrings.True_string ? true : false; } }
         public SettingViewModel TipsViewed { get; set; }
+        public bool TipsViewedBool { get { return TipsViewed.Value == MagicStrings.True_string ? true : false; } }
         public SettingViewModel ExposureCalcViewed { get; set; }
+        public bool ExposureCalcViewedBool { get { return ExposureCalcViewed.Value == MagicStrings.True_string ? true : false; } }
         public SettingViewModel LightMeterViewed { get; set; }
+        public bool LightMeterViewedBool { get { return LightMeterViewed.Value == MagicStrings.True_string ? true : false; } }
         public SettingViewModel SceneEvaluationViewed { get; set; }
+        public bool SceneEvaluationViewedBool { get { return SceneEvaluationViewed.Value == MagicStrings.True_string ? true : false; } }
         public SettingViewModel LastBulkWeatherUpdate { get; set; }
         public SettingViewModel Language
         {
@@ -109,6 +118,13 @@ namespace Locations.Core.Shared.ViewModels
         public bool AdSupportboolean { get {
                 return AdSupport.Value == MagicStrings.True_string ? true : false;
             } }
+
+        public SettingViewModel SunCalculationViewed { get; set; }
+        public bool SunCalculationViewedBool { get { return SunCalculationViewed.Value == MagicStrings.True_string ? true : false; } }
+
+        public SettingViewModel TemperatureFormat { get; set; }
+        public bool TemperatureFormatToggle { get { return TemperatureFormat.Value == MagicStrings.Fahrenheit ? true : false; } }
+
         private SettingViewModel _adSupport;
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -637,6 +637,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Temperature Scale.
+        /// </summary>
+        internal static string TemperatureFormat {
+            get {
+                return ResourceManager.GetString("TemperatureFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 1/3.
         /// </summary>
         internal static string thirds {
@@ -646,11 +655,29 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tips Viewed.
+        /// </summary>
+        internal static string TipViewed {
+            get {
+                return ResourceManager.GetString("TipViewed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Title:.
         /// </summary>
         internal static string Title {
             get {
                 return ResourceManager.GetString("Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Towards Wind.
+        /// </summary>
+        internal static string TowardsWind {
+            get {
+                return ResourceManager.GetString("TowardsWind", resourceCulture);
             }
         }
         
@@ -691,11 +718,29 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Wind Direction.
+        /// </summary>
+        internal static string WindDirection {
+            get {
+                return ResourceManager.GetString("WindDirection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wind Speed.
         /// </summary>
         internal static string WindSpeed {
             get {
                 return ResourceManager.GetString("WindSpeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to With Wind.
+        /// </summary>
+        internal static string WithWind {
+            get {
+                return ResourceManager.GetString("WithWind", resourceCulture);
             }
         }
     }

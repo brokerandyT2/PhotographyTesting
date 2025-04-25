@@ -30,7 +30,14 @@ public partial class SunLocation : ContentPage
 
         PageHelpers.CheckVisit(MagicStrings.SunLocationViewed, PageEnums.SunLocation, ss, Navigation);
         PageHelpers.ShowAD(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean(), Navigation);
-
+        
+        var hemi = ss.GetSettingByName(MagicStrings.Hemisphere).Value;
+        //q.Hemisphere = hemi;
+        //arrow.Source = hemi == Hemisphere.HemisphereChoices.North.Name() ? "arrow_clipart_north.png" : "arrow_clipart_south.png";
+        arrow.Source = "arrow_clipart_north.png";
+        date.Format = ss.GetSettingByName(MagicStrings.DateFormat).Value;
+        time.Format = ss.GetSettingByName(MagicStrings.TimeFormat).Value;
+    
     }
     public SunLocation()
     {
@@ -39,9 +46,7 @@ public partial class SunLocation : ContentPage
         var y = new Locations.Core.Business.DataAccess.SettingsService();
         var z = new LocationsService();
         var q = new vm.SunLocation();
-        var hemi = y.GetSettingByName(MagicStrings.Hemisphere).Value;
-        q.Hemisphere = hemi;
-        arrow.Source = hemi == Hemisphere.HemisphereChoices.North.Name() ? "arrow_clipart_north.png" : "arrow_clipart_south.png";
+
         date.Format = y.GetSettingByName(MagicStrings.DateFormat).Value;
         date.Date = DateTime.Now;
         time.Format = y.GetSettingByName(MagicStrings.TimeFormat).Value;

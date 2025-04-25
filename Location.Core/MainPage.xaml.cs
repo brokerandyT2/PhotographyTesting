@@ -4,6 +4,7 @@ using Locations.Core.Business.DataAccess;
 using Location.Core.Views;
 using static Locations.Core.Shared.Enums.SubscriptionType;
 using Newtonsoft.Json;
+using static Locations.Core.Shared.Enums.Hemisphere;
 #if PHOTOGRAPHY
 
 #endif
@@ -53,6 +54,8 @@ namespace Location.Core
 
         public MainPage()
         {
+
+       
             InitializeComponent();
             DataAccess da = new DataAccess();
 

@@ -21,7 +21,7 @@ public partial class AddLocation : ContentPage
     {
         InitializeComponent();
         BindingContext = (LocationViewModel)viewModel;
-        CloseModal.IsVisible = CloseModal.IsEnabled = false;
+       CloseModal.IsVisible = CloseModal.IsEnabled = false;
     }
     public AddLocation(int id)
     {

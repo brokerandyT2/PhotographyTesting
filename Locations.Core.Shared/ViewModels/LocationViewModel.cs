@@ -35,8 +35,8 @@ namespace Locations.Core.Shared.ViewModels
 
         private void Geolocation_LocationChanged(object? sender, GeolocationLocationChangedEventArgs e)
         {
-            Lattitude = e.Location.Latitude;
-            Longitude = e.Location.Longitude;
+            Lattitude = Math.Round(e.Location.Latitude, 4);
+            Longitude = Math.Round(e.Location.Longitude,4);
         }
 
         public void TakePhoto(object sender) {

@@ -107,7 +107,9 @@ namespace Locations.Core.Business.DataAccess
             s.UniqeID = GetSettingByName(MagicStrings.UniqueID) ;
             s.AdSupport = GetSettingByName(MagicStrings.FreePremiumAdSupported);
             s.SubscriptionType = GetSettingByName(MagicStrings.SubscriptionType);
-            
+            s.SunCalculationViewed = GetSettingByName(MagicStrings.SunCalculatorViewed);
+            s.WindDirection = GetSettingByName(MagicStrings.WindDirection);
+            s.TemperatureFormat = GetSettingByName(MagicStrings.TemperatureType);
             return s;
         }
         public SettingViewModel SaveSettingWithObjectReturn(SettingViewModel s)

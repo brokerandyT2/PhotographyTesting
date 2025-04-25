@@ -77,14 +77,17 @@ namespace Locations.Core.Business
 #if DEBUG
 
             list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
+            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
 #elif RELEASE
 #if ANDY
             SettingViewModel y = new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() };
             var q = ss.SaveSettingWithObjectReturn(y);
+            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
 
 #else
             SettingViewModel y = new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() };
             var q = ss.SaveSettingWithObjectReturn(y);
+            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(-1).ToString() });
 #endif
 #endif
 
@@ -92,7 +95,7 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.FirstName, Value = "" });
             list.Add(new() { Name = MagicStrings.LastName, Value = "" });
 
-            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(-1).ToString() });
+            
 
             list.Add(new() { Name = MagicStrings.UniqueID, Value = Guid.NewGuid().ToString() });
 
@@ -129,7 +132,7 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
 #else
             list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
+            //list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
             list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.TipsViewed, Value = MagicStrings.True_string });

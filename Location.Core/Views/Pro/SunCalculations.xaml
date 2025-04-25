@@ -7,9 +7,10 @@
              xmlns:strings="clr-namespace:Location.Core.Resources" 
              xmlns:system="clr-namespace:System;assembly=netstandard"
              x:DataType="models:SunCalculations">
-    <ContentPage.BindingContext>
+   <ContentPage.BindingContext>
         <models:SunCalculations/>
     </ContentPage.BindingContext>
+   <ScrollView>  
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -77,6 +78,7 @@
         <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="18" Grid.ColumnSpan="4"/>
         <Image Source="Resources/AppIcon/sunrise.png" Grid.Row="19" Grid.Column="0" />
         <Label Text="{x:Static strings:AppResources.AstronomicalDusk}" TextColor="#CC0000" FontSize="Small" HorizontalOptions="Start" Grid.Row="19" Grid.Column="1" />
-        <Label FormattedText="{Binding AstronomicalDuskFormatted}" HorizontalOptions="End" Grid.Row="19" Grid.Column="2" /> 
-    </Grid>
+        <Label FormattedText="{Binding AstronomicalDuskFormatted}" HorizontalOptions="End" Grid.Row="19" Grid.Column="2" />
+        </Grid>
+    </ScrollView>
 </ContentPage>

@@ -218,6 +218,9 @@
 	  <MauiXaml Update="Views\Settings.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\SubscriptionOrAdFeature.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\Tips.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

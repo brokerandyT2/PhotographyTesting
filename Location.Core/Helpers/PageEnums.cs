@@ -16,6 +16,7 @@ namespace Location.Core.Helpers
         SunCalculations,
         AddLocation,
         ListLocations,
-        Settings
+        Settings,
+        Tips
     }
 }
