@@ -30,7 +30,8 @@ namespace Location.Photography.Shared.ViewModels
         private DateTime _civildusk;
         private List<LocationViewModel> locations1 = new List<LocationViewModel>();
 
-        public List<LocationViewModel> Locations { get => locations1; set { locations1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Locations))); } }
+        public List<LocationViewModel> Locations { get => locations1; 
+            set { locations1 = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Locations))); } }
         public void CalculateSun()
         {
             TimeZoneInfo cst = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
@@ -143,7 +144,7 @@ namespace Location.Photography.Shared.ViewModels
 
         private void PropertyUpdater(string v)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(v)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(v));
         }
 
         public override event PropertyChangedEventHandler? PropertyChanged;

@@ -17,45 +17,46 @@ public partial class SunCalculations : ContentPage
 	{
 		InitializeComponent();
         DoTheNeedful();
-        LocationsPicker.SelectedIndex = 0;
-        
-        var page = settingsService.GetSettingByName(MagicStrings.SunCalculatorViewed);
 
     }
     private void DoTheNeedful()
     {
-        DateTime no = DateTime.Now;
-        var q = no.ToString("hh:mm tt");
+        var loc = ls.GetLocations();
+        Location.Photography.Shared.ViewModels.SunCalculations vm = new lpsv.SunCalculations();
+        vm.Locations = loc;
+        vm.DateFormat = settingsService.GetSettingByName(MagicStrings.DateFormat).Value;
+        vm.TimeFormat = settingsService.GetSettingByName(MagicStrings.TimeFormat).Value;
+        vm.Latitude = loc[0].Lattitude;
+        vm.Longitude = loc[0].Longitude;
+        locationPhoto.Source = loc[0].Photo == string.Empty? "imageoffoutlinecustom.png": loc[0].Photo;
+        vm.Date = DateTime.Now;
+        vm.CalculateSun();
 
-        var x = new lpsv.SunCalculations();
-        x.DateFormat = settingsService.GetSettingByName(Locations.Core.Shared.MagicStrings.DateFormat).Value;
-        x.TimeFormat = settingsService.GetSettingByName(Locations.Core.Shared.MagicStrings.TimeFormat).Value;
-        x.Locations = ls.GetLocations();
-        x.Date = date.Date = DateTime.Now;
-        date.Format = x.DateFormat;
-
-        x.Latitude = x.Locations[0].Lattitude;
-        x.Longitude = x.Locations[0].Longitude;
-        x.CalculateSun();
-        BindingContext = x;
+        BindingContext = vm;
+        locationPicker.SelectedIndex = 0;
     }
     private void LocationsPicker_SelectedIndexChanged(object sender, EventArgs e)
     {
+
         lpsv.SunCalculations x = ((lpsv.SunCalculations)BindingContext);
         var q = string.Empty;
         var z = ((LocationViewModel)((Picker)sender).SelectedItem);//.Locations[LocationsPicker.SelectedIndex];
+        locationPhoto.Source = z.Photo == string.Empty ? "imageoffoutlinecustom.png" : z.Photo ;
         x.Latitude = z.Lattitude;
         x.Longitude = z.Longitude;
+        x.Date = datePicker.Date;
         x.CalculateSun();
+//        BindingContext = x;
 
     }
-
-    private void date_DateSelected(object sender, DateChangedEventArgs e)
+    
+    private void datePicker_DateSelected(object sender, DateChangedEventArgs e)
     {
         var date = e.NewDate;
         var y = (lpsv.SunCalculations)BindingContext;
         y.Date = date;
         y.CalculateSun();
+        //BindingContext = y;
 
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
