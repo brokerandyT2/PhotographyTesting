@@ -18,7 +18,7 @@ namespace Location.Core.Helpers
     {
         public static void CheckVisit(string pageName, PageEnums pageEnum, SettingsService settingsService, INavigation navigation)
         {
-            CheckSubscription(pageEnum, settingsService, navigation);
+            //CheckSubscription(pageEnum, settingsService, navigation);
             var page = settingsService.GetSettingByName(pageName);
             if (!page.ToBoolean())
             {
@@ -42,7 +42,8 @@ namespace Location.Core.Helpers
 
             pro.AddRange(free);
 
-            DateTime lastAd = GetAdTime(pageEnums);
+            //DateTime lastAd = GetAdTime(pageEnums);
+            var lastAd = DateTime.Now;
             var hours = settingService.GetSettingByName(MagicStrings.AdGivesHours).Value;
             var isAdSupported = settingService.GetSettingByName(MagicStrings.FreePremiumAdSupported).Value;
 
@@ -110,7 +111,8 @@ namespace Location.Core.Helpers
                     value.Value = DateTime.Now.ToString();
                     break;
             }
-            return DateTime.Parse(value.Value);
+            // return DateTime.Parse(value.Value);
+            return DateTime.Now;
         }
 
         internal static void ShowAD(PageEnums page, INavigation navigation)

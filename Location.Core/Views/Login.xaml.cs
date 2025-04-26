@@ -39,8 +39,8 @@ public partial class Login : ContentPage
         }
 
 
-        Auth x = new Auth();
-        var token = x.PerformOAuthLogin();
+        //Auth x = new Auth();
+       // var token = x.PerformOAuthLogin();
         /*var user = x.GetUser(token.Result);
         var userInfo = x.GetUserInfo(token.Result);
         var email = userInfo.Result.Email;

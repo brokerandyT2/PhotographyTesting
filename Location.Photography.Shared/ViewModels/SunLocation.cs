@@ -3,6 +3,7 @@ using Location.Photography.Shared.ViewModels.Interfaces;
 using Locations.Core.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
@@ -15,14 +16,12 @@ namespace Location.Photography.Shared.ViewModels
     {
        
         public override event PropertyChangedEventHandler? PropertyChanged;
-        public List<LocationViewModel> List_Locations { get; set; }
-        private string _imageURL  ;
-        public string ImageURL
-        { get { return _imageURL; } set { _imageURL = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageURL))); } }
+        public ObservableCollection<LocationViewModel> List_Locations { get => list_Locations; set { list_Locations = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(List_Locations))); } }
+
 
         private double _latitude;
         private double _longitude;
-        private bool _isNorthernHemisphere;
+
 
         private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Now);
         private TimeOnly _selectedTime = TimeOnly.FromDateTime(DateTime.Now);
@@ -40,31 +39,15 @@ namespace Location.Photography.Shared.ViewModels
         public TimeOnly SelectedTime
         { get => _selectedTime; set { _selectedTime = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedTime))); } }
 
-        public DateTime SelectedDateTime
-        { get { return new DateTime(SelectedDate, SelectedTime); } }
 
-        private string _hemisphere;
-        public string Hemisphere
-        {
-            get
-            {
-                if (_hemisphere == Locations.Core.Shared.MagicStrings.North)
-                { return "arrow_clipart_north.png"; }
-                else
-                { return "arrow_clipart_south.png"; }
-            }
-            set
-            {
-                _hemisphere = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Hemisphere)));
-            }
-        }
+
+       
         private double _rotationAngle;
         public double RotationAngle
         {
             get
             {
-                return (_rotationAngle + 360) % 360;
+                return _rotationAngle ;
 
             }
             set { _rotationAngle = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RotationAngle))); }
@@ -79,6 +62,8 @@ namespace Location.Photography.Shared.ViewModels
             set { _RotationAngleNorth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RotationAngleNorth))); }
         }
         private double _inclination;
+        private ObservableCollection<LocationViewModel> list_Locations;
+
         public double Inclination
         { get => _inclination; }
         public SunLocation()
@@ -91,7 +76,7 @@ namespace Location.Photography.Shared.ViewModels
             if (!Compass.IsMonitoring)
             {
                 Compass.ReadingChanged += Compass_ReadingChanged;
-                Compass.Start(SensorSpeed.Default);
+                Compass.Start(SensorSpeed.UI);
             }
             if (!Accelerometer.IsMonitoring)
             {
@@ -117,15 +102,17 @@ namespace Location.Photography.Shared.ViewModels
 
         private void Compass_ReadingChanged(object? sender, CompassChangedEventArgs e)
         {
-            var heading = RotationAngleNorth = e.Reading.HeadingMagneticNorth;
-            double angleDiff = _rotationAngle - heading;
+            var heading =  e.Reading.HeadingMagneticNorth;
+             RotationAngleNorth = heading;
+             double angleDiff = _rotationAngle - heading;
 
-            // Normalize to -180 to 180 degrees
-            angleDiff = (angleDiff + 360) % 360;
-            if (angleDiff > 180) angleDiff -= 360;
+             // Normalize to -180 to 180 degrees
+             angleDiff = (angleDiff + 360) % 360;
+             if (angleDiff > 180) angleDiff -= 360;
 
-            // Apply rotation (horizontal azimuth)
-           RotationAngle = Convert.ToDouble(Math.Abs(angleDiff));
+             // Apply rotation (horizontal azimuth)
+            RotationAngle = Convert.ToDouble(Math.Abs(angleDiff));
+
 
         }
 

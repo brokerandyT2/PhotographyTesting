@@ -47,7 +47,8 @@
             <Editor HeightRequest="150" Text="{Binding Description}" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="4"/>
             <Button x:Name="Save" Text="Save" HeightRequest="50" Grid.Column="0" Grid.Row="9" Pressed="Save_Pressed" Grid.ColumnSpan="4" />
             <Button x:Name="CloseModal" Text="{x:Static strings:AppResources.CloseLocationDetails}" Pressed="CloseModal_Pressed" Grid.Row="10" Grid.ColumnSpan="2" IsVisible="False"/>
-        </Grid>
+        
+</Grid>
     </ScrollView>
 
 

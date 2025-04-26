@@ -14,13 +14,21 @@
         <Picker x:Name="locationPicker" SelectedIndexChanged="locationPicker_SelectedIndexChanged"  ItemsSource="{Binding List_Locations}" ItemDisplayBinding="{Binding Title}" />
         <DatePicker x:Name="date" DateSelected="date_DateSelected"  Date="{Binding SelectedDate}"  />
         <TimePicker x:Name="time" TimeSelected="time_TimeSelected"  Time="{Binding SelectedTime}" />
-        <Label Text="{x:Static system:Environment.NewLine}"/>
+        
 
         
-        
-       <Image x:Name="north"  Source="north.png" Rotation="{Binding RotationAngleNorth}"></Image>
+
+       <Image x:Name="north" Source="north.png" Rotation="{Binding RotationAngleNorth}"></Image>
+        <Label Text="{x:Static system:Environment.NewLine}"/>
+
+        <Label Text="{x:Static system:Environment.NewLine}"/>
+        <Label Text="{x:Static system:Environment.NewLine}"/>
+        <Label Text="{x:Static system:Environment.NewLine}"/> 
+        <Image x:Name="arrow" Source="arrowup.png" WidthRequest="150" Rotation="{Binding RotationAngle}"></Image>
+        <Label Text="{Binding RotationAngle}"/>
+        <Label Text="{Binding RotationAngleNorth}"/>
         <StackLayout HorizontalOptions="Center" VerticalOptions="Center">
-             <Image x:Name="arrow" Source="arrowup.png" WidthRequest="150" Rotation="{Binding RotationAngle}"></Image>
+             
            
         </StackLayout>
     </VerticalStackLayout>

@@ -41,8 +41,13 @@ namespace Location.Core
             {
                 try
                 {
+#if ANDY
+                    return SubscriptionTypeEnum.Premium;
+
+#else
                     Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
                     return _subType;
+#endif
                 }
                 catch
                 {
@@ -55,7 +60,7 @@ namespace Location.Core
         public MainPage()
         {
 
-       
+
             InitializeComponent();
             DataAccess da = new DataAccess();
 
@@ -63,8 +68,8 @@ namespace Location.Core
             this.Children.Add(new ListLocations());
             this.Children.Add(new Tips());
 
-            PermissionStatus ps = Permissions.RequestAsync<Permissions.Camera>().Result;
-            PermissionStatus pss = Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
+            //PermissionStatus ps = Permissions.RequestAsync<Permissions.Camera>().Result;
+            //PermissionStatus pss = Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
             SettingsService ss = new SettingsService();
 
             //Increment the app open counter
@@ -77,7 +82,7 @@ namespace Location.Core
             var setting = ss.GetSettingByName(MagicStrings.DefaultLanguage);
             var adSupport = Convert.ToBoolean(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).Value);
 
-            var subscription = ss.GetSettingByName(MagicStrings.SubscriptionType).Value;
+            var subscription = SubscriptionType;
 
             //Make sure we have saved the systems language
             if (setting.Value != language)
@@ -100,14 +105,14 @@ namespace Location.Core
             //IsLoggedIn = we have an email address (bare minimum currently)
             if (IsLoggedIn)
             {
-                if ((subscription == SubscriptionTypeEnum.Professional.Name() || subscription == SubscriptionTypeEnum.Premium.Name()) || adSupport)
+                if ((subscription == SubscriptionTypeEnum.Professional || subscription == SubscriptionTypeEnum.Premium) || adSupport)
                 {
 #if PHOTOGRAPHY
                     this.Children.Add(new Views.Pro.SceneEvaluation());
                     this.Children.Add(new Views.Pro.SunCalculations());
 
 #endif
-                    if ((subscription == SubscriptionTypeEnum.Premium.Name()) || adSupport)
+                    if ((subscription == SubscriptionTypeEnum.Premium) || adSupport)
                     {
 #if PHOTOGRAPHY
                         this.Children.Add(new Views.Premium.ExposureCalculator());

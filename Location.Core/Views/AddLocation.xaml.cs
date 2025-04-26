@@ -15,7 +15,8 @@ public partial class AddLocation : ContentPage
     {
         InitializeComponent();
         CloseModal.IsVisible = CloseModal.IsEnabled = false;
-
+        //permission.Text = ss.GetSettingByName(MagicStrings.SubscriptionType).Value;
+        //subscription.Text = ss.GetSettingByName(MagicStrings.SubscriptionExpiration).Value;
     }
     public AddLocation(ILocationViewModel viewModel)
     {

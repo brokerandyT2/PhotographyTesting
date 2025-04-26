@@ -6,66 +6,40 @@ using Locations.Core.Shared.Enums;
 using Location.Photography.Shared.ViewModels;
 using Location.Photography.Business.DataAccess;
 using Location.Core.Helpers;
+using System.Collections.ObjectModel;
+using CommunityToolkit.Maui.Core.Extensions;
 
 namespace Location.Core.Views.Premium;
 
 public partial class SunLocation : ContentPage
 {
-    public vm.SunLocation Item
-    {
-        get => BindingContext as vm.SunLocation;
-        set
-        {
-            BindingContext = value;
-
-        }
-
-    }
+   
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
         base.OnNavigatedTo(args);
-        var x = ss.GetSettingByName(MagicStrings.SunLocationViewed);
-        var z = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
 
-        PageHelpers.CheckVisit(MagicStrings.SunLocationViewed, PageEnums.SunLocation, ss, Navigation);
-        
-        var hemi = ss.GetSettingByName(MagicStrings.Hemisphere).Value;
-        //q.Hemisphere = hemi;
-        //arrow.Source = hemi == Hemisphere.HemisphereChoices.North.Name() ? "arrow_clipart_north.png" : "arrow_clipart_south.png";
-        arrow.Source = "arrowup.png";
-        date.Format = ss.GetSettingByName(MagicStrings.DateFormat).Value;
-        time.Format = ss.GetSettingByName(MagicStrings.TimeFormat).Value;
-    
+        PageHelpers.CheckVisit(MagicStrings.SunLocationViewed, PageEnums.SunLocation, new Locations.Core.Business.DataAccess.SettingsService(), Navigation);
+  
     }
+
+    private void DoTheNeedful()
+    {
+        Locations.Core.Business.DataAccess.LocationsService ss = new Locations.Core.Business.DataAccess.LocationsService();
+        var x = new vm.SunLocation();
+        x.List_Locations = ss.GetLocations().ToObservableCollection() ;
+        x.SelectedDate = DateOnly.FromDateTime(DateTime.Now);
+        x.SelectedTime = TimeOnly.FromDateTime(DateTime.Now);
+        date.Date = DateTime.Now;
+        time.Time = TimeOnly.FromDateTime(DateTime.Now).ToTimeSpan();
+        BindingContext = x;
+        locationPicker.SelectedIndex = 0;
+    }
+
     public SunLocation()
     {
         InitializeComponent();
 
-        var y = new Locations.Core.Business.DataAccess.SettingsService();
-        var z = new LocationsService();
-        var q = new vm.SunLocation();
-
-        date.Format = y.GetSettingByName(MagicStrings.DateFormat).Value;
-        date.Date = DateTime.Now;
-        time.Format = y.GetSettingByName(MagicStrings.TimeFormat).Value;
-        time.Time = DateTime.Now.TimeOfDay;
-        q.List_Locations = z.GetLocations();
-        BindingContext = q;
-        locationPicker.SelectedIndex = 0;
-
-        var absoluteLayout = DeviceDisplay.MainDisplayInfo;
-        
-        double radius = Math.Min(absoluteLayout.Width, absoluteLayout.Height) / 2;
-        arrow.AnchorY = radius / arrow.Height;
-        arrow.AnchorX = radius / arrow.Width;
-       // north.AnchorX = radius / north.Width;
-      //  north.AnchorY = (radius / north.Height)+50;
-
-
-
-
-
+        DoTheNeedful();
     }
 
     private void locationPicker_SelectedIndexChanged(object sender, EventArgs e)
