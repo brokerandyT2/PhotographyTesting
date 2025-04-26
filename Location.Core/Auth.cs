@@ -4,12 +4,7 @@ using Duende.IdentityModel.Jwk;
 using Duende.IdentityModel.OidcClient;
 using Duende.IdentityModel.OidcClient.Browser;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 #if ANDROID
 using Duende.IdentityModel.OidcClient;

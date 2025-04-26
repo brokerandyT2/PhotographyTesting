@@ -39,15 +39,15 @@ public partial class SceneEvaluation : ContentPage
          {
              Dispatcher.Dispatch(() =>
              {
-                 //processing.IsVisible = true;
-                // processing.IsRunning = true;
+                 processing.IsVisible = true;
+                 processing.IsRunning = true;
              });
              await viewModel.EvaluateScene(sender);
 
               Dispatcher.Dispatch(() =>
               {
-              //    processing.IsVisible = false;
-               //   processing.IsRunning = false;
+                  processing.IsVisible = false;
+                  processing.IsRunning = false;
               });
               
           }); 
@@ -61,7 +61,7 @@ public partial class SceneEvaluation : ContentPage
         Microsoft.Maui.Controls.RadioButton rb = (Microsoft.Maui.Controls.RadioButton)sender;
         var x = rb.Value;
 
-      /*  switch (x) { 
+       switch (x) { 
             case "R":
                 histogramRed.IsVisible = true;
                 histogramGreen.IsVisible = false;
@@ -92,7 +92,7 @@ public partial class SceneEvaluation : ContentPage
                 histogramBlue.IsVisible = true;
                 histogramContrast.IsVisible = true;
                 break;
-        } */
+        } 
 
     }
 }
