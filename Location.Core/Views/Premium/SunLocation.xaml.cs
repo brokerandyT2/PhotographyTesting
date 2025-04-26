@@ -33,7 +33,7 @@ public partial class SunLocation : ContentPage
         var hemi = ss.GetSettingByName(MagicStrings.Hemisphere).Value;
         //q.Hemisphere = hemi;
         //arrow.Source = hemi == Hemisphere.HemisphereChoices.North.Name() ? "arrow_clipart_north.png" : "arrow_clipart_south.png";
-        arrow.Source = "arrow_clipart_north.png";
+        arrow.Source = "arrowup.png";
         date.Format = ss.GetSettingByName(MagicStrings.DateFormat).Value;
         time.Format = ss.GetSettingByName(MagicStrings.TimeFormat).Value;
     
@@ -53,6 +53,19 @@ public partial class SunLocation : ContentPage
         q.List_Locations = z.GetLocations();
         BindingContext = q;
         locationPicker.SelectedIndex = 0;
+
+        var absoluteLayout = DeviceDisplay.MainDisplayInfo;
+        
+        double radius = Math.Min(absoluteLayout.Width, absoluteLayout.Height) / 2;
+        arrow.AnchorY = radius / arrow.Height;
+        arrow.AnchorX = radius / arrow.Width;
+       // north.AnchorX = radius / north.Width;
+      //  north.AnchorY = (radius / north.Height)+50;
+
+
+
+
+
     }
 
     private void locationPicker_SelectedIndexChanged(object sender, EventArgs e)

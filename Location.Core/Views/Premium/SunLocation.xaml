@@ -14,6 +14,14 @@
         <Picker x:Name="locationPicker" SelectedIndexChanged="locationPicker_SelectedIndexChanged"  ItemsSource="{Binding List_Locations}" ItemDisplayBinding="{Binding Title}" />
         <DatePicker x:Name="date" DateSelected="date_DateSelected"  Date="{Binding SelectedDate}"  />
         <TimePicker x:Name="time" TimeSelected="time_TimeSelected"  Time="{Binding SelectedTime}" />
-        <Image x:Name="arrow" Source="{Binding ImageURL}" Rotation="{Binding RotationAngle}"></Image>
+        <Label Text="{x:Static system:Environment.NewLine}"/>
+
+        
+        
+       <Image x:Name="north"  Source="north.png" Rotation="{Binding RotationAngleNorth}"></Image>
+        <StackLayout HorizontalOptions="Center" VerticalOptions="Center">
+             <Image x:Name="arrow" Source="arrowup.png" WidthRequest="150" Rotation="{Binding RotationAngle}"></Image>
+           
+        </StackLayout>
     </VerticalStackLayout>
 </ContentPage>

@@ -46,10 +46,17 @@ public partial class ExposureCalculator : ContentPage
         shutter.IsChecked = true;
         //((lpv.ExposureCalculator)BindingContext).Calculate();
     }
-    public ExposureCalculator(int tipID)
+    private bool _isFromTips;
+    public ExposureCalculator(int tipID, bool isFromTips = false)
     {
-
+        this._isFromTips = isFromTips;
+        InitializeComponent();
         var x = ts.Get(tipID);
+        ISO_Picker.SelectedIndex = 0;
+        fstop_Picker.SelectedIndex = 0;
+        ShutterSpeed_Picker.SelectedIndex = 0;
+        exposurefull.IsChecked = true;
+        shutter.IsChecked = true;
         lps.ViewModels.ExposureCalculator ec = new lps.ViewModels.ExposureCalculator();
         ec.OldISO = (ISO_Picker.SelectedIndex = ISO_Picker.SelectedIndex + 1).ToString();
         ec.FStopSelected = fstop_Picker.SelectedItem.ToString();
@@ -63,17 +70,17 @@ public partial class ExposureCalculator : ContentPage
         ShutterSpeed_Picker.SelectedItem = ec.ShutterSpeedSelected;
         ISO_Picker.SelectedItem = ec.ISOSelected;
         _skipCalculations = false;
-        ec.Calculate();
-
+        ec.Calculate();        
+        closeButton.IsVisible = this._isFromTips;
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
 
-        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
 
-        PageHelpers.CheckVisit(MagicStrings.ExposureCalcViewed, PageEnums.ExposureCalculator, ss, Navigation);
+
+        PageHelpers.CheckVisit(MagicStrings.ExposureCalcViewed, PageEnums.ExposureCalculator, new Locations.Core.Business.DataAccess.SettingsService(), Navigation);
 
 
     }

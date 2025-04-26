@@ -25,15 +25,9 @@ public partial class Tips : ContentPage
 
     private void exposurecalc_Pressed(object sender, EventArgs e)
     {
-        if (settingsService.GetSettingByName(MagicStrings.SubscriptionType).Value == SubscriptionType.SubscriptionTypeEnum.Professional.Name())
-        {
-            //TODO: Fix. NO OP
-            //Navigation.PushModalAsync(new ExposureCalculator((int)((Button)sender).CommandParameter)).RunSynchronously();
-        }
-        else
-        {
-            Navigation.PushModalAsync(new Location.Core.Views.FeatureNotSupported(MagicStrings.ExposureCalculator));
-        }
+                
+            Navigation.PushModalAsync(new Views.Premium.ExposureCalculator((int)((Microsoft.Maui.Controls.Button)sender).CommandParameter, true));
+       
 
     }
 }

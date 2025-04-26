@@ -69,6 +69,15 @@ namespace Location.Photography.Shared.ViewModels
             }
             set { _rotationAngle = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RotationAngle))); }
         }
+        private double _RotationAngleNorth;
+        public double RotationAngleNorth
+        {
+            get
+            {
+                return Math.Abs(_RotationAngleNorth);
+            }
+            set { _RotationAngleNorth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RotationAngleNorth))); }
+        }
         private double _inclination;
         public double Inclination
         { get => _inclination; }
@@ -108,7 +117,7 @@ namespace Location.Photography.Shared.ViewModels
 
         private void Compass_ReadingChanged(object? sender, CompassChangedEventArgs e)
         {
-            var heading = e.Reading.HeadingMagneticNorth;
+            var heading = RotationAngleNorth = e.Reading.HeadingMagneticNorth;
             double angleDiff = _rotationAngle - heading;
 
             // Normalize to -180 to 180 degrees
