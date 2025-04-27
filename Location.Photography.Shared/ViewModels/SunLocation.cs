@@ -1,12 +1,14 @@
 ﻿using Innovative.SolarCalculator;
 using Location.Photography.Shared.ViewModels.Interfaces;
 using Locations.Core.Shared.ViewModels;
+using Microsoft.Maui;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,115 +18,144 @@ namespace Location.Photography.Shared.ViewModels
     {
        
         public override event PropertyChangedEventHandler? PropertyChanged;
-        public ObservableCollection<LocationViewModel> List_Locations { get => list_Locations; set { list_Locations = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(List_Locations))); } }
-
-
+        private DateTime _selectedDateTime = DateTime.Now;
         private double _latitude;
         private double _longitude;
+        private double _northRotationAngle;
+        private double _sunDirection;
 
+        private const double SunSmoothingFactor = 0.1; // smaller = smoother (e.g., 0.1 = 10% change)
 
-        private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Now);
-        private TimeOnly _selectedTime = TimeOnly.FromDateTime(DateTime.Now);
+        public SunLocation()
+        {
+            if (Compass.Default.IsSupported)
+            {
+                Compass.Default.ReadingChanged += Compass_ReadingChanged;
+                if(!Compass.Default.IsMonitoring)
+                    Compass.Default.Start(SensorSpeed.UI);
+            }
+
+            Latitude = 0;
+            Longitude = 0;
+        }
+
+     
+
+        public DateTime SelectedDateTime
+        {
+            get => _selectedDateTime;
+            set
+            {
+                if (_selectedDateTime != value)
+                {
+                    _selectedDateTime = value;
+                    OnPropertyChanged();
+                    CalculateSunDirection(NorthRotationAngle);
+                }
+            }
+        }
 
         public double Latitude
-        { get => _latitude; set { _latitude = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Latitude))); } }
+        {
+            get => _latitude;
+            set
+            {
+                if (_latitude != value)
+                {
+                    _latitude = value;
+                    OnPropertyChanged();
+                    CalculateSunDirection(NorthRotationAngle);
+                }
+            }
+        }
+
         public double Longitude
         {
             get => _longitude;
-            set { _longitude = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Longitude))); }
-        }
-        public DateOnly SelectedDate
-        { get => _selectedDate; set { _selectedDate = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedDate))); } }
-
-        public TimeOnly SelectedTime
-        { get => _selectedTime; set { _selectedTime = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedTime))); } }
-
-
-
-       
-        private double _rotationAngle;
-        public double RotationAngle
-        {
-            get
+            set
             {
-                return _rotationAngle ;
-
-            }
-            set { _rotationAngle = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RotationAngle))); }
-        }
-        private double _RotationAngleNorth;
-        public double RotationAngleNorth
-        {
-            get
-            {
-                return Math.Abs(_RotationAngleNorth);
-            }
-            set { _RotationAngleNorth = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RotationAngleNorth))); }
-        }
-        private double _inclination;
-        private ObservableCollection<LocationViewModel> list_Locations;
-
-        public double Inclination
-        { get => _inclination; }
-        public SunLocation()
-        {
-            this.ToggleSensors();
-        }
-
-        private void ToggleSensors()
-        {
-            if (!Compass.IsMonitoring)
-            {
-                Compass.ReadingChanged += Compass_ReadingChanged;
-                Compass.Start(SensorSpeed.UI);
-            }
-            if (!Accelerometer.IsMonitoring)
-            {
-                //Accelerometer.ReadingChanged += Accelerometer_ReadingChanged;
-                //Accelerometer.Start(SensorSpeed.Default);
+                if (_longitude != value)
+                {
+                    _longitude = value;
+                    OnPropertyChanged();
+                    CalculateSunDirection(NorthRotationAngle);
+                }
             }
         }
 
-        private void Accelerometer_ReadingChanged(object? sender, AccelerometerChangedEventArgs e)
+        public double NorthRotationAngle
         {
-            Vector3 acceleration = e.Reading.Acceleration;
-
-            // Calculate phone inclination (pitch)
-            var holder = Math.Atan2(acceleration.Y, acceleration.Z) * (180.0 / Math.PI);
-
-            if (Math.Abs(holder - _inclination) < 5)
+            get => _northRotationAngle;
+            set
             {
-                Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(200));
-                Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(200));
-
+                if (_northRotationAngle != value)
+                {
+                    _northRotationAngle = value;
+                    OnPropertyChanged();
+                }
             }
         }
 
-        private void Compass_ReadingChanged(object? sender, CompassChangedEventArgs e)
+        public double SunDirection
         {
-            var heading =  e.Reading.HeadingMagneticNorth;
-             RotationAngleNorth = heading;
-             double angleDiff = _rotationAngle - heading;
-
-             // Normalize to -180 to 180 degrees
-             angleDiff = (angleDiff + 360) % 360;
-             if (angleDiff > 180) angleDiff -= 360;
-
-             // Apply rotation (horizontal azimuth)
-            RotationAngle = Convert.ToDouble(Math.Abs(angleDiff));
-
-
+            get => _sunDirection;
+            set
+            {
+                if (_sunDirection != value)
+                {
+                    _sunDirection = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
-        public void Calculate()
+        private void Compass_ReadingChanged(object sender, CompassChangedEventArgs e)
+        {
+            var heading = e.Reading.HeadingMagneticNorth;
+
+            NorthRotationAngle = heading;
+
+            CalculateSunDirection(heading);
+        }
+
+        private void CalculateSunDirection(double heading)
         {
             TimeZoneInfo cst = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
 
-            DateTime dt = new DateTime(SelectedDate.Year, SelectedDate.Month, SelectedDate.Day, SelectedTime.Hour, SelectedTime.Minute, 0);
+            DateTime dt = SelectedDateTime;
             SolarTimes solarTimes = new SolarTimes(dt, this._latitude, this._longitude);
-            RotationAngle = Math.Round((double)solarTimes.SolarAzimuth, 0);
-            _inclination = Math.Round ((double)solarTimes.SolarElevation, 0);
+            var RotationAngle = Math.Round((double)solarTimes.SolarAzimuth, 0);
+            //_inclination = Math.Round((double)solarTimes.SolarElevation, 0);
+            double angleDiff = RotationAngle - heading;
+
+            // Normalize to -180 to 180 degrees
+            angleDiff = (angleDiff + 360) % 360;
+            if (angleDiff > 180) angleDiff -= 360;
+
+            // Fake simple sun azimuth calculation (replace later with real)
+            var hourAngle = RotationAngle;
+
+
+            // Smoothly interpolate from current to target
+            SunDirection = SmoothAngle(SunDirection, angleDiff, SunSmoothingFactor);
+        }
+        public void Calculate()
+        {
+            this.CalculateSunDirection(this.NorthRotationAngle);
+           
 
         }
+
+        /// <summary>
+        /// Smooth interpolation between angles, handling wrap-around at 360 degrees.
+        /// </summary>
+        private double SmoothAngle(double current, double target, double smoothingFactor)
+        {
+            double difference = ((target - current + 540) % 360) - 180;
+            return (current + difference * smoothingFactor + 360) % 360;
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

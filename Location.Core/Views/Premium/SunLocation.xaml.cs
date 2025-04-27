@@ -13,7 +13,7 @@ namespace Location.Core.Views.Premium;
 
 public partial class SunLocation : ContentPage
 {
-   
+   Locations.Core.Business.DataAccess.LocationsService ss = new Locations.Core.Business.DataAccess.LocationsService();
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
@@ -24,11 +24,11 @@ public partial class SunLocation : ContentPage
 
     private void DoTheNeedful()
     {
-        Locations.Core.Business.DataAccess.LocationsService ss = new Locations.Core.Business.DataAccess.LocationsService();
+        
         var x = new vm.SunLocation();
-        x.List_Locations = ss.GetLocations().ToObservableCollection() ;
-        x.SelectedDate = DateOnly.FromDateTime(DateTime.Now);
-        x.SelectedTime = TimeOnly.FromDateTime(DateTime.Now);
+
+        x.SelectedDateTime = GetDate();
+
         date.Date = DateTime.Now;
         time.Time = TimeOnly.FromDateTime(DateTime.Now).ToTimeSpan();
         BindingContext = x;
@@ -38,8 +38,13 @@ public partial class SunLocation : ContentPage
     public SunLocation()
     {
         InitializeComponent();
+        BindingContext = new vm.SunLocation();
+        var loc = ss.GetLocations();
+        locationPicker.ItemsSource = loc;
+        date.Date = DateTime.Now;
+        time.Time = TimeOnly.FromDateTime(DateTime.Now).ToTimeSpan();
+        locationPicker.SelectedIndex = 0;
 
-        DoTheNeedful();
     }
 
     private void locationPicker_SelectedIndexChanged(object sender, EventArgs e)
@@ -48,20 +53,26 @@ public partial class SunLocation : ContentPage
         var x = (LocationViewModel)((Picker)sender).SelectedItem;
         y.Latitude = x.Lattitude;
         y.Longitude = x.Longitude;
+        y.SelectedDateTime = GetDate();
         y.Calculate();
+    }
+
+    private DateTime GetDate()
+    {
+        return new DateTime(date.Date.Year, date.Date.Month, date.Date.Day, time.Time.Hours, time.Time.Minutes, 0);
     }
 
     private void date_DateSelected(object sender, DateChangedEventArgs e)
     {
         var y = ((vm.SunLocation)BindingContext);
-        y.SelectedDate = DateOnly.FromDateTime(e.NewDate);
+        y.SelectedDateTime = GetDate();
         y.Calculate();
     }
 
     private void time_TimeSelected(object sender, TimeChangedEventArgs e)
     {
         var y = ((vm.SunLocation)BindingContext);
-        y.SelectedTime = new TimeOnly(e.NewTime.Hours, e.NewTime.Minutes, 0);
+        y.SelectedDateTime = GetDate();
         y.Calculate();
     }
 }

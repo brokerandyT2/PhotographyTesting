@@ -11,22 +11,22 @@
         <models:SunLocation/>
     </ContentPage.BindingContext>
     <VerticalStackLayout>
-        <Picker x:Name="locationPicker" SelectedIndexChanged="locationPicker_SelectedIndexChanged"  ItemsSource="{Binding List_Locations}" ItemDisplayBinding="{Binding Title}" />
+        <Picker x:Name="locationPicker" SelectedIndexChanged="locationPicker_SelectedIndexChanged"  ItemDisplayBinding="{Binding Title}" />
         <DatePicker x:Name="date" DateSelected="date_DateSelected"  Date="{Binding SelectedDate}"  />
         <TimePicker x:Name="time" TimeSelected="time_TimeSelected"  Time="{Binding SelectedTime}" />
-        
 
-        
 
-       <Image x:Name="north" Source="north.png" Rotation="{Binding RotationAngleNorth}"></Image>
+
+
+        <Image x:Name="north" Source="north.png" Rotation="{Binding NorthRotationAngle}"></Image>
         <Label Text="{x:Static system:Environment.NewLine}"/>
 
         <Label Text="{x:Static system:Environment.NewLine}"/>
         <Label Text="{x:Static system:Environment.NewLine}"/>
-        <Label Text="{x:Static system:Environment.NewLine}"/> 
-        <Image x:Name="arrow" Source="arrowup.png" WidthRequest="150" Rotation="{Binding RotationAngle}"></Image>
-        <Label Text="{Binding RotationAngle}"/>
-        <Label Text="{Binding RotationAngleNorth}"/>
+        <Label Text="{x:Static system:Environment.NewLine}"/>
+        <Image x:Name="arrow" Source="arrowup.png" WidthRequest="150" Rotation="{Binding SunDirection}"></Image>
+        <Label Text="{Binding NorthRotationAngle}"/>
+        <Label Text="{Binding SunDirection}"/>
         <StackLayout HorizontalOptions="Center" VerticalOptions="Center">
              
            
