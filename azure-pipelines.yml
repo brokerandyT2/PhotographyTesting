@@ -29,13 +29,13 @@ steps:
     command: 'restore'
     projects: '$(solution)'
 
-# Build MAUI project with semantic version
-- task: DotNetCoreCLI@2
-  displayName: 'Build MAUI Solution'
+- task: VSBuild@1
+  displayName: 'Build MAUI Android using MSBuild (Visual Studio)'
   inputs:
-    command: 'build'
-    projects: '$(solution)'
-    arguments: '--configuration $(buildConfiguration) /p:Version=$(GitVersion.SemVer) /u:ANDY'
+    solution: '$(solution)'
+    msbuildArgs: '/p:Configuration=$(buildConfiguration) /p:Platform=AnyCPU'# /p:Version=$(GitVersion.SemVer)'
+    platform: 'Any CPU'
+    configuration: '$(buildConfiguration)'
 
 # (Optional) Pack or Publish if needed
 # - task: DotNetCoreCLI@2
