@@ -19,7 +19,7 @@ namespace Location.Core
 public static bool IsLoggedIn =  ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;
 
 #else
-        public static bool IsLoggedIn = true;
+        public static bool IsLoggedIn = false;
 #endif
 
 

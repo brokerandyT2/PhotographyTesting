@@ -16,12 +16,12 @@
             Text="Welcome!"
             FontSize="32"
             HorizontalOptions="Center" />
-        <Button 
-            Text="Login with Google"
+        <ImageButton 
+            Source="android_neutral_rd_ctn.png"
            
             Command="{Binding GoogleLoginCommands}"
             BackgroundColor="#4285F4"
-            TextColor="White"
+            
             CornerRadius="8"
             HeightRequest="50"
             HorizontalOptions="Center" 

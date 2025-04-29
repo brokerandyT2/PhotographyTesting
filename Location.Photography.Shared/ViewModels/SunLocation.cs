@@ -137,7 +137,7 @@ namespace Location.Photography.Shared.ViewModels
             var RotationAngle = Math.Round((double)solarTimes.SolarAzimuth, 0);
             //_inclination = Math.Round((double)solarTimes.SolarElevation, 0);
             double angleDiff = RotationAngle - heading;
-            double angleDiffN = RotationAngle - heading;
+            double angleDiffN = NorthRotationAngle - heading;
 
             // Normalize to -180 to 180 degrees
             angleDiff = (angleDiff + 360) % 360;
