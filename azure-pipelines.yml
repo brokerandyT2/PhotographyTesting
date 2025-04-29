@@ -1,26 +1,47 @@
-# Xamarin.Android
-# Build a Xamarin.Android project.
-# Add steps that test, sign, and distribute an app, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/xamarin
-
 trigger:
-- master
+  branches:
+    include:
+      - main
+      - feature/*
+      - release/*
 
 pool:
   vmImage: 'windows-latest'
 
 variables:
   buildConfiguration: 'Release'
-  outputDirectory: '$(build.binariesDirectory)/$(buildConfiguration)'
+  solution: 'Photography.sln'
 
 steps:
-- task: NuGetToolInstaller@1
-
-- task: NuGetCommand@2
+# Install .NET SDK (ensure it's the version MAUI requires)
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK'
   inputs:
-    restoreSolution: '**/*.sln'
+    packageType: 'sdk'
+    version: '9.x' # Use the .NET version your MAUI project uses
 
+
+
+# Restore NuGet packages
 - task: DotNetCoreCLI@2
+  displayName: 'Restore NuGet packages'
   inputs:
-    command: 'build'
-    projects: '**/**.sln'
+    command: 'restore'
+    projects: '$(solution)'
+
+- task: VSBuild@1
+  displayName: 'Build MAUI Android using MSBuild (Visual Studio)'
+  inputs:
+    solution: '$(solution)'
+    msbuildArgs: '/p:Configuration=$(buildConfiguration) /p:Platform=AnyCPU'# /p:Version=$(GitVersion.SemVer)'
+    platform: 'Any CPU'
+    configuration: '$(buildConfiguration)'
+
+# (Optional) Pack or Publish if needed
+# - task: DotNetCoreCLI@2
+#   displayName: 'Publish'
+#   inputs:
+#     command: 'publish'
+#     publishWebProjects: false
+#     projects: '$(solution)'
+#     arguments: '--configuration $(buildConfiguration)'
