@@ -27,6 +27,9 @@ stages:
         version: '9.x'
         includePreviewVersions: true
     - script: |
+        dotnet workload restore
+      displayName: 'Restore Workloads'
+    - script: |
         dotnet workload install maui-ios maccatalyst
       displayName: 'Install MAUI iOS Workload'
 
