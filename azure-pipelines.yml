@@ -18,7 +18,7 @@ steps:
   displayName: 'Install .NET SDK'
   inputs:
     packageType: 'sdk'
-    version: '8.x.x' # Use the .NET version your MAUI project uses
+    version: '9.x' # Use the .NET version your MAUI project uses
 
 
 
