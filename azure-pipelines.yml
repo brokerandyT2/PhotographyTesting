@@ -41,13 +41,20 @@ stages:
         restoreSolution: '**/*.sln'
         feedsToUse: 'select'
 
-    - script: |
-        dotnet build Photography.sln --configuration $(buildConfiguration) -p:ContinuousIntegrationBuild=true
+    - task: VSBuild@1
       displayName: 'Build MAUI Solution'
+      inputs:
+        solution: 'Photography.sln'
+        configuration: '$(buildConfiguration)'
+        msbuildArgs: '-p:ContinuousIntegrationBuild=true'
 
-    - script: |
-        dotnet publish Location.Core/Location.Core.csproj -c $(buildConfiguration) -o $(outputDir) -p:Version=$(Build.BuildNumber)
+    - task: DotNetCoreCLI@2
       displayName: 'Publish MAUI App'
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: 'Location.Core/Location.Core.csproj'
+        arguments: '-c $(buildConfiguration) -o $(outputDir) -p:Version=$(Build.BuildNumber)'
 
 
     - task: PublishBuildArtifacts@1
