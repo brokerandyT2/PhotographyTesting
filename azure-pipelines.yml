@@ -46,7 +46,7 @@ stages:
       inputs:
         solution: 'Photography.sln'
         configuration: '$(buildConfiguration)'
-        msbuildArgs: '-p:ContinuousIntegrationBuild=true'
+        msbuildArgs: '-p:ContinuousIntegrationBuild=true -u:ANDY'
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish MAUI App'
