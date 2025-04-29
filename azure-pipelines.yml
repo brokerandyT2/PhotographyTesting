@@ -26,6 +26,9 @@ stages:
       inputs:
         version: '9.x'
         includePreviewVersions: true
+    - script: |
+        dotnet workload install maui-ios
+      displayName: 'Install MAUI iOS Workload'
 
     - task: NuGetToolInstaller@1
 
