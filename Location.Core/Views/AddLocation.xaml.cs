@@ -42,8 +42,8 @@ public partial class AddLocation : ContentPage
     private void Save_Pressed(object sender, EventArgs e)
     {
         var x = (LocationViewModel)BindingContext;
-   
-        BindingContext = ls.Save(x, true);
+        var y = ls.Save(x, true);
+        BindingContext = new LocationViewModel();
 
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
@@ -69,6 +69,7 @@ public partial class AddLocation : ContentPage
                 using FileStream localFileStream = File.OpenWrite(localFilePath);
                 await sourceStream.CopyToAsync(localFileStream);
                 x.Photo = localFilePath;
+                AddPhoto.ImageSource = localFilePath;
             }
         }
     }

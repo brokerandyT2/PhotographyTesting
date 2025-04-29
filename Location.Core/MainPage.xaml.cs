@@ -45,8 +45,8 @@ public static bool IsLoggedIn =  ss.GetSettingByName(MagicStrings.Email).Value !
                     Dispatcher.Dispatch(() => da = new DataAccess());
                 }
             );
-            PermissionStatus ps = Permissions.RequestAsync<Permissions.Camera>().Result;
-            PermissionStatus pss = Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
+            var ps =  Permissions.RequestAsync<Permissions.Camera>().Result;
+            var pss =  Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
 #endif
 
 

@@ -75,4 +75,9 @@ public partial class SunLocation : ContentPage
         y.SelectedDateTime = GetDate();
         y.Calculate();
     }
+
+    private void ImageButton_Pressed(object sender, EventArgs e)
+    {
+        Navigation.PopModalAsync();
+    }
 }

@@ -10,7 +10,8 @@ public partial class Tips : ContentPage
 {
     TipService ts = new TipService();
     SettingsService settingsService = new SettingsService();
-	public Tips()
+    private static Locations.Core.Shared.Enums.SubscriptionType.SubscriptionTypeEnum _subType;
+    public Tips()
 	{
 		InitializeComponent();
         BindingContext = ts.GetDisplay();
@@ -35,6 +36,8 @@ public partial class Tips : ContentPage
     {
         base.OnNavigatedTo(args);
         PageHelpers.CheckVisit(MagicStrings.TipsViewed, PageEnums.Tips, settingsService, Navigation);
+        Enum.TryParse(settingsService.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
+        exposurecalc.IsVisible = _subType == SubscriptionType.SubscriptionTypeEnum.Professional || _subType == SubscriptionType.SubscriptionTypeEnum.Premium ? true : false;
     }
     
 }

@@ -43,9 +43,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Label Text="{x:Static strings:AppResources.exposureincrements}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="1" Grid.ColumnSpan="4"/>
+            <Label Text="{x:Static strings:AppResources.exposureincrements}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="1" Grid.ColumnSpan="3"/>
+            <ImageButton Pressed="closeButton_Pressed" Source="closeoutlinecustom.png" x:Name="closebtn" IsVisible="False" Grid.Row="0" Grid.Column="4" />
 
-                <StackLayout RadioButtonGroup.GroupName="Exposure" Grid.Row="2" Grid.ColumnSpan="4" Padding="2,0,2,0" Orientation="Horizontal" >
+            <StackLayout RadioButtonGroup.GroupName="Exposure" Grid.Row="2" Grid.ColumnSpan="4" Padding="2,0,2,0" Orientation="Horizontal" >
 
                     <RadioButton x:Name="exposurefull" Value="1" Content="{x:Static strings:AppResources.full}" Padding="2,0,10,0" CheckedChanged="exposuresteps_CheckedChanged" />
 
@@ -78,7 +79,7 @@
                 <Label Text="{Binding FStopResult}" x:Name="fstopresult" Grid.Row="10" Grid.Column="2"/>
                 <Label Text="{Binding ISOResult}" x:Name="isoresult" Grid.Row="10" Grid.Column="3" />
             <Label Text="{Binding ErrorMessage}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="11" Grid.ColumnSpan="4" x:Name="error" IsVisible="False"/>
-            <Button Grid.Row="14" x:Name="closeButton" Grid.ColumnSpan="4" Text="Close Window" Pressed="closeButton_Pressed"/>
+           
             </Grid>
         </VerticalStackLayout>
 </ContentPage>

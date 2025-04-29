@@ -38,4 +38,9 @@ public partial class EditLocation : ContentPage
         var y = (LocationViewModel)BindingContext;
         Navigation.PushModalAsync(new Pro.SunCalculations(y));
     }
+
+    private void ImageButton_Pressed(object sender, EventArgs e)
+    {
+        Navigation.PushAsync(new MainPage());
+    }
 }

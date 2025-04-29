@@ -33,7 +33,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Image Source="{Binding Photo}"  Grid.Column="0" Grid.ColumnSpan="4" HeightRequest="150" Grid.Row="0"/>
-
+            <ImageButton Pressed="ImageButton_Pressed" Source="closeoutlinecustom.png" Grid.Row="0" Grid.Column="4" />
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Column="1" Grid.ColumnSpan="4" Grid.Row="1"/>
             <Button Text="{x:Static strings:AppResources.Weather}" Grid.Row="2" Grid.Column="1" x:Name="WeatherButton" Pressed="WeatherButton_Pressed" />
             <Button Text="{x:Static strings:AppResources.SunCalculations}" Grid.Row="2" Grid.Column="2" x:Name="SunEvents" Pressed="SunEvents_Pressed" />

@@ -32,7 +32,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="AddPhoto" ImageSource="landscape.png" Background="Grey" Grid.Column="0" Grid.ColumnSpan="4" WidthRequest="1000" Grid.Row="0" Pressed="AddPhoto_Pressed" />
+            <Button x:Name="AddPhoto" ImageSource="landscape.png" Background="Grey" Grid.Column="0" Grid.ColumnSpan="4" WidthRequest="500" Grid.Row="0" Pressed="AddPhoto_Pressed" />
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="1"/>
             <Label Text="{x:Static strings:AppResources.Title}" FontSize="Medium" Grid.Row="1" Grid.ColumnSpan="4" HorizontalOptions="Start"/>
             <Entry IsPassword="False" IsSpellCheckEnabled="True" IsTextPredictionEnabled="True" Text="{Binding Title}" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4"/>

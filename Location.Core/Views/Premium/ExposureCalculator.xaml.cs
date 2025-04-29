@@ -17,7 +17,7 @@ public partial class ExposureCalculator : ContentPage
     {
         _adSupport = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean();
         InitializeComponent();
-        closeButton.IsVisible = false;
+        closebtn.IsVisible = false;
         ShutterSpeed_Picker.IsEnabled = false;
 
         var x = (lpv.ExposureCalculator)BindingContext;
@@ -70,11 +70,12 @@ public partial class ExposureCalculator : ContentPage
         ShutterSpeed_Picker.SelectedItem = ec.ShutterSpeedSelected;
         ISO_Picker.SelectedItem = ec.ISOSelected;
         _skipCalculations = false;
+        closebtn.IsVisible = isFromTips;
         ec.Calculate();
-       
-        
-       
-        closeButton.IsVisible = this._isFromTips;
+
+
+
+        closebtn.IsVisible = this._isFromTips;
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
@@ -202,5 +203,5 @@ public partial class ExposureCalculator : ContentPage
         x.Calculate();
     }
 
-
+   
 }
