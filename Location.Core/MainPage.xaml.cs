@@ -23,7 +23,7 @@ namespace Location.Core
                 try
                 {
 #if ANDY
-                    return true;
+                    return false;
 #else
                     return ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;
 #endif
@@ -60,16 +60,18 @@ namespace Location.Core
         public MainPage()
         {
 
-
+            DataAccess da;
             InitializeComponent();
-            DataAccess da = new DataAccess();
+            Task.Run(async () =>
+                {
+                    Dispatcher.Dispatch(() => da = new DataAccess());
+                }
+            );
 
-            this.Children.Add(new AddLocation());
-            this.Children.Add(new ListLocations());
-            this.Children.Add(new Tips());
+           
 
-            //PermissionStatus ps = Permissions.RequestAsync<Permissions.Camera>().Result;
-            //PermissionStatus pss = Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
+            PermissionStatus ps = Permissions.RequestAsync<Permissions.Camera>().Result;
+            PermissionStatus pss = Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
             SettingsService ss = new SettingsService();
 
             //Increment the app open counter
@@ -105,6 +107,8 @@ namespace Location.Core
             //IsLoggedIn = we have an email address (bare minimum currently)
             if (IsLoggedIn)
             {
+                AddDefault();
+
                 if ((subscription == SubscriptionTypeEnum.Professional || subscription == SubscriptionTypeEnum.Premium) || adSupport)
                 {
 #if PHOTOGRAPHY
@@ -124,6 +128,7 @@ namespace Location.Core
             }
             else
             {
+                AddDefault();
                 Navigation.PushModalAsync(new Login());
 
             }
@@ -132,7 +137,12 @@ namespace Location.Core
 
         }
 
-
+        private void AddDefault()
+        {
+            this.Children.Add(new AddLocation());
+            this.Children.Add(new ListLocations());
+            this.Children.Add(new Tips());
+        }
     }
 
 }

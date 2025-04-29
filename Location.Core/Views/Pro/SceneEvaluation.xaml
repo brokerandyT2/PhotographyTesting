@@ -4,7 +4,6 @@
              x:Class="Location.Core.Views.Pro.SceneEvaluation"
              Title="Scene Evaluation"
              xmlns:models="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
-             IconImageSource="Resources/AppIcon/sceneevaluation.png"
              xmlns:strings="clr-namespace:Location.Core.Resources"
              xmlns:system="clr-namespace:System;assembly=netstandard"
              x:DataType="models:SceneEvaluationViewModel">
@@ -37,7 +36,7 @@
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0" Grid.ColumnSpan="6"/>
             <Label Text="{x:Static strings:AppResources.pleasewaitlong}" Grid.Row="1" Grid.ColumnSpan="6"/>
             
-            <Image x:Name="histogramRed" Source="{Binding RedHistogramImage}" IsVisible="False" Grid.Row="2" Grid.ColumnSpan="6" Aspect="AspectFill"/>
+            <Image x:Name="histogramRed" Source="{Binding RedHistogramImage}" IsVisible="False" Grid.Row="2" Grid.ColumnSpan="6" />
             <Image x:Name="histogramBlue" Source="{Binding BlueHistogramImage}" IsVisible="False" Grid.Row="3" Grid.ColumnSpan="6"/>
             <Image x:Name="histogramGreen" Source="{Binding GreenHistogramImage}" IsVisible="False" Grid.Row="4"  Grid.ColumnSpan="6"/>
             <Image x:Name="histogramContrast" Source="{Binding ContrastHistogramImage}" Grid.Row="5" Grid.ColumnSpan="6"/>
@@ -46,9 +45,9 @@
             <RadioButton Content="{x:Static strings:AppResources.Blue}" GroupName="chart" Value="B" Grid.Row="6" Grid.Column="1" CheckedChanged="CheckedChanged" IsVisible="True"/>
             <RadioButton Content="{x:Static strings:AppResources.Green}" GroupName="chart" Value="G" Grid.Row="6" Grid.Column="2" CheckedChanged="CheckedChanged" IsVisible="True"/>
             <RadioButton Content="{x:Static strings:AppResources.Contrast}" GroupName="chart" Value="C" Grid.Row="6" Grid.Column="3" CheckedChanged="CheckedChanged" IsVisible="True" IsChecked="False"/>
-            <RadioButton Content="{x:Static strings:AppResources.ViewAll}" GroupName="chart" Value="A" Grid.Row="7" Grid.ColumnSpan="6" CheckedChanged="CheckedChanged" IsVisible="True" IsChecked="True"/>
+            <RadioButton Content="{x:Static strings:AppResources.ViewAll}" GroupName="chart" Value="A" Grid.Row="7" Grid.ColumnSpan="6" x:Name="Default" CheckedChanged="CheckedChanged" IsVisible="True" />
             <Button x:Name="EvaluateSceneBtn" Text="{x:Static strings:AppResources.EvaluateScene}" HeightRequest="50" Clicked="EvaluateSceneBtn_Clicked" Grid.Row="8" Grid.ColumnSpan="6"/>
-            <ActivityIndicator x:Name="processing" IsRunning="False" IsVisible="False" />
+            <ActivityIndicator x:Name="processing" IsRunning="False" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Center" />
         </Grid>
 
                     

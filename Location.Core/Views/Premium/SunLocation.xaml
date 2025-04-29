@@ -25,8 +25,8 @@
         <Label Text="{x:Static system:Environment.NewLine}"/>
         <Label Text="{x:Static system:Environment.NewLine}"/>
         <Image x:Name="arrow" Source="arrowup.png" WidthRequest="150" Rotation="{Binding SunDirection}"></Image>
-        <Label Text="{Binding NorthRotationAngle}"/>
-        <Label Text="{Binding SunDirection}"/>
+     <!--   <Label Text="{Binding NorthRotationAngle}"/>
+        <Label Text="{Binding SunDirection}"/> -->
         <StackLayout HorizontalOptions="Center" VerticalOptions="Center">
              
            

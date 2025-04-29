@@ -30,6 +30,7 @@ public partial class SceneEvaluation : ContentPage
 
         InitializeComponent();
         BindingContext = this;
+        Default.IsChecked = true;
     }
     private async void EvaluateSceneBtn_Clicked(object sender, EventArgs e)
     {

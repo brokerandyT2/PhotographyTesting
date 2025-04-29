@@ -5,27 +5,64 @@
              xmlns:models="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
              xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:strings="clr-namespace:Location.Core.Resources"
+             xmlns:skia="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls"
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Core;assembly=CommunityToolkit.Maui.Core"
              xmlns:cv="clr-namespace:Camera.MAUI;assembly=Camera.MAUI"
+             xmlns:zx="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+             xmlns:z="clr-namespace:ZXing.Net.Maui;assembly=ZXing.Net.MAUI"
              Title="LightMeter"
              x:DataType="models:LightMeter">
     <ContentPage.BindingContext>
         <models:LightMeter />
     </ContentPage.BindingContext>
-    <ScrollView>
-    <Grid>
-       
-        <!-- Camera Preview -->
-            <cv:CameraView x:Name="cameraView" IsEnabled="True" IsVisible="True" WidthRequest="300" HeightRequest="300" TakeAutoSnapShot="True"/>
-            <Button Pressed="Button_Pressed"/>
 
-            <Label x:Name="ExposureReading" 
-           Text="EV: --"
-           BackgroundColor="Black"
-           TextColor="White"
-           Padding="10"
-           VerticalOptions="End"
-           HorizontalOptions="Center"/>
-        </Grid>
-    </ScrollView>
+    <Grid RowDefinitions="*, Auto, Auto" ColumnDefinitions="*">
+        <zx:CameraBarcodeReaderView x:Name="cameraView" WidthRequest="300" 
+                                    FrameReady="cameraView_FrameReady"
+                                    BarcodesDetected="cameraView_BarcodesDetected"/>
+        <!-- Camera View 
+        <zx:CameraView x:Name="cameraView"
+                    Grid.Row="0"
+                   WidthRequest="300"
+                     FrameReady="OnFrameReady"
+                    
+                    />-->
+
+        <!-- Light Meter Needle (SkiaSharp) -->
+        <skia:SKCanvasView
+            Grid.Row="0"
+            PaintSurface="OnCanvasViewPaintSurface"
+            InputTransparent="True" />
+
+        <!-- ISO and Aperture Pickers -->
+        <StackLayout Grid.Row="1" 
+                     Orientation="Horizontal"
+                     HorizontalOptions="Center"
+                     Spacing="20"
+                     Padding="10">
+
+            <Label Text="ISO:" VerticalOptions="Center" />
+            <Picker ItemsSource="{Binding ISOs}" 
+                    SelectedItem="{Binding SelectedISO}"
+                    WidthRequest="100" />
+
+            <Label Text="Aperture:" VerticalOptions="Center" />
+            <Picker ItemsSource="{Binding Apertures}" 
+                    SelectedItem="{Binding SelectedAperture}"
+                    WidthRequest="100" />
+
+        </StackLayout>
+
+        <!-- Light Sensor Switch -->
+        <StackLayout Grid.Row="2"
+                     Orientation="Horizontal"
+                     HorizontalOptions="Center"
+                     Padding="10"
+                     Spacing="10">
+
+            
+            <Button Text="{x:Static strings:AppResources.StartMonitoring}" Pressed="Button_Pressed"/>
+        </StackLayout>
+
+    </Grid>
 </ContentPage>

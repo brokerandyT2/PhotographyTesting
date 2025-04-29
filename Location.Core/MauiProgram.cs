@@ -1,13 +1,17 @@
 ﻿
-using Microsoft.Extensions.Logging;
-using epj.Expander;
-using Locations.Core.Shared.ViewModels.Interface;
-using Locations.Core.Shared.ViewModels;
-using epj.Expander.Maui;
-using CommunityToolkit.Maui;
 using Camera.MAUI;
+using CommunityToolkit.Maui;
+using epj.Expander.Maui;
+using Locations.Core.Shared.ViewModels;
+using Locations.Core.Shared.ViewModels.Interface;
+using Microsoft.Extensions.Logging;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 using Syncfusion.Maui.Toolkit.Hosting;
-
+using ZXing.Net.Maui.Controls;
+#if ANDROID
+using Location.Core.Platforms.Android;
+#endif
+using Location.Core;
 namespace Location.Core;
 
 public static class MauiProgram
@@ -15,10 +19,13 @@ public static class MauiProgram
 	public static MauiApp CreateMauiApp()
 	{
 		var builder = MauiApp.CreateBuilder();
-		builder
-			.UseMauiApp<App>()
+        builder
+            .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
             .UseMauiCameraView()
+            .UseExpander()
+            .UseBarcodeReader()
+            .UseSkiaSharp()
             .ConfigureSyncfusionToolkit()
 			.ConfigureFonts(fonts =>
 			{
@@ -33,7 +40,11 @@ public static class MauiProgram
         builder.Services.AddTransient<ILocationList, LocationsListViewModel>();
         builder.Services.AddTransient<ITipsViewmodel, TipsViewModel>();
         builder.Services.AddTransient<IDetailsView, DetailsViewModel>();
+#if ANDROID
+        //builder.Services.AddSingleton<Platforms.Android.IGoogleAuthService, Platforms.Android.GoogleAuthService>();
+#endif
 #if DEBUG
+
         builder.Logging.AddDebug();
 #endif
         Expander.EnableAnimations();

@@ -36,5 +36,6 @@ public partial class EditLocation : ContentPage
     private void SunEvents_Pressed(object sender, EventArgs e)
     {
         var y = (LocationViewModel)BindingContext;
+        Navigation.PushModalAsync(new Pro.SunCalculations(y));
     }
 }

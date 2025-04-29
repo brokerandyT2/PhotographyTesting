@@ -1,190 +1,207 @@
-﻿using Camera.MAUI;
-using Locations.Core.Shared;
-using Locations.Core.Business.DataAccess;
+﻿using vm = Location.Photography.Shared.ViewModels;
+using ZXing.Net.Maui;
 using SkiaSharp;
-using static Microsoft.Maui.ApplicationModel.Permissions;
-using System.ComponentModel;
-using Syncfusion.Maui.Toolkit.Internals;
-using System.IO;
-using Location.Core.Helpers;
+using Locations.Core.Business.DataAccess;
+using SkiaSharp.Views.Maui;
+#if ANDROID
+using Java.Nio;
+#endif
 namespace Location.Core.Views.Premium;
 
 public partial class LightMeter : ContentPage
 {
-    SettingsService ss = new SettingsService();
-    private double iso;
-    private double shutterSpeed;  // User-specified shutter speed (seconds)
-    private double aperture; // User-specified f-stop
-    private bool _activate = false;
-    private double _brightness;
-    private double _ev;
-    private string _exposure;
+    private readonly vm.LightMeter _viewModel;
+
+    private static SettingsService sss = new SettingsService();
+    int delay = Convert.ToInt32(sss.GetSettingByName(Locations.Core.Shared.MagicStrings.CameraRefresh).Value);
     public LightMeter()
     {
         InitializeComponent();
-        cameraView.CamerasLoaded += CameraView_CamerasLoaded;
+
+        _viewModel = BindingContext as vm.LightMeter;
+    }
+
+    private void OnFrameReady(object sender, CameraFrameBufferEventArgs e)
+    {
+       
+
+        
+
+
     }
     protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
     {
-        _activate = false;
         base.OnNavigatedFrom(args);
+        _isActive = false;
+        cameraView.BarcodesDetected -= cameraView_BarcodesDetected;
 
-
-        var y = cameraView.StopCameraAsync().Result;
-        BeginCapture(false);
     }
+    private bool _isActive = false;
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        _activate = true;
         base.OnNavigatedTo(args);
-        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
+        Thread.Sleep(delay);
+        Thread.Sleep(delay);
+        _isActive = true;
+        SettingsService sss = new SettingsService();
 
-
-        var isAds = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean();
-
-        PageHelpers.CheckVisit(MagicStrings.LightMeterViewed, PageEnums.LightMeter, ss, Navigation);
-
-        //BeginCapture(_activate);
+        Thread.Sleep(delay);
+       
     }
-
-    private void BeginCapture(bool active)
+    private void OnCanvasViewPaintSurface(object sender, SKPaintSurfaceEventArgs e)
     {
-        string localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, Guid.NewGuid() + ".png");
-        while (active)
+        var canvas = e.Surface.Canvas;
+        var info = e.Info;
+        canvas.Clear();
+
+        float centerX = info.Width / 2f;
+        float centerY = info.Height / 2f;
+        float radius = Math.Min(centerX, centerY) * 0.8f;
+
+        // Draw meter background
+        using (var paint = new SKPaint
         {
-            if (cameraView.IsLoaded)
-            {
-                Stream stream = cameraView.TakePhotoAsync().Result;
-                using FileStream localStream = File.OpenWrite(localFilePath);
-                stream.CopyTo(localStream);
+            Style = SKPaintStyle.Stroke,
+            Color = SKColors.Gray,
+            StrokeWidth = 5
+        })
+        {
+            canvas.DrawCircle(centerX, centerY, radius, paint);
+        }
 
-                SkiaSharp.SKBitmap bmp = SKBitmap.Decode(localFilePath);
+        // Draw needle
+        using (var paint = new SKPaint
+        {
+            Style = SKPaintStyle.Stroke,
+            Color = SKColors.Red,
+            StrokeWidth = 4,
+            IsAntialias = true
+        })
+        {
+            var angle = (float)(_viewModel?.NeedleRotation ?? 0);
+            var rad = SKMatrix.CreateRotationDegrees(angle, centerX, centerY);
 
-                _brightness = CalculateBrightness(bmp.Bytes, bmp.Height, bmp.Width);
-                _ev = ConvertToEV(_brightness);
-                _exposure = CompareExposure(_ev, iso, shutterSpeed, aperture);
+            SKPoint start = new(centerX, centerY);
+            SKPoint end = new(centerX, centerY - radius);
 
-            }
-            Thread.Sleep(Convert.ToInt32(ss.GetSettingByName(MagicStrings.CameraRefresh).Value));
-            var x = string.Empty;
+            end = rad.MapPoint(end);
+
+            canvas.DrawLine(start, end, paint);
+        }
+
+        // Draw EV Value text
+        using (var paint = new SKPaint
+        {
+            Color = SKColors.White,
+            TextSize = 48,
+            IsAntialias = true,
+            TextAlign = SKTextAlign.Center
+        })
+        {
+            canvas.DrawText($"EV: {Math.Round((decimal)_viewModel?.EVValue, 1).ToString()}", centerX, centerY + radius + 50, paint);
         }
     }
-
-    private void CameraView_CamerasLoaded(object? sender, EventArgs e)
-    {
-
-        foreach (var camera in new CameraView().Cameras)
-        {
-            if (camera.Position == CameraPosition.Back)
-            {
-                cameraView.Camera = camera;
-                cameraView.PropertyChanged -= CameraView_PropertyChanged;
-                // cameraView.PropertyChanged += CameraView_PropertyChanged;
-
-                /* cameraView.TakeAutoSnapShot = true;
-                 cameraView.AutoSnapShotAsImageSource = true;
-                 cameraView.AutoSnapShotFormat = Camera.MAUI.ImageFormat.PNG;
-                 cameraView.AutoSnapShotSeconds = TimeSpan.FromMilliseconds(Convert.ToInt32(ss.GetSettingByName(MagicStrings.CameraRefresh).Value)).Seconds; */
-                cameraView.StartCameraAsync();
-
-
-            }
-        }
-    }
-
-    private void CameraView_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-
-        var y = (CameraView)sender;
-        var x = y.SnapShotStream;
-
-
-        if (e.PropertyName == nameof(cameraView.SnapShotStream))// && cameraView.SnapShotStream != null)
-        {
-            string localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, Guid.NewGuid() + ".png");
-
-            Stream stream = cameraView.SnapShotStream;
-            using FileStream localFileStream = File.OpenWrite(localFilePath);
-
-            stream.CopyToAsync(localFileStream);
-            SkiaSharp.SKBitmap bmp = SKBitmap.Decode(localFilePath);
-
-            _brightness = CalculateBrightness(bmp.Bytes, bmp.Height, bmp.Width);
-            _ev = ConvertToEV(_brightness);
-            _exposure = CompareExposure(_ev, iso, shutterSpeed, aperture);
-
-            var exists = File.Exists(localFilePath);
-            if (exists)
-                File.Delete(localFilePath);
-        }
-    }
-
-
-    // 📌 Step 3: Calculate Brightness from Camera Frame
-    private double CalculateBrightness(byte[] imageData, int width, int height)
-    {
-        // Average Luminance from YUV Image Data
-        double sum = imageData.Take(width * height).Sum(b => (double)b);
-        return sum / (width * height); // Normalize
-    }
-
-    // 📌 Step 4: Convert Brightness to Exposure Value (EV)
-    private double ConvertToEV(double brightness)
-    {
-        return Math.Log2(brightness / 100.0 + 1); // Normalize to EV Scale
-    }
-
-    // 📌 Step 5: Compare User Settings to Ideal Exposure
-    private string CompareExposure(double ev, double iso, double shutter, double aperture)
-    {
-        // Calculate ideal EV for given settings (EV100 Standard)
-        double idealEV = Math.Log2((aperture * aperture) / shutter) - Math.Log2(iso / 100.0);
-
-        if (ev < idealEV - 1) return "Underexposed";
-        if (ev > idealEV + 1) return "Overexposed";
-        return "Proper Exposure";
-    }
-
-
-    private void ShutterSpeed_Picker_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        shutterSpeed = Convert.ToDouble(((Picker)sender).SelectedItem.ToString().Replace("1/", ""));
-    }
-
-    private void fstop_Picker_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        aperture = Convert.ToDouble(((Picker)sender).SelectedItem.ToString().Replace("f/", ""));
-    }
-
-    private void ISO_Picker_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        iso = Convert.ToDouble(((Picker)sender).SelectedItem.ToString().Replace("f/", ""));
-    }
-
     private void Button_Pressed(object sender, EventArgs e)
     {
-        var stream = cameraView.TakePhotoAsync().Result;
-        string localFilePath = string.Empty;
-        if (stream != null)
-        {
-            localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, Guid.NewGuid() + ".png");
-            var _ = cameraView.SaveSnapShot(Camera.MAUI.ImageFormat.PNG, localFilePath);
-
-            // save the file into local storage
-
-            /* using Stream sourceStream = photo.OpenReadAsync().Result;
-             using FileStream localFileStream = File.OpenWrite(localFilePath);
-             sourceStream.CopyToAsync(localFileStream);
-
-             SkiaSharp.SKBitmap bmp = SKBitmap.Decode(localFilePath);
-
-             _brightness = CalculateBrightness(bmp.Bytes, bmp.Height, bmp.Width);
-             _ev = ConvertToEV(_brightness);
-             _exposure = CompareExposure(_ev, iso, shutterSpeed, aperture);
-
-             var exists = File.Exists(localFilePath);
-             if (exists)
-                 File.Delete(localFilePath);*/
-        }
+        cameraView.BarcodesDetected += cameraView_BarcodesDetected;
+        cameraView.CameraLocation = CameraLocation.Rear;
+       
     }
+
+    private void cameraView_BarcodesDetected(object sender, BarcodeDetectionEventArgs e)
+    {
+#if ANDROID
+        var z = e.Results[0].Raw;
+
+        byte[] outputBytes = new byte[16]; 
+        var outputBuffer = ByteBuffer.Wrap(outputBytes);             //... filling buffer (using tflite model)
+                                                                     //var bufferBytes = outputBuffer.GetFloat(2); 
+        //var x = ((ZXing.Net.Maui.Controls.CameraView)sender).CaptureAsync().Result;// SaveAsImage(Guid.NewGuid().ToString());
+        var ss = SKBitmap.Decode(z);
+       // var z = string.Empty;
+        _viewModel.ProcessFrame(ss);
+#endif
+    }
+
+    private void cameraView_FrameReady(object sender, CameraFrameBufferEventArgs e)
+    {
+        
+    }
+}
+
+public class LightMeterScaleDrawable : IDrawable
+{
+    public double NeedleRotation { get; set; }
+    public double PeakNeedleRotation { get; set; }
+
+    public void Draw(ICanvas canvas, RectF dirtyRect)
+    {
+        canvas.StrokeColor = Colors.Black;
+        canvas.StrokeSize = 2;
+
+        float centerX = dirtyRect.Center.X;
+        float centerY = dirtyRect.Center.Y;
+        float radius = Math.Min(dirtyRect.Width, dirtyRect.Height) / 2 - 20;
+
+        // Draw Arc
+        canvas.DrawArc(
+            centerX - radius,
+            centerY - radius,
+            radius * 2,
+            radius * 2,
+            135, // Start angle
+            270, // Sweep angle
+            false, false);
+
+        // Draw Tick Marks
+        int divisions = 25; // from -5 EV to +20 EV
+        for (int i = 0; i <= divisions; i++)
+        {
+            double angle = 135 + (270.0 / divisions) * i;
+            double rad = Math.PI * angle / 180.0;
+            float innerRadius = radius - 10;
+            float outerRadius = radius;
+
+            float x1 = centerX + (float)(innerRadius * Math.Cos(rad));
+            float y1 = centerY + (float)(innerRadius * Math.Sin(rad));
+            float x2 = centerX + (float)(outerRadius * Math.Cos(rad));
+            float y2 = centerY + (float)(outerRadius * Math.Sin(rad));
+
+            canvas.DrawLine(x1, y1, x2, y2);
+
+            // Every 5 EVs: Draw label
+            if (i % 5 == 0)
+            {
+                string label = (-5 + i).ToString();
+                float labelRadius = radius - 25;
+                float lx = centerX + (float)(labelRadius * Math.Cos(rad));
+                float ly = centerY + (float)(labelRadius * Math.Sin(rad));
+                canvas.FontColor = Colors.Black;
+                canvas.FontSize = 12;
+                canvas.DrawString(label, lx - 8, ly - 8, 20, 20, HorizontalAlignment.Center, VerticalAlignment.Center);
+            }
+        }
+
+        // Draw Needle (Current)
+        DrawNeedle(canvas, centerX, centerY, radius - 30, NeedleRotation, Colors.Red, 3);
+
+        // Draw Peak Needle (optional, thinner)
+        DrawNeedle(canvas, centerX, centerY, radius - 35, PeakNeedleRotation, Colors.Orange, 1);
+    }
+
+    private void DrawNeedle(ICanvas canvas, float centerX, float centerY, float length, double rotation, Color color, float thickness)
+    {
+        double angle = 135 + (rotation + 90); // Adjust because our scale starts at 135°
+        double rad = Math.PI * angle / 180.0;
+
+        float x = centerX + (float)(length * Math.Cos(rad));
+        float y = centerY + (float)(length * Math.Sin(rad));
+
+        canvas.StrokeColor = color;
+        canvas.StrokeSize = thickness;
+        canvas.DrawLine(centerX, centerY, x, y);
+    }
+    
+
+   
 }

@@ -19,6 +19,27 @@ public partial class SunCalculations : ContentPage
         DoTheNeedful();
 
     }
+    public SunCalculations(LocationViewModel location)
+    {
+        InitializeComponent();
+        DoTheNeedful(location);
+    }
+    private void DoTheNeedful(LocationViewModel location)
+    {
+        var loc = ls.GetLocations();
+        Location.Photography.Shared.ViewModels.SunCalculations vm = new lpsv.SunCalculations();
+        vm.Locations = loc;
+        vm.DateFormat = settingsService.GetSettingByName(MagicStrings.DateFormat).Value;
+        vm.TimeFormat = settingsService.GetSettingByName(MagicStrings.TimeFormat).Value;
+        vm.Latitude = location.Lattitude;
+        vm.Longitude = location.Longitude;
+        locationPhoto.Source = location.Photo == string.Empty ? "imageoffoutlinecustom.png" : location.Photo;
+        vm.Date = DateTime.Now;
+        vm.CalculateSun();
+
+        BindingContext = vm;
+        locationPicker.SelectedIndex = 0;
+    }
     private void DoTheNeedful()
     {
         var loc = ls.GetLocations();
@@ -28,7 +49,7 @@ public partial class SunCalculations : ContentPage
         vm.TimeFormat = settingsService.GetSettingByName(MagicStrings.TimeFormat).Value;
         vm.Latitude = loc[0].Lattitude;
         vm.Longitude = loc[0].Longitude;
-        locationPhoto.Source = loc[0].Photo == string.Empty? "imageoffoutlinecustom.png": loc[0].Photo;
+        locationPhoto.Source = loc[0].Photo == string.Empty ? "imageoffoutlinecustom.png" : loc[0].Photo;
         vm.Date = DateTime.Now;
         vm.CalculateSun();
 

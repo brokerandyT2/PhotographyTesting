@@ -112,8 +112,18 @@ namespace Location.Photography.Shared.ViewModels
         private void Compass_ReadingChanged(object sender, CompassChangedEventArgs e)
         {
             var heading = e.Reading.HeadingMagneticNorth;
-
-            NorthRotationAngle = heading;
+            if (NorthRotationAngle > 0 && NorthRotationAngle < 180)
+            {
+                NorthRotationAngle = -NorthRotationAngle;
+            }
+            else if (NorthRotationAngle > 180 && NorthRotationAngle < 360)
+            {
+                NorthRotationAngle = 360 - NorthRotationAngle;
+            }
+            else
+            {
+                NorthRotationAngle = heading;
+            }
 
             CalculateSunDirection(heading);
         }

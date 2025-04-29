@@ -29,4 +29,9 @@ public partial class WeatherDisplay : ContentPage
     {
         PageHelpers.CheckVisit(MagicStrings.WeatherDisplayViewed, PageEnums.WeatherDisplay, ss, Navigation);
     }
+
+    private void ImageButton_Pressed(object sender, EventArgs e)
+    {
+        Navigation.PopModalAsync();
+    }
 }

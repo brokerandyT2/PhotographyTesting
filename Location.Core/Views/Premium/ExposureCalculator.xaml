@@ -77,8 +77,8 @@
                 <Label Text="{Binding ShutterSpeedResult}" x:Name="shutterspeedresult"  Grid.Row="10" Grid.Column="1"/>
                 <Label Text="{Binding FStopResult}" x:Name="fstopresult" Grid.Row="10" Grid.Column="2"/>
                 <Label Text="{Binding ISOResult}" x:Name="isoresult" Grid.Row="10" Grid.Column="3" />
-
-                <Button Grid.Row="14" x:Name="closeButton" Grid.ColumnSpan="4" Text="Close Window" Pressed="closeButton_Pressed"/>
+            <Label Text="{Binding ErrorMessage}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="11" Grid.ColumnSpan="4" x:Name="error" IsVisible="False"/>
+            <Button Grid.Row="14" x:Name="closeButton" Grid.ColumnSpan="4" Text="Close Window" Pressed="closeButton_Pressed"/>
             </Grid>
         </VerticalStackLayout>
 </ContentPage>

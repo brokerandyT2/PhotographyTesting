@@ -381,17 +381,18 @@ namespace Location.Photography.Shared.ViewModels
                 if (idx > values.Count - 1)
                 {
 
-                    throw new OverexposedError(idx, values, _increments);
+                    ErrorMessage =  new OverexposedError(idx, values, _increments).Message;
                 }
 
                 if (idx < 0)
                 {
 
-                    throw new UnderexposedError(idx, baseIdx, values, _increments);
+                    ErrorMessage =  new UnderexposedError(idx, baseIdx, values, _increments).Message;
                 }
 
                 return values[idx];
             }
+            public string ErrorMessage { get; set; } = string.Empty;
             /// <summary>
             /// /// /// Gets the difference in stops between the base value and the final value 
             /// </summary>
@@ -446,25 +447,25 @@ namespace Location.Photography.Shared.ViewModels
             /// <returns></returns>
             private static double ShutterStringToDecimal(string shutter)
             {
-                if (shutter.EndsWith("\""))
+                if (shutter != null && shutter.EndsWith("\""))
                 {
                     // Example: 2" -> 2
                     return double.Parse(shutter.TrimEnd('"'));
                 }
 
-                if (shutter.Contains("\""))
+                if (shutter != null && shutter.Contains("\""))
                 {
                     // Example: 0"3 -> 1/3
                     return 1.0 / double.Parse(shutter[^1].ToString());
                 }
 
-                if (shutter.Contains("/"))
+                if (shutter != null && shutter.Contains("/"))
                 {
                     // Example: 1/4 -> 0.25
                     var parts = shutter.Split('/');
                     return double.Parse(parts[0]) / double.Parse(parts[1]);
                 }
-
+                if(shutter == null) { shutter = "1"; }
                 // Example: 3.2
                 return double.Parse(shutter);
             }

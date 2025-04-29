@@ -151,6 +151,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        internal static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Choose Date:.
         /// </summary>
         internal static string choosedate {
@@ -246,6 +255,15 @@ namespace Location.Core.Resources {
         internal static string equivalentexposure {
             get {
                 return ResourceManager.GetString("equivalentexposure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        internal static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
             }
         }
         
@@ -430,6 +448,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Login failed. Please try again..
+        /// </summary>
+        internal static string LoginFailed {
+            get {
+                return ResourceManager.GetString("LoginFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Longitude:.
         /// </summary>
         internal static string Longitude {
@@ -453,6 +480,15 @@ namespace Location.Core.Resources {
         internal static string NorthernHemisphere {
             get {
                 return ResourceManager.GetString("NorthernHemisphere", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OK.
+        /// </summary>
+        internal static string OK {
+            get {
+                return ResourceManager.GetString("OK", resourceCulture);
             }
         }
         
@@ -588,6 +624,15 @@ namespace Location.Core.Resources {
         internal static string SouthernHemisphere {
             get {
                 return ResourceManager.GetString("SouthernHemisphere", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start Monitoring.
+        /// </summary>
+        internal static string StartMonitoring {
+            get {
+                return ResourceManager.GetString("StartMonitoring", resourceCulture);
             }
         }
         
