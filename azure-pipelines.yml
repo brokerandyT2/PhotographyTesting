@@ -42,16 +42,13 @@ stages:
         feedsToUse: 'select'
 
     - script: |
-        dotnet workload restore
-      displayName: 'Restore .NET Workloads'
-
-    - script: |
         dotnet build Photography.sln --configuration $(buildConfiguration) -p:ContinuousIntegrationBuild=true
       displayName: 'Build MAUI Solution'
 
     - script: |
         dotnet publish Location.Core/Location.Core.csproj -c $(buildConfiguration) -o $(outputDir) -p:Version=$(Build.BuildNumber)
       displayName: 'Publish MAUI App'
+
 
     - task: PublishBuildArtifacts@1
       inputs:
