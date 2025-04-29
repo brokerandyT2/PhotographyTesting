@@ -1,16 +1,9 @@
 ﻿using Location.Core.Views;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
-using Locations.Core.Business.DataAccess.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Locations.Core.Shared.Enums;
-using static Locations.Core.Shared.Enums.SubscriptionType;
-using Location.Core.Resources;
 using Locations.Core.Shared.ViewModels;
+using static Locations.Core.Shared.Enums.SubscriptionType;
 
 namespace Location.Core.Helpers
 {
@@ -20,7 +13,7 @@ namespace Location.Core.Helpers
         {
             //CheckSubscription(pageEnum, settingsService, navigation);
             var page = settingsService.GetSettingByName(pageName);
-            if (!page.ToBoolean())
+            if (page.ToBoolean() == false)
             {
                 navigation.PushModalAsync(new PageTutorialModal(pageEnum));
                 page.Value = MagicStrings.True_string;

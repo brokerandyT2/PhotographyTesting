@@ -4,6 +4,7 @@ using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
+using System.Xml;
 
 namespace Location.Core.Views;
 
@@ -40,7 +41,9 @@ public partial class AddLocation : ContentPage
 
     private void Save_Pressed(object sender, EventArgs e)
     {
-        BindingContext = ls.Save((LocationViewModel)BindingContext, true);
+        var x = (LocationViewModel)BindingContext;
+   
+        BindingContext = ls.Save(x, true);
 
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)

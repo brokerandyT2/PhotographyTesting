@@ -781,6 +781,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tips Tutorial.
+        /// </summary>
+        internal static string TipsTutorial {
+            get {
+                return ResourceManager.GetString("TipsTutorial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tips Viewed.
         /// </summary>
         internal static string TipViewed {

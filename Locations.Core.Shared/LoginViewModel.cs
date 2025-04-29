@@ -38,7 +38,7 @@ namespace Locations.Core.Shared
             GoogleLoginCommands = new RelayCommand(async () => await GoogleLoginAsync());
         }
 
-        private async Task GoogleLoginAsync()
+        public async Task GoogleLoginAsync()
         {
             const string clientId = "1064488372076-9juboi2k00j5rta6f5vbl1q3dr5cn56b.apps.googleusercontent.com";
             const string redirectUri = "com.googleusercontent.apps.1064488372076-9juboi2k00j5rta6f5vbl1q3dr5cn56b:/oauth2redirect/";
@@ -89,6 +89,7 @@ namespace Locations.Core.Shared
                             UserEmail = token.Claims.FirstOrDefault(c => c.Type == "email")?.Value ?? "";
 
                             StatusMessage = $"Welcome {UserFirstName} {UserLastName}!";
+                            StatusCode = 1;
                         }
                         else
                         {

@@ -15,64 +15,43 @@ namespace Location.Core
 
         private static Locations.Core.Business.DataAccess.SettingsService ss = new SettingsService();
         private static Locations.Core.Shared.Enums.SubscriptionType.SubscriptionTypeEnum _subType;
-
-        public static bool IsLoggedIn
-        {
-            get
-            {
-                try
-                {
-#if ANDY
-                    return false;
-#else
-                    return ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;
-#endif
-                }
-                catch
-                {
-                    //I know swallowing an Exception is wrong.  In this case the exception occurs on start up due to the setting not being available.
-                    return false;
-                }
-            }
-        }
-        public static SubscriptionTypeEnum SubscriptionType
-        {
-            get
-            {
-                try
-                {
-#if ANDY
-                    return SubscriptionTypeEnum.Premium;
+#if !ANDY
+public static bool IsLoggedIn =  ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;
 
 #else
-                    Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
-                    return _subType;
+        public static bool IsLoggedIn = true;
 #endif
-                }
-                catch
-                {
-                    //I know swallowing an Exception is wrong.  In this case the exception occurs on start up due to the setting not being available.
-                    return SubscriptionTypeEnum.Free;
-                }
-            }
-        }
+
+
+#if !ANDY
+        public static SubscriptionTypeEnum SubscriptionType = _subType;
+#else
+        public static SubscriptionTypeEnum SubscriptionType = SubscriptionTypeEnum.Premium;
+#endif
+
 
         public MainPage()
         {
-
+            SettingsService ss = new SettingsService();
+#if !ANDY
+                Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
+#endif
+           
             DataAccess da;
             InitializeComponent();
+#if PHOTOGRAPHY
             Task.Run(async () =>
                 {
                     Dispatcher.Dispatch(() => da = new DataAccess());
                 }
             );
-
-           
-
             PermissionStatus ps = Permissions.RequestAsync<Permissions.Camera>().Result;
             PermissionStatus pss = Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
-            SettingsService ss = new SettingsService();
+#endif
+
+
+
+
 
             //Increment the app open counter
             var z = ss.GetSetting(MagicStrings.AppOpenCounter);

@@ -18,7 +18,7 @@ public partial class Login : ContentPage
     private async void Button_Pressed(object sender, EventArgs e)
     {
         var x = BindingContext as LoginViewModel;
-         //await x.GoogleLoginAsync();
+         await x.GoogleLoginAsync();
 
         if (x.StatusCode == 1)
         {
@@ -37,11 +37,11 @@ public partial class Login : ContentPage
             ss.SaveSettingWithObjectReturn(name);
             ss.SaveSettingWithObjectReturn(email);
 
-            Navigation.PushAsync(new MainPage());
+           await Navigation.PushAsync(new MainPage());
         }
         else
         {
-            DisplayAlert(AppResources.Error, AppResources.LoginFailed, AppResources.OK);
+          await DisplayAlert(AppResources.Error, AppResources.LoginFailed, AppResources.OK);
         }
     }
 }

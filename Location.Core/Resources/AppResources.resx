@@ -357,6 +357,9 @@
   <data name="thirds" xml:space="preserve">
     <value>1/3</value>
   </data>
+  <data name="TipsTutorial" xml:space="preserve">
+    <value>Tips Tutorial</value>
+  </data>
   <data name="TipViewed" xml:space="preserve">
     <value>Tips Viewed</value>
   </data>

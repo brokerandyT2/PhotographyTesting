@@ -115,7 +115,7 @@ namespace Locations.Core.Business
 
 
 
-#if RELEASE
+
            
 #if ANDY
             list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
@@ -146,7 +146,7 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.Email, Value = "" });    
 #endif
 
-#else
+/*#else
             list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
             list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.True_string });
@@ -158,7 +158,7 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.AddLocationViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.WeatherDisplayViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.True_string });
-#endif
+#endif*/
 
 
 

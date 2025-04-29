@@ -40,6 +40,9 @@ public partial class PageTutorialModal : ContentPage
             case PageEnums.Settings:
                 content.Text = AppResources.SettingsTutorial;
                 break;
+            case PageEnums.Tips:
+                content.Text = AppResources.TipsTutorial;
+                break;
             default:
                 content.Text = "Page Not Found";
                 break;
