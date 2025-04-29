@@ -24,4 +24,3 @@ steps:
   inputs:
     command: 'build'
     projects: '**/**.sln'
-    arguments: '/U ANDY'
