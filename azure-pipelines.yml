@@ -11,7 +11,7 @@ pool:
 variables:
   buildConfiguration: 'Release'
   solution: 'Photography.sln'
-
+  CI: true
 steps:
 # Install .NET SDK (ensure it's the version MAUI requires)
 - task: UseDotNet@2
