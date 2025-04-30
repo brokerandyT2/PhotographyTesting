@@ -138,7 +138,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Location.Photography.Business\Location.Photography.Business.csproj" />
     <ProjectReference Include="..\Location.Photography.Shared\Location.Photography.Shared.csproj" />
+    <ProjectReference Include="..\Locations.Core.Business\Locations.Core.Business.csproj" />
     <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
   </ItemGroup>
 
