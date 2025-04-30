@@ -1,86 +1,83 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Location.Photography.Business.DataAccess;
+using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared.ViewModels;
-using System;
 
-namespace Location.Photography.Business.Tests
+namespace Locations.Core.Business.Tests
 {
     [TestClass]
-    public class LocationServiceTests
+    public class LocationsServiceTests
     {
-        private LocationService _service;
+        private LocationsService _service;
 
         [TestInitialize]
         public void Setup()
         {
-            _service = new LocationService();
+            _service = new LocationsService();
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void Delete_ShouldThrowNotImplementedException_WhenCalledWithModel()
+        public void Save_ShouldReturnNewLocation_WhenReturnNewIsTrue()
         {
             // Arrange
-            var model = new LocationViewModel();
+            var location = new LocationViewModel { Lattitude = 10.0, Longitude = 20.0 };
 
             // Act
-            _service.Delete(model);
+            var result = _service.Save(location, returnNew: true);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreNotEqual(location, result);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void Delete_ShouldThrowNotImplementedException_WhenCalledWithId()
+        public void Get_ShouldReturnLocation_WhenIdIsValid()
         {
             // Arrange
-            int id = 1;
+            int validId = 1;
 
             // Act
-            _service.Delete(id);
+            var result = _service.Get(validId);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(validId, result.Id);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void Delete_ShouldThrowNotImplementedException_WhenCalledWithCoordinates()
+        public void Delete_ShouldReturnFalse_WhenLocationDoesNotExist()
         {
             // Arrange
-            double latitude = 10.0;
-            double longitude = 20.0;
+            int invalidId = -1;
 
             // Act
-            _service.Delete(latitude, longitude);
+            var result = _service.Delete(invalidId);
+
+            // Assert
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void Save_ShouldThrowNotImplementedException_WhenCalledWithModel()
+        public void GetAll_ShouldReturnAllLocations()
         {
-            // Arrange
-            var model = new LocationViewModel();
-
             // Act
-            _service.Save(model);
+            var result = _service.GetAll();
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Count > 0, "There should be at least one location.");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void Save_ShouldThrowNotImplementedException_WhenCalledWithModelAndReturnNew()
+        public void Update_ShouldModifyExistingLocation()
         {
             // Arrange
-            var model = new LocationViewModel();
+            var location = new LocationViewModel { Id = 1, Lattitude = 15.0, Longitude = 25.0 };
 
             // Act
-            _service.Save(model, returnNew: true);
-        }
+            var result = _service.Update(location);
 
-        [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void Get_ShouldThrowNotImplementedException_WhenCalledWithId()
-        {
-            // Arrange
-            int id = 1;
-
-            // Act
-            _service.Get(id);
+            // Assert
+            Assert.IsTrue(result, "Update should return true for a valid location.");
         }
     }
 }
