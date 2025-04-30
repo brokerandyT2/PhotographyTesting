@@ -13,7 +13,7 @@ variables:
   buildConfiguration: 'Release'
   outputDir: '$(Build.ArtifactStagingDirectory)/drop'
   CI: true
-  
+  MY_PAT: $(MY_PAT) # Ensure that MY_PAT is stored securely
 
 stages:
 - stage: Build
@@ -71,6 +71,13 @@ stages:
     - script: |
         echo "Using GitVersion: $(GitVersion_SemVer)"
       displayName: 'Confirm Build Number'
+
+    # Output the tags from the Git repository
+    - script: |
+        echo "Fetching tags from Git..."
+        git fetch --tags
+        git tag
+      displayName: 'Output Git Tags'
 
     # Restore workloads
     - script: |
