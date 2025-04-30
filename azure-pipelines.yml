@@ -27,7 +27,7 @@ stages:
 
     - script: |
         echo "Fetching all Git tags..."
-        git config --global credential.helper "store --file=.git-credentials"
+        git config --global credential.helper store
         echo "https://$(MY_PAT)@dev.azure.com" > .git-credentials
         git fetch --tags
         git tag
@@ -120,7 +120,7 @@ stages:
     # Set up Git credentials and fetch tags
     - script: |
         echo "Setting up Git credentials..."
-        git config --global credential.helper "store --file=.git-credentials"
+        git config --global credential.helper store
         echo "https://$(MY_PAT)@dev.azure.com" > .git-credentials
         git fetch --tags
         git tag
