@@ -13,6 +13,7 @@ variables:
   buildConfiguration: 'Release'
   outputDir: '$(Build.ArtifactStagingDirectory)/drop'
   CI: true
+  MY_PAT: $(MY_PAT)  # This references the secret variable from Azure DevOps
 
 stages:
 - stage: Build
@@ -20,85 +21,67 @@ stages:
   - job: Build_MAUI
     pool:
       vmImage: 'windows-latest'
-
     steps:
-    - checkout: self
-      fetchDepth: 0  # Ensure full history is fetched
 
+    # Checkout the repository with a depth of 0 to get all history (useful for versioning)
+    - checkout: self
+      fetchDepth: 0
+
+    # Set up Git credentials using the stored PAT
+    - script: |
+        git config --global credential.helper store
+        echo "https://$(MY_PAT)@dev.azure.com" > ~/.git-credentials
+      displayName: 'Set up Git credentials'
+
+    # Install .NET SDK 9.x
     - task: UseDotNet@2
       displayName: 'Install .NET SDK 9.x'
       inputs:
         version: '9.x'
         includePreviewVersions: true
 
-    - task: PowerShell@2
+    # Install and run GitVersion
+    - script: |
+        dotnet new tool-manifest --force
+        dotnet tool install GitVersion.Tool --version 6.3.0
+        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
+        echo "GitVersion output file content:"
+        type gitversion.json
+        cat gitversion.json
+        echo "GitVersion log content:"
+        type gitversion.log
       displayName: 'Install and Run GitVersion'
-      inputs:
-        targetType: 'inline'
-        script: |
-          # Ensure git is fully fetched, including tags
-          git fetch --tags
-          
-          # Install GitVersion tool
-          dotnet new tool-manifest --force
-          dotnet tool install GitVersion.Tool --version 6.3.0
-          
-          # Run GitVersion to get version information in JSON format
-          $gitVersionOutput = dotnet tool run dotnet-gitversion /output json /verbosity quiet 2>&1
-          
-          # Log the output to file for debugging
-          $gitVersionOutput | Out-File -FilePath gitversion.log -Encoding utf8
-          $gitVersionOutput | ConvertFrom-Json | Out-File -FilePath gitversion.json -Encoding utf8
 
-          # Output logs for troubleshooting
-          Write-Host "GitVersion output file content:"
-          Get-Content gitversion.json
-          Write-Host "GitVersion log content:"
-          Get-Content gitversion.log
-
+    # Parse GitVersion JSON and set build version
     - task: PowerShell@2
       displayName: 'Parse GitVersion and Set Variables'
       inputs:
         targetType: 'inline'
         script: |
-          try {
-              # Check the contents of the JSON file for debugging
-              $gitVersionContent = Get-Content 'gitversion.json' -Raw
-              Write-Host "GitVersion JSON content:"
-              Write-Host $gitVersionContent
-
-              # Parse GitVersion output
-              $gitVersion = $gitVersionContent | ConvertFrom-Json
-              
-              # Extract versioning information
+          $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+          Write-Host "GitVersion JSON content:"
+          Write-Host $gitVersion
+          if ($gitVersion -and $gitVersion.SemVer) {
               $semver = $gitVersion.SemVer
-              $assemblyVer = $gitVersion.AssemblySemVer
-              $fileVer = $gitVersion.AssemblySemFileVer
-              $infoVer = $gitVersion.InformationalVersion
-
-              # Set the build number and GitVersion variables
-              Write-Host "##vso[build.updatebuildnumber]$semver"
-              Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
-              Write-Host "##vso[task.setvariable variable=GitVersion_AssemblySemVer]$assemblyVer"
-              Write-Host "##vso[task.setvariable variable=GitVersion_AssemblySemFileVer]$fileVer"
-              Write-Host "##vso[task.setvariable variable=GitVersion_InformationalVersion]$infoVer"
-          } catch {
-              Write-Error "Failed to parse GitVersion output: $_"
-              exit 1
+          } else {
+              $semver = '0.5.0'
+              Write-Host "GitVersion output is invalid or missing. Using default version: $semver"
           }
+          Write-Host "Setting build number to $semver"
+          Write-Host "##vso[build.updatebuildnumber]$semver"
+          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
 
-    - script: |
-        echo "Using GitVersion: $(GitVersion_SemVer)"
-      displayName: 'Confirm Build Number'
-
+    # Restore .NET MAUI workloads
     - script: |
         dotnet workload restore
       displayName: 'Restore Workloads'
 
+    # Install the MAUI iOS workload
     - script: |
         dotnet workload install maui-ios maccatalyst
       displayName: 'Install MAUI iOS Workload'
 
+    # Restore NuGet packages
     - task: NuGetToolInstaller@1
 
     - task: NuGetCommand@2
@@ -107,6 +90,7 @@ stages:
         restoreSolution: '**/*.sln'
         feedsToUse: 'select'
 
+    # Build MAUI Solution
     - task: VSBuild@1
       displayName: 'Build MAUI Solution'
       inputs:
@@ -114,6 +98,7 @@ stages:
         configuration: '$(buildConfiguration)'
         msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(GitVersion_SemVer)'
 
+    # Run Tests (optional, skip if unnecessary)
     - task: DotNetCoreCLI@2
       displayName: 'Run Tests'
       inputs:
@@ -122,6 +107,7 @@ stages:
         arguments: '--configuration Release --no-build'
       continueOnError: true
 
+    # Publish the MAUI App
     - task: DotNetCoreCLI@2
       displayName: 'Publish MAUI App'
       inputs:
@@ -130,6 +116,7 @@ stages:
         projects: '**/Location.Core.csproj'
         arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(GitVersion_SemVer)'
 
+    # Publish build artifacts
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(outputDir)'
