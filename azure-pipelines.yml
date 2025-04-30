@@ -34,23 +34,37 @@ stages:
         git tag
       displayName: 'Ensure full Git history and tags are available'
 
-    - script: |
-        dotnet new tool-manifest --force
-        dotnet tool install GitVersion.Tool --version 6.3.0
-        dotnet tool run gitversion /output json /verbosity quiet > gitversion.json
+    - task: PowerShell@2
       displayName: 'Install and Run GitVersion'
+      inputs:
+        targetType: 'inline'
+        script: |
+          # Install and run GitVersion
+          dotnet new tool-manifest --force
+          dotnet tool install GitVersion.Tool --version 6.3.0
+          $gitVersionOutput = dotnet tool run dotnet-gitversion /output json /verbosity quiet 2>&1
+          $gitVersionOutput | Out-File -FilePath gitversion.log -Encoding utf8
+          $gitVersionOutput | ConvertFrom-Json | Out-File -FilePath gitversion.json -Encoding utf8
+
+          # Log the output
+          Write-Host "GitVersion output file content:"
+          Get-Content gitversion.json
+          Write-Host "GitVersion log content:"
+          Get-Content gitversion.log
 
     - task: PowerShell@2
       displayName: 'Parse GitVersion and Set Variables'
       inputs:
         targetType: 'inline'
         script: |
+          # Parse GitVersion output
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
           $semver = $gitVersion.SemVer
           $assemblyVer = $gitVersion.AssemblySemVer
           $fileVer = $gitVersion.AssemblySemFileVer
           $infoVer = $gitVersion.InformationalVersion
 
+          # Set the build number and GitVersion variables
           Write-Host "##vso[build.updatebuildnumber]$semver"
           Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
           Write-Host "##vso[task.setvariable variable=GitVersion_AssemblySemVer]$assemblyVer"
