@@ -27,7 +27,7 @@ stages:
 
     - script: |
         echo "Fetching all Git tags..."
-        git config --global credential.helper store
+        git config --global credential.helper manager-core
         echo "https://$(MY_PAT)@dev.azure.com" > .git-credentials
         git fetch --tags
         git tag
@@ -116,12 +116,3 @@ stages:
       inputs:
         PathtoPublish: '$(outputDir)'
         ArtifactName: 'drop'
-
-    # Set up Git credentials and fetch tags
-    - script: |
-        echo "Setting up Git credentials..."
-        git config --global credential.helper store
-        echo "https://$(MY_PAT)@dev.azure.com" > .git-credentials
-        git fetch --tags
-        git tag
-      displayName: 'Set up Git credentials and fetch tags'
