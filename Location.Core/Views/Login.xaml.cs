@@ -3,6 +3,7 @@ using Location.Core.Resources;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
 using Microsoft.Maui.Authentication;
+using Microsoft.Maui.Controls;
 using System.Diagnostics;
 
 namespace Location.Core.Views;

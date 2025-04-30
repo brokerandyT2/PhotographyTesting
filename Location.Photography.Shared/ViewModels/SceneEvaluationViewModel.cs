@@ -59,7 +59,7 @@ namespace Location.Photography.Shared.ViewModels
             GreenHistogram = new int[256];
             BlueHistogram = new int[256];
             ContrastHistogram = new int[256];
-           // Evaluate = new Command(EvaluateScene);
+            // Evaluate = new Command(EvaluateScene);
         }
 
         public Task<int> EvaluateScene(object obj)
@@ -84,6 +84,17 @@ namespace Location.Photography.Shared.ViewModels
 
                         // save the file into local storage
                         string localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, photo.FileName);
+                        DirectoryInfo di = new DirectoryInfo(Microsoft.Maui.Storage.FileSystem.AppDataDirectory);
+                        var files = di.GetFiles();
+
+                        foreach (var file in files)
+                        {
+                            if (file.Extension == ".jpg")
+                            {
+                                file.Delete();
+                            }
+                        }
+
 
                         using Stream sourceStream = await photo.OpenReadAsync();
                         using FileStream localFileStream = File.OpenWrite(localFilePath);
@@ -139,7 +150,7 @@ namespace Location.Photography.Shared.ViewModels
 
                     });
                 }
-                
+
             }
             return 69;
         }

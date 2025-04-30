@@ -7,6 +7,7 @@ using Location.Photography.Shared.ViewModels;
 using Locations.Core.Shared.DTO;
 using Locations.Core.Shared;
 using Location.Core.Helpers;
+using Microsoft.Maui.Controls;
 namespace Location.Core.Views.Pro;
 
 public partial class SunCalculations : ContentPage

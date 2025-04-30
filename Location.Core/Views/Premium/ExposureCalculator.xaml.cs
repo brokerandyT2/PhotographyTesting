@@ -3,6 +3,7 @@ using Location.Core.Helpers;
 using Locations.Core.Business.Advertising;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
+using Microsoft.Maui.Controls;
 using lps = Location.Photography.Shared;
 using lpv = Location.Photography.Shared.ViewModels;
 namespace Location.Core.Views.Premium;
@@ -85,7 +86,7 @@ public partial class ExposureCalculator : ContentPage
 
 
         PageHelpers.CheckVisit(MagicStrings.ExposureCalcViewed, PageEnums.ExposureCalculator, new Locations.Core.Business.DataAccess.SettingsService(), Navigation);
-
+        
 
     }
 

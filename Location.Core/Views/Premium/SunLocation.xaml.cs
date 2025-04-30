@@ -8,6 +8,7 @@ using Location.Photography.Business.DataAccess;
 using Location.Core.Helpers;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Maui.Core.Extensions;
+using Microsoft.Maui.Controls;
 
 namespace Location.Core.Views.Premium;
 

@@ -5,6 +5,8 @@ using Location.Core.Views;
 using static Locations.Core.Shared.Enums.SubscriptionType;
 using Newtonsoft.Json;
 using static Locations.Core.Shared.Enums.Hemisphere;
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Controls;
 #if PHOTOGRAPHY
 
 #endif
@@ -19,7 +21,7 @@ namespace Location.Core
 public static bool IsLoggedIn =  ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;
 
 #else
-        public static bool IsLoggedIn = false;
+        public static bool IsLoggedIn = true;
 #endif
 
 
@@ -37,16 +39,12 @@ public static bool IsLoggedIn =  ss.GetSettingByName(MagicStrings.Email).Value !
                 Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
 #endif
            
-            DataAccess da;
+            DataAccess da = new DataAccess();
             InitializeComponent();
 #if PHOTOGRAPHY
-            Task.Run(async () =>
-                {
-                    Dispatcher.Dispatch(() => da = new DataAccess());
-                }
-            );
-            var ps =  Permissions.RequestAsync<Permissions.Camera>().Result;
-            var pss =  Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
+           
+            //var ps =  Permissions.RequestAsync<Permissions.Camera>().Result;
+            //var pss =  Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
 #endif
 
 
@@ -111,16 +109,16 @@ public static bool IsLoggedIn =  ss.GetSettingByName(MagicStrings.Email).Value !
                 Navigation.PushModalAsync(new Login());
 
             }
-            this.Children.Add(new Settings());
+            this.Children.Add(new Location.Core.Views.Settings());
 
 
         }
 
         private void AddDefault()
         {
-            this.Children.Add(new AddLocation());
-            this.Children.Add(new ListLocations());
-            this.Children.Add(new Tips());
+            this.Children.Add(new Location.Core.Views.AddLocation());
+            this.Children.Add(new Location.Core.Views.ListLocations());
+            this.Children.Add(new Location.Core.Views.Tips());
         }
     }
 

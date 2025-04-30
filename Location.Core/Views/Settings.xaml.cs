@@ -3,6 +3,7 @@ using Location.Core.Resources;
 using Location.Photography.Business.DataAccess;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Enums;
+using Microsoft.Maui.Controls;
 using OpenWeatherMap;
 
 namespace Location.Core.Views;
