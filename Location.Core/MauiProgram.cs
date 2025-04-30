@@ -6,7 +6,7 @@ using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
 using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
-using Syncfusion.Maui.Toolkit.Hosting;
+
 using ZXing.Net.Maui.Controls;
 #if ANDROID
 using Location.Core.Platforms.Android;
@@ -26,7 +26,7 @@ public static class MauiProgram
             .UseExpander()
             .UseBarcodeReader()
             .UseSkiaSharp()
-            .ConfigureSyncfusionToolkit()
+
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

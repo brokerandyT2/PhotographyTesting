@@ -138,6 +138,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Camera.MAUI" Version="1.5.1" />
+    <PackageReference Include="CommunityToolkit.Maui" Version="11.2.0" />
+    <PackageReference Include="epj.Expander.Maui" Version="1.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.4" />
+    <PackageReference Include="SkiaSharp" Version="3.119.0" />
+    <PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.119.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Location.Photography.Business\Location.Photography.Business.csproj" />
     <ProjectReference Include="..\Location.Photography.Shared\Location.Photography.Shared.csproj" />
     <ProjectReference Include="..\Locations.Core.Business\Locations.Core.Business.csproj" />
