@@ -29,7 +29,7 @@ stages:
 
     - script: |
         dotnet new tool-manifest
-        dotnet tool install GitVersion.Tool --version 5.x
+        dotnet tool install GitVersion.Tool 
         dotnet tool run gitversion /output json > gitversion.json
       displayName: 'Install and Run GitVersion'
 
