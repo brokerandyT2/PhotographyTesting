@@ -13,6 +13,7 @@ variables:
   buildConfiguration: 'Release'
   outputDir: '$(Build.ArtifactStagingDirectory)/drop'
   CI: true
+  MY_PAT: $(MY_PAT) # Assuming MY_PAT is set as a secret variable in the pipeline
 
 stages:
 - stage: Build
@@ -20,27 +21,25 @@ stages:
   - job: Build_MAUI
     pool:
       vmImage: 'windows-latest'
+
     steps:
-    # Checkout the repository with full history to fetch all tags
     - checkout: self
-      fetchDepth: 0  # Ensure full history is fetched, including all tags
+      fetchDepth: 0  # Ensure full history is fetched to get all tags
 
-    # Set up Git credentials using MY_PAT
     - script: |
-        git config --global user.name "Your Name"
-        git config --global user.email "your-email@example.com"
+        echo "Fetching all Git tags..."
+        git config --global credential.helper "store --file=.git-credentials"
         echo "https://$(MY_PAT)@dev.azure.com" > .git-credentials
-        git config --global credential.helper store
-      displayName: 'Set up Git credentials'
+        git fetch --tags
+        git tag
+      displayName: 'Output Git Tags'
 
-    # Install .NET SDK
     - task: UseDotNet@2
       displayName: 'Install .NET SDK 9.x'
       inputs:
         version: '9.x'
         includePreviewVersions: true
 
-    # Install GitVersion tool via dotnet CLI
     - script: |
         echo "Current directory: %CD%"
         dir
@@ -50,46 +49,39 @@ stages:
         dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
         echo "GitVersion output file content:"
         type gitversion.json
+        cat gitversion.json
         echo "GitVersion log content:"
         type gitversion.log
       workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Install and Run GitVersion'
 
-    # PowerShell script to parse GitVersion JSON and set build number
     - task: PowerShell@2
-      displayName: 'Parse GitVersion and Set Variables'
+      displayName: 'Update Build Number from GitVersion'
       inputs:
         targetType: 'inline'
         script: |
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-          Write-Host "Setting build number to $($gitVersion.SemVer)"
-          Write-Host "##vso[build.updatebuildnumber]$($gitVersion.SemVer)"
-          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$($gitVersion.SemVer)"
+          if ($gitVersion -and $gitVersion.SemVer) {
+              $semver = $gitVersion.SemVer
+          } else {
+              Write-Host "GitVersion output is invalid or missing."
+          }
+          Write-Host "Setting build number to $semver"
+          Write-Host "##vso[build.updatebuildnumber]$semver"
+          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
 
-    # Confirm build number
     - script: |
         echo "Using GitVersion: $(GitVersion_SemVer)"
       displayName: 'Confirm Build Number'
 
     - script: |
-        echo "Fetching tags from Git..."
-        git config --global credential.helper store
-        echo "https://$(MY_PAT)@dev.azure.com" > .git-credentials
-        git fetch --tags
-        git tag
-      displayName: 'Output Git Tags'
-
-    # Restore workloads
-    - script: |
         dotnet workload restore
       displayName: 'Restore Workloads'
 
-    # Install MAUI iOS workload
     - script: |
         dotnet workload install maui-ios maccatalyst
       displayName: 'Install MAUI iOS Workload'
 
-    # Restore NuGet packages
     - task: NuGetToolInstaller@1
 
     - task: NuGetCommand@2
@@ -98,7 +90,6 @@ stages:
         restoreSolution: '**/*.sln'
         feedsToUse: 'select'
 
-    # Build MAUI solution
     - task: VSBuild@1
       displayName: 'Build MAUI Solution'
       inputs:
@@ -106,7 +97,6 @@ stages:
         configuration: '$(buildConfiguration)'
         msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(GitVersion_SemVer)'
 
-    # Run tests
     - task: DotNetCoreCLI@2
       displayName: 'Run Tests'
       inputs:
@@ -115,7 +105,6 @@ stages:
         arguments: '--configuration Release --no-build'
       continueOnError: true
 
-    # Publish MAUI app
     - task: DotNetCoreCLI@2
       displayName: 'Publish MAUI App'
       inputs:
@@ -124,8 +113,16 @@ stages:
         projects: '**/Location.Core.csproj'
         arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(GitVersion_SemVer)'
 
-    # Publish build artifacts
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(outputDir)'
         ArtifactName: 'drop'
+
+    # Set up Git credentials and fetch tags
+    - script: |
+        echo "Setting up Git credentials..."
+        git config --global credential.helper "store --file=.git-credentials"
+        echo "https://$(MY_PAT)@dev.azure.com" > .git-credentials
+        git fetch --tags
+        git tag
+      displayName: 'Set up Git credentials and fetch tags'
