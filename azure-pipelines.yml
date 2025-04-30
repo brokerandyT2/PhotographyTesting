@@ -10,38 +10,54 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  solution: 'Photography.sln'
+  outputDir: '$(Build.ArtifactStagingDirectory)/drop'
+  CI: true
 
-steps:
-# Install .NET SDK (ensure it's the version MAUI requires)
-- task: UseDotNet@2
-  displayName: 'Install .NET SDK'
-  inputs:
-    packageType: 'sdk'
-    version: '9.x' # Use the .NET version your MAUI project uses
+stages:
+- stage: Build
+  jobs:
+  - job: Build_MAUI
+    pool:
+      vmImage: 'windows-latest'
+
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Install .NET SDK 9.x'
+      inputs:
+        version: '9.x'
+        includePreviewVersions: true
+    - script: |
+        dotnet workload restore
+      displayName: 'Restore Workloads'
+    - script: |
+        dotnet workload install maui-ios maccatalyst
+      displayName: 'Install MAUI iOS Workload'
+
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      inputs:
+        command: 'restore'
+        restoreSolution: '**/*.sln'
+        feedsToUse: 'select'
+
+    - task: VSBuild@1
+      displayName: 'Build MAUI Solution'
+      inputs:
+        solution: 'Photography.sln'
+        configuration: '$(buildConfiguration)'
+        msbuildArgs: '-p:ContinuousIntegrationBuild=true -u:ANDY'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish MAUI App'
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: 'Location.Core/Location.Core.csproj'
+        arguments: '-c $(buildConfiguration) -o $(outputDir) -p:Version=$(Build.BuildNumber)'
 
 
-
-# Restore NuGet packages
-- task: DotNetCoreCLI@2
-  displayName: 'Restore NuGet packages'
-  inputs:
-    command: 'restore'
-    projects: '$(solution)'
-
-- task: VSBuild@1
-  displayName: 'Build MAUI Android using MSBuild (Visual Studio)'
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:Configuration=$(buildConfiguration) /p:Platform=AnyCPU'# /p:Version=$(GitVersion.SemVer)'
-    platform: 'Any CPU'
-    configuration: '$(buildConfiguration)'
-
-# (Optional) Pack or Publish if needed
-# - task: DotNetCoreCLI@2
-#   displayName: 'Publish'
-#   inputs:
-#     command: 'publish'
-#     publishWebProjects: false
-#     projects: '$(solution)'
-#     arguments: '--configuration $(buildConfiguration)'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(outputDir)'
+        ArtifactName: 'drop'
