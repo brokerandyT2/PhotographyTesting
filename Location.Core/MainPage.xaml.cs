@@ -15,13 +15,13 @@ namespace Location.Core
     public partial class MainPage : TabbedPage
     {
 
-        private static Locations.Core.Business.DataAccess.SettingsService ss = new SettingsService();
-        private static Locations.Core.Shared.Enums.SubscriptionType.SubscriptionTypeEnum _subType;
+        private static SettingsService ss = new SettingsService();
+        private static SubscriptionTypeEnum _subType;
 #if !ANDY
-public static bool IsLoggedIn =  ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;
+        public static bool IsLoggedIn = true;
 
 #else
-        public static bool IsLoggedIn = true;
+       public static bool IsLoggedIn =  ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;  
 #endif
 
 

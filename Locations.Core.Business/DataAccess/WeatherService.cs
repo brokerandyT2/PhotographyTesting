@@ -370,6 +370,7 @@ namespace Locations.Core.Business.DataAccess
                 Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
                 return new WeatherViewModel();
             }
+        }
         public WeatherViewModel Get(int id)
         {
             try
