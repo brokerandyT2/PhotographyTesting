@@ -46,7 +46,7 @@ stages:
       inputs:
         solution: 'Photography.sln'
         configuration: '$(buildConfiguration)'
-        msbuildArgs: '-p:ContinuousIntegrationBuild=true -u:ANDY'
+        msbuildArgs: '-p:ContinuousIntegrationBuild=true'
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish MAUI App'
@@ -54,7 +54,7 @@ stages:
         command: 'publish'
         publishWebProjects: false
         projects: 'Location.Core/Location.Core.csproj'
-        arguments: '-c $(buildConfiguration) -o $(outputDir) -p:Version=$(Build.BuildNumber)'
+        arguments: '--framework net9.0-android35.0 --configuration Release --output $(Build.ArtifactStagingDirectory)'
 
 
     - task: PublishBuildArtifacts@1
