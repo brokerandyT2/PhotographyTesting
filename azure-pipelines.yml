@@ -33,24 +33,27 @@ stages:
         dotnet new tool-manifest --force
         dotnet tool install GitVersion.Tool --version 6.3.0
         dotnet tool list
-        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.log 2> gitversion.json
+        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
         type gitversion.json
+        cat gitversion.json
       workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Install and Run GitVersion'
 
-    - task: PowerShell@2
-      displayName: 'Extract SemVer from GitVersion'
-      inputs:
-        targetType: 'inline'
-        script: |
-          $gitVersion = Get-Content "gitversion.json" | ConvertFrom-Json
-          $semver = $gitVersion.SemVer
-          Write-Host "##vso[build.updatebuildnumber]$semver"
-          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
+    - script: |
+        $gitVersion = Get-Content "gitversion.json" | ConvertFrom-Json
+        if ($gitVersion -and $gitVersion.SemVer) {
+            $semver = $gitVersion.SemVer
+        } else {
+            $semver = "0.5.0"  # Provide a default version here
+            echo "GitVersion output is invalid or missing. Using default version: $semver"
+        }
+        echo "Setting build number to $semver"
+        Write-Host "##vso[build.updatebuildnumber]$semver"
+      displayName: 'Update Build Number from GitVersion with Default Value'
 
     - script: |
-        echo "Using GitVersion: $(GitVersion_SemVer)"
-      displayName: 'Confirm GitVersion Output'
+        echo "Using GitVersion: $(Build.BuildNumber)"
+      displayName: 'Confirm Build Number'
 
     - script: |
         dotnet workload restore
@@ -73,7 +76,7 @@ stages:
       inputs:
         solution: 'Photography.sln'
         configuration: '$(buildConfiguration)'
-        msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(GitVersion_SemVer)'
+        msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(Build.BuildNumber)'
 
     - task: DotNetCoreCLI@2
       displayName: 'Run Tests'
@@ -88,7 +91,7 @@ stages:
         command: publish
         publishWebProjects: false
         projects: '**/Location.Core.csproj'
-        arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(GitVersion_SemVer)'
+        arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(Build.BuildNumber)'
 
     - task: PublishBuildArtifacts@1
       inputs:
