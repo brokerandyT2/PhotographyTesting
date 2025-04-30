@@ -13,7 +13,6 @@ variables:
   buildConfiguration: 'Release'
   outputDir: '$(Build.ArtifactStagingDirectory)/drop'
   CI: true
-  MY_PAT: $(MY_PAT) # Assuming MY_PAT is set as a secret variable in the pipeline
 
 stages:
 - stage: Build
