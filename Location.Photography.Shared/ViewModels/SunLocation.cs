@@ -16,7 +16,6 @@ namespace Location.Photography.Shared.ViewModels
 {
     public class SunLocation : ViewModelBase, ISunLocation
     {
-       
         public override event PropertyChangedEventHandler? PropertyChanged;
         private DateTime _selectedDateTime = DateTime.Now;
         private double _latitude;
@@ -24,22 +23,21 @@ namespace Location.Photography.Shared.ViewModels
         private double _northRotationAngle;
         private double _sunDirection;
 
-        private const double SunSmoothingFactor = 0.1; // smaller = smoother (e.g., 0.1 = 10% change)
+        private const double SunSmoothingFactor = 0.1;
+        private const double NorthSmoothingFactor = 0.1;
 
         public SunLocation()
         {
             if (Compass.Default.IsSupported)
             {
                 Compass.Default.ReadingChanged += Compass_ReadingChanged;
-                if(!Compass.Default.IsMonitoring)
+                if (!Compass.Default.IsMonitoring)
                     Compass.Default.Start(SensorSpeed.UI);
             }
 
             Latitude = 0;
             Longitude = 0;
         }
-
-     
 
         public DateTime SelectedDateTime
         {
@@ -112,59 +110,45 @@ namespace Location.Photography.Shared.ViewModels
         private void Compass_ReadingChanged(object sender, CompassChangedEventArgs e)
         {
             var heading = e.Reading.HeadingMagneticNorth;
-            if (NorthRotationAngle > 0 && NorthRotationAngle < 180)
-            {
-                NorthRotationAngle = -NorthRotationAngle;
-            }
-            else if (NorthRotationAngle > 180 && NorthRotationAngle < 360)
-            {
-                NorthRotationAngle = 360 - NorthRotationAngle;
-            }
-            else
-            {
-                NorthRotationAngle = heading;
-            }
 
+            // Update both directions using smoothing
+            UpdateNorthRotationAngle(heading);
             CalculateSunDirection(heading);
+        }
+
+        private void UpdateNorthRotationAngle(double rawHeading)
+        {
+            NorthRotationAngle = SmoothAngle(NorthRotationAngle, rawHeading, NorthSmoothingFactor);
         }
 
         private void CalculateSunDirection(double heading)
         {
-            TimeZoneInfo cst = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
-
             DateTime dt = SelectedDateTime;
-            SolarTimes solarTimes = new SolarTimes(dt, this._latitude, this._longitude);
-            var RotationAngle = Math.Round((double)solarTimes.SolarAzimuth, 0);
-            //_inclination = Math.Round((double)solarTimes.SolarElevation, 0);
-            double angleDiff = RotationAngle - heading;
-            double angleDiffN = NorthRotationAngle - heading;
+            SolarTimes solarTimes = new SolarTimes(dt, Latitude, Longitude);
+            double solarAzimuth = Math.Round((double)solarTimes.SolarAzimuth, 0);
 
-            // Normalize to -180 to 180 degrees
-            angleDiff = (angleDiff + 360) % 360;
-            if (angleDiff > 180) angleDiff -= 360;
+            // Difference between sun and compass heading
+            double angleDiff = NormalizeAngle(solarAzimuth - heading);
 
-            // Fake simple sun azimuth calculation (replace later with real)
-            var hourAngle = RotationAngle;
-
-
-            // Smoothly interpolate from current to target
             SunDirection = SmoothAngle(SunDirection, angleDiff, SunSmoothingFactor);
-            RotationAngle = SmoothAngle(RotationAngle, angleDiffN, SunSmoothingFactor);
         }
+
         public void Calculate()
         {
-            this.CalculateSunDirection(this.NorthRotationAngle);
-           
-
+            CalculateSunDirection(NorthRotationAngle);
         }
 
-        /// <summary>
-        /// Smooth interpolation between angles, handling wrap-around at 360 degrees.
-        /// </summary>
         private double SmoothAngle(double current, double target, double smoothingFactor)
         {
             double difference = ((target - current + 540) % 360) - 180;
             return (current + difference * smoothingFactor + 360) % 360;
+        }
+
+        private double NormalizeAngle(double angle)
+        {
+            angle = angle % 360;
+            if (angle < 0) angle += 360;
+            return angle;
         }
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
