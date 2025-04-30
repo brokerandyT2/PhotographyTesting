@@ -1,0 +1,15 @@
+﻿# GitVersion.yml
+
+versioningMode: ContinuousDeployment
+branches:
+  master:
+    tag: 'v'
+    versioningMode: ContinuousDeployment
+    increment: Patch
+  develop:
+    tag: 'v'
+    versioningMode: ContinuousDeployment
+    increment: Minor
+tagPrefix: 'v'  # Ensure that GitVersion looks for the 'v' prefix
+commitMessageIncrementing: Enabled
+mergeMessageIncrementing: Enabled
