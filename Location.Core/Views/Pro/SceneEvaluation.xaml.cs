@@ -3,7 +3,7 @@ using Location.Core.Helpers;
 using Location.Photography.Shared.ViewModels;
 using Locations.Core.Shared;
 using Microsoft.Maui.Controls;
-using Syncfusion.Maui.Toolkit.Carousel;
+
 
 namespace Location.Core.Views.Pro;
 
