@@ -63,4 +63,46 @@ stages:
           Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
 
     - script: |
-        echo "Using GitVersion
+        echo "Using GitVersion: $(GitVersion_SemVer)"
+      displayName: 'Confirm Build Number'
+
+    - script: |
+        dotnet workload restore
+        dotnet workload install maui
+      displayName: 'Restore & Install MAUI Workloads'
+
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      inputs:
+        command: 'restore'
+        restoreSolution: '**/*.sln'
+        feedsToUse: 'select'
+
+    - task: VSBuild@1
+      displayName: 'Build MAUI Solution'
+      inputs:
+        solution: 'Photography.sln'
+        configuration: '$(buildConfiguration)'
+        msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(GitVersion_SemVer)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run Tests'
+      inputs:
+        command: 'test'
+        projects: '**/*.Tests.csproj'
+        arguments: '--configuration Release --no-build'
+      continueOnError: true
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish MAUI Android App'
+      inputs:
+        command: publish
+        publishWebProjects: false
+        projects: '**/Location.Core.csproj' # replace with your actual Android project
+        arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(GitVersion_SemVer)'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(outputDir)'
+        ArtifactName: 'drop'
