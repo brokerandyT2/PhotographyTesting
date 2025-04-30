@@ -42,20 +42,22 @@ stages:
       workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Install and Run GitVersion'
 
-    - script: |
-        powershell -Command "
-        $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-        if ($gitVersion -and $gitVersion.SemVer) {
-            $semver = $gitVersion.SemVer
-        } else {
-            $semver = '0.5.0'
-            Write-Host 'GitVersion output is invalid or missing. Using default version: $semver'
-        }
-        Write-Host 'Setting build number to $semver'
-        Write-Host '##vso[build.updatebuildnumber]$semver'
-        Write-Host '##vso[task.setvariable variable=GitVersion_SemVer]$semver'
-        "
+    - task: PowerShell@2
       displayName: 'Update Build Number from GitVersion with Default Value'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+          if ($gitVersion -and $gitVersion.SemVer) {
+              $semver = $gitVersion.SemVer
+          } else {
+              $semver = '0.5.0'
+              Write-Host "GitVersion output is invalid or missing. Using default version: $semver"
+          }
+          Write-Host "Setting build number to $semver"
+          Write-Host "##vso[build.updatebuildnumber]$semver"
+          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
+
 
     - script: |
         echo "Using GitVersion: $(GitVersion_SemVer)"
