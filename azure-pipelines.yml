@@ -34,8 +34,11 @@ stages:
         dotnet tool install GitVersion.Tool --version 6.3.0
         dotnet tool list
         dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
+        echo "GitVersion output file content:"
         type gitversion.json
         cat gitversion.json
+        echo "GitVersion log content:"
+        type gitversion.log
       workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Install and Run GitVersion'
 
