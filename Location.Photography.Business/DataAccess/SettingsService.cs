@@ -13,6 +13,7 @@ namespace Location.Photography.Business.DataAccess
     public class SettingsService : ISettingService<SettingViewModel>
     {
         SettingsQuery<SettingViewModel> sq = new SettingsQuery<SettingViewModel>();
+        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
         public SettingsService() { }
 
         public bool Delete(SettingViewModel model)
@@ -42,9 +43,17 @@ namespace Location.Photography.Business.DataAccess
 
         public SettingViewModel GetSettingByName(string name)
         {
-            Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
-            return ss.GetSetting(name);
+            try
+            {
+                return ss.GetSetting(name);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new SettingViewModel();
+            }
         }
+
 
         public object GetSettingByName(object cameraRefresh)
         {
@@ -53,12 +62,18 @@ namespace Location.Photography.Business.DataAccess
 
         public string GetSettingWithMagicString(string key)
         {
-
-            return GetSettingByName(key).Value;
-
-            throw new NotImplementedException();
-
+            try
+            {
+                return GetSettingByName(key).Value;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return string.Empty;
+            }
         }
+
+
 
         public SettingViewModel Save(SettingViewModel model)
         {

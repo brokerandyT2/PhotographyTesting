@@ -30,7 +30,15 @@ namespace Location.Photography.Business.DataAccess
 
         public TipViewModel Get(int id)
         {
-            return query.GetItem<TipViewModel>(id);
+            try
+            {
+                return query.GetItem<TipViewModel>(id);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new TipViewModel();
+            }
         }
 
         public TipViewModel Save(TipViewModel model)

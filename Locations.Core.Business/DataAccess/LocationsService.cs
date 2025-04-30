@@ -18,69 +18,158 @@ namespace Locations.Core.Business.DataAccess
         public LocationsService() { }
         public LocationViewModel SaveSettingWithObjectReturn(LocationViewModel s)
         {
-            return lq.SaveWithIDReturn(s);
+            try
+            {
+                return lq.SaveWithIDReturn(s);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new LocationViewModel();
+            }
         }
         public LocationViewModel Save(LocationViewModel locationViewModel, bool getWeather, bool returnNew)
         {
-            if (getWeather)
+            try
             {
-                SettingsService set = new Business.DataAccess.SettingsService();
+                if (getWeather)
+                {
+                    SettingsService set = new Business.DataAccess.SettingsService();
 
-                WeatherAPI weatherAPI = new WeatherAPI(set.GetSettingByName(Constants.Weather_API_Key_string).GetValue(),locationViewModel.Lattitude, locationViewModel.Longitude, set.GetSettingByName(Constants.WeatherURL_string).GetValue());
-                WeatherService weatherService = new WeatherService();
-                weatherService.Save(weatherAPI.GetWeatherAsync().Result);
+                    WeatherAPI weatherAPI = new WeatherAPI(set.GetSettingByName(Constants.Weather_API_Key_string).GetValue(), locationViewModel.Lattitude, locationViewModel.Longitude, set.GetSettingByName(Constants.WeatherURL_string).GetValue());
+                    WeatherService weatherService = new WeatherService();
+                    weatherService.Save(weatherAPI.GetWeatherAsync().Result);
+                }
+                lq.SaveItem(locationViewModel);
+                return returnNew ? new LocationViewModel() : locationViewModel;
             }
-            lq.SaveItem(locationViewModel);
-            return returnNew? new LocationViewModel(): locationViewModel;
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new LocationViewModel();
+            }
         }
         public LocationViewModel Save(LocationViewModel locationViewModel)
         {
-            GeoLocationAPI geoLocationAPI = new GeoLocationAPI(ref locationViewModel);
-            geoLocationAPI.GetCityAndState(locationViewModel.Lattitude, locationViewModel.Longitude);
+            try
+            {
+                GeoLocationAPI geoLocationAPI = new GeoLocationAPI(ref locationViewModel);
+                geoLocationAPI.GetCityAndState(locationViewModel.Lattitude, locationViewModel.Longitude);
 
 
-            lq.SaveItem(locationViewModel);
-            return locationViewModel;
+                lq.SaveItem(locationViewModel);
+                return locationViewModel;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new LocationViewModel();
+            }
         }
         public LocationViewModel Save(LocationViewModel locationViewModel, bool returnNew)
         {
-            Save(locationViewModel);
-            return new LocationViewModel();
+            try
+            {
+                Save(locationViewModel);
+                return new LocationViewModel();
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new LocationViewModel();
+            }
 
         }
 
-        public LocationViewModel Get(int id){
+        public LocationViewModel Get(int id)
+        {
 
-            return lq.GetItem<LocationViewModel>(id);
+            try
+            {
+                return lq.GetItem<LocationViewModel>(id);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new LocationViewModel();
+            }
         }
         public LocationViewModel GetLocation(double latitude, double longitude)
         {
-            return lq.GetItem<LocationViewModel>(latitude, longitude);
+            try
+            {
+                return lq.GetItem<LocationViewModel>(latitude, longitude);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new LocationViewModel();
+            }
         }
         public bool Delete(LocationViewModel locationViewModel)
         {
-            var x = lq.DeleteItem<LocationViewModel>(locationViewModel);
-            return x != 420? true: false;
+            try
+            {
+                var x = lq.DeleteItem<LocationViewModel>(locationViewModel);
+                return x != 420 ? true : false;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return false;
+            }
         }
         public bool Delete(int id)
         {
-            var y = Get(id);
-            return lq.DeleteItem<LocationViewModel>(y) == 420 ? false: true ;
+            try
+            {
+                var y = Get(id);
+                return lq.DeleteItem<LocationViewModel>(y) == 420 ? false : true;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return false;
+            }
         }
         public bool Delete(double latitude, double longitude)
         {
-            var x = lq.GetItem<LocationViewModel>(latitude, longitude);
-            return Delete(x.Id);
+            try
+            {
+                var x = lq.GetItem<LocationViewModel>(latitude, longitude);
+                return Delete(x.Id);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return false;
+            }
 
         }
         public bool Update(LocationViewModel locationViewModel)
         {
-            lq.Update(locationViewModel);
-            return true;
+            try
+            {
+                lq.Update(locationViewModel);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return false;
+            }
         }
         public List<LocationViewModel> GetLocations()
         {
-            return lq.GetItems<LocationViewModel>().Where(x=>x.IsDeleted == false).ToList();
+            try
+            {
+                return lq.GetItems<LocationViewModel>().Where(x => x.IsDeleted == false).ToList();
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new List<LocationViewModel>();
+            }
         }
     }
 }

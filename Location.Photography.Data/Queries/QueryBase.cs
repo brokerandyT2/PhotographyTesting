@@ -15,7 +15,8 @@ namespace Location.Photography.Data.Queries
         public abstract string GetValueByString<T>(string name);
 
         public abstract IList<T> GetItems<T>();
-        public T GetItemByString<T>(string name) {
+        public T GetItemByString<T>(string name)
+        {
             throw new NotImplementedException();
         }
         public int DeleteItem<T>(T item) where T : new()
@@ -34,16 +35,40 @@ namespace Location.Photography.Data.Queries
 
         public void DeleteItem<T>(int id)
         {
-            var x = GetItem<T>(id);
-            var y = dataB.DeleteAsync(x).Result;
+            try
+            {
+                var x = GetItem<T>(id);
+                var y = dataB.DeleteAsync(x).Result;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+
+            }
         }
         public void SaveItem(T item)
         {
-            dataB.InsertOrReplaceAsync(item);
+            try
+            {
+                dataB.InsertOrReplaceAsync(item);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+
+            }
         }
         public void Update(T item)
         {
-            SaveItem(item);
+            try
+            {
+                SaveItem(item);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+
+            }
         }
     }
 }

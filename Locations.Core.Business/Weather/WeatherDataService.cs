@@ -16,7 +16,7 @@ using Microsoft.Maui.Animations;
 namespace Locations.Core.Business.Weather
 {
     public class WeatherDataService
-    {  
+    {
         private readonly HttpClient _httpClient;
         private string endpoint;
         private double latitude;
@@ -49,114 +49,161 @@ namespace Locations.Core.Business.Weather
 
         public async Task<WeatherViewModel> GetAllWeatherDataAsync()
         {
-            return await GetAsyncMethodFactory<WeatherViewModel>(TypeMethod.GetAllWeatherDataAsync);
+            try
+            {
+                return await GetAsyncMethodFactory<WeatherViewModel>(TypeMethod.GetAllWeatherDataAsync);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new WeatherViewModel();
+            }
         }
 
-      
+
 
         public async Task<Placemark> GetPlacemarkAsync()
         {
-            var location = await Geolocation.Default.GetLocationAsync();
+            try
+            {
+                var location = await Geolocation.Default.GetLocationAsync();
 
-            IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(this.latitude, this.longitude);
-            Placemark placemark = placemarks?.FirstOrDefault();
-            return placemark;
-        }
+                IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(this.latitude, this.longitude);
+                Placemark placemark = placemarks?.FirstOrDefault();
+                return placemark;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new Placemark();
+            }
+            }
 
         public async Task<T> GetAsyncMethodFactory<T>(TypeMethod typeMethod) where T : class
         {
-
-            Uri url = new(GenerateRequestUri(this.endpoint, this.latitude, this.longitude, this.API_KEY));
-
-            HttpResponseMessage response = _httpClient.GetAsync(url).Result;
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                string content = await response.Content.ReadAsStringAsync();
-                return GetDeserializedContent<T>(typeMethod, content);
-            }
+                Uri url = new(GenerateRequestUri(this.endpoint, this.latitude, this.longitude, this.API_KEY));
 
-            return default;
+                HttpResponseMessage response = _httpClient.GetAsync(url).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string content = await response.Content.ReadAsStringAsync();
+                    return GetDeserializedContent<T>(typeMethod, content);
+                }
+
+                return default;
+            }catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return default;
+            }
         }
 
         public static T GetDeserializedContent<T>(TypeMethod typeMethod, string content) where T : class
         {
-            var _serializerOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            };
-            newtonsoft.JsonTextReader _reader = new newtonsoft.JsonTextReader(new StringReader(content));
-    
-
-           // var POCO = newtonsoft.JsonConvert.DeserializeObject<Current>(content);
-            var PO = new Json.Net.JsonParser(); // (content);
-
-
-            var x = content;
-
-
-            return typeMethod switch
-            {
-                TypeMethod.GetAllWeatherDataAsync =>
-                JsonSerializer.Deserialize<WeatherViewModel>(content) as T,
-                //TypeMethod.GetDaysAsync => JsonSerializer.Deserialize<Current>(content) as T,
-
-
-            };
-        }
-
-        public async Task<List<Daily>> GetDaysAsync()
-        {
-            return await GetAsyncMethodFactory<List<Daily>>(TypeMethod.GetDaysAsync);
-        }
-        public async Task<WeatherViewModel> GetWeatherAsync()
-        {
-            WeatherViewModel weather = new WeatherViewModel();
-            WeatherDataService weatherDataService = new WeatherDataService(this.endpoint, this.latitude, this.longitude, this.API_KEY);
-            List<Daily> returned = null;
             try
             {
-                returned = weatherDataService.GetDaysAsync().Result;
+                var _serializerOptions = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = true
+                };
+                newtonsoft.JsonTextReader _reader = new newtonsoft.JsonTextReader(new StringReader(content));
+
+
+                // var POCO = newtonsoft.JsonConvert.DeserializeObject<Current>(content);
+                var PO = new Json.Net.JsonParser(); // (content);
+
+
+                var x = content;
+
+
+                return typeMethod switch
+                {
+                    TypeMethod.GetAllWeatherDataAsync =>
+                    JsonSerializer.Deserialize<WeatherViewModel>(content) as T,
+                    //TypeMethod.GetDaysAsync => JsonSerializer.Deserialize<Current>(content) as T,
+
+
+                };
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return default;
             }
-            weather.Latitude = this.latitude;
-            weather.Longitude = this.longitude;
-            weather.Forecast_Day_One = returned[0].Weather[0].Description;
-            weather.Forecast_Day_Two = returned[1].Weather[0].Description;
-            weather.Forecasts_Day_Three = returned[2].Weather[0].Description;
-            weather.Forecasts_Day_Four = returned[3].Weather[0].Description;
-            weather.Forecasts_Day_Five = returned[4].Weather[0].Description;
-         
-            weather.Temperature_Day_One = (int)Math.Round(returned[0].Temp.Max);
-            weather.Temperature_Day_One_Low = (int)Math.Round(returned[0].Temp.Min);
-            weather.Temperature_Day_Two = (int)Math.Round(returned[1].Temp.Max);
-            weather.Temperature_Day_Two_Low = (int)Math.Round(returned[1].Temp.Min);
-            weather.Temperature_Day_Three = (int)Math.Round(returned[2].Temp.Max);
-            weather.Temperature_Day_Three_Low = (int)Math.Round(returned[2].Temp.Min);
-            weather.Temperature_Day_Four = (int)Math.Round(returned[3].Temp.Max);
-            weather.Temperature_Day_Four_Low = (int)Math.Round(returned[3].Temp.Min);
-            weather.Temperature_Day_Five = (int)Math.Round(returned[4].Temp.Max);
-            weather.Temperature_Day_One_Low = (int)Math.Round(returned[4].Temp.Min);
-            weather.Sunrise_Day_One = new DateTime(returned[0].Sunrise);
-            weather.Sunrise_Day_Two = new DateTime(returned[1].Sunrise);
-            weather.Sunrise_Day_Three = new DateTime(returned[2].Sunrise);
-            weather.Sunrise_Day_Four = new DateTime(returned[3].Sunrise);
-            weather.Sunrise_Day_Five = new DateTime(returned[4].Sunrise);
-            weather.Sunset_Day_One = new DateTime(returned[0].Sunset);
-            weather.Sunrise_Day_Two = new DateTime(returned[1].Sunset);
-            weather.Sunrise_Day_Three = new DateTime(returned[2].Sunset);
-            weather.Sunset_Day_Four = new DateTime(returned[3].Sunset);
-            weather.Sunset_Day_Five = new DateTime(returned[4].Sunset);
-            weather.LastUpdate = DateTime.Now;
+            }
+
+        public async Task<List<Daily>> GetDaysAsync()
+        {
+            try
+            {
+                return await GetAsyncMethodFactory<List<Daily>>(TypeMethod.GetDaysAsync);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new List<Daily>();
+            }
+            
+        }
+        public async Task<WeatherViewModel> GetWeatherAsync()
+        {
+            try
+            {
+                WeatherViewModel weather = new WeatherViewModel();
+                WeatherDataService weatherDataService = new WeatherDataService(this.endpoint, this.latitude, this.longitude, this.API_KEY);
+                List<Daily> returned = null;
+                try
+                {
+                    returned = weatherDataService.GetDaysAsync().Result;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+                weather.Latitude = this.latitude;
+                weather.Longitude = this.longitude;
+                weather.Forecast_Day_One = returned[0].Weather[0].Description;
+                weather.Forecast_Day_Two = returned[1].Weather[0].Description;
+                weather.Forecasts_Day_Three = returned[2].Weather[0].Description;
+                weather.Forecasts_Day_Four = returned[3].Weather[0].Description;
+                weather.Forecasts_Day_Five = returned[4].Weather[0].Description;
+
+                weather.Temperature_Day_One = (int)Math.Round(returned[0].Temp.Max);
+                weather.Temperature_Day_One_Low = (int)Math.Round(returned[0].Temp.Min);
+                weather.Temperature_Day_Two = (int)Math.Round(returned[1].Temp.Max);
+                weather.Temperature_Day_Two_Low = (int)Math.Round(returned[1].Temp.Min);
+                weather.Temperature_Day_Three = (int)Math.Round(returned[2].Temp.Max);
+                weather.Temperature_Day_Three_Low = (int)Math.Round(returned[2].Temp.Min);
+                weather.Temperature_Day_Four = (int)Math.Round(returned[3].Temp.Max);
+                weather.Temperature_Day_Four_Low = (int)Math.Round(returned[3].Temp.Min);
+                weather.Temperature_Day_Five = (int)Math.Round(returned[4].Temp.Max);
+                weather.Temperature_Day_One_Low = (int)Math.Round(returned[4].Temp.Min);
+                weather.Sunrise_Day_One = new DateTime(returned[0].Sunrise);
+                weather.Sunrise_Day_Two = new DateTime(returned[1].Sunrise);
+                weather.Sunrise_Day_Three = new DateTime(returned[2].Sunrise);
+                weather.Sunrise_Day_Four = new DateTime(returned[3].Sunrise);
+                weather.Sunrise_Day_Five = new DateTime(returned[4].Sunrise);
+                weather.Sunset_Day_One = new DateTime(returned[0].Sunset);
+                weather.Sunrise_Day_Two = new DateTime(returned[1].Sunset);
+                weather.Sunrise_Day_Three = new DateTime(returned[2].Sunset);
+                weather.Sunset_Day_Four = new DateTime(returned[3].Sunset);
+                weather.Sunset_Day_Five = new DateTime(returned[4].Sunset);
+                weather.LastUpdate = DateTime.Now;
 
 
 
 
-            return weather;
+                return weather;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new WeatherViewModel();
+            }
         }
     }
     public class Temp
@@ -283,9 +330,9 @@ namespace Locations.Core.Business.Weather
         public double Pop { get; set; }
     }
 
-   
 
-    
+
+
 
     public class Daily
     {

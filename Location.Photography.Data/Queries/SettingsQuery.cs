@@ -26,6 +26,7 @@ namespace Location.Photography.Data.Queries
         public string GetValueBy<T>(string name)
         {
             return dataB.Table<SettingViewModel>().Where(x => x.Name == name).FirstOrDefaultAsync().Result.Value;
+
         }
         public override string GetValueByString<T>(string name)
         {

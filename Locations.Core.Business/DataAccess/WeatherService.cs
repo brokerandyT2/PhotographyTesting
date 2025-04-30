@@ -16,34 +16,43 @@ namespace Locations.Core.Business.DataAccess
         public WeatherService() { }
         public WeatherViewModel GetWeather(double latitude, double longitude)
         {
-            var update = _settingsService.GetSettingByName(MagicStrings.LastBulkWeatherUpdate);
-            var lastUpdate = DateTime.Parse(update.Value);
-            var x = _weatherQuery.GetWeather(latitude, longitude);
-            WeatherViewModel wvm = new WeatherViewModel();
-            if (x == null)
+            try
             {
-                NetworkAccess accessType = Connectivity.Current.NetworkAccess;
-                if (accessType == NetworkAccess.Internet && lastUpdate < DateTime.Now.AddDays(-1))
+                var update = _settingsService.GetSettingByName(MagicStrings.LastBulkWeatherUpdate);
+                var lastUpdate = DateTime.Parse(update.Value);
+                var x = _weatherQuery.GetWeather(latitude, longitude);
+                WeatherViewModel wvm = new WeatherViewModel();
+                if (x == null)
                 {
-                    var key = _settingsService.GetSetting(MagicStrings.Weather_API_Key).Value;
-                    var url = _settingsService.GetSetting(MagicStrings.WeatherURL).Value;
-                    var tempSetting = _settingsService.GetSetting(MagicStrings.TemperatureType).Value;
-                    //TODO: get rid of this library.
-                    var client = new OpenWeatherAPI.OpenWeatherApiClient(key, url, tempSetting, true);
-                    var output = client.GetData(latitude, longitude);
-                    wvm = StringToWeatherViewModel(output);
-                    update.Value = DateTime.Now.ToString();
-                    _settingsService.SaveSettingWithObjectReturn(update);
-                    Save(wvm);
+                    NetworkAccess accessType = Connectivity.Current.NetworkAccess;
+                    if (accessType == NetworkAccess.Internet && lastUpdate < DateTime.Now.AddDays(-1))
+                    {
+                        var key = _settingsService.GetSetting(MagicStrings.Weather_API_Key).Value;
+                        var url = _settingsService.GetSetting(MagicStrings.WeatherURL).Value;
+                        var tempSetting = _settingsService.GetSetting(MagicStrings.TemperatureType).Value;
+                        //TODO: get rid of this library.
+                        var client = new OpenWeatherAPI.OpenWeatherApiClient(key, url, tempSetting, true);
+                        var output = client.GetData(latitude, longitude);
+                        wvm = StringToWeatherViewModel(output);
+                        update.Value = DateTime.Now.ToString();
+                        _settingsService.SaveSettingWithObjectReturn(update);
+                        Save(wvm);
+                    }
+                    wvm.DateFormat = _settingsService.GetSettingByName(MagicStrings.DateFormat).Value;
+                    wvm.TimeFormat = _settingsService.GetSettingByName(MagicStrings.TimeFormat).Value;
+                    return wvm;
                 }
-                wvm.DateFormat= _settingsService.GetSettingByName(MagicStrings.DateFormat).Value;
-                wvm.TimeFormat= _settingsService.GetSettingByName(MagicStrings.TimeFormat).Value;
-                return wvm;
+                else
+                {
+                    return x;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return x;
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new WeatherViewModel();
             }
+
 
         }
 
@@ -76,7 +85,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.MoonRise_Day_One = dateTime.AddSeconds(day.SelectToken("moonrise").ToObject<int>()).ToLocalTime();
                         wvm.MoonSet_Day_One = dateTime.AddSeconds(day.SelectToken("moonset").ToObject<int>()).ToLocalTime();
                         wvm.MoonPhaseAs_Number_DayOne = day.SelectToken("moon_phase").ToObject<double>();
-                         wvm.Summary_Day_One = day.SelectToken("summary").ToObject<string>();
+                        wvm.Summary_Day_One = day.SelectToken("summary").ToObject<string>();
                         var temps = day.SelectToken("temp");
                         var feels_likes = day.SelectToken("feels_like");
                         var weather = day.SelectToken("weather");
@@ -103,7 +112,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_One_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayOne = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_one = day.SelectToken("clouds").ToObject<int>();
-                       // wvm.Rain_Day_One = day.SelectToken("rain").ToObject<int>();
+                        // wvm.Rain_Day_One = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 1)
                     {
@@ -177,7 +186,7 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Three_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayThree = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_Three = day.SelectToken("clouds").ToObject<int>();
-                       // wvm.Rain_Day_Three = day.SelectToken("rain").ToObject<int>();
+                        // wvm.Rain_Day_Three = day.SelectToken("rain").ToObject<int>();
                     }
                     else if (i == 3)
                     {
@@ -214,9 +223,10 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Four_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayFour = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_Four = day.SelectToken("clouds").ToObject<int>();
-                       // wvm.Rain_Day_Four = day.SelectToken("rain").ToObject<int>();
+                        // wvm.Rain_Day_Four = day.SelectToken("rain").ToObject<int>();
                     }
-                    else if (i == 4) {
+                    else if (i == 4)
+                    {
                         wvm.Forecasts_Day_Five = day.SelectToken("summary").ToObject<string>();
                         wvm.Sunrise_Day_Five = dateTime.AddSeconds(day.SelectToken("sunrise").ToObject<int>()).ToLocalTime();
                         wvm.Sunset_Day_Five = dateTime.AddSeconds(day.SelectToken("sunset").ToObject<int>()).ToLocalTime();
@@ -250,9 +260,10 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Five_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DayFive = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_Five = day.SelectToken("clouds").ToObject<int>();
-                       // wvm.Rain_Day_Five = day.SelectToken("rain").ToObject<int>();
+                        // wvm.Rain_Day_Five = day.SelectToken("rain").ToObject<int>();
                     }
-                    else if (i == 5) {
+                    else if (i == 5)
+                    {
                         wvm.Forecasts_Day_Six = day.SelectToken("summary").ToObject<string>();
                         wvm.Sunrise_Day_Six = dateTime.AddSeconds(day.SelectToken("sunrise").ToObject<int>()).ToLocalTime();
                         wvm.Sunset_Day_Six = dateTime.AddSeconds(day.SelectToken("sunset").ToObject<int>()).ToLocalTime();
@@ -286,9 +297,10 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Six_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DaySix = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_Six = day.SelectToken("clouds").ToObject<int>();
-                      //  wvm.Rain_Day_Six = day.SelectToken("rain").ToObject<int>();
+                        //  wvm.Rain_Day_Six = day.SelectToken("rain").ToObject<int>();
                     }
-                    else if (i == 6) {
+                    else if (i == 6)
+                    {
                         wvm.Forecasts_Day_Seven = day.SelectToken("summary").ToObject<string>();
                         wvm.Sunrise_Day_Seven = dateTime.AddSeconds(day.SelectToken("sunrise").ToObject<int>()).ToLocalTime();
                         wvm.Sunset_Day_Seven = dateTime.AddSeconds(day.SelectToken("sunset").ToObject<int>()).ToLocalTime();
@@ -322,9 +334,9 @@ namespace Locations.Core.Business.DataAccess
                         wvm.Temperature_Day_Seven_Low = day.SelectToken("clouds").ToObject<double>();
                         wvm.UV_Index_DaySeven = day.SelectToken("uvi").ToObject<double>();
                         wvm.Clouds_day_Seven = day.SelectToken("clouds").ToObject<int>();
-                      //  wvm.Rain_Day_Seven = day.SelectToken("rain").ToObject<int>();
+                        //  wvm.Rain_Day_Seven = day.SelectToken("rain").ToObject<int>();
                     }
-                    
+
 
                     i++;
                 }
@@ -335,35 +347,77 @@ namespace Locations.Core.Business.DataAccess
 
         public WeatherViewModel Save(WeatherViewModel model)
         {
-            _weatherQuery.SaveItem(model);
-            return model;
+            try
+            {
+                _weatherQuery.SaveItem(model);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new WeatherViewModel();
+            }
         }
         public WeatherViewModel Save(WeatherViewModel model, bool returnNew)
         {
-            var x = Save(model);
-            return returnNew ? new WeatherViewModel() : model;
-        }
+            try
+            {
+                var x = Save(model);
+                return returnNew ? new WeatherViewModel() : model;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new WeatherViewModel();
+            }
         public WeatherViewModel Get(int id)
         {
-            return _weatherQuery.GetItem<WeatherViewModel>(id);
+            try
+            {
+                return _weatherQuery.GetItem<WeatherViewModel>(id);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new WeatherViewModel();
 
+            }
         }
-
         public bool Delete(WeatherViewModel model)
         {
-            var y = _weatherQuery.DeleteItem<WeatherViewModel>(model);
-            return y == 420 ? false : true;
+            try
+            {
+                var y = _weatherQuery.DeleteItem<WeatherViewModel>(model);
+                return y == 420 ? false : true;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return false;
+            }
         }
         public bool Delete(int id)
         {
-
-            return _weatherQuery.DeleteItem<WeatherViewModel>(_weatherQuery.GetItem<WeatherViewModel>(id)) == 420 ? false : true;
-
+            try
+            {
+                return _weatherQuery.DeleteItem<WeatherViewModel>(_weatherQuery.GetItem<WeatherViewModel>(id)) == 420 ? false : true;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return false;
+            }
         }
         public bool Delete(double latitude, double longitude)
         {
-            return _weatherQuery.DeleteItem<WeatherViewModel>(_weatherQuery.GetWeather(latitude, longitude)) == 420 ? false : true;
-
+            try
+            {
+                return _weatherQuery.DeleteItem<WeatherViewModel>(_weatherQuery.GetWeather(latitude, longitude)) == 420 ? false : true;
+            }catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return false;
+            }
         }
 
 

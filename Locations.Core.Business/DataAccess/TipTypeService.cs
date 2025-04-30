@@ -18,37 +18,84 @@ namespace Locations.Core.Business.DataAccess
         }
         public TipTypeViewModel Save(TipTypeViewModel model)
         {
+            try
+            {
+                query.SaveItem(model);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return model;
 
-            query.SaveItem(model);
-            return model;
+            }
         }
         public TipTypeViewModel Save(TipTypeViewModel model, bool returnNew)
         {
-
-            var x = Save(model);
-            return returnNew ? new TipTypeViewModel() : x;
+            try
+            {
+                var x = Save(model);
+                return returnNew ? new TipTypeViewModel() : x;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return model;
+            }
         }
         public TipTypeViewModel Get(int id)
         {
-
-            return query.GetItem<TipTypeViewModel>(id);
+            try
+            {
+                return query.GetItem<TipTypeViewModel>(id);
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new TipTypeViewModel();
+            }
         }
         public List<TipTypeViewModel> GetAllTips()
-        { 
-            return (List<TipTypeViewModel>)query.GetItems<TipTypeViewModel>();
+        {
+            try
+            {
+                return (List<TipTypeViewModel>)query.GetItems<TipTypeViewModel>();
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return new List<TipTypeViewModel>();
+            }
+           
         }
 
         public bool Delete(TipTypeViewModel model)
         {
+            try
+            {
+                var x = query.DeleteItem(model);
+                return x != 420 ? true : false;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return false;
+            }
 
-            var x = query.DeleteItem(model);
-            return x != 420 ? true : false;
         }
         public bool Delete(int id)
         {
-            var model = query.GetItem<TipTypeViewModel>(id);
-            var x = query.DeleteItem(model);
-            return x != 420 ? true : false;
+            try
+            {
+                var model = query.GetItem<TipTypeViewModel>(id);
+                var x = query.DeleteItem(model);
+                return x != 420 ? true : false;
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                return false;
+            }
         }
         public bool Delete(double latitude, double longitude)
         {
