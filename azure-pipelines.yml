@@ -21,14 +21,54 @@ stages:
       vmImage: 'windows-latest'
 
     steps:
+    - checkout: self
+      fetchDepth: 0
     - task: UseDotNet@2
       displayName: 'Install .NET SDK 9.x'
       inputs:
         version: '9.x'
         includePreviewVersions: true
+
+    - script: |
+        echo "Current directory: %CD%"
+        dir
+        dotnet new tool-manifest --force
+        dotnet tool install GitVersion.Tool --version 6.3.0
+        dotnet tool list
+        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
+        echo "GitVersion output file content:"
+        type gitversion.json
+        cat gitversion.json
+        echo "GitVersion log content:"
+        type gitversion.log
+      workingDirectory: $(Build.SourcesDirectory)
+      displayName: 'Install and Run GitVersion'
+
+    - task: PowerShell@2
+      displayName: 'Update Build Number from GitVersion with Default Value'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+          if ($gitVersion -and $gitVersion.SemVer) {
+              $semver = $gitVersion.SemVer
+          } else {
+              $semver = '0.5.0'
+              Write-Host "GitVersion output is invalid or missing. Using default version: $semver"
+          }
+          Write-Host "Setting build number to $semver"
+          Write-Host "##vso[build.updatebuildnumber]$semver"
+          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
+
+
+    - script: |
+        echo "Using GitVersion: $(GitVersion_SemVer)"
+      displayName: 'Confirm Build Number'
+
     - script: |
         dotnet workload restore
       displayName: 'Restore Workloads'
+
     - script: |
         dotnet workload install maui-ios maccatalyst
       displayName: 'Install MAUI iOS Workload'
@@ -46,7 +86,14 @@ stages:
       inputs:
         solution: 'Photography.sln'
         configuration: '$(buildConfiguration)'
-        msbuildArgs: '-p:ContinuousIntegrationBuild=true'
+        msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(GitVersion_SemVer)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run Tests'
+      inputs:
+        command: 'test'
+        projects: '**/*Tests.csproj'
+        arguments: '--configuration Release --no-build'
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish MAUI App'
@@ -54,8 +101,7 @@ stages:
         command: publish
         publishWebProjects: false
         projects: '**/Location.Core.csproj'
-        arguments: '--framework net9.0-android35.0 --configuration Release --output $(Build.ArtifactStagingDirectory)/drop'
-
+        arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(GitVersion_SemVer)'
 
     - task: PublishBuildArtifacts@1
       inputs:
