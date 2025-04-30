@@ -40,19 +40,22 @@ stages:
       displayName: 'Install and Run GitVersion'
 
     - script: |
-        $gitVersion = Get-Content "gitversion.json" | ConvertFrom-Json
+        powershell -Command "
+        $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
         if ($gitVersion -and $gitVersion.SemVer) {
             $semver = $gitVersion.SemVer
         } else {
-            $semver = "0.5.0"  # Provide a default version here
-            echo "GitVersion output is invalid or missing. Using default version: $semver"
+            $semver = '0.5.0'
+            Write-Host 'GitVersion output is invalid or missing. Using default version: $semver'
         }
-        echo "Setting build number to $semver"
-        Write-Host "##vso[build.updatebuildnumber]$semver"
+        Write-Host 'Setting build number to $semver'
+        Write-Host '##vso[build.updatebuildnumber]$semver'
+        Write-Host '##vso[task.setvariable variable=GitVersion_SemVer]$semver'
+        "
       displayName: 'Update Build Number from GitVersion with Default Value'
 
     - script: |
-        echo "Using GitVersion: $(Build.BuildNumber)"
+        echo "Using GitVersion: $(GitVersion_SemVer)"
       displayName: 'Confirm Build Number'
 
     - script: |
@@ -76,7 +79,7 @@ stages:
       inputs:
         solution: 'Photography.sln'
         configuration: '$(buildConfiguration)'
-        msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(Build.BuildNumber)'
+        msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(GitVersion_SemVer)'
 
     - task: DotNetCoreCLI@2
       displayName: 'Run Tests'
@@ -91,7 +94,7 @@ stages:
         command: publish
         publishWebProjects: false
         projects: '**/Location.Core.csproj'
-        arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(Build.BuildNumber)'
+        arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(GitVersion_SemVer)'
 
     - task: PublishBuildArtifacts@1
       inputs:
