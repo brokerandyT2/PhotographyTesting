@@ -27,10 +27,10 @@ stages:
     - checkout: self
       fetchDepth: 0
 
-    # Set up Git credentials using the stored PAT
+    # Set up Git credentials for Windows
     - script: |
         git config --global credential.helper store
-        echo "https://$(MY_PAT)@dev.azure.com" > ~/.git-credentials
+        echo "https://$(MY_PAT)@dev.azure.com" > C:\Users\$(Build.UserName)\.git-credentials
       displayName: 'Set up Git credentials'
 
     # Install .NET SDK 9.x
