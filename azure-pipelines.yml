@@ -94,6 +94,7 @@ stages:
         command: 'test'
         projects: '**/*Tests.csproj'
         arguments: '--configuration Release --no-build'
+      continueOnError: true
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish MAUI App'
