@@ -21,7 +21,10 @@ namespace Location.Core
         public static bool IsLoggedIn = true;
 
 #else
-       public static bool IsLoggedIn =  ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false;  
+       public static bool IsLoggedIn
+        {
+            get { return ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false; }
+        }
 #endif
 
 
@@ -38,17 +41,11 @@ namespace Location.Core
 #if !ANDY
                 Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
 #endif
-           
-            DataAccess da = new DataAccess();
+          
+            
             InitializeComponent();
-#if PHOTOGRAPHY
-           
-            //var ps =  Permissions.RequestAsync<Permissions.Camera>().Result;
-            //var pss =  Permissions.RequestAsync<Permissions.LocationWhenInUse>().Result;
-#endif
-
-
-
+            DataAccess da = new DataAccess();
+         
 
 
             //Increment the app open counter
