@@ -1,13 +1,10 @@
 trigger:
   branches:
     include:
-      - main
       - master
+      - main
       - feature/*
       - release/*
-  tags:
-    include:
-      - '*'
 
 pool:
   vmImage: 'windows-latest'
@@ -27,12 +24,12 @@ stages:
     steps:
     - checkout: self
       fetchDepth: 0
-      persistCredentials: true
 
-    - script: |
-        git fetch --tags --force --prune
-        git tag
-      displayName: 'Ensure full Git history and tags are available'
+    - task: UseDotNet@2
+      displayName: 'Install .NET SDK 9.x'
+      inputs:
+        version: '9.x'
+        includePreviewVersions: true
 
     - task: PowerShell@2
       displayName: 'Install and Run GitVersion'
@@ -46,7 +43,7 @@ stages:
           $gitVersionOutput | Out-File -FilePath gitversion.log -Encoding utf8
           $gitVersionOutput | ConvertFrom-Json | Out-File -FilePath gitversion.json -Encoding utf8
 
-          # Log the output
+          # Log the output for debugging
           Write-Host "GitVersion output file content:"
           Get-Content gitversion.json
           Write-Host "GitVersion log content:"
@@ -57,32 +54,66 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          # Parse GitVersion output
-          $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-          $semver = $gitVersion.SemVer
-          $assemblyVer = $gitVersion.AssemblySemVer
-          $fileVer = $gitVersion.AssemblySemFileVer
-          $infoVer = $gitVersion.InformationalVersion
+          try {
+              # Check the contents of the json file for debugging
+              $gitVersionContent = Get-Content 'gitversion.json' -Raw
+              Write-Host "GitVersion JSON content:"
+              Write-Host $gitVersionContent
 
-          # Set the build number and GitVersion variables
+              # Parse GitVersion output
+              $gitVersion = $gitVersionContent | ConvertFrom-Json
+              
+              # Extract versioning information
+              $semver = $gitVersion.SemVer
+              $assemblyVer = $gitVersion.AssemblySemVer
+              $fileVer = $gitVersion.AssemblySemFileVer
+              $infoVer = $gitVersion.InformationalVersion
+
+              # Set the build number and GitVersion variables
+              Write-Host "##vso[build.updatebuildnumber]$semver"
+              Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
+              Write-Host "##vso[task.setvariable variable=GitVersion_AssemblySemVer]$assemblyVer"
+              Write-Host "##vso[task.setvariable variable=GitVersion_AssemblySemFileVer]$fileVer"
+              Write-Host "##vso[task.setvariable variable=GitVersion_InformationalVersion]$infoVer"
+          } catch {
+              Write-Error "Failed to parse GitVersion output: $_"
+              exit 1
+          }
+
+    - script: |
+        echo "Current directory: %CD%"
+        dir
+        dotnet new tool-manifest --force
+        dotnet tool install GitVersion.Tool --version 6.3.0
+        dotnet tool list
+        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
+        echo "GitVersion output file content:"
+        type gitversion.json
+        cat gitversion.json
+        echo "GitVersion log content:"
+        type gitversion.log
+      workingDirectory: $(Build.SourcesDirectory)
+      displayName: 'Install and Run GitVersion'
+
+    - task: PowerShell@2
+      displayName: 'Update Build Number from GitVersion with Default Value'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+          if ($gitVersion -and $gitVersion.SemVer) {
+              $semver = $gitVersion.SemVer
+          } else {
+              $semver = '0.5.0'
+              Write-Host "GitVersion output is invalid or missing. Using default version: $semver"
+          }
+          Write-Host "Setting build number to $semver"
           Write-Host "##vso[build.updatebuildnumber]$semver"
           Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
-          Write-Host "##vso[task.setvariable variable=GitVersion_AssemblySemVer]$assemblyVer"
-          Write-Host "##vso[task.setvariable variable=GitVersion_AssemblySemFileVer]$fileVer"
-          Write-Host "##vso[task.setvariable variable=GitVersion_InformationalVersion]$infoVer"
 
     - script: |
         echo "Using GitVersion: $(GitVersion_SemVer)"
-        echo "AssemblyVersion: $(GitVersion_AssemblySemVer)"
-        echo "FileVersion: $(GitVersion_AssemblySemFileVer)"
-        echo "InformationalVersion: $(GitVersion_InformationalVersion)"
-      displayName: 'Confirm GitVersion Output'
-
-    - task: UseDotNet@2
-      displayName: 'Install .NET SDK 9.x'
-      inputs:
-        version: '9.x'
-        includePreviewVersions: true
+      displayName: 'Confirm Build Number'
 
     - script: |
         dotnet workload restore
@@ -105,10 +136,7 @@ stages:
       inputs:
         solution: 'Photography.sln'
         configuration: '$(buildConfiguration)'
-        msbuildArgs: >
-          -p:AssemblyVersion=$(GitVersion_AssemblySemVer)
-          -p:FileVersion=$(GitVersion_AssemblySemFileVer)
-          -p:InformationalVersion=$(GitVersion_InformationalVersion)
+        msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(GitVersion_SemVer)'
 
     - task: DotNetCoreCLI@2
       displayName: 'Run Tests'
@@ -124,14 +152,7 @@ stages:
         command: publish
         publishWebProjects: false
         projects: '**/Location.Core.csproj'
-        arguments: >
-          --framework net9.0-android35.0
-          --configuration Release
-          --output $(outputDir)
-          -p:Version=$(GitVersion_SemVer)
-          -p:AssemblyVersion=$(GitVersion_AssemblySemVer)
-          -p:FileVersion=$(GitVersion_AssemblySemFileVer)
-          -p:InformationalVersion=$(GitVersion_InformationalVersion)
+        arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(GitVersion_SemVer)'
 
     - task: PublishBuildArtifacts@1
       inputs:
