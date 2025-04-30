@@ -13,7 +13,7 @@ variables:
   buildConfiguration: 'Release'
   outputDir: '$(Build.ArtifactStagingDirectory)/drop'
   CI: true
-  MY_PAT: $(MY_PAT) # Ensure that MY_PAT is stored securely
+  
 
 stages:
 - stage: Build
