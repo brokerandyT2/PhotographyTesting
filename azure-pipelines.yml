@@ -71,9 +71,10 @@ stages:
         echo "Using GitVersion: $(GitVersion_SemVer)"
       displayName: 'Confirm Build Number'
 
-    # Output the tags from the Git repository
     - script: |
         echo "Fetching tags from Git..."
+        git config --global credential.helper store
+        echo "https://$(MY_PAT)@dev.azure.com" > .git-credentials
         git fetch --tags
         git tag
       displayName: 'Output Git Tags'
