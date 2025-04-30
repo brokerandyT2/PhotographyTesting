@@ -31,7 +31,7 @@ stages:
         installationPath: $(Agent.ToolsDirectory)/dotnet
 
     - script: |
-        dotnet tool install --global GitVersion.Tool --version 5.x
+        dotnet tool install --global GitVersion.Tool
       displayName: 'Install GitVersion Tool'
 
     - script: |
