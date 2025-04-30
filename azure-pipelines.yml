@@ -24,11 +24,68 @@ stages:
     steps:
     - checkout: self
       fetchDepth: 0
-      persistCredentials: true
 
-    - script: |
-        git fetch --tags --force --prune
-      displayName: 'Ensure full Git history and tags are available'
+    - task: UseDotNet@2
+      displayName: 'Install .NET SDK 9.x'
+      inputs:
+        version: '9.x'
+        includePreviewVersions: true
+
+    - task: PowerShell@2
+      displayName: 'Install and Run GitVersion'
+      inputs:
+        targetType: 'inline'
+        script: |
+          # Ensure git is fully fetched, including tags
+          git fetch --tags
+          
+          # Install GitVersion tool
+          dotnet new tool-manifest --force
+          dotnet tool install GitVersion.Tool --version 6.3.0
+          
+          # Run GitVersion to get version information in JSON format
+          $gitVersionOutput = dotnet tool run dotnet-gitversion /output json /verbosity quiet 2>&1
+          
+          # Log the output to file for debugging
+          $gitVersionOutput | Out-File -FilePath gitversion.log -Encoding utf8
+          $gitVersionOutput | ConvertFrom-Json | Out-File -FilePath gitversion.json -Encoding utf8
+
+          # Output logs for troubleshooting
+          Write-Host "GitVersion output file content:"
+          Get-Content gitversion.json
+          Write-Host "GitVersion log content:"
+          Get-Content gitversion.log
+
+    - task: PowerShell@2
+      displayName: 'Parse GitVersion and Set Variables'
+      inputs:
+        targetType: 'inline'
+        script: |
+          try {
+              # Check the contents of the JSON file for debugging
+              $gitVersionContent = Get-Content 'gitversion.json' -Raw
+              Write-Host "GitVersion JSON content:"
+              Write-Host $gitVersionContent
+
+              # Parse GitVersion output
+              $gitVersion = $gitVersionContent | ConvertFrom-Json
+              
+              # Extract versioning information
+              $semver = $gitVersion.SemVer
+              $assemblyVer = $gitVersion.AssemblySemVer
+              $fileVer = $gitVersion.AssemblySemFileVer
+              $infoVer = $gitVersion.InformationalVersion
+
+              # Set the build number and GitVersion variables
+              Write-Host "##vso[build.updatebuildnumber]$semver"
+              Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
+              Write-Host "##vso[task.setvariable variable=GitVersion_AssemblySemVer]$assemblyVer"
+              Write-Host "##vso[task.setvariable variable=GitVersion_AssemblySemFileVer]$fileVer"
+              Write-Host "##vso[task.setvariable variable=GitVersion_InformationalVersion]$infoVer"
+          } catch {
+              Write-Error "Failed to parse GitVersion output: $_"
+              exit 1
+          }
 
     - script: |
         echo "Current directory: %CD%"
@@ -39,6 +96,7 @@ stages:
         dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
         echo "GitVersion output file content:"
         type gitversion.json
+        cat gitversion.json
         echo "GitVersion log content:"
         type gitversion.log
       workingDirectory: $(Build.SourcesDirectory)
@@ -66,8 +124,11 @@ stages:
 
     - script: |
         dotnet workload restore
-        dotnet workload install maui
-      displayName: 'Restore & Install MAUI Workloads'
+      displayName: 'Restore Workloads'
+
+    - script: |
+        dotnet workload install maui-ios maccatalyst
+      displayName: 'Install MAUI iOS Workload'
 
     - task: NuGetToolInstaller@1
 
@@ -88,16 +149,16 @@ stages:
       displayName: 'Run Tests'
       inputs:
         command: 'test'
-        projects: '**/*.Tests.csproj'
+        projects: '**/*Tests.csproj'
         arguments: '--configuration Release --no-build'
       continueOnError: true
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish MAUI Android App'
+      displayName: 'Publish MAUI App'
       inputs:
         command: publish
         publishWebProjects: false
-        projects: '**/Location.Core.csproj' # replace with your actual Android project
+        projects: '**/Location.Core.csproj'
         arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(GitVersion_SemVer)'
 
     - task: PublishBuildArtifacts@1
