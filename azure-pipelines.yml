@@ -51,10 +51,10 @@ stages:
     - task: DotNetCoreCLI@2
       displayName: 'Publish MAUI App'
       inputs:
-        command: 'publish'
+        command: publish
         publishWebProjects: false
-        projects: 'Location.Core/Location.Core.csproj'
-        arguments: '--framework net9.0-android35.0 --configuration Release --output $(Build.ArtifactStagingDirectory)'
+        projects: '**/Location.Core.csproj'
+        arguments: '--framework net9.0-android35.0 --configuration Release --output $(Build.ArtifactStagingDirectory)/drop'
 
 
     - task: PublishBuildArtifacts@1
