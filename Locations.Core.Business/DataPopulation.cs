@@ -118,7 +118,7 @@ namespace Locations.Core.Business
 
            
 #if ANDY
-            list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
+            //list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
             list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.True_string });
