@@ -28,8 +28,6 @@ stages:
 
     - script: |
         git fetch --tags --force --prune
-        git fetch --unshallow || true
-        git tag
       displayName: 'Ensure full Git history and tags are available'
 
     - script: |
