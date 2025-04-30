@@ -24,11 +24,13 @@ stages:
     steps:
     - checkout: self
       fetchDepth: 0
-    - task: UseDotNet@2
-      displayName: 'Install .NET SDK 9.x'
-      inputs:
-        version: '9.x'
-        includePreviewVersions: true
+      persistCredentials: true
+
+    - script: |
+        git fetch --tags --force --prune
+        git fetch --unshallow || true
+        git tag
+      displayName: 'Ensure full Git history and tags are available'
 
     - script: |
         echo "Current directory: %CD%"
@@ -39,7 +41,6 @@ stages:
         dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
         echo "GitVersion output file content:"
         type gitversion.json
-        cat gitversion.json
         echo "GitVersion log content:"
         type gitversion.log
       workingDirectory: $(Build.SourcesDirectory)
@@ -61,51 +62,5 @@ stages:
           Write-Host "##vso[build.updatebuildnumber]$semver"
           Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
 
-
     - script: |
-        echo "Using GitVersion: $(GitVersion_SemVer)"
-      displayName: 'Confirm Build Number'
-
-    - script: |
-        dotnet workload restore
-      displayName: 'Restore Workloads'
-
-    - script: |
-        dotnet workload install maui-ios maccatalyst
-      displayName: 'Install MAUI iOS Workload'
-
-    - task: NuGetToolInstaller@1
-
-    - task: NuGetCommand@2
-      inputs:
-        command: 'restore'
-        restoreSolution: '**/*.sln'
-        feedsToUse: 'select'
-
-    - task: VSBuild@1
-      displayName: 'Build MAUI Solution'
-      inputs:
-        solution: 'Photography.sln'
-        configuration: '$(buildConfiguration)'
-        msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(GitVersion_SemVer)'
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Run Tests'
-      inputs:
-        command: 'test'
-        projects: '**/*Tests.csproj'
-        arguments: '--configuration Release --no-build'
-      continueOnError: true
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish MAUI App'
-      inputs:
-        command: publish
-        publishWebProjects: false
-        projects: '**/Location.Core.csproj'
-        arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(GitVersion_SemVer)'
-
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(outputDir)'
-        ArtifactName: 'drop'
+        echo "Using GitVersion
