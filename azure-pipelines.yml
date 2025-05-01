@@ -1,3 +1,10 @@
+variables:
+  buildConfiguration: 'Release'
+  outputDir: '$(Build.ArtifactStagingDirectory)/drop'
+  androidSdkVersion: '35'
+  androidHome: '$(Agent.ToolsDirectory)/android-sdk'
+  javaHome: 'C:\Java\OpenJDK11'
+
 trigger:
   branches:
     include:
@@ -9,33 +16,20 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
-variables:
-  buildConfiguration: 'Release'
-  outputDir: '$(Build.ArtifactStagingDirectory)/drop'
-  androidSdkVersion: '35'
-  androidHome: '$(Agent.ToolsDirectory)/android-sdk'
-  javaHome: 'C:\Java\OpenJDK11'
-
 stages:
 - stage: Build
   jobs:
   - job: Build_MAUI_Android
     pool:
       vmImage: 'windows-latest'
-
     steps:
     - checkout: self
       fetchDepth: 0
 
     - script: |
-        echo "Current directory: %CD%"
-        dir
         dotnet new tool-manifest --force
         dotnet tool install GitVersion.Tool --version 6.3.0
-        dotnet tool list
-        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
-        type gitversion.json
-        type gitversion.log
+        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
       workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Install and Run GitVersion'
 
@@ -46,11 +40,8 @@ stages:
         script: |
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
           if ($gitVersion -and $gitVersion.SemVer) {
-              $semver = $gitVersion.SemVer
-              Write-Host "##vso[build.updatebuildnumber]$semver"
-              Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
-          } else {
-              Write-Host "GitVersion output is invalid or missing."
+              Write-Host "##vso[build.updatebuildnumber]$($gitVersion.SemVer)"
+              Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$($gitVersion.SemVer)"
           }
 
     - task: UseDotNet@2
@@ -64,24 +55,20 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          $jdkVersion = "11"
-          $installerUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.21+9/OpenJDK11U-jdk_x64_windows_hotspot_11.0.21_9.msi"
-          $installerPath = "$env:Temp\openjdk.msi"
-          $installDir = "$(javaHome)"
-
-          Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
-          Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installerPath`" INSTALLDIR=`"$installDir`" /quiet /qn /norestart"
-
-          Write-Host "##vso[task.setvariable variable=JAVA_HOME]$installDir"
+          $jdkUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.21+9/OpenJDK11U-jdk_x64_windows_hotspot_11.0.21_9.msi"
+          $installerPath = "$env:TEMP\openjdk11.msi"
+          Invoke-WebRequest -Uri $jdkUrl -OutFile $installerPath
+          Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installerPath`" INSTALLDIR=`"$(javaHome)`" /quiet /qn /norestart"
+          Write-Host "##vso[task.setvariable variable=JAVA_HOME]$(javaHome)"
 
     - task: PowerShell@2
-      displayName: 'Download and Set Up Android SDK Command-Line Tools'
+      displayName: 'Install Android SDK Command-Line Tools'
       inputs:
         targetType: 'inline'
         script: |
           $sdkRoot = "$(androidHome)"
           $toolsUrl = "https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip"
-          $zipPath = "$sdkRoot\cmdline-tools.zip"
+          $zipPath = "$sdkRoot\tools.zip"
           $extractTemp = "$sdkRoot\temp"
           $finalToolsDir = "$sdkRoot\cmdline-tools\latest"
 
@@ -97,7 +84,11 @@ stages:
           Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
 
     - script: |
-        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
+        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" `
+          "platform-tools" `
+          "platforms;android-$(androidSdkVersion)" `
+          "build-tools;34.0.0" `
+          "emulator"
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
@@ -105,7 +96,7 @@ stages:
       displayName: 'Install Android SDK components'
 
     - task: DotNetCoreCLI@2
-      displayName: 'Restore Workloads'
+      displayName: 'Restore MAUI Workloads'
       inputs:
         command: 'custom'
         custom: 'workload'
@@ -131,63 +122,34 @@ stages:
       inputs:
         restoreSolution: 'Location.Core.sln'
 
-    - task: VSBuild@1
-      displayName: 'Build Photography.sln with MSBuild (for tests)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Build APK'
       inputs:
-        solution: 'Photography.sln'
-        msbuildArchitecture: 'x64'
-        platform: 'Any CPU'
-        configuration: '$(buildConfiguration)'
-        vsVersion: 'latest'
-        msbuildArgs: '/restore /p:UseDotNetNativeToolchain=false'
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '-f net9.0-android /p:Configuration=$(buildConfiguration) /p:OutputPath=$(outputDir)-apk'
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
 
-#    - task: DotNetCoreCLI@2
-#      displayName: 'Run Unit Tests'
-#      inputs:
-#        command: 'test'
-#        projects: '**/*Tests.csproj'
-#        arguments: '--configuration $(buildConfiguration)'
-#      continueOnError: true
-#      env:
-#        ANDROID_HOME: $(ANDROID_HOME)
-#        JAVA_HOME: $(JAVA_HOME)
-#        PATH: $(PATH)
-
-    - script: |
-        dotnet publish "Location.Core/Location.Core.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir) -p:AndroidPackageFormat=aab
-      displayName: 'Publish Android AAB (App Bundle)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Build AAB'
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '-f net9.0-android /p:Configuration=$(buildConfiguration) /p:OutputPath=$(outputDir)-aab /p:AndroidPackageFormat=aab'
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
-    - script: |
-        echo "Listing files in output directory:"
-        dir $(outputDir)
-      displayName: 'List Output Directory Contents - AAB'
-    - task: PublishBuildArtifacts@1
-      displayName: 'Upload AAB Artifact'
-      inputs:
-        PathtoPublish: '$(outputDir)'
-        ArtifactName: 'android-aab'
 
     - script: |
-        dotnet publish "Location.Core/Location.Core.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir)-apk -p:AndroidPackageFormat=apk
-      displayName: 'Publish Android APK'
-      env:
-        ANDROID_HOME: $(ANDROID_HOME)
-        JAVA_HOME: $(JAVA_HOME)
-        PATH: $(PATH)
-    - script: |
-        echo "Listing files in output directory:"
-        dir $(outputDir)
-      displayName: 'List Output Directory Contents - APK'
-    - task: PublishBuildArtifacts@1
-      displayName: 'Upload APK Artifact'
-      inputs:
-        PathtoPublish: '$(outputDir)-apk'
-        ArtifactName: 'android-apk'
+        echo "Pushing APK to Azure Artifacts Feed (apks)..."
+        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(GitVersion_SemVer) --path $(outputDir)-apk
+      displayName: 'Push APK to apks Feed'
 
+    - script: |
+        echo "Pushing AAB to Azure Artifacts Feed (aab)..."
+        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(GitVersion_SemVer) --path $(outputDir)-aab
+      displayName: 'Push AAB to aabs Feed'
