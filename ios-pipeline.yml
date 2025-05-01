@@ -20,7 +20,7 @@ variables:
   appleProfile: '$(APPLE_PROFILE)'    # Set up Apple provisioning profile
 
 stages:
-- stage: Build
+- stage: Build_iOs
   jobs:
   - job: Build_MAUI_iOS_Android
     pool:
