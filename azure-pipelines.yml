@@ -118,11 +118,11 @@ stages:
       displayName: 'Restore .NET Packages'
 
     - script: |
-        dotnet build --configuration $(buildConfiguration)
+        dotnet build --configuration $(buildConfiguration) /p:Platform=x64
       displayName: 'Build MAUI Android Project'
 
     - script: |
-        dotnet publish **/*.csproj ` 
+        dotnet publish **/*.csproj `
           -f net9.0-android$(androidSdkVersion).0 `
           -c $(buildConfiguration) `
           -o $(outputDir) `
