@@ -89,11 +89,12 @@ stages:
 
     - task: NuGetToolInstaller@1
 
-    - script: dotnet restore Photography.sln
+    - script: |
+        dotnet restore "Photography.sln"
       displayName: 'Restore .NET Packages'
 
     - script: |
-        dotnet build "Photography.sln" --configuration $(buildConfiguration) /p:Platform="Any CPU" --no-restore
+        dotnet build "Photography.sln" --configuration $(buildConfiguration) --no-restore
       displayName: 'Build MAUI Android Solution'
 
     - script: |
