@@ -118,7 +118,7 @@ stages:
       displayName: 'Restore .NET Packages'
 
     - script: |
-        dotnet build --configuration $(buildConfiguration) /p:Platform=x64
+        dotnet build --configuration $(buildConfiguration) /p:Platform="Any CPU"
       displayName: 'Build MAUI Android Project'
 
     - script: |
