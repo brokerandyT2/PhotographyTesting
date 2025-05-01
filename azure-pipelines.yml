@@ -15,9 +15,6 @@ variables:
   androidSdkVersion: '35'
   androidHome: '$(Agent.ToolsDirectory)/android-sdk'
   javaHome: 'C:\Java\OpenJDK11'
-  feedName: 'mobile-artifacts'
-  apkPackageName: 'photography-apk'
-  aabPackageName: 'photography-aab'
 
 stages:
 - stage: Build
@@ -132,12 +129,12 @@ stages:
     - task: NuGetCommand@2
       displayName: 'Restore NuGet Packages'
       inputs:
-        restoreSolution: 'Photography.sln'
+        restoreSolution: 'Location.Core.sln'
 
     - task: VSBuild@1
-      displayName: 'Build Photography.sln with MSBuild (for tests)'
+      displayName: 'Build Location.Core.sln with MSBuild (for tests)'
       inputs:
-        solution: 'Photography.sln'
+        solution: 'Location.Core.sln'
         msbuildArchitecture: 'x64'
         platform: 'Any CPU'
         configuration: '$(buildConfiguration)'
@@ -161,48 +158,29 @@ stages:
         PATH: $(PATH)
 
     - script: |
-        dotnet publish "Locations.Photography.Mobile/Locations.Photography.Mobile.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir) -p:AndroidPackageFormat=aab
+        dotnet publish "Location.Core/Location.Core.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir) -p:AndroidPackageFormat=aab
       displayName: 'Publish Android AAB (App Bundle)'
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
 
+    - task: PublishBuildArtifacts@1
+      displayName: 'Upload AAB Artifact'
+      inputs:
+        PathtoPublish: '$(outputDir)'
+        ArtifactName: 'android-aab'
+
     - script: |
-        dotnet publish "Locations.Photography.Mobile/Locations.Photography.Mobile.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir)-apk -p:AndroidPackageFormat=apk
+        dotnet publish "Location.Core/Location.Core.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir)-apk -p:AndroidPackageFormat=apk
       displayName: 'Publish Android APK'
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
 
-    # Delete previous versions of AAB and APK from Azure Artifacts
-    - script: |
-        az artifacts universal delete --feed $(feedName) --package-name $(aabPackageName) --version $(GitVersion_SemVer) --yes
-      displayName: 'Delete Old AAB if Exists'
-
-    - script: |
-        az artifacts universal delete --feed $(feedName) --package-name $(apkPackageName) --version $(GitVersion_SemVer) --yes
-      displayName: 'Delete Old APK if Exists'
-
-    # Publish the new AAB to Azure Artifacts
-    - task: UniversalPackages@0
-      displayName: 'Publish AAB to Azure Artifacts'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Upload APK Artifact'
       inputs:
-        command: publish
-        publishDirectory: '$(outputDir)'
-        feedsToUse: 'internal'
-        vstsFeedPublish: '$(feedName)'
-        packageName: 'photography-aab'
-        packageVersion: '$(GitVersion_SemVer)'
-
-    # Publish the new APK to Azure Artifacts
-    - task: UniversalPackages@0
-      displayName: 'Publish APK to Azure Artifacts'
-      inputs:
-        command: publish
-        publishDirectory: '$(outputDir)-apk'
-        feedsToUse: 'internal'
-        vstsFeedPublish: '$(feedName)'
-        packageName: 'photography-apk'
-        packageVersion: '$(GitVersion_SemVer)'
+        PathtoPublish: '$(outputDir)-apk'
+        ArtifactName: 'android-apk'
