@@ -24,7 +24,7 @@ stages:
 - stage: Setup
   displayName: 'Setup Environment'
   jobs:
-  - job: SetupJob
+  - job: 'Setup'
     steps:
     - checkout: self
       fetchDepth: 0
@@ -96,7 +96,7 @@ stages:
 - stage: Restore
   dependsOn: Setup
   jobs:
-  - job: RestoreJob
+  - job: 'Restore_Workloads_and_NUGET_pkgs'
     steps:
     - task: DotNetCoreCLI@2
       displayName: 'Restore MAUI Workloads'
@@ -131,7 +131,7 @@ stages:
 - stage: Build
   dependsOn: Restore
   jobs:
-  - job: BuildJob
+  - job: 'Build_APK_and_AAB'
     steps:
     - task: DotNetCoreCLI@2
       displayName: 'Build APK'
@@ -161,7 +161,7 @@ stages:
 - stage: Publish
   dependsOn: Build
   jobs:
-  - job: PublishJob
+  - job: 'Publish_AAB_and_APK_to_Artifacts'
     steps:
     - script: |
         echo "Publishing APK..."
