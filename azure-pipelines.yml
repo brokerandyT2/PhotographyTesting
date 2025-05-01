@@ -1,8 +1,8 @@
 trigger:
   branches:
     include:
-      - master
       - main
+      - master
       - feature/*
       - release/*
 
@@ -12,19 +12,19 @@ pool:
 variables:
   buildConfiguration: 'Release'
   outputDir: '$(Build.ArtifactStagingDirectory)/drop'
-  CI: true
+  androidSdkVersion: '35'
+  androidHome: '$(Agent.ToolsDirectory)/android-sdk'
 
 stages:
 - stage: Build
   jobs:
-  - job: Build_MAUI
+  - job: Build_MAUI_Android
     pool:
       vmImage: 'windows-latest'
 
     steps:
     - checkout: self
-      fetchDepth: 0  # Ensure full history is fetched to get all tags
-
+      fetchDepth: 0
 
     - task: UseDotNet@2
       displayName: 'Install .NET SDK 9.x'
@@ -33,82 +33,75 @@ stages:
         includePreviewVersions: true
 
     - script: |
-        echo "Current directory: %CD%"
-        dir
-        dotnet new tool-manifest --force
-        dotnet tool install GitVersion.Tool --version 6.3.0
-        dotnet tool list
-        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
-        echo "GitVersion output file content:"
-        type gitversion.json
-        cat gitversion.json
-        echo "GitVersion log content:"
-        type gitversion.log
-      workingDirectory: $(Build.SourcesDirectory)
-      displayName: 'Install and Run GitVersion'
-
-    - task: PowerShell@2
-      displayName: 'Update Build Number from GitVersion'
-      inputs:
-        targetType: 'inline'
-        script: |
-          $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-          if ($gitVersion -and $gitVersion.SemVer) {
-              $semver = $gitVersion.SemVer
-          } else {
-              Write-Host "GitVersion output is invalid or missing."
-          }
-          Write-Host "Setting build number to $semver"
-          Write-Host "##vso[build.updatebuildnumber]$semver"
-          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
+        echo "Installing Java (required for Android tooling)..."
+        choco install -y openjdk11
+      displayName: 'Install Java JDK'
 
     - script: |
-        echo "Using GitVersion: $(GitVersion_SemVer)"
-      displayName: 'Confirm Build Number'
-
-    #- script: |
-    #    dotnet workload restore
-    #  displayName: 'Restore Workloads'
+        echo "Installing Android command-line tools..."
+        mkdir "%ANDROID_HOME%"
+        curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip
+        tar -xf cmdline-tools.zip -C "%ANDROID_HOME%"
+        mkdir "%ANDROID_HOME%/cmdline-tools/latest"
+        move "%ANDROID_HOME%/cmdline-tools"/* "%ANDROID_HOME%/cmdline-tools/latest"
+      env:
+        ANDROID_HOME: $(androidHome)
+      displayName: 'Download Android SDK CLI tools'
 
     - script: |
-        dotnet workload install maui-ios maccatalyst maui maui-android
-      displayName: 'Install MAUI iOS Workload'
+        echo "Installing Android SDK packages..."
+        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root=%ANDROID_HOME% "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
+      env:
+        ANDROID_HOME: $(androidHome)
+        JAVA_HOME: C:\Program Files\OpenJDK\openjdk-11\
+      displayName: 'Install Android SDK components'
+
+    - script: |
+        echo "Set environment variables..."
+        echo "##vso[task.setvariable variable=ANDROID_HOME]$(androidHome)"
+        echo "##vso[task.setvariable variable=JAVA_HOME]C:\Program Files\OpenJDK\openjdk-11"
+        echo "##vso[task.setvariable variable=PATH]$(androidHome)\platform-tools;$(androidHome)\cmdline-tools\latest\bin;$(PATH)"
+      displayName: 'Set Env Vars'
+
+    - script: |
+        echo "Installing MAUI workloads..."
+        dotnet workload install maui maui-android
+      displayName: 'Install .NET MAUI Workloads'
 
     - task: NuGetToolInstaller@1
+
     - script: |
-        dotnet clean
-      displayName: 'Clean solution'
-      
-    - task: NuGetCommand@2
-      inputs:
-        command: 'restore'
-        restoreSolution: '**/*.sln'
-        feedsToUse: 'select'
+        dotnet restore
+      displayName: 'Restore .NET Packages'
 
-    - task: VSBuild@1
-      displayName: 'Build MAUI Solution'
-      inputs:
-        solution: 'Photography.sln'
-        configuration: '$(buildConfiguration)'
-        msbuildArgs: '-p:ContinuousIntegrationBuild=true -p:Version=$(GitVersion_SemVer)'
+    - script: |
+        dotnet build --configuration $(buildConfiguration)
+      displayName: 'Build MAUI Android Project'
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Run Tests'
-      inputs:
-        command: 'test'
-        projects: '**/*Tests.csproj'
-        arguments: '--configuration Release --no-build'
-      continueOnError: true
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish MAUI App'
-      inputs:
-        command: publish
-        publishWebProjects: false
-        projects: '**/Location.Core.csproj'
-        arguments: '--framework net9.0-android35.0 --configuration Release --output $(outputDir) -p:Version=$(GitVersion_SemVer)'
+    - script: |
+        dotnet publish **/*.csproj `
+          -f net9.0-android$(androidSdkVersion).0 `
+          -c $(buildConfiguration) `
+          -o $(outputDir) `
+          -p:AndroidPackageFormat=aab
+      displayName: 'Publish Android AAB (App Bundle)'
 
     - task: PublishBuildArtifacts@1
+      displayName: 'Upload AAB Artifact'
       inputs:
         PathtoPublish: '$(outputDir)'
-        ArtifactName: 'drop'
+        ArtifactName: 'android-aab'
+
+    - script: |
+        dotnet publish **/*.csproj `
+          -f net9.0-android$(androidSdkVersion).0 `
+          -c $(buildConfiguration) `
+          -o $(outputDir)-apk `
+          -p:AndroidPackageFormat=apk
+      displayName: 'Publish Android APK'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Upload APK Artifact'
+      inputs:
+        PathtoPublish: '$(outputDir)-apk'
+        ArtifactName: 'android-apk'
