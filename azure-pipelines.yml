@@ -14,7 +14,6 @@ variables:
   outputDir: '$(Build.ArtifactStagingDirectory)/drop'
   androidSdkVersion: '35'
   androidHome: '$(Agent.ToolsDirectory)/android-sdk'
-  javaHome: 'C:\Java\OpenJDK11'
 
 stages:
 - stage: Build
@@ -118,17 +117,19 @@ stages:
         echo "##vso[task.setvariable variable=PATH]$(androidHome)\platform-tools;$(androidHome)\cmdline-tools\latest\bin;$(PATH)"
       displayName: 'Set Env Vars'
 
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: 'Photography.sln'
+      displayName: 'Restore NuGet Packages'
+
     - task: DotNetCoreCLI@2
       displayName: 'Install MAUI Workloads'
       inputs:
         command: 'custom'
         custom: 'workload'
         arguments: 'install maui maui-android maui-ios maui-windows'
-
-    - task: NuGetCommand@2
-      inputs:
-        restoreSolution: 'Photography.sln'
-      displayName: 'Restore NuGet Packages'
 
     - task: VSBuild@1
       displayName: 'Build Photography.sln with MSBuild (for tests)'
@@ -139,6 +140,14 @@ stages:
         configuration: '$(buildConfiguration)'
         vsVersion: 'latest'
         msbuildArgs: '/restore /p:UseDotNetNativeToolchain=false'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run Unit Tests'
+      inputs:
+        command: 'test'
+        projects: '**/*Tests.csproj'
+        arguments: '--configuration $(buildConfiguration)'
+      continueOnError: true
 
     - script: |
         dotnet publish "Locations.Photography.Mobile/Locations.Photography.Mobile.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir) -p:AndroidPackageFormat=aab
