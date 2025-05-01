@@ -1,16 +1,11 @@
 ﻿using Innovative.SolarCalculator;
 using Location.Photography.Shared.ViewModels.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using Microsoft.Maui;
+using Microsoft.Maui.Devices.Sensors;
+using Microsoft.Maui.ApplicationModel;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Location.Photography.Shared.ViewModels
 {
@@ -22,6 +17,9 @@ namespace Location.Photography.Shared.ViewModels
         private double _longitude;
         private double _northRotationAngle;
         private double _sunDirection;
+        private double _sunElevation;
+        private double _deviceTilt;
+        private bool _elevationMatched;
 
         private const double SunSmoothingFactor = 0.1;
         private const double NorthSmoothingFactor = 0.1;
@@ -35,8 +33,7 @@ namespace Location.Photography.Shared.ViewModels
                     Compass.Default.Start(SensorSpeed.UI);
             }
 
-            Latitude = 0;
-            Longitude = 0;
+            StartSensors();
         }
 
         public DateTime SelectedDateTime
@@ -107,11 +104,49 @@ namespace Location.Photography.Shared.ViewModels
             }
         }
 
+        public double SunElevation
+        {
+            get => _sunElevation;
+            set
+            {
+                if (_sunElevation != value)
+                {
+                    _sunElevation = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public double DeviceTilt
+        {
+            get => _deviceTilt;
+            set
+            {
+                if (_deviceTilt != value)
+                {
+                    _deviceTilt = value;
+                    OnPropertyChanged();
+                    CheckElevationMatch();
+                }
+            }
+        }
+
+        public bool ElevationMatched
+        {
+            get => _elevationMatched;
+            set
+            {
+                if (_elevationMatched != value)
+                {
+                    _elevationMatched = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+       
         private void Compass_ReadingChanged(object sender, CompassChangedEventArgs e)
         {
             var heading = e.Reading.HeadingMagneticNorth;
-
-            // Update both directions using smoothing
             UpdateNorthRotationAngle(heading);
             CalculateSunDirection(heading);
         }
@@ -123,19 +158,51 @@ namespace Location.Photography.Shared.ViewModels
 
         private void CalculateSunDirection(double heading)
         {
-            DateTime dt = SelectedDateTime;
-            SolarTimes solarTimes = new SolarTimes(dt, Latitude, Longitude);
+            var dt = SelectedDateTime;
+            var solarTimes = new SolarTimes(dt, Latitude, Longitude);
             double solarAzimuth = Math.Round((double)solarTimes.SolarAzimuth, 0);
+            SunElevation = solarTimes.SolarElevation;
 
-            // Difference between sun and compass heading
             double angleDiff = NormalizeAngle(solarAzimuth - heading);
-
             SunDirection = SmoothAngle(SunDirection, angleDiff, SunSmoothingFactor);
         }
 
-        public void Calculate()
+        public void StartSensors()
         {
-            CalculateSunDirection(NorthRotationAngle);
+            if (Accelerometer.Default.IsSupported && !Accelerometer.Default.IsMonitoring)
+            {
+                Accelerometer.Default.ReadingChanged += Accelerometer_ReadingChanged;
+                Accelerometer.Default.Start(SensorSpeed.UI);
+            }
+        }
+
+        private void Accelerometer_ReadingChanged(object sender, AccelerometerChangedEventArgs e)
+        {
+            var z = e.Reading.Acceleration.Z;
+            var tilt = Math.Acos(z) * 180 / Math.PI;
+            DeviceTilt = tilt;
+        }
+
+        private async void CheckElevationMatch()
+        {
+            if (Math.Abs(DeviceTilt - SunElevation) <= 3)
+            {
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    try
+                    {
+                        Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
+                        await Task.Delay(100);
+                        Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
+                        ElevationMatched = true;
+                    }
+                    catch { }
+                });
+            }
+            else
+            {
+                ElevationMatched = false;
+            }
         }
 
         private double SmoothAngle(double current, double target, double smoothingFactor)

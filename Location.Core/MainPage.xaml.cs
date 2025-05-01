@@ -19,12 +19,13 @@ namespace Location.Core
         private static SubscriptionTypeEnum _subType;
 #if !ANDY
         
-         public static bool IsLoggedIn
+public static bool IsLoggedIn = true;
+#else
+        public static bool IsLoggedIn
         {
             get { return ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false; }
         }
-#else
-        public static bool IsLoggedIn = true;
+
 #endif
 
 
@@ -41,12 +42,12 @@ namespace Location.Core
 #if !ANDY
                 Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
 #endif
-          
-            
+
+
             InitializeComponent();
             DataAccess da = new DataAccess();
-         
 
+            InitAsync();
 
             //Increment the app open counter
             var z = ss.GetSetting(MagicStrings.AppOpenCounter);
@@ -109,6 +110,20 @@ namespace Location.Core
             this.Children.Add(new Location.Core.Views.Settings());
 
 
+        }
+
+        private async void InitAsync()
+        {
+            Dispatcher.Dispatch(async () =>
+            {
+                var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+                var statustwo = await Permissions.RequestAsync<Permissions.Camera>();
+            });
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+
+
+            });
         }
 
         private void AddDefault()

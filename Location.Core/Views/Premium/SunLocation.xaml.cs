@@ -55,7 +55,7 @@ public partial class SunLocation : ContentPage
         y.Latitude = x.Lattitude;
         y.Longitude = x.Longitude;
         y.SelectedDateTime = GetDate();
-        y.Calculate();
+        //y.Calculate();
     }
 
     private DateTime GetDate()
@@ -67,14 +67,14 @@ public partial class SunLocation : ContentPage
     {
         var y = ((vm.SunLocation)BindingContext);
         y.SelectedDateTime = GetDate();
-        y.Calculate();
+        //y.Calculate();
     }
 
     private void time_TimeSelected(object sender, TimeChangedEventArgs e)
     {
         var y = ((vm.SunLocation)BindingContext);
         y.SelectedDateTime = GetDate();
-        y.Calculate();
+        //y.Calculate();
     }
 
     private void ImageButton_Pressed(object sender, EventArgs e)
