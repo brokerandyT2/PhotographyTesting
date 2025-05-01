@@ -50,6 +50,12 @@ stages:
         version: '9.x'
         includePreviewVersions: true
 
+    - task: UseDotNet@2
+      displayName: 'Install .NET SDK 8.x'
+      inputs:
+        version: '8.x'
+        includePreviewVersions: true
+
     - task: PowerShell@2
       displayName: 'Install OpenJDK 11 and Set JAVA_HOME'
       inputs:
@@ -84,10 +90,10 @@ stages:
           Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
 
     - script: |
-        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" ^
-          "platform-tools" ^
-          "platforms;android-$(androidSdkVersion)" ^
-          "build-tools;34.0.0" ^
+        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" `
+          "platform-tools" `
+          "platforms;android-$(androidSdkVersion)" `
+          "build-tools;34.0.0" `
           "emulator"
       env:
         ANDROID_HOME: $(ANDROID_HOME)
@@ -127,7 +133,7 @@ stages:
       inputs:
         command: 'build'
         projects: '**/*.csproj'
-        arguments: '-f net9.0-android /p:Configuration=$(buildConfiguration) /p:OutputPath=$(outputDir)-apk'
+        arguments: '-f net8.0-android /p:Configuration=$(buildConfiguration) /p:OutputPath=$(outputDir)-apk'
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
@@ -138,7 +144,7 @@ stages:
       inputs:
         command: 'build'
         projects: '**/*.csproj'
-        arguments: '-f net9.0-android /p:Configuration=$(buildConfiguration) /p:OutputPath=$(outputDir)-aab /p:AndroidPackageFormat=aab'
+        arguments: '-f net8.0-android /p:Configuration=$(buildConfiguration) /p:OutputPath=$(outputDir)-aab /p:AndroidPackageFormat=aab'
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
