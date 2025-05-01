@@ -12,6 +12,20 @@ trigger:
       - master
       - feature/*
       - release/*
+  paths:
+    exclude:
+      - Location.Core/Platforms/iOS/**
+
+pr:
+  branches:
+    include:
+      - main
+      - master
+      - feature/*
+      - release/*
+  paths:
+    exclude:
+      - Location.Core/Platforms/iOS/**
 
 pool:
   vmImage: 'windows-latest'
@@ -37,14 +51,9 @@ stages:
         targetType: 'inline'
         script: |
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-          if ($gitVersion -and $gitVersion.MajorMinorPatch) {
-              # Remove the period from the build number
-              $cleanBuildNumber = "$(Build.BuildNumber)".Replace('.', '')
-              # Concatenate GitVersion with the cleaned build number
-              $buildVersion = "$($gitVersion.MajorMinorPatch)$cleanBuildNumber-$(Build.BuildId)"
-               Write-Host "GitVersion Build Number: $buildVersion"
-              Write-Host "##vso[build.updatebuildnumber]$buildVersion"
-              Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
+          if ($gitVersion -and $gitVersion.SemVer) {
+              Write-Host "##vso[build.updatebuildnumber]$($gitVersion.SemVer)"
+              Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$($gitVersion.SemVer)"
           }
 
 # Stage 2 - SETUP
