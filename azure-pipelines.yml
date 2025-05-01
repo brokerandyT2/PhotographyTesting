@@ -14,80 +14,113 @@ variables:
   outputDir: '$(Build.ArtifactStagingDirectory)/drop'
   androidSdkVersion: '35'
   androidHome: '$(Agent.ToolsDirectory)/android-sdk'
-  javaHome: 'C:\Java\OpenJDK11'
 
 stages:
 - stage: Build
   jobs:
   - job: Build_MAUI_Android
+    pool:
+      vmImage: 'windows-latest'
+
     steps:
     - checkout: self
       fetchDepth: 0
 
     - task: UseDotNet@2
+      displayName: 'Install .NET SDK 9.x'
       inputs:
         version: '9.x'
         includePreviewVersions: true
 
     - task: PowerShell@2
-      displayName: 'Install OpenJDK 11'
+      displayName: 'Install OpenJDK 11 and Set JAVA_HOME'
       inputs:
         targetType: 'inline'
         script: |
+          $jdkVersion = "11"
           $installerUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.21+9/OpenJDK11U-jdk_x64_windows_hotspot_11.0.21_9.msi"
-          $installerPath = "$env:TEMP\openjdk.msi"
-          $installDir = "$(javaHome)"
+          $installerPath = "$env:Temp\openjdk.msi"
+          $installDir = "C:\Java\OpenJDK$jdkVersion"
+
+          Write-Host "Downloading OpenJDK $jdkVersion..."
           Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+
+          Write-Host "Installing to $installDir..."
           Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installerPath`" INSTALLDIR=`"$installDir`" /quiet /qn /norestart"
-          Write-Host "##vso[task.setvariable variable=JAVA_HOME]$installDir"
-          Write-Host "Installed Java to $installDir"
+
+          Write-Host "Setting JAVA_HOME and updating PATH..."
+          [System.Environment]::SetEnvironmentVariable("JAVA_HOME", $installDir, [System.EnvironmentVariableTarget]::Process)
+          $env:JAVA_HOME = $installDir
+          $env:Path += ";$installDir\bin"
+
+          java -version
 
     - task: PowerShell@2
-      displayName: 'Install Android Command-Line Tools'
+      displayName: 'Download and Set Up Android SDK Command-Line Tools'
       inputs:
         targetType: 'inline'
         script: |
+          $ErrorActionPreference = 'Stop'
+
           $sdkRoot = "$(androidHome)"
           $toolsUrl = "https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip"
           $zipPath = "$sdkRoot\cmdline-tools.zip"
-          $tempDir = "$sdkRoot\temp"
-          $finalDir = "$sdkRoot\cmdline-tools\latest"
+          $toolsDir = "$sdkRoot\cmdline-tools"
+          $latestDir = "$toolsDir\latest"
+
+          Write-Host "Creating SDK root: $sdkRoot"
           New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
+
+          Write-Host "Downloading command line tools..."
           Invoke-WebRequest -Uri $toolsUrl -OutFile $zipPath
-          Expand-Archive -Path $zipPath -DestinationPath $tempDir -Force
-          Move-Item "$tempDir\cmdline-tools" "$finalDir"
-          Remove-Item $tempDir, $zipPath -Recurse -Force
-          Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
+
+          Write-Host "Extracting..."
+          Expand-Archive -Path $zipPath -DestinationPath "$sdkRoot\temp" -Force
+
+          Write-Host "Reorganizing for sdkmanager compatibility..."
+          New-Item -ItemType Directory -Path $latestDir -Force | Out-Null
+          Copy-Item "$sdkRoot\temp\cmdline-tools\*" -Destination $latestDir -Recurse -Force
+
+          Write-Host "Cleaning up..."
+          Remove-Item "$sdkRoot\temp" -Recurse -Force
+          Remove-Item $zipPath -Force
+
+          Write-Host "Done."
+      env:
+        ANDROID_HOME: $(androidHome)
 
     - script: |
+        echo "Installing Android SDK packages..."
         "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root=%ANDROID_HOME% `
           "platform-tools" `
           "platforms;android-$(androidSdkVersion)" `
           "build-tools;34.0.0" `
           "emulator"
-      displayName: 'Install Android SDK Packages'
       env:
-        JAVA_HOME: $(javaHome)
         ANDROID_HOME: $(androidHome)
+        JAVA_HOME: C:\Java\OpenJDK11
+      displayName: 'Install Android SDK components'
 
     - script: |
-        echo "Updating PATH..."
-        echo "##vso[task.setvariable variable=PATH]$(ANDROID_HOME)\platform-tools;$(ANDROID_HOME)\cmdline-tools\latest\bin;$(PATH)"
-      displayName: 'Set Android SDK on PATH'
+        echo "##vso[task.setvariable variable=ANDROID_HOME]$(androidHome)"
+        echo "##vso[task.setvariable variable=JAVA_HOME]C:\Java\OpenJDK11"
+        echo "##vso[task.setvariable variable=PATH]$(androidHome)\platform-tools;$(androidHome)\cmdline-tools\latest\bin;$(PATH)"
+      displayName: 'Set Env Vars'
 
     - script: |
+        echo "Installing MAUI workloads..."
         dotnet workload install maui maui-android
-      displayName: 'Install MAUI Workloads'
+      displayName: 'Install .NET MAUI Workloads'
 
     - task: NuGetToolInstaller@1
 
     - script: |
         dotnet restore
-      displayName: 'Restore NuGet Packages'
+      displayName: 'Restore .NET Packages'
 
     - script: |
         dotnet build --configuration $(buildConfiguration)
-      displayName: 'Build MAUI Android App'
+      displayName: 'Build MAUI Android Project'
 
     - script: |
         dotnet publish **/*.csproj `
@@ -95,9 +128,10 @@ stages:
           -c $(buildConfiguration) `
           -o $(outputDir) `
           -p:AndroidPackageFormat=aab
-      displayName: 'Publish AAB'
+      displayName: 'Publish Android AAB (App Bundle)'
 
     - task: PublishBuildArtifacts@1
+      displayName: 'Upload AAB Artifact'
       inputs:
         PathtoPublish: '$(outputDir)'
         ArtifactName: 'android-aab'
@@ -108,9 +142,10 @@ stages:
           -c $(buildConfiguration) `
           -o $(outputDir)-apk `
           -p:AndroidPackageFormat=apk
-      displayName: 'Publish APK'
+      displayName: 'Publish Android APK'
 
     - task: PublishBuildArtifacts@1
+      displayName: 'Upload APK Artifact'
       inputs:
         PathtoPublish: '$(outputDir)-apk'
         ArtifactName: 'android-apk'
