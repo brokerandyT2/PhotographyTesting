@@ -104,7 +104,7 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.LastBulkWeatherUpdate, Value = DateTime.Now.AddDays(-2).ToString() });
             list.Add(new() { Name = MagicStrings.DefaultLanguage, Value = "en-US" });
             list.Add(new() { Name = MagicStrings.WindDirection, Value = MagicStrings.TowardsWind });
-            list.Add(new() { Name = MagicStrings.CameraRefresh, Value = "1000" });
+            list.Add(new() { Name = MagicStrings.CameraRefresh, Value = "2000" });
             list.Add(new() { Name = MagicStrings.AppOpenCounter, Value = "1" });
             list.Add(new() { Name = MagicStrings.TimeFormat, Value = MagicStrings.USTimeformat_Pattern });
             list.Add(new() { Name = MagicStrings.DateFormat, Value = MagicStrings.USDateFormat });
