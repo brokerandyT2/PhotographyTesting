@@ -1,0 +1,149 @@
+trigger:
+  branches:
+    include:
+      - main
+      - master
+      - feature/*
+      - release/*
+
+pool:
+  vmImage: 'macos-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  outputDir: '$(Build.ArtifactStagingDirectory)/drop'
+  iosSdkVersion: '14.4'  # Adjust as per your requirements
+  androidSdkVersion: '35'
+  androidHome: '/usr/local/share/android-sdk'
+  javaHome: '/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home'
+  appleCert: '$(APPLE_CERTIFICATE)'  # Set up Apple certificates in Pipeline or KeyVault
+  appleProfile: '$(APPLE_PROFILE)'    # Set up Apple provisioning profile
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build_MAUI_iOS_Android
+    pool:
+      vmImage: 'macos-latest'
+
+    steps:
+    - checkout: self
+      fetchDepth: 0
+
+    - script: |
+        echo "Current directory: %CD%"
+        dir
+        dotnet new tool-manifest --force
+        dotnet tool install GitVersion.Tool --version 6.3.0
+        dotnet tool list
+        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
+        type gitversion.json
+        type gitversion.log
+      workingDirectory: $(Build.SourcesDirectory)
+      displayName: 'Install and Run GitVersion'
+
+    - task: PowerShell@2
+      displayName: 'Update Build Number from GitVersion'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+          if ($gitVersion -and $gitVersion.SemVer) {
+              $semver = $gitVersion.SemVer
+              Write-Host "##vso[build.updatebuildnumber]$semver"
+              Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
+          } else {
+              Write-Host "GitVersion output is invalid or missing."
+          }
+
+    - task: UseDotNet@2
+      displayName: 'Install .NET SDK 9.x'
+      inputs:
+        version: '9.x'
+        includePreviewVersions: true
+
+    - script: |
+        echo "Installing Android SDK..."
+        curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-9477386_latest.zip
+        unzip sdk-tools.zip -d /usr/local/share/android-sdk
+        echo "##vso[task.setvariable variable=ANDROID_HOME]$ANDROID_HOME"
+      displayName: 'Download and Set Up Android SDK Command-Line Tools'
+
+    - script: |
+        sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
+      displayName: 'Install Android SDK components'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore Workloads'
+      inputs:
+        command: 'custom'
+        custom: 'workload'
+        arguments: 'restore'
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Install MAUI Workloads'
+      inputs:
+        command: 'custom'
+        custom: 'workload'
+        arguments: 'install maui maui-android maui-ios maui-windows'
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+
+    - task: NuGetCommand@2
+      displayName: 'Restore NuGet Packages'
+      inputs:
+        restoreSolution: 'Photography.sln'
+
+    - task: VSBuild@1
+      displayName: 'Build iOS Project'
+      inputs:
+        solution: 'Photography.sln'
+        msbuildArchitecture: 'x64'
+        platform: 'iPhone'
+        configuration: '$(buildConfiguration)'
+        vsVersion: 'latest'
+        msbuildArgs: '/restore /p:UseDotNetNativeToolchain=false /p:Platform=iPhone'
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run Unit Tests'
+      inputs:
+        command: 'test'
+        projects: '**/*Tests.csproj'
+        arguments: '--configuration $(buildConfiguration)'
+      continueOnError: true
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+
+    - script: |
+        dotnet publish "Photography/Photography.csproj" -f net9.0-ios$(iosSdkVersion).0 -c $(buildConfiguration) -o $(outputDir) -p:Platform=iPhone -p:BuildIpa=true
+      displayName: 'Publish iOS IPA'
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Upload iOS IPA Artifact'
+      inputs:
+        PathtoPublish: '$(outputDir)'
+        ArtifactName: 'ios-ipa'
+
+    - script: |
+        dotnet publish "Photography/Photography.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir)-apk -p:AndroidPackageFormat=apk
+      displayName: 'Publish Android APK'
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Upload APK Artifact'
+      inputs:
+        PathtoPublish: '$(outputDir)-apk'
+        ArtifactName: 'android-apk'
