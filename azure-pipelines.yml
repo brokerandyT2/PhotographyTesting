@@ -93,11 +93,7 @@ stages:
 
     - script: |
         echo "Installing Android SDK packages..."
-        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root=%ANDROID_HOME% `
-          "platform-tools" `
-          "platforms;android-$(androidSdkVersion)" `
-          "build-tools;34.0.0" `
-          "emulator"
+        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
       env:
         ANDROID_HOME: $(androidHome)
         JAVA_HOME: C:\Java\OpenJDK11
