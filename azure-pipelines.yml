@@ -65,8 +65,8 @@ stages:
           $sdkRoot = "$(androidHome)"
           $toolsUrl = "https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip"
           $zipPath = "$sdkRoot\cmdline-tools.zip"
-          $toolsDir = "$sdkRoot\cmdline-tools"
-          $latestDir = "$toolsDir\latest"
+          $extractTemp = "$sdkRoot\temp"
+          $finalToolsDir = "$sdkRoot\cmdline-tools\latest"
 
           Write-Host "Creating SDK root: $sdkRoot"
           New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
@@ -74,15 +74,17 @@ stages:
           Write-Host "Downloading command line tools..."
           Invoke-WebRequest -Uri $toolsUrl -OutFile $zipPath
 
-          Write-Host "Extracting..."
-          Expand-Archive -Path $zipPath -DestinationPath "$sdkRoot\temp" -Force
+          Write-Host "Extracting to temp..."
+          Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
 
-          Write-Host "Reorganizing for sdkmanager compatibility..."
-          New-Item -ItemType Directory -Path $latestDir -Force | Out-Null
-          Copy-Item "$sdkRoot\temp\cmdline-tools\*" -Destination $latestDir -Recurse -Force
+          Write-Host "Creating final tools folder..."
+          New-Item -ItemType Directory -Force -Path $finalToolsDir | Out-Null
+
+          Write-Host "Moving tools to $finalToolsDir"
+          Copy-Item "$extractTemp\cmdline-tools\*" -Destination $finalToolsDir -Recurse -Force
 
           Write-Host "Cleaning up..."
-          Remove-Item "$sdkRoot\temp" -Recurse -Force
+          Remove-Item $extractTemp -Recurse -Force
           Remove-Item $zipPath -Force
 
           Write-Host "Done."
@@ -102,6 +104,7 @@ stages:
       displayName: 'Install Android SDK components'
 
     - script: |
+        echo "Set environment variables..."
         echo "##vso[task.setvariable variable=ANDROID_HOME]$(androidHome)"
         echo "##vso[task.setvariable variable=JAVA_HOME]C:\Java\OpenJDK11"
         echo "##vso[task.setvariable variable=PATH]$(androidHome)\platform-tools;$(androidHome)\cmdline-tools\latest\bin;$(PATH)"
@@ -123,7 +126,7 @@ stages:
       displayName: 'Build MAUI Android Project'
 
     - script: |
-        dotnet publish **/*.csproj `
+        dotnet publish **/*.csproj ` 
           -f net9.0-android$(androidSdkVersion).0 `
           -c $(buildConfiguration) `
           -o $(outputDir) `
