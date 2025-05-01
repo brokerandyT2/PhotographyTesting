@@ -75,7 +75,10 @@ stages:
       displayName: 'Install MAUI iOS Workload'
 
     - task: NuGetToolInstaller@1
-
+    - script: |
+        dotnet clean
+      displayName: 'Clean solution'
+      
     - task: NuGetCommand@2
       inputs:
         command: 'restore'
