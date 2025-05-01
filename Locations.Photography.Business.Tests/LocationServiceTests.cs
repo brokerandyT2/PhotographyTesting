@@ -60,7 +60,7 @@ namespace Locations.Core.Business.Tests
         public void GetAll_ShouldReturnAllLocations()
         {
             // Act
-            var result = _service.GetAll();
+            var result = _service.GetLocations();
 
             // Assert
             Assert.IsNotNull(result);

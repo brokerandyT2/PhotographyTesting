@@ -18,13 +18,13 @@ namespace Location.Core
         private static SettingsService ss = new SettingsService();
         private static SubscriptionTypeEnum _subType;
 #if !ANDY
-        public static bool IsLoggedIn = true;
-
-#else
-       public static bool IsLoggedIn
+        
+         public static bool IsLoggedIn
         {
             get { return ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false; }
         }
+#else
+        public static bool IsLoggedIn = true;
 #endif
 
 
