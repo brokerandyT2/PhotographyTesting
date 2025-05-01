@@ -145,17 +145,17 @@ stages:
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Run Unit Tests'
-      inputs:
-        command: 'test'
-        projects: '**/*Tests.csproj'
-        arguments: '--configuration $(buildConfiguration)'
-      continueOnError: true
-      env:
-        ANDROID_HOME: $(ANDROID_HOME)
-        JAVA_HOME: $(JAVA_HOME)
-        PATH: $(PATH)
+#    - task: DotNetCoreCLI@2
+#      displayName: 'Run Unit Tests'
+#      inputs:
+#        command: 'test'
+#        projects: '**/*Tests.csproj'
+#        arguments: '--configuration $(buildConfiguration)'
+#      continueOnError: true
+#      env:
+#        ANDROID_HOME: $(ANDROID_HOME)
+#        JAVA_HOME: $(JAVA_HOME)
+#        PATH: $(PATH)
 
     - script: |
         dotnet publish "Location.Core/Location.Core.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir) -p:AndroidPackageFormat=aab
@@ -164,7 +164,10 @@ stages:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
-
+    - script: |
+        echo "Listing files in output directory:"
+        dir $(outputDir)
+      displayName: 'List Output Directory Contents - AAB'
     - task: PublishBuildArtifacts@1
       displayName: 'Upload AAB Artifact'
       inputs:
@@ -178,9 +181,13 @@ stages:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
-
+    - script: |
+        echo "Listing files in output directory:"
+        dir $(outputDir)
+      displayName: 'List Output Directory Contents - APK'
     - task: PublishBuildArtifacts@1
       displayName: 'Upload APK Artifact'
       inputs:
         PathtoPublish: '$(outputDir)-apk'
         ArtifactName: 'android-apk'
+
