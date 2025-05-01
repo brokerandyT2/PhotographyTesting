@@ -14,6 +14,7 @@ variables:
   outputDir: '$(Build.ArtifactStagingDirectory)/drop'
   androidSdkVersion: '35'
   androidHome: '$(Agent.ToolsDirectory)/android-sdk'
+  javaHome: 'C:\Java\OpenJDK11'
 
 stages:
 - stage: Build
@@ -33,10 +34,7 @@ stages:
         dotnet tool install GitVersion.Tool --version 6.3.0
         dotnet tool list
         dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
-        echo "GitVersion output file content:"
         type gitversion.json
-        cat gitversion.json
-        echo "GitVersion log content:"
         type gitversion.log
       workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Install and Run GitVersion'
@@ -49,16 +47,11 @@ stages:
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
           if ($gitVersion -and $gitVersion.SemVer) {
               $semver = $gitVersion.SemVer
+              Write-Host "##vso[build.updatebuildnumber]$semver"
+              Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
           } else {
               Write-Host "GitVersion output is invalid or missing."
           }
-          Write-Host "Setting build number to $semver"
-          Write-Host "##vso[build.updatebuildnumber]$semver"
-          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
-
-    - script: |
-        echo "Using GitVersion: $(GitVersion_SemVer)"
-      displayName: 'Confirm Build Number'
 
     - task: UseDotNet@2
       displayName: 'Install .NET SDK 9.x'
@@ -74,14 +67,12 @@ stages:
           $jdkVersion = "11"
           $installerUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.21+9/OpenJDK11U-jdk_x64_windows_hotspot_11.0.21_9.msi"
           $installerPath = "$env:Temp\openjdk.msi"
-          $installDir = "C:\Java\OpenJDK$jdkVersion"
+          $installDir = "$(javaHome)"
 
           Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
           Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installerPath`" INSTALLDIR=`"$installDir`" /quiet /qn /norestart"
 
-          [System.Environment]::SetEnvironmentVariable("JAVA_HOME", $installDir, [System.EnvironmentVariableTarget]::Process)
-          $env:JAVA_HOME = $installDir
-          $env:Path += ";$installDir\bin"
+          Write-Host "##vso[task.setvariable variable=JAVA_HOME]$installDir"
 
     - task: PowerShell@2
       displayName: 'Download and Set Up Android SDK Command-Line Tools'
@@ -101,21 +92,17 @@ stages:
           Copy-Item "$extractTemp\cmdline-tools\*" -Destination $finalToolsDir -Recurse -Force
           Remove-Item $extractTemp -Recurse -Force
           Remove-Item $zipPath -Force
-      env:
-        ANDROID_HOME: $(androidHome)
+
+          Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
+          Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
 
     - script: |
         "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
       env:
-        ANDROID_HOME: $(androidHome)
-        JAVA_HOME: C:\Java\OpenJDK11
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+        PATH: $(PATH)
       displayName: 'Install Android SDK components'
-
-    - script: |
-        echo "##vso[task.setvariable variable=ANDROID_HOME]$(androidHome)"
-        echo "##vso[task.setvariable variable=JAVA_HOME]C:\Java\OpenJDK11"
-        echo "##vso[task.setvariable variable=PATH]$(androidHome)\platform-tools;$(androidHome)\cmdline-tools\latest\bin;$(PATH)"
-      displayName: 'Set Env Vars'
 
     - task: DotNetCoreCLI@2
       displayName: 'Restore Workloads'
@@ -123,6 +110,10 @@ stages:
         command: 'custom'
         custom: 'workload'
         arguments: 'restore'
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+        PATH: $(PATH)
 
     - task: DotNetCoreCLI@2
       displayName: 'Install MAUI Workloads'
@@ -130,11 +121,15 @@ stages:
         command: 'custom'
         custom: 'workload'
         arguments: 'install maui maui-android maui-ios maui-windows'
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+        PATH: $(PATH)
 
     - task: NuGetCommand@2
+      displayName: 'Restore NuGet Packages'
       inputs:
         restoreSolution: 'Photography.sln'
-      displayName: 'Restore NuGet Packages'
 
     - task: VSBuild@1
       displayName: 'Build Photography.sln with MSBuild (for tests)'
@@ -145,6 +140,10 @@ stages:
         configuration: '$(buildConfiguration)'
         vsVersion: 'latest'
         msbuildArgs: '/restore /p:UseDotNetNativeToolchain=false'
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+        PATH: $(PATH)
 
     - task: DotNetCoreCLI@2
       displayName: 'Run Unit Tests'
@@ -153,10 +152,18 @@ stages:
         projects: '**/*Tests.csproj'
         arguments: '--configuration $(buildConfiguration)'
       continueOnError: true
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+        PATH: $(PATH)
 
     - script: |
         dotnet publish "Locations.Photography.Mobile/Locations.Photography.Mobile.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir) -p:AndroidPackageFormat=aab
       displayName: 'Publish Android AAB (App Bundle)'
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+        PATH: $(PATH)
 
     - task: PublishBuildArtifacts@1
       displayName: 'Upload AAB Artifact'
@@ -167,6 +174,10 @@ stages:
     - script: |
         dotnet publish "Locations.Photography.Mobile/Locations.Photography.Mobile.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir)-apk -p:AndroidPackageFormat=apk
       displayName: 'Publish Android APK'
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+        PATH: $(PATH)
 
     - task: PublishBuildArtifacts@1
       displayName: 'Upload APK Artifact'
