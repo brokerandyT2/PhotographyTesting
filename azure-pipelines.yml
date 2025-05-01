@@ -97,18 +97,6 @@ stages:
         PATH: $(PATH)
       displayName: 'Install Android SDK components'
 
-    - script: |
-        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" `
-          "platform-tools" `
-          "platforms;android-$(androidSdkVersion)" `
-          "build-tools;34.0.0" `
-          "emulator"
-      env:
-        ANDROID_HOME: $(ANDROID_HOME)
-        JAVA_HOME: $(JAVA_HOME)
-        PATH: $(PATH)
-      displayName: 'Install Android SDK components'
-
     - task: DotNetCoreCLI@2
       displayName: 'Restore MAUI Workloads'
       inputs:
