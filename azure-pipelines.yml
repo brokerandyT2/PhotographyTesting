@@ -84,10 +84,10 @@ stages:
           Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
 
     - script: |
-        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" `
-          "platform-tools" `
-          "platforms;android-$(androidSdkVersion)" `
-          "build-tools;34.0.0" `
+        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" ^
+          "platform-tools" ^
+          "platforms;android-$(androidSdkVersion)" ^
+          "build-tools;34.0.0" ^
           "emulator"
       env:
         ANDROID_HOME: $(ANDROID_HOME)
