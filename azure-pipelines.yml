@@ -67,28 +67,22 @@ stages:
           Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installerPath`" INSTALLDIR=`"$(javaHome)`" /quiet /qn /norestart"
           Write-Host "##vso[task.setvariable variable=JAVA_HOME]$(javaHome)"
 
-    - task: PowerShell@2
-      displayName: 'Install Android SDK Command-Line Tools'
-      inputs:
-        targetType: 'inline'
-        script: |
-          $sdkRoot = "$(androidHome)"
-          $toolsUrl = "https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip"
-          $zipPath = "$sdkRoot\tools.zip"
-          $extractTemp = "$sdkRoot\temp"
-          $finalToolsDir = "$sdkRoot\cmdline-tools\latest"
+    - script: |
+        echo "Installing Android SDK components..."
+        echo "ANDROID_HOME is set to: %ANDROID_HOME%"
+        echo "JAVA_HOME is set to: %JAVA_HOME%"
+        echo "Path is set to: %PATH%"
 
-          New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
-          Invoke-WebRequest -Uri $toolsUrl -OutFile $zipPath
-          Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
-          New-Item -ItemType Directory -Force -Path $finalToolsDir | Out-Null
-          Copy-Item "$extractTemp\cmdline-tools\*" -Destination $finalToolsDir -Recurse -Force
-          Remove-Item $extractTemp -Recurse -Force
-          Remove-Item $zipPath -Force
-
-          Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
-          Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
-
+        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" `
+          "platform-tools" `
+          "platforms;android-$(androidSdkVersion)" `
+          "build-tools;34.0.0" `
+          "emulator"
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+        PATH: $(PATH)
+      displayName: 'Install Android SDK components'
     - script: |
         "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" `
           "platform-tools" `
