@@ -32,10 +32,29 @@ stages:
         version: '9.x'
         includePreviewVersions: true
 
-    - script: |
-        echo "Installing Java (required for Android tooling)..."
-        choco install -y openjdk11
-      displayName: 'Install Java JDK'
+    - task: PowerShell@2
+      displayName: 'Install OpenJDK 11 and Set JAVA_HOME'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $jdkVersion = "11"
+          $installerUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.21+9/OpenJDK11U-jdk_x64_windows_hotspot_11.0.21_9.msi"
+          $installerPath = "$env:Temp\openjdk.msi"
+          $installDir = "C:\Java\OpenJDK$jdkVersion"
+
+          Write-Host "Downloading OpenJDK $jdkVersion..."
+          Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+
+          Write-Host "Installing to $installDir..."
+          Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installerPath`" INSTALLDIR=`"$installDir`" /quiet /qn /norestart"
+
+          Write-Host "Setting JAVA_HOME and updating PATH..."
+          [System.Environment]::SetEnvironmentVariable("JAVA_HOME", $installDir, [System.EnvironmentVariableTarget]::Process)
+          $env:JAVA_HOME = $installDir
+          $env:Path += ";$installDir\bin"
+
+          java -version
+
 
     - task: PowerShell@2
       displayName: 'Download and Set Up Android SDK Command-Line Tools'
