@@ -1,10 +1,3 @@
-variables:
-  buildConfiguration: 'Release'
-  outputDir: '$(Build.ArtifactStagingDirectory)/drop'
-  androidSdkVersion: '35'
-  androidHome: '$(Agent.ToolsDirectory)/android-sdk'
-  javaHome: 'C:\Java\OpenJDK11'
-
 trigger:
   branches:
     include:
@@ -16,12 +9,22 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
+variables:
+  buildConfiguration: 'Release'
+  outputDir: '$(Build.ArtifactStagingDirectory)/drop'
+  androidSdkVersion: '35'
+  androidHome: '$(Agent.ToolsDirectory)/android-sdk'
+  javaHome: 'C:\Java\OpenJDK11'
+
 stages:
-- stage: Build
+
+# ------------------
+# Stage: Setup
+# ------------------
+- stage: Setup
+  displayName: 'Setup Environment'
   jobs:
-  - job: Build_MAUI_Android
-    pool:
-      vmImage: 'windows-latest'
+  - job: SetupJob
     steps:
     - checkout: self
       fetchDepth: 0
@@ -30,28 +33,25 @@ stages:
         dotnet new tool-manifest --force
         dotnet tool install GitVersion.Tool --version 6.3.0
         dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
-      workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Install and Run GitVersion'
 
     - task: PowerShell@2
-      displayName: 'Update Build Number from GitVersion'
+      displayName: 'Set GitVersion Build Number'
       inputs:
         targetType: 'inline'
         script: |
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-          if ($gitVersion -and $gitVersion.SemVer) {
-              Write-Host "##vso[build.updatebuildnumber]$($gitVersion.SemVer)"
-              Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$($gitVersion.SemVer)"
-          }
+          Write-Host "##vso[build.updatebuildnumber]$($gitVersion.SemVer)"
+          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer;isOutput=true]$($gitVersion.SemVer)"
 
     - task: UseDotNet@2
-      displayName: 'Install .NET SDK 9.x'
+      displayName: 'Install .NET 9.x SDK'
       inputs:
         version: '9.x'
         includePreviewVersions: true
 
     - task: PowerShell@2
-      displayName: 'Install OpenJDK 11 and Set JAVA_HOME'
+      displayName: 'Install OpenJDK 11'
       inputs:
         targetType: 'inline'
         script: |
@@ -62,7 +62,7 @@ stages:
           Write-Host "##vso[task.setvariable variable=JAVA_HOME]$(javaHome)"
 
     - task: PowerShell@2
-      displayName: 'Download and Set Up Android SDK Command-Line Tools'
+      displayName: 'Install Android SDK'
       inputs:
         targetType: 'inline'
         script: |
@@ -77,20 +77,27 @@ stages:
           Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
           New-Item -ItemType Directory -Force -Path $finalToolsDir | Out-Null
           Copy-Item "$extractTemp\cmdline-tools\*" -Destination $finalToolsDir -Recurse -Force
-          Remove-Item $extractTemp -Recurse -Force
-          Remove-Item $zipPath -Force
+          Remove-Item $extractTemp, $zipPath -Recurse -Force
 
           Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
           Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
 
     - script: |
         "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
+      displayName: 'Install Android SDK Components'
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
-      displayName: 'Install Android SDK components'
 
+# ------------------
+# Stage: Restore
+# ------------------
+- stage: Restore
+  dependsOn: Setup
+  jobs:
+  - job: RestoreJob
+    steps:
     - task: DotNetCoreCLI@2
       displayName: 'Restore MAUI Workloads'
       inputs:
@@ -118,6 +125,14 @@ stages:
       inputs:
         restoreSolution: 'Photography.sln'
 
+# ------------------
+# Stage: Build
+# ------------------
+- stage: Build
+  dependsOn: Restore
+  jobs:
+  - job: BuildJob
+    steps:
     - task: DotNetCoreCLI@2
       displayName: 'Build APK'
       inputs:
@@ -140,12 +155,20 @@ stages:
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
 
+# ------------------
+# Stage: Publish
+# ------------------
+- stage: Publish
+  dependsOn: Build
+  jobs:
+  - job: PublishJob
+    steps:
     - script: |
-        echo "Pushing APK to Azure Artifacts Feed (apks)..."
-        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(GitVersion_SemVer) --path $(outputDir)-apk
-      displayName: 'Push APK to apks Feed'
+        echo "Publishing APK..."
+        az artifacts universal publish --organization "https://dev.azure.com/$(organization)" --feed "$(apksFeed)" --package-name location-core-apk --package-version "$(GitVersion_SemVer)" --path "$(outputDir)-apk"
+      displayName: 'Publish APK'
 
     - script: |
-        echo "Pushing AAB to Azure Artifacts Feed (aab)..."
-        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(GitVersion_SemVer) --path $(outputDir)-aab
-      displayName: 'Push AAB to aabs Feed'
+        echo "Publishing AAB..."
+        az artifacts universal publish --organization "https://dev.azure.com/$(organization)" --feed "$(aabsFeed)" --package-name location-core-aab --package-version "$(GitVersion_SemVer)" --path "$(outputDir)-aab"
+      displayName: 'Publish AAB'
