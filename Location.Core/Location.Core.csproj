@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0-android35.0</TargetFrameworks>
+    <TargetFrameworks>net9.0-android35.0;net9.0-windows</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
     <RootNamespace>Location.Core</RootNamespace>
@@ -16,12 +16,9 @@
 
     <WindowsPackageType>None</WindowsPackageType>
 
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">34.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 
     <Configurations>Debug;Release;Release For Andy;Testing</Configurations>
   </PropertyGroup>
@@ -31,78 +28,18 @@
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
     <InformationalVersion>$(Version)</InformationalVersion>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <ApplicationVersion>$(VersionCode)</ApplicationVersion>
   </PropertyGroup>
 
   <!-- DefineConstants Per Configuration -->
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Testing|net9.0-android|AnyCPU'">
+  <!-- Android -->
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android35.0|AnyCPU'">
     <DefineConstants>$(DefineConstants);PHOTOGRAPHY;ANDY</DefineConstants>
+    <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release For Andy|net9.0-android|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY;ANDY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Testing|net9.0-ios|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release For Andy|net9.0-ios|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY;ANDY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY;ANDY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Testing|net9.0-maccatalyst|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release For Andy|net9.0-maccatalyst|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Testing|net9.0-windows10.0.19041.0|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release For Andy|net9.0-windows10.0.19041.0|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
-  </PropertyGroup>
-
-  <!-- Android 35 Specific -->
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android35.0|AnyCPU'">
     <DefineConstants>$(DefineConstants);PHOTOGRAPHY;ANDY</DefineConstants>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
@@ -118,22 +55,29 @@
     <AndroidPackageFormat>apk</AndroidPackageFormat>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android35.0|AnyCPU'">
-    <DefineConstants>$(DefineConstants);PHOTOGRAPHY;ANDY</DefineConstants>
-    <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
+  <!-- Windows -->
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows|AnyCPU'">
+    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows|AnyCPU'">
+    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Testing|net9.0-windows|AnyCPU'">
+    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release For Andy|net9.0-windows|AnyCPU'">
+    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- App Icon -->
     <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
-    <!-- Splash Screen -->
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
-    <!-- Images -->
     <MauiImage Include="Resources\Images\**\*.png" />
     <MauiImage Include="Resources\Images\**\*.jpg" />
-    <!-- Fonts -->
     <MauiFont Include="Resources\Fonts\**\*.ttf" />
-    <!-- Raw Assets -->
     <MauiAsset Include="Resources\Raw\**" />
   </ItemGroup>
 
