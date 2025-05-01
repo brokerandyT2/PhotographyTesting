@@ -1,3 +1,10 @@
+variables:
+  buildConfiguration: 'Release'
+  outputDir: '$(Build.ArtifactStagingDirectory)/drop'
+  androidSdkVersion: '35'
+  androidHome: '$(Agent.ToolsDirectory)/android-sdk'
+  javaHome: 'C:\Java\OpenJDK11'
+
 trigger:
   branches:
     include:
@@ -9,22 +16,10 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
-variables:
-  buildConfiguration: 'Release'
-  outputDir: '$(Build.ArtifactStagingDirectory)/drop'
-  androidSdkVersion: '35'
-  androidHome: '$(Agent.ToolsDirectory)/android-sdk'
-  javaHome: 'C:\Java\OpenJDK11'
-
 stages:
-
-# ------------------
-# Stage: Setup
-# ------------------
-- stage: Setup
-  displayName: 'Setup Environment'
+- stage: Versioning
   jobs:
-  - job: 'Setup'
+  - job: GitVersion
     steps:
     - checkout: self
       fetchDepth: 0
@@ -36,16 +31,26 @@ stages:
       displayName: 'Install and Run GitVersion'
 
     - task: PowerShell@2
-      displayName: 'Set GitVersion Build Number'
+      displayName: 'Set GitVersion-based Build Number'
       inputs:
         targetType: 'inline'
         script: |
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-          Write-Host "##vso[build.updatebuildnumber]$($gitVersion.SemVer)"
-          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer;isOutput=true]$($gitVersion.SemVer)"
+          if ($gitVersion -and $gitVersion.MajorMinorPatch) {
+              $buildVersion = "v$($gitVersion.MajorMinorPatch).$(Build.BuildNumber)"
+              Write-Host "##vso[build.updatebuildnumber]$buildVersion"
+              Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
+          }
+
+- stage: Build
+  dependsOn: Versioning
+  jobs:
+  - job: Build_Android
+    steps:
+    - checkout: self
 
     - task: UseDotNet@2
-      displayName: 'Install .NET 9.x SDK'
+      displayName: 'Install .NET SDK 9.x'
       inputs:
         version: '9.x'
         includePreviewVersions: true
@@ -62,7 +67,7 @@ stages:
           Write-Host "##vso[task.setvariable variable=JAVA_HOME]$(javaHome)"
 
     - task: PowerShell@2
-      displayName: 'Install Android SDK'
+      displayName: 'Download Android SDK CLI Tools'
       inputs:
         targetType: 'inline'
         script: |
@@ -77,68 +82,49 @@ stages:
           Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
           New-Item -ItemType Directory -Force -Path $finalToolsDir | Out-Null
           Copy-Item "$extractTemp\cmdline-tools\*" -Destination $finalToolsDir -Recurse -Force
-          Remove-Item $extractTemp, $zipPath -Recurse -Force
+          Remove-Item $extractTemp -Recurse -Force
+          Remove-Item $zipPath -Force
 
           Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
           Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
 
     - script: |
         "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
-      displayName: 'Install Android SDK Components'
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
+      displayName: 'Install Android SDK components'
 
-# ------------------
-# Stage: Restore
-# ------------------
-- stage: Restore
-  dependsOn: Setup
-  jobs:
-  - job: 'Restore_Workloads_and_NUGET_pkgs'
-    steps:
     - task: DotNetCoreCLI@2
       displayName: 'Restore MAUI Workloads'
       inputs:
         command: 'custom'
         custom: 'workload'
         arguments: 'restore'
-      env:
-        ANDROID_HOME: $(ANDROID_HOME)
-        JAVA_HOME: $(JAVA_HOME)
-        PATH: $(PATH)
 
     - task: DotNetCoreCLI@2
       displayName: 'Install MAUI Workloads'
       inputs:
         command: 'custom'
         custom: 'workload'
-        arguments: 'install maui maui-android maui-ios maui-windows'
-      env:
-        ANDROID_HOME: $(ANDROID_HOME)
-        JAVA_HOME: $(JAVA_HOME)
-        PATH: $(PATH)
+        arguments: install maui maui-android maui-ios maui-windows
 
     - task: NuGetCommand@2
       displayName: 'Restore NuGet Packages'
       inputs:
         restoreSolution: 'Photography.sln'
 
-# ------------------
-# Stage: Build
-# ------------------
-- stage: Build
-  dependsOn: Restore
-  jobs:
-  - job: 'Build_APK_and_AAB'
-    steps:
     - task: DotNetCoreCLI@2
       displayName: 'Build APK'
       inputs:
         command: 'build'
         projects: '**/Location.Core.csproj'
-        arguments: '-f net9.0-android /p:Configuration=$(buildConfiguration) /p:OutputPath=$(outputDir)-apk'
+        arguments: >
+          -f net9.0-android
+          -p:Configuration=$(buildConfiguration)
+          -p:OutputPath=$(outputDir)-apk
+          -p:Version=$(GitVersion_BuildVersion)
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
@@ -149,26 +135,29 @@ stages:
       inputs:
         command: 'build'
         projects: '**/Location.Core.csproj'
-        arguments: '-f net9.0-android /p:Configuration=$(buildConfiguration) /p:OutputPath=$(outputDir)-aab /p:AndroidPackageFormat=aab'
+        arguments: >
+          -f net9.0-android
+          -p:Configuration=$(buildConfiguration)
+          -p:OutputPath=$(outputDir)-aab
+          -p:AndroidPackageFormat=aab
+          -p:Version=$(GitVersion_BuildVersion)
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
 
-# ------------------
-# Stage: Publish
-# ------------------
 - stage: Publish
   dependsOn: Build
+  condition: succeeded()
   jobs:
-  - job: 'Publish_AAB_and_APK_to_Artifacts'
+  - job: PublishArtifacts
     steps:
     - script: |
-        echo "Publishing APK..."
-        az artifacts universal publish --organization "https://dev.azure.com/$(organization)" --feed "$(apksFeed)" --package-name location-core-apk --package-version "$(GitVersion_SemVer)" --path "$(outputDir)-apk"
-      displayName: 'Publish APK'
+        echo "Pushing APK to Azure Artifacts Feed (apks)..."
+        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(GitVersion_BuildVersion) --path $(outputDir)-apk
+      displayName: 'Push APK to apks Feed'
 
     - script: |
-        echo "Publishing AAB..."
-        az artifacts universal publish --organization "https://dev.azure.com/$(organization)" --feed "$(aabsFeed)" --package-name location-core-aab --package-version "$(GitVersion_SemVer)" --path "$(outputDir)-aab"
-      displayName: 'Publish AAB'
+        echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
+        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(GitVersion_BuildVersion) --path $(outputDir)-aab
+      displayName: 'Push AAB to aabs Feed'
