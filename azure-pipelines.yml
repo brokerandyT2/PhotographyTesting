@@ -38,15 +38,25 @@ stages:
       displayName: 'Install Java JDK'
 
     - script: |
-        echo "Installing Android command-line tools..."
-        mkdir "%ANDROID_HOME%"
-        curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip
-        tar -xf cmdline-tools.zip -C "%ANDROID_HOME%"
-        mkdir "%ANDROID_HOME%/cmdline-tools/latest"
-        move "%ANDROID_HOME%/cmdline-tools"/* "%ANDROID_HOME%/cmdline-tools/latest"
+        echo "Downloading Android command-line tools..."
+        set ANDROID_SDK_ROOT=$(androidHome)
+        mkdir "%ANDROID_SDK_ROOT%"
+        curl -o "%ANDROID_SDK_ROOT%/cmdline-tools.zip" https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip
+
+        echo "Extracting..."
+        mkdir "%ANDROID_SDK_ROOT%/cmdline-tools-temp"
+        tar -xf "%ANDROID_SDK_ROOT%/cmdline-tools.zip" -C "%ANDROID_SDK_ROOT%/cmdline-tools-temp"
+
+        echo "Reorganizing for sdkmanager compatibility..."
+        mkdir "%ANDROID_SDK_ROOT%/cmdline-tools/latest"
+        move "%ANDROID_SDK_ROOT%/cmdline-tools-temp/cmdline-tools/"* "%ANDROID_SDK_ROOT%/cmdline-tools/latest"
+
+        echo "Cleaning up..."
+        rmdir /s /q "%ANDROID_SDK_ROOT%/cmdline-tools-temp"
+        del "%ANDROID_SDK_ROOT%/cmdline-tools.zip"
       env:
-        ANDROID_HOME: $(androidHome)
-      displayName: 'Download Android SDK CLI tools'
+        ANDROID_SDK_ROOT: $(androidHome)
+      displayName: 'Download Android SDK CLI tools (fixed)'
 
     - script: |
         echo "Installing Android SDK packages..."
