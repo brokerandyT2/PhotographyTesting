@@ -26,12 +26,14 @@ stages:
     - checkout: self
       fetchDepth: 0
 
+    # Install .NET SDK
     - task: UseDotNet@2
       displayName: 'Install .NET SDK 9.x'
       inputs:
         version: '9.x'
         includePreviewVersions: true
 
+    # Install OpenJDK 11 and set JAVA_HOME
     - task: PowerShell@2
       displayName: 'Install OpenJDK 11 and Set JAVA_HOME'
       inputs:
@@ -49,6 +51,7 @@ stages:
           $env:JAVA_HOME = $installDir
           $env:Path += ";$installDir\bin"
 
+    # Download and set up Android SDK command-line tools
     - task: PowerShell@2
       displayName: 'Download and Set Up Android SDK Command-Line Tools'
       inputs:
@@ -70,6 +73,7 @@ stages:
       env:
         ANDROID_HOME: $(androidHome)
 
+    # Install Android SDK components
     - script: |
         "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
       env:
@@ -77,19 +81,23 @@ stages:
         JAVA_HOME: C:\Java\OpenJDK11
       displayName: 'Install Android SDK components'
 
+    # Set environment variables for SDK and Java
     - script: |
         echo "##vso[task.setvariable variable=ANDROID_HOME]$(androidHome)"
         echo "##vso[task.setvariable variable=JAVA_HOME]C:\Java\OpenJDK11"
         echo "##vso[task.setvariable variable=PATH]$(androidHome)\platform-tools;$(androidHome)\cmdline-tools\latest\bin;$(PATH)"
       displayName: 'Set Env Vars'
 
+    # Install NuGet Tool
     - task: NuGetToolInstaller@1
 
+    # Restore NuGet Packages
     - task: NuGetCommand@2
       inputs:
         restoreSolution: 'Photography.sln'
       displayName: 'Restore NuGet Packages'
 
+    # Install MAUI Workloads
     - task: DotNetCoreCLI@2
       displayName: 'Install MAUI Workloads'
       inputs:
@@ -97,6 +105,7 @@ stages:
         custom: 'workload'
         arguments: 'restore'
 
+    # Build Photography.sln with MSBuild (for tests)
     - task: VSBuild@1
       displayName: 'Build Photography.sln with MSBuild (for tests)'
       inputs:
@@ -107,24 +116,29 @@ stages:
         vsVersion: 'latest'
         msbuildArgs: '/restore /p:UseDotNetNativeToolchain=false'
 
+    # Install .NET MAUI Workloads
     - script: |
         dotnet workload install maui maui-android
       displayName: 'Install .NET MAUI Workloads'
 
+    # Publish Android AAB (App Bundle)
     - script: |
         dotnet publish "Locations.Photography.Mobile/Locations.Photography.Mobile.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir) -p:AndroidPackageFormat=aab
       displayName: 'Publish Android AAB (App Bundle)'
 
+    # Upload AAB Artifact
     - task: PublishBuildArtifacts@1
       displayName: 'Upload AAB Artifact'
       inputs:
         PathtoPublish: '$(outputDir)'
         ArtifactName: 'android-aab'
 
+    # Publish Android APK
     - script: |
         dotnet publish "Locations.Photography.Mobile/Locations.Photography.Mobile.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir)-apk -p:AndroidPackageFormat=apk
       displayName: 'Publish Android APK'
 
+    # Upload APK Artifact
     - task: PublishBuildArtifacts@1
       displayName: 'Upload APK Artifact'
       inputs:
