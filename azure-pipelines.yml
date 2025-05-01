@@ -66,12 +66,12 @@ stages:
         echo "Using GitVersion: $(GitVersion_SemVer)"
       displayName: 'Confirm Build Number'
 
-    - script: |
-        dotnet workload restore
-      displayName: 'Restore Workloads'
+    #- script: |
+    #    dotnet workload restore
+    #  displayName: 'Restore Workloads'
 
     - script: |
-        dotnet workload install maui-ios maccatalyst maui
+        dotnet workload install maui-ios maccatalyst maui maui-android
       displayName: 'Install MAUI iOS Workload'
 
     - task: NuGetToolInstaller@1
