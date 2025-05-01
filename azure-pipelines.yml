@@ -71,7 +71,7 @@ stages:
       displayName: 'Restore Workloads'
 
     - script: |
-        dotnet workload install maui-ios maccatalyst
+        dotnet workload install maui-ios maccatalyst maui
       displayName: 'Install MAUI iOS Workload'
 
     - task: NuGetToolInstaller@1
