@@ -118,8 +118,8 @@ stages:
       displayName: 'Restore .NET Packages'
 
     - script: |
-        dotnet build --configuration $(buildConfiguration) /p:Platform="Any CPU"
-      displayName: 'Build MAUI Android Project'
+        dotnet build Photography.sln --configuration $(buildConfiguration) /p:Platform="Any CPU" --no-restore
+      displayName: 'Build MAUI Android Solution'
 
     - script: |
         dotnet publish **/*.csproj `
