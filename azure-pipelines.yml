@@ -132,9 +132,9 @@ stages:
         restoreSolution: 'Location.Core.sln'
 
     - task: VSBuild@1
-      displayName: 'Build Location.Core.sln with MSBuild (for tests)'
+      displayName: 'Build Photography.sln with MSBuild (for tests)'
       inputs:
-        solution: 'Location.Core.sln'
+        solution: 'Photography.sln'
         msbuildArchitecture: 'x64'
         platform: 'Any CPU'
         configuration: '$(buildConfiguration)'
