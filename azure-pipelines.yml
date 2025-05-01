@@ -83,19 +83,26 @@ stages:
         echo "##vso[task.setvariable variable=PATH]$(androidHome)\platform-tools;$(androidHome)\cmdline-tools\latest\bin;$(PATH)"
       displayName: 'Set Env Vars'
 
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: 'Photography.sln'
+      displayName: 'Restore NuGet Packages'
+
+    - task: VSBuild@1
+      displayName: 'Build Photography.sln with MSBuild (for tests)'
+      inputs:
+        solution: 'Photography.sln'
+        msbuildArchitecture: 'x64'
+        platform: 'Any CPU'
+        configuration: '$(buildConfiguration)'
+        vsVersion: 'latest'
+        msbuildArgs: '/restore /p:UseDotNetNativeToolchain=false'
+
     - script: |
         dotnet workload install maui maui-android
       displayName: 'Install .NET MAUI Workloads'
-
-    - task: NuGetToolInstaller@1
-
-    - script: |
-        dotnet restore "Photography.sln"
-      displayName: 'Restore .NET Packages'
-
-    - script: |
-        dotnet build "Photography.sln" --configuration $(buildConfiguration) --no-restore
-      displayName: 'Build MAUI Android Solution'
 
     - script: |
         dotnet publish "Locations.Photography.Mobile/Locations.Photography.Mobile.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir) -p:AndroidPackageFormat=aab
