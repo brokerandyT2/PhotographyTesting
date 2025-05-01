@@ -14,6 +14,7 @@ variables:
   outputDir: '$(Build.ArtifactStagingDirectory)/drop'
   androidSdkVersion: '35'
   androidHome: '$(Agent.ToolsDirectory)/android-sdk'
+  javaHome: 'C:\Java\OpenJDK11'
 
 stages:
 - stage: Build
@@ -25,6 +26,40 @@ stages:
     steps:
     - checkout: self
       fetchDepth: 0
+
+    - script: |
+        echo "Current directory: %CD%"
+        dir
+        dotnet new tool-manifest --force
+        dotnet tool install GitVersion.Tool --version 6.3.0
+        dotnet tool list
+        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion.log
+        echo "GitVersion output file content:"
+        type gitversion.json
+        cat gitversion.json
+        echo "GitVersion log content:"
+        type gitversion.log
+      workingDirectory: $(Build.SourcesDirectory)
+      displayName: 'Install and Run GitVersion'
+
+    - task: PowerShell@2
+      displayName: 'Update Build Number from GitVersion'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+          if ($gitVersion -and $gitVersion.SemVer) {
+              $semver = $gitVersion.SemVer
+          } else {
+              Write-Host "GitVersion output is invalid or missing."
+          }
+          Write-Host "Setting build number to $semver"
+          Write-Host "##vso[build.updatebuildnumber]$semver"
+          Write-Host "##vso[task.setvariable variable=GitVersion_SemVer]$semver"
+
+    - script: |
+        echo "Using GitVersion: $(GitVersion_SemVer)"
+      displayName: 'Confirm Build Number'
 
     - task: UseDotNet@2
       displayName: 'Install .NET SDK 9.x'
@@ -83,13 +118,6 @@ stages:
         echo "##vso[task.setvariable variable=PATH]$(androidHome)\platform-tools;$(androidHome)\cmdline-tools\latest\bin;$(PATH)"
       displayName: 'Set Env Vars'
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Install MAUI Workloads'
-      inputs:
-        command: 'custom'
-        custom: 'workload'
-        arguments: 'install maui maui-android maui-ios maui-windows'
-
     - task: NuGetToolInstaller@1
 
     - task: NuGetCommand@2
@@ -102,7 +130,7 @@ stages:
       inputs:
         command: 'custom'
         custom: 'workload'
-        arguments: 'restore'
+        arguments: 'install maui maui-android maui-ios maui-windows'
 
     - task: VSBuild@1
       displayName: 'Build Photography.sln with MSBuild (for tests)'
@@ -113,10 +141,6 @@ stages:
         configuration: '$(buildConfiguration)'
         vsVersion: 'latest'
         msbuildArgs: '/restore /p:UseDotNetNativeToolchain=false'
-
-    - script: |
-        dotnet workload install maui maui-android
-      displayName: 'Install .NET MAUI Workloads'
 
     - script: |
         dotnet publish "Locations.Photography.Mobile/Locations.Photography.Mobile.csproj" -f net9.0-android$(androidSdkVersion).0 -c $(buildConfiguration) -o $(outputDir) -p:AndroidPackageFormat=aab
