@@ -90,6 +90,13 @@ stages:
         restoreSolution: 'Photography.sln'
       displayName: 'Restore NuGet Packages'
 
+    - task: DotNetCoreCLI@2
+      displayName: 'Install MAUI Workloads'
+      inputs:
+        command: 'custom'
+        custom: 'workload'
+        arguments: 'restore'
+
     - task: VSBuild@1
       displayName: 'Build Photography.sln with MSBuild (for tests)'
       inputs:
