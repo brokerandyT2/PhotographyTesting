@@ -17,6 +17,7 @@ pool:
   vmImage: 'windows-latest'
 
 stages:
+# Stage 1 - VERSIONING
 - stage: Versioning
   jobs:
   - job: GitVersion
@@ -37,15 +38,16 @@ stages:
         script: |
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
           if ($gitVersion -and $gitVersion.MajorMinorPatch) {
-              $buildVersion = "v$($gitVersion.MajorMinorPatch).$(Build.BuildNumber)"
+              $buildVersion = "$($gitVersion.MajorMinorPatch).$(Build.BuildNumber)"
               Write-Host "##vso[build.updatebuildnumber]$buildVersion"
               Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
           }
 
-- stage: Build
+# Stage 2 - SETUP
+- stage: Setup
   dependsOn: Versioning
   jobs:
-  - job: Build_Android
+  - job: EnvironmentSetup
     steps:
     - checkout: self
 
@@ -108,7 +110,15 @@ stages:
       inputs:
         command: 'custom'
         custom: 'workload'
-        arguments: install maui maui-android maui-ios maui-windows
+        arguments: 'install maui maui-android'
+
+# Stage 3 - BUILD
+- stage: Build
+  dependsOn: Setup
+  jobs:
+  - job: BuildApkAndAab
+    steps:
+    - checkout: self
 
     - task: NuGetCommand@2
       displayName: 'Restore NuGet Packages'
@@ -146,6 +156,7 @@ stages:
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
 
+# Stage 4 - PUBLISH
 - stage: Publish
   dependsOn: Build
   condition: succeeded()
