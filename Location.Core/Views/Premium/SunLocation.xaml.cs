@@ -66,6 +66,7 @@ public partial class SunLocation : ContentPage
     private void date_DateSelected(object sender, DateChangedEventArgs e)
     {
         var y = ((vm.SunLocation)BindingContext);
+        y.SelectedDate = date.Date
         y.SelectedDateTime = GetDate();
         //y.Calculate();
     }

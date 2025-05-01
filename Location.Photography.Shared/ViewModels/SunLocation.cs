@@ -23,6 +23,36 @@ namespace Location.Photography.Shared.ViewModels
 
         private const double SunSmoothingFactor = 0.1;
         private const double NorthSmoothingFactor = 0.1;
+        private DateTime _selectedDate;
+        private DateTime _seletedTime;
+
+        public DateTime SelectedDate
+        {
+            get => _selectedDate;
+            set
+            {
+                if (_selectedDate != value)
+                {
+                    _selectedDate = value;
+                    OnPropertyChanged();
+                    SelectedDateTime = new DateTime(_selectedDate.Year, _selectedDate.Month, _selectedDate.Day, SelectedDateTime.Hour, SelectedDateTime.Minute, SelectedDateTime.Second);
+                }
+            }
+        }
+        public DateTime SelectedTime
+        {
+            get => _seletedTime;
+            set
+            {
+                if (_seletedTime != value)
+                {
+                    _seletedTime = value;
+                    OnPropertyChanged();
+                    SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, SelectedDateTime.Day, _seletedTime.Hour, _seletedTime.Minute, _seletedTime.Second);
+                }
+            }
+        }
+
 
         public SunLocation()
         {

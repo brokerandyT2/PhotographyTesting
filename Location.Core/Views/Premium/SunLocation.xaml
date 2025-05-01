@@ -20,8 +20,8 @@
            Padding="10" CornerRadius="10">
         <VerticalStackLayout>
             <Picker x:Name="locationPicker" SelectedIndexChanged="locationPicker_SelectedIndexChanged"  ItemDisplayBinding="{Binding Title}" />
-            <DatePicker x:Name="date" DateSelected="date_DateSelected"  Date="{Binding SelectedDate}"  />
-            <TimePicker x:Name="time" TimeSelected="time_TimeSelected"  Time="{Binding SelectedTime}" />
+            <DatePicker x:Name="date" DateSelected="date_DateSelected"  Date="{Binding SelectedDateTime}"  />
+            <TimePicker x:Name="time" TimeSelected="time_TimeSelected"  Time="{Binding SelectedDateTime}" />
 
             <Image x:Name="north" Source="north.png" Rotation="{Binding NorthRotationAngle}"/>
             <Label Text="{x:Static system:Environment.NewLine}"/>
