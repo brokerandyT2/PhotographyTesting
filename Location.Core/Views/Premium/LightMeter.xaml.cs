@@ -25,7 +25,7 @@ public partial class LightMeter : ContentPage
     {
         base.OnNavigatedTo(args);
 
-        // Start camera timer loop (every 1 second for example)
+        // Start camera timer loop 
        var timer = _settingsService.GetSetting(MagicStrings.CameraRefresh).Value;
         _captureTimer = new System.Timers.Timer(Convert.ToInt16(timer)); // 1000 ms = 1 second
         _captureTimer.Elapsed += async (s, e) => await CaptureAndProcessFrameAsync();
