@@ -58,7 +58,7 @@ stages:
               $minor = $semVerParts[1]
               $buildId = "$(Build.BuildId)"
               $semVer = "$major.$minor.$buildId"
-              $assemblySemVer = $gsemVer # Strip pre-release metadata for AssemblyVersion
+              $assemblySemVer = $semVer # Strip pre-release metadata for AssemblyVersion
               $buildNumber = "$(Build.BuildNumber)"
               $buildId = "$(Build.BuildId)"
               $androidVersionCode = "$buildNumber$buildId".Replace('.', '')
