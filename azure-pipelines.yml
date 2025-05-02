@@ -143,6 +143,14 @@ stages:
         command: 'custom'
         custom: 'workload'
         arguments: 'install maui maui-android'
+    - task: PowerShell@2
+      displayName: 'Output GitVersion_BuildVersion'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "GitVersion_BuildVersion = $(GitVersion_BuildVersion)"
+          Write-Host "BuildId = $(BuildId)"
+          Write-Host "Formatted = $(formattedVersion)"
 
 # Stage 3 - BUILD
 - stage: Build
