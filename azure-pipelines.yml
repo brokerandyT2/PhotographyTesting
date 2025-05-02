@@ -57,7 +57,7 @@ stages:
               Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
               Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
               Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$(Build.BuildId)"
-               Write-Host "Build UpdateBuildNumber = $(build.updatebuildnumber)"
+
               Write-Host "SemVer=$(semVer)"
               Write-Host "AssemblySemVer = $(AssemblySemVer)"
               Write-Host "AndroidVersionCode = $(AndroidVersionCode)"
