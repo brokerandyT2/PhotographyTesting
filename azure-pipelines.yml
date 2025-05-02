@@ -289,7 +289,7 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              $feedName = "$(aabsFeed)"
+              $feedName = "AABs"
               $existing = az artifacts feed list --query "[?name=='AABs']"
               if (-not $existing) {
                 Write-Host "Creating feed '$feedName'..."
