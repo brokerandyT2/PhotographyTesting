@@ -273,11 +273,11 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              $feedName = "$(apksFeed)"
-              $existing = az artifacts feed list --query "[?name=='$feedName']"
+              $feedName = "APKs"
+              $existing = az artifacts feed list --query "[?name=='APKs']"
               if (-not $existing) {
                 Write-Host "Creating feed '$feedName'..."
-                az artifacts feed create --name $feedName
+                az artifacts feed create --name 'APKs'
               } else {
                 Write-Host "Feed '$feedName' already exists."
               }
@@ -290,10 +290,10 @@ stages:
             targetType: 'inline'
             script: |
               $feedName = "$(aabsFeed)"
-              $existing = az artifacts feed list --query "[?name=='$feedName']"
+              $existing = az artifacts feed list --query "[?name=='AABs']"
               if (-not $existing) {
                 Write-Host "Creating feed '$feedName'..."
-                az artifacts feed create --name $feedName
+                az artifacts feed create --name 'AABs'
               } else {
                 Write-Host "Feed '$feedName' already exists."
               }
@@ -311,7 +311,7 @@ stages:
                 exit 1
               }
               az artifacts universal publish `
-                --feed "$(apksFeed)" `
+                --feed "APKs" `
                 --name "location-core-apk" `
                 --version "$(SemVer)" `
                 --path "$apkPath"
@@ -329,7 +329,7 @@ stages:
                 exit 1
               }
               az artifacts universal publish `
-                --feed "$(aabsFeed)" `
+                --feed "AABs" `
                 --name "location-core-aab" `
                 --version "$(SemVer)" `
                 --path "$aabPath"
