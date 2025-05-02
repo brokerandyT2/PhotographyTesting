@@ -175,7 +175,7 @@ stages:
               -f net9.0-android
               -p:Configuration=$(buildConfiguration)
               -p:OutputPath=$(outputDir)-apk
-              -p:Version=$(Build.BuildNumbe)
+              -p:Version=$(Build.BuildNumber)
               -p:VersionCode=$(Build.BuildId)
           env:
             ANDROID_HOME: $(ANDROID_HOME)
@@ -192,7 +192,7 @@ stages:
               -p:Configuration=$(buildConfiguration)
               -p:OutputPath=$(outputDir)-aab
               -p:AndroidPackageFormat=aab
-              -p:Version=$(Build.BuildNumbe)
+              -p:Version=$(Build.BuildNumber)
               -p:VersionCode=$(Build.BuildId)
           env:
             ANDROID_HOME: $(ANDROID_HOME)
@@ -208,10 +208,10 @@ stages:
       steps:
         - script: |
             echo "Pushing APK to Azure Artifacts Feed (apks)..."
-            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(gitVersion) --path $(outputDir)-apk
+            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(Build.BuildNumber) --path $(outputDir)-apk
           displayName: 'Push APK to apks Feed'
 
         - script: |
             echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
-            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(gitVersion) --path $(outputDir)-aab
+            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(Build.BuildNumber) --path $(outputDir)-aab
           displayName: 'Push AAB to aabs Feed'
