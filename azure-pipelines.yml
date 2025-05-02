@@ -52,8 +52,13 @@ stages:
             targetType: 'inline'
             script: |
               $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-              $semVer = $gitVersion.SemVer
-              $assemblySemVer = $gitVersion.AssemblySemVer.Split('-')[0]  # Strip pre-release metadata for AssemblyVersion
+              $semVerRaw = $gitVersion.SemVer
+              $semVerParts = $semVerRaw -split '\.'
+              $major = $semVerParts[0]
+              $minor = $semVerParts[1]
+              $buildId = "$(Build.BuildId)"
+              $semVer = "$major.$minor.$buildId"
+              $assemblySemVer = $gsemVer # Strip pre-release metadata for AssemblyVersion
               $buildNumber = "$(Build.BuildNumber)"
               $buildId = "$(Build.BuildId)"
               $androidVersionCode = "$buildNumber$buildId".Replace('.', '')
