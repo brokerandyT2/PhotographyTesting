@@ -45,7 +45,7 @@ stages:
             echo "SemVer=$(SemVer)"
             echo "outputDir=$(outputDir)-apk"
           displayName: 'Debug output variables'
-          
+
         - script: |
             dotnet new tool-manifest --force
             dotnet tool install GitVersion.Tool --version 6.3.0
@@ -229,6 +229,7 @@ stages:
               /p:DefineConstants="PHOTOGRAPHY"
 
 # Stage 4 - PUBLISH
+# Stage 4 - PUBLISH
 - stage: Publish
   dependsOn: 
     - Setup
@@ -240,22 +241,51 @@ stages:
   jobs:
     - job: PublishArtifacts
       steps:
-            - script: |
-                echo "Pushing APK to Azure Artifacts Feed (apks)..."
-                az artifacts universal publish \
-                  --organization https://dev.azure.com/3squaredcircles \
-                  --feed 'apks' \
-                  --name MyPhotographyLocation.apk \
-                  --version $(SemVer) \
-                  --path "$(outputDir)-apk"
-              displayName: 'Push APK to apks Feed'
 
-            - script: |
-                echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
-                az artifacts universal publish \
-                  --organization https://dev.azure.com/$(organization) \
-                  --feed $(aabsFeed) \
-                  --name location-core-aab \
-                  --version $(SemVer) \
-                  --path "$(outputDir)-aab"
-              displayName: 'Push AAB to aabs Feed'
+        # Diagnostic output
+        - powershell: |
+            Write-Host "organization: $(organization)"
+            Write-Host "apksFeed: $(apksFeed)"
+            Write-Host "SemVer: $(SemVer)"
+            Write-Host "outputDir: $(outputDir)"
+            $apkPath = "$(outputDir)-apk"
+            Write-Host "Resolved APK path: $apkPath"
+            if (-Not (Test-Path $apkPath)) {
+              Write-Error "APK output path does not exist: $apkPath"
+            } else {
+              Write-Host "APK path exists:"
+              Get-ChildItem $apkPath
+            }
+          displayName: 'Check APK Output Directory'
+
+        - powershell: |
+            Write-Host "Pushing APK to Azure Artifacts Feed (apks)..."
+            az artifacts universal publish `
+              --organization "https://dev.azure.com/$(organization)" `
+              --feed "$(apksFeed)" `
+              --name "location-core-apk" `
+              --version "$(SemVer)" `
+              --path "$(outputDir)-apk"
+          displayName: 'Push APK to apks Feed'
+
+        # Diagnostic output for AAB
+        - powershell: |
+            $aabPath = "$(outputDir)-aab"
+            Write-Host "Resolved AAB path: $aabPath"
+            if (-Not (Test-Path $aabPath)) {
+              Write-Error "AAB output path does not exist: $aabPath"
+            } else {
+              Write-Host "AAB path exists:"
+              Get-ChildItem $aabPath
+            }
+          displayName: 'Check AAB Output Directory'
+
+        - powershell: |
+            Write-Host "Pushing AAB to Azure Artifacts Feed (aabs)..."
+            az artifacts universal publish `
+              --organization "https://dev.azure.com/$(organization)" `
+              --feed "$(aabsFeed)" `
+              --name "location-core-aab" `
+              --version "$(SemVer)" `
+              --path "$(outputDir)-aab"
+          displayName: 'Push AAB to aabs Feed'
