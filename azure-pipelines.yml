@@ -50,13 +50,12 @@ stages:
         script: |
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
           if ($gitVersion -and $gitVersion.MajorMinorPatch) {
-              # Remove the period from the build number
-              $cleanBuildNumber = "$(Build.BuildNumber)".Replace('.', '')
               # Concatenate GitVersion with the cleaned build number
-              $buildVersion = "$($gitVersion.MajorMinorPatch)$(Build.BuildId)"
+              $buildVersion = "$($gitVersion.MajorMinorPatch)-$(Build.BuildId)"
                Write-Host "GitVersion Build Number: $buildVersion"
               Write-Host "##vso[build.updatebuildnumber]$buildVersion"
               Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
+              Write-Host "##vso[task.setvariable variable=BuildId]$(Build.BuildId)"
           }
     - task: PowerShell@2
       displayName: 'Output GitVersion_BuildVersion'
@@ -64,6 +63,7 @@ stages:
         targetType: 'inline'
         script: |
           Write-Host "GitVersion_BuildVersion = $(GitVersion_BuildVersion)"
+          Write-Host "BuildId = $(BuildId)"
 
 # Stage 2 - SETUP
 - stage: Setup
