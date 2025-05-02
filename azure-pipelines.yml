@@ -135,6 +135,7 @@ stages:
             arguments: 'install maui maui-android --project Location.Core.csproj'
 
 # Stage 3 - BUILD
+
 - stage: Build
   dependsOn: Setup
   jobs:
@@ -147,58 +148,66 @@ stages:
           inputs:
             restoreSolution: 'Photography.sln'
 
-        - task: DotNetCoreCLI@2
+        - task: MSBuild@1
           displayName: 'Build APK'
           inputs:
-            command: 'build'
-            projects: '**/Location.Core.csproj'
-            arguments: >
-              -f net9.0-android
-              -p:Configuration=$(buildConfiguration)
-              -p:OutputPath=$(outputDir)-apk
-              -p:Version=$(SemVer)
-              -p:AssemblySemVer=$(AssemblySemVer)
-              -p:FileVersion=$(AssemblySemVer)
-              -p:InformationalVersion=$(SemVer)
-              -p:AndroidVersionCode=$(AndroidVersionCode)
-          env:
-            ANDROID_HOME: $(ANDROID_HOME)
-            JAVA_HOME: $(JAVA_HOME)
-            PATH: $(PATH)
+            solution: '**/Location.Core.csproj'
+            msbuildArchitecture: 'x64'
+            configuration: '$(buildConfiguration)'
+            platform: 'Any CPU'
+            msbuildArguments: >
+              /t:Build
+              /p:TargetFramework=net9.0-android
+              /p:OutputPath=$(outputDir)-apk
+              /p:Version=$(SemVer)
+              /p:AssemblyVersion=$(AssemblySemVer)
+              /p:FileVersion=$(AssemblySemVer)
+              /p:InformationalVersion=$(SemVer)
+              /p:AndroidVersionCode=$(AndroidVersionCode)
 
-        - task: DotNetCoreCLI@2
+        - task: MSBuild@1
           displayName: 'Build AAB'
           inputs:
-            command: 'build'
-            projects: '**/Location.Core.csproj'
-            arguments: >
-              -f net9.0-android
-              -p:Configuration=$(buildConfiguration)
-              -p:OutputPath=$(outputDir)-aab
-              -p:AndroidPackageFormat=aab
-              -p:Version=$(SemVer)
-              -p:AssemblySemVer=$(AssemblySemVer)
-              -p:FileVersion=$(AssemblySemVer)
-              -p:InformationalVersion=$(SemVer)
-              -p:AndroidVersionCode=$(AndroidVersionCode)
-          env:
-            ANDROID_HOME: $(ANDROID_HOME)
-            JAVA_HOME: $(JAVA_HOME)
-            PATH: $(PATH)
+            solution: '**/Location.Core.csproj'
+            msbuildArchitecture: 'x64'
+            configuration: '$(buildConfiguration)'
+            platform: 'Any CPU'
+            msbuildArguments: >
+              /t:Build
+              /p:TargetFramework=net9.0-android
+              /p:OutputPath=$(outputDir)-aab
+              /p:AndroidPackageFormat=aab
+              /p:Version=$(SemVer)
+              /p:AssemblyVersion=$(AssemblySemVer)
+              /p:FileVersion=$(AssemblySemVer)
+              /p:InformationalVersion=$(SemVer)
+              /p:AndroidVersionCode=$(AndroidVersionCode)
 
-# Stage 4 - PUBLISH
 - stage: Publish
   dependsOn: Build
   condition: succeeded()
   jobs:
     - job: PublishArtifacts
       steps:
+        - checkout: self
+
         - script: |
             echo "Pushing APK to Azure Artifacts Feed (apks)..."
-            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(SemVer) --path $(outputDir)-apk
+            az artifacts universal publish \
+              --organization https://dev.azure.com/$(organization) \
+              --feed $(apksFeed) \
+              --package-name location-core-apk \
+              --package-version $(SemVer) \
+              --path "$(outputDir)-apk"
           displayName: 'Push APK to apks Feed'
 
         - script: |
             echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
-            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(SemVer) --path $(outputDir)-aab
+            az artifacts universal publish \
+              --organization https://dev.azure.com/$(organization) \
+              --feed $(aabsFeed) \
+              --package-name location-core-aab \
+              --package-version $(SemVer) \
+              --path "$(outputDir)-aab"
           displayName: 'Push AAB to aabs Feed'
+
