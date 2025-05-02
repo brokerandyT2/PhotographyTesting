@@ -39,34 +39,32 @@ stages:
         - checkout: self
           fetchDepth: 0
 
+        # Install and run GitVersion to generate versioning info
         - script: |
             dotnet new tool-manifest --force
             dotnet tool install GitVersion.Tool --version 6.3.0
             dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
           displayName: 'Install and Run GitVersion'
 
-        - task: PowerShell@2
-          displayName: 'Set GitVersion-based Build Number'
-          inputs:
-            targetType: 'inline'
+        # Set versioning variables based on GitVersion output
         - script: |
             $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
             $semVer = $gitVersion.SemVer
             $assemblySemVer = $gitVersion.AssemblySemVer
-
-            # Remove periods from SemVer if needed, or combine Build.BuildNumber and Build.BuildId
             $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)"
 
-            # Update the build number, versioning variables, and set AndroidVersionCode
+            # Set Azure DevOps variables for versioning
             Write-Host "##vso[build.updatebuildnumber]$semVer"
             Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
             Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
             Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$androidVersionCode"
-
+            
             # Output the values for debugging
             Write-Host "SemVer=$semVer"
             Write-Host "AssemblySemVer = $AssemblySemVer"
-            Write-Host "AndroidVersionCode = $androidVersionCode"
+            Write-Host "AndroidVersionCode = $androidVersionCode"'
+          displayName: 'Set GitVersion-based Build Number'
+
 # Stage 2 - SETUP
 - stage: Setup
   dependsOn: Versioning
@@ -75,12 +73,14 @@ stages:
       steps:
         - checkout: self
 
+        # Install .NET SDK 9.x
         - task: UseDotNet@2
           displayName: 'Install .NET SDK 9.x'
           inputs:
             version: '9.x'
             includePreviewVersions: true
 
+        # Install OpenJDK 11
         - task: PowerShell@2
           displayName: 'Install OpenJDK 11'
           inputs:
@@ -92,6 +92,7 @@ stages:
               Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installerPath`" INSTALLDIR=`"$(javaHome)`" /quiet /qn /norestart"
               Write-Host "##vso[task.setvariable variable=JAVA_HOME]$(javaHome)"
 
+        # Install Android SDK and accept licenses
         - task: PowerShell@2
           displayName: 'Install Android SDK and Accept Licenses'
           inputs:
@@ -103,6 +104,7 @@ stages:
               $extractTemp = "$sdkRoot\temp"
               $finalToolsDir = "$sdkRoot\cmdline-tools\latest"
 
+              # Download and extract command-line tools
               New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
               Invoke-WebRequest -Uri $toolsUrl -OutFile $zipPath
               Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
@@ -114,26 +116,17 @@ stages:
               Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
               Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
 
+              # Accept SDK licenses and install necessary components
               & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --licenses --sdk_root="$sdkRoot"
               & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="$sdkRoot" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
-          env:
-            ANDROID_HOME: $(ANDROID_HOME)
-            JAVA_HOME: $(JAVA_HOME)
-            PATH: $(PATH)
 
+        # Restore and install .NET MAUI workloads
         - task: DotNetCoreCLI@2
-          displayName: 'Restore MAUI Workloads'
+          displayName: 'Restore and Install MAUI Workloads'
           inputs:
             command: 'custom'
             custom: 'workload'
-            arguments: 'restore'
-
-        - task: DotNetCoreCLI@2
-          displayName: 'Install MAUI Workloads'
-          inputs:
-            command: 'custom'
-            custom: 'workload'
-            arguments: 'install maui maui-android'
+            arguments: 'restore install maui maui-android'
 
 # Stage 3 - BUILD
 - stage: Build
@@ -143,11 +136,13 @@ stages:
       steps:
         - checkout: self
 
+        # Restore NuGet packages for the solution
         - task: NuGetCommand@2
           displayName: 'Restore NuGet Packages'
           inputs:
             restoreSolution: 'Photography.sln'
 
+        # Build APK
         - task: DotNetCoreCLI@2
           displayName: 'Build APK'
           inputs:
@@ -167,6 +162,7 @@ stages:
             JAVA_HOME: $(JAVA_HOME)
             PATH: $(PATH)
 
+        # Build AAB
         - task: DotNetCoreCLI@2
           displayName: 'Build AAB'
           inputs:
@@ -194,11 +190,13 @@ stages:
   jobs:
     - job: PublishArtifacts
       steps:
+        # Push APK to Azure Artifacts Feed
         - script: |
             echo "Pushing APK to Azure Artifacts Feed (apks)..."
             az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(SemVer) --path $(outputDir)-apk
           displayName: 'Push APK to apks Feed'
 
+        # Push AAB to Azure Artifacts Feed
         - script: |
             echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
             az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(SemVer) --path $(outputDir)-aab
