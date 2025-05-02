@@ -200,6 +200,7 @@ stages:
               /p:InformationalVersion=$(SemVer)
               /p:AndroidVersionCode=$(AndroidVersionCode)
               /p:NuGetVersion=$(SemVer)
+              /p:DefineConstants="PHOTOGRAPHY"
 
         - task: MSBuild@1
           displayName: 'Build AAB'
@@ -219,6 +220,7 @@ stages:
               /p:InformationalVersion=$(SemVer)
               /p:AndroidVersionCode=$(AndroidVersionCode)
               /p:NuGetVersion=$(SemVer)
+              /p:DefineConstants="PHOTOGRAPHY"
 
 # Stage 4 - PUBLISH
 - stage: Publish
