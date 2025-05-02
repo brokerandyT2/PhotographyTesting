@@ -60,13 +60,13 @@ stages:
               $buildId = "$(Build.BuildId)"
               $semVer = "$major.$minor.$buildId"
               $assemblySemVer = $semVer
-              $buildNumber = "$(Build.BuildNumber)"
-              $androidVersionCode = "$buildNumber$buildId".Replace('.', '')
+              $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)".Replace('.', '')
 
               Write-Host "##vso[build.updatebuildnumber]$semVer"
               Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
               Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
               Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
+
 
 # Stage 2 - SETUP
 - stage: Setup
@@ -79,7 +79,22 @@ stages:
     - job: EnvironmentSetup
       steps:
         - checkout: self
-
+        - task: Powershell@2
+          displayName: 'Validate Semver'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
+              Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
+              Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
+        - task: PowerShell@2
+          displayName: 'Show GitVersion Variables'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "SemVer=$(SemVer)"
+              Write-Host "AssemblySemVer=$(AssemblySemVer)"
+              Write-Host "AndroidVersionCode=$(AndroidVersionCode)"
         - task: UseDotNet@2
           displayName: 'Install .NET SDK 9.x'
           inputs:
@@ -141,13 +156,15 @@ stages:
             arguments: 'install maui maui-android'
 
 - stage: Build
-  dependsOn: Setup
-  variables:
-    SemVer: $[ stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer'] ]
-    AssemblySemVer: $[ stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.AssemblySemVer'] ]
-    AndroidVersionCode: $[ stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.AndroidVersionCode'] ]
+  dependsOn: 
+    - Setup
+    - Versioning
   jobs:
     - job: BuildApkAndAab
+      variables:
+        SemVer: $[ dependencies.Versioning.outputs['SetGitVersionVars.SemVer'] ]
+        AssemblySemVer: $[ dependencies.Versioning.outputs['SetGitVersionVars.AssemblySemVer'] ]
+        AndroidVersionCode: $[ dependencies.Versioning.outputs['SetGitVersionVars.AndroidVersionCode'] ]
       steps:
         - checkout: self
 
@@ -201,8 +218,12 @@ stages:
               /p:InformationalVersion=$(SemVer)
               /p:AndroidVersionCode=$(AndroidVersionCode)
 
+
 - stage: Publish
-  dependsOn: Build
+  dependsOn: 
+    - Setup
+    - Versioning
+    - Build
   condition: succeeded()
   variables:
     SemVer: $[ stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer'] ]
