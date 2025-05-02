@@ -103,6 +103,42 @@ stages:
     - job: EnvironmentSetup
       steps:
         - checkout: self
+
+        - task: PowerShell@2
+          displayName: 'Ensure APK Feed Exists'
+          inputs:
+            targetType: 'inline'
+            script: |
+              # Set feed name and check if it exists
+              $feedName = "APKs"
+              $organizationUrl = "https://dev.azure.com/$(organization)"
+              $existing = az artifacts feed list --organization $organizationUrl --query "[?name=='$feedName']"
+
+              # If feed doesn't exist, create it
+              if (-not $existing) {
+                Write-Host "Creating feed '$feedName'..."
+                az artifacts feed create --name "$feedName" --organization $organizationUrl --project $(project)
+              } else {
+                Write-Host "Feed '$feedName' already exists."
+              }
+        - task: PowerShell@2
+          displayName: 'Ensure AAB Feed Exists'
+          inputs:
+            targetType: 'inline'
+            script: |
+              # Set feed name and check if it exists
+              $feedName = "AABs"
+              $organizationUrl = "https://dev.azure.com/$(organization)"
+              $existing = az artifacts feed list --organization $organizationUrl --query "[?name=='$feedName']"
+
+              # If feed doesn't exist, create it
+              if (-not $existing) {
+                Write-Host "Creating feed '$feedName'..."
+                az artifacts feed create --name "$feedName" --organization $organizationUrl --project $(project)
+              } else {
+                Write-Host "Feed '$feedName' already exists."
+              }
+
         - task: PowerShell@2
           displayName: 'Validate Semver'
           inputs:
@@ -269,39 +305,7 @@ stages:
             AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
 
         - task: PowerShell@2
-          displayName: 'Ensure APK Feed Exists'
-          inputs:
-            targetType: 'inline'
-            script: |
-              $feedName = "APKs"
-              $existing = az artifacts feed list --query "[?name=='APKs']"
-              if (-not $existing) {
-                Write-Host "Creating feed '$feedName'..."
-                az artifacts feed create --name 'APKs'
-              } else {
-                Write-Host "Feed '$feedName' already exists."
-              }
-          env:
-            AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
-
-        - task: PowerShell@2
-          displayName: 'Ensure AAB Feed Exists'
-          inputs:
-            targetType: 'inline'
-            script: |
-              $feedName = "AABs"
-              $existing = az artifacts feed list --query "[?name=='AABs']"
-              if (-not $existing) {
-                Write-Host "Creating feed '$feedName'..."
-                az artifacts feed create --name 'AABs'
-              } else {
-                Write-Host "Feed '$feedName' already exists."
-              }
-          env:
-            AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
-
-        - task: PowerShell@2
-          displayName: 'Publish APK to apks Feed'
+          displayName: 'Publish APK to APKs Feed'
           inputs:
             targetType: 'inline'
             script: |
@@ -314,12 +318,11 @@ stages:
                 --feed "APKs" `
                 --name "location-core-apk" `
                 --version "$(SemVer)" `
-                --path "$apkPath"
-          env:
-            AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
-
+                --path "$apkPath" `
+                --organization https://dev.azure.com/$(organization) `
+                --project $(project)
         - task: PowerShell@2
-          displayName: 'Publish AAB to aabs Feed'
+          displayName: 'Publish AAB to AABs Feed'
           inputs:
             targetType: 'inline'
             script: |
@@ -332,6 +335,8 @@ stages:
                 --feed "AABs" `
                 --name "location-core-aab" `
                 --version "$(SemVer)" `
-                --path "$aabPath"
-          env:
-            AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
+                --path "$aabPath" `
+                --organization https://dev.azure.com/$(organization) `
+                --project $(project)
+
+
