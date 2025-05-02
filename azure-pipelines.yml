@@ -49,18 +49,24 @@ stages:
           displayName: 'Set GitVersion-based Build Number'
           inputs:
             targetType: 'inline'
-            script: |
-              $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-              $semVer = $gitVersion.SemVer
-              $assemblySemVer = $gitVersion.AssemblySemVer
-              Write-Host "##vso[build.updatebuildnumber]$semVer"
-              Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
-              Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
-              Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$semVer"
+        - script: |
+            $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+            $semVer = $gitVersion.SemVer
+            $assemblySemVer = $gitVersion.AssemblySemVer
 
-              Write-Host "SemVer=$semVer"
-              Write-Host "AssemblySemVer = $AssemblySemVer"
-              Write-Host "AndroidVersionCode = $(AndroidVersionCode)"
+            # Remove periods from SemVer if needed, or combine Build.BuildNumber and Build.BuildId
+            $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)"
+
+            # Update the build number, versioning variables, and set AndroidVersionCode
+            Write-Host "##vso[build.updatebuildnumber]$semVer"
+            Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
+            Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
+            Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$androidVersionCode"
+
+            # Output the values for debugging
+            Write-Host "SemVer=$semVer"
+            Write-Host "AssemblySemVer = $AssemblySemVer"
+            Write-Host "AndroidVersionCode = $androidVersionCode"
 # Stage 2 - SETUP
 - stage: Setup
   dependsOn: Versioning
