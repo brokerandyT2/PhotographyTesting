@@ -67,14 +67,13 @@ stages:
               Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
               Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
 
-
 # Stage 2 - SETUP
 - stage: Setup
   dependsOn: Versioning
   variables:
-    SemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.SemVer'] ]
-    AssemblySemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AssemblySemVer'] ]
-    AndroidVersionCode: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AndroidVersionCode'] ]
+    SemVer: $[stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer']]
+    AssemblySemVer: $[stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.AssemblySemVer']]
+    AndroidVersionCode: $[stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.AndroidVersionCode']]
   jobs:
     - job: EnvironmentSetup
       steps:
@@ -163,9 +162,9 @@ stages:
   jobs:
     - job: BuildApkAndAab
       variables:
-        SemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.SemVer'] ]
-        AssemblySemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AssemblySemVer'] ]
-        AndroidVersionCode: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AndroidVersionCode'] ]
+        SemVer: $[stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer']]
+        AssemblySemVer: $[stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.AssemblySemVer']]
+        AndroidVersionCode: $[stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.AndroidVersionCode']]
       steps:
         - checkout: self
 
@@ -200,7 +199,7 @@ stages:
               /p:FileVersion=$(AssemblySemVer)
               /p:InformationalVersion=$(SemVer)
               /p:AndroidVersionCode=$(AndroidVersionCode)
-              /p:NuGetVersion=$(SemVer)  # Added NuGetVersion
+              /p:NuGetVersion=$(SemVer)
 
         - task: MSBuild@1
           displayName: 'Build AAB'
@@ -219,7 +218,7 @@ stages:
               /p:FileVersion=$(AssemblySemVer)
               /p:InformationalVersion=$(SemVer)
               /p:AndroidVersionCode=$(AndroidVersionCode)
-              /p:NuGetVersion=$(SemVer)  # Added NuGetVersion
+              /p:NuGetVersion=$(SemVer)
 
 # Stage 4 - PUBLISH
 - stage: Publish
@@ -229,7 +228,7 @@ stages:
     - Build
   condition: succeeded()
   variables:
-    SemVer: $[ stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer'] ]
+    SemVer: $[stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer']]
   jobs:
     - job: PublishArtifacts
       steps:
