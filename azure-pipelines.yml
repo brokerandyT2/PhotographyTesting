@@ -144,10 +144,10 @@ stages:
         - checkout: self
 
         - task: DotNetCoreCLI@2
-          displayName: 'Dotnet Restore'
+          displayName: 'Restore Solution'
           inputs:
             command: 'restore'
-            projects: '**/*.csproj'
+            projects: 'Photography.sln'
 
         - task: MSBuild@1
           displayName: 'Build APK'
