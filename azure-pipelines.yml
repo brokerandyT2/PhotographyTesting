@@ -113,7 +113,8 @@ stages:
       displayName: 'Install Android SDK components'
 
     - script: |
-        yes | %ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat --licenses
+        echo "Accepting Android SDK Licenses..."
+        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --licenses
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
