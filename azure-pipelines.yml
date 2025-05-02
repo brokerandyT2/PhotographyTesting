@@ -143,10 +143,11 @@ stages:
       steps:
         - checkout: self
 
-        - task: NuGetCommand@2
-          displayName: 'Restore NuGet Packages'
+        - task: DotNetCoreCLI@2
+          displayName: 'Dotnet Restore'
           inputs:
-            restoreSolution: 'Photography.sln'
+            command: 'restore'
+            projects: '**/*.csproj'
 
         - task: MSBuild@1
           displayName: 'Build APK'
