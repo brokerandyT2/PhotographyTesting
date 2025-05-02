@@ -140,13 +140,12 @@ stages:
             custom: 'workload'
             arguments: 'install maui maui-android'
 
-# Stage 3 - BUILD
 - stage: Build
   dependsOn: Setup
   variables:
-    SemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.SemVer'] ]
-    AssemblySemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AssemblySemVer'] ]
-    AndroidVersionCode: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AndroidVersionCode'] ]
+    SemVer: $[ stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer'] ]
+    AssemblySemVer: $[ stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.AssemblySemVer'] ]
+    AndroidVersionCode: $[ stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.AndroidVersionCode'] ]
   jobs:
     - job: BuildApkAndAab
       steps:
@@ -202,12 +201,11 @@ stages:
               /p:InformationalVersion=$(SemVer)
               /p:AndroidVersionCode=$(AndroidVersionCode)
 
-# Stage 4 - PUBLISH
 - stage: Publish
   dependsOn: Build
   condition: succeeded()
   variables:
-    SemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.SemVer'] ]
+    SemVer: $[ stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer'] ]
   jobs:
     - job: PublishArtifacts
       steps:
@@ -232,3 +230,4 @@ stages:
               --package-version $(SemVer) \
               --path "$(outputDir)-aab"
           displayName: 'Push AAB to aabs Feed'
+
