@@ -68,7 +68,7 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              Write-Host "GitVersion_BuildVersion = $(gitVersion)"
+              Write-Host "Build.BuildNumbe = $(Build.BuildNumbe)"
 
 # Stage 2 - SETUP
 - stage: Setup
@@ -152,7 +152,7 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              Write-Host "GitVersion_BuildVersion = $(gitVersion)"
+              Write-Host "Build.BuildNumbe = $(Build.BuildNumbe)"
 # Stage 3 - BUILD
 - stage: Build
   dependsOn: Setup
@@ -175,7 +175,7 @@ stages:
               -f net9.0-android
               -p:Configuration=$(buildConfiguration)
               -p:OutputPath=$(outputDir)-apk
-              -p:Version=$(gitVersion)
+              -p:Version=$(Build.BuildNumbe)
               -p:VersionCode=$(Build.BuildId)
           env:
             ANDROID_HOME: $(ANDROID_HOME)
@@ -192,7 +192,7 @@ stages:
               -p:Configuration=$(buildConfiguration)
               -p:OutputPath=$(outputDir)-aab
               -p:AndroidPackageFormat=aab
-              -p:Version=$(gitVersion)
+              -p:Version=$(Build.BuildNumbe)
               -p:VersionCode=$(Build.BuildId)
           env:
             ANDROID_HOME: $(ANDROID_HOME)
