@@ -123,14 +123,14 @@ stages:
           inputs:
             command: 'custom'
             custom: 'workload'
-            arguments: 'restore --project **/Location.Core.csproj'
+            arguments: 'restore --project Location.Core.csproj'
 
         - task: DotNetCoreCLI@2
           displayName: 'Install MAUI Workloads'
           inputs:
             command: 'custom'
             custom: 'workload'
-            arguments: 'install maui maui-android --project **/Location.Core.csproj'
+            arguments: 'install maui maui-android --project Location.Core.csproj'
 
 # Stage 3 - BUILD
 - stage: Build
