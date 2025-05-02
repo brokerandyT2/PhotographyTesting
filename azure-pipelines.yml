@@ -60,7 +60,7 @@ stages:
 
               Write-Host "SemVer=$semVer"
               Write-Host "AssemblySemVer = $AssemblySemVer"
-              Write-Host "AndroidVersionCode = $AndroidVersionCode"
+              Write-Host "AndroidVersionCode = $(AndroidVersionCode)"
 # Stage 2 - SETUP
 - stage: Setup
   dependsOn: Versioning
