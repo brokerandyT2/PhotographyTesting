@@ -57,13 +57,14 @@ stages:
                       $semVer = $gitVersion.SemVer
                       $assemblySemVer = $gitVersion.AssemblySemVer
                       $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)"
-
+                      $androidVersionCode = $androidVersionCode.Replace('.','')
                       # Set Azure DevOps variables
                       Write-Host "##vso[build.updatebuildnumber]$semVer"
                       Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
                       Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
+                      
                       Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$androidVersionCode"
-
+                      
                       # Output for debugging
                       Write-Host "SemVer=$semVer"
                       Write-Host "AssemblySemVer=$assemblySemVer"
