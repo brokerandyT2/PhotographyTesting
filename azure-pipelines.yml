@@ -4,8 +4,10 @@ variables:
   androidSdkVersion: '35'
   androidHome: '$(Agent.ToolsDirectory)/android-sdk'
   javaHome: 'C:\Java\OpenJDK11'
-  # Format version for NuGet compatibility
-  formattedVersion: $[format('{0}.{1}.{2}.{3}', variables['GitVersion.Major'], variables['GitVersion.Minor'], variables['GitVersion.Patch'], variables['Build.BuildId'])]
+  versionPrefix: '0.8'
+  versionFormat: "$(Build.BuildId)"
+  # Use GitVersion for major/minor/patch versioning
+  gitVersion: $[format('{0}.{1}.{2}', variables['GitVersion.Major'], variables['GitVersion.Minor'], variables['GitVersion.Patch'])]
 
 trigger:
   branches:
@@ -17,16 +19,18 @@ trigger:
   paths:
     exclude:
       - Location.Core/Platforms/iOS/*  
+
 pr:
   branches:
     include:
-    - main
-    - master
-    - feature/*
-    - release/*
+      - main
+      - master
+      - feature/*
+      - release/*
   paths:
     exclude:
       - Location.Core/Platforms/iOS/*
+
 pool:
   vmImage: 'windows-latest'
 
@@ -34,181 +38,173 @@ stages:
 # Stage 1 - VERSIONING
 - stage: Versioning
   jobs:
-  - job: GitVersion
-    steps:
-    - checkout: self
-      fetchDepth: 0
+    - job: GitVersion
+      steps:
+        - checkout: self
+          fetchDepth: 0
 
-    - script: |
-        dotnet new tool-manifest --force
-        dotnet tool install GitVersion.Tool --version 6.3.0
-        dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
-      displayName: 'Install and Run GitVersion'
+        - script: |
+            dotnet new tool-manifest --force
+            dotnet tool install GitVersion.Tool --version 6.3.0
+            dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
+          displayName: 'Install and Run GitVersion'
 
-    - task: PowerShell@2
-      displayName: 'Set GitVersion-based Build Number'
-      inputs:
-        targetType: 'inline'
-        script: |
-          $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-          if ($gitVersion -and $gitVersion.MajorMinorPatch) {
-              $formattedVersion = "$($gitVersion.MajorMinorPatch).$(Build.BuildId)"
-              Write-Host "GitVersion Build Number: $formattedVersion"
-              Write-Host "##vso[build.updatebuildnumber]$formattedVersion"
-              Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$formattedVersion"
-              Write-Host "##vso[task.setvariable variable=BuildId]$(Build.BuildId)"
-          }
-    - task: PowerShell@2
-      displayName: 'Output GitVersion_BuildVersion'
-      inputs:
-        targetType: 'inline'
-        script: |
-          Write-Host "GitVersion_BuildVersion = $(GitVersion_BuildVersion)"
-          Write-Host "BuildId = $(BuildId)"
+        - task: PowerShell@2
+          displayName: 'Set GitVersion-based Build Number'
+          inputs:
+            targetType: 'inline'
+            script: |
+              $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+              if ($gitVersion -and $gitVersion.MajorMinorPatch) {
+                  # Concatenate GitVersion with the build number
+                  $buildVersion = "$($gitVersion.MajorMinorPatch)-$(Build.BuildId)"
+                  Write-Host "GitVersion Build Number: $buildVersion"
+                  Write-Host "##vso[build.updatebuildnumber]$buildVersion"
+                  Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
+              }
+              
+        - task: PowerShell@2
+          displayName: 'Output GitVersion_BuildVersion'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "GitVersion_BuildVersion = $(GitVersion_BuildVersion)"
 
 # Stage 2 - SETUP
 - stage: Setup
   dependsOn: Versioning
   jobs:
-  - job: EnvironmentSetup
-    steps:
-    - checkout: self
+    - job: EnvironmentSetup
+      steps:
+        - checkout: self
 
-    - task: UseDotNet@2
-      displayName: 'Install .NET SDK 9.x'
-      inputs:
-        version: '9.x'
-        includePreviewVersions: true
+        - task: UseDotNet@2
+          displayName: 'Install .NET SDK 9.x'
+          inputs:
+            version: '9.x'
+            includePreviewVersions: true
 
-    - task: PowerShell@2
-      displayName: 'Install OpenJDK 11'
-      inputs:
-        targetType: 'inline'
-        script: |
-          $jdkUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.21+9/OpenJDK11U-jdk_x64_windows_hotspot_11.0.21_9.msi"
-          $installerPath = "$env:TEMP\openjdk11.msi"
-          Invoke-WebRequest -Uri $jdkUrl -OutFile $installerPath
-          Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installerPath`" INSTALLDIR=`"$(javaHome)`" /quiet /qn /norestart"
-          Write-Host "##vso[task.setvariable variable=JAVA_HOME]$(javaHome)"
+        - task: PowerShell@2
+          displayName: 'Install OpenJDK 11'
+          inputs:
+            targetType: 'inline'
+            script: |
+              $jdkUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.21+9/OpenJDK11U-jdk_x64_windows_hotspot_11.0.21_9.msi"
+              $installerPath = "$env:TEMP\openjdk11.msi"
+              Invoke-WebRequest -Uri $jdkUrl -OutFile $installerPath
+              Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installerPath`" INSTALLDIR=`"$(javaHome)`" /quiet /qn /norestart"
+              Write-Host "##vso[task.setvariable variable=JAVA_HOME]$(javaHome)"
 
-    - task: PowerShell@2
-      displayName: 'Install Android SDK and Accept Licenses'
-      inputs:
-        targetType: 'inline'
-        script: |
-          # Define Android SDK root path
-          $sdkRoot = "$(ANDROID_HOME)"
-          
-          # URL to download the command-line tools for Android SDK
-          $toolsUrl = "https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip"
-          $zipPath = "$sdkRoot\cmdline-tools.zip"
-          $extractTemp = "$sdkRoot\temp"
-          $finalToolsDir = "$sdkRoot\cmdline-tools\latest"
+        - task: PowerShell@2
+          displayName: 'Install Android SDK and Accept Licenses'
+          inputs:
+            targetType: 'inline'
+            script: |
+              # Define Android SDK root path
+              $sdkRoot = "$(ANDROID_HOME)"
+              
+              # URL to download the command-line tools for Android SDK
+              $toolsUrl = "https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip"
+              $zipPath = "$sdkRoot\cmdline-tools.zip"
+              $extractTemp = "$sdkRoot\temp"
+              $finalToolsDir = "$sdkRoot\cmdline-tools\latest"
 
-          # Create SDK directory if it doesn't exist
-          New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
-          
-          # Download and extract Android SDK command-line tools
-          Invoke-WebRequest -Uri $toolsUrl -OutFile $zipPath
-          Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
-          New-Item -ItemType Directory -Force -Path $finalToolsDir | Out-Null
-          Copy-Item "$extractTemp\cmdline-tools\*" -Destination $finalToolsDir -Recurse -Force
-          Remove-Item $extractTemp -Recurse -Force
-          Remove-Item $zipPath -Force
+              # Create SDK directory if it doesn't exist
+              New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
+              
+              # Download and extract Android SDK command-line tools
+              Invoke-WebRequest -Uri $toolsUrl -OutFile $zipPath
+              Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
+              New-Item -ItemType Directory -Force -Path $finalToolsDir | Out-Null
+              Copy-Item "$extractTemp\cmdline-tools\*" -Destination $finalToolsDir -Recurse -Force
+              Remove-Item $extractTemp -Recurse -Force
+              Remove-Item $zipPath -Force
 
-          # Set ANDROID_HOME and update PATH
-          Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
-          Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
+              # Set ANDROID_HOME and update PATH
+              Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
+              Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
 
-          # Accept Android SDK licenses
-          & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --licenses --sdk_root="$sdkRoot"
+              # Accept Android SDK licenses
+              & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --licenses --sdk_root="$sdkRoot"
 
-          # Install necessary SDK components
-          & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="$sdkRoot" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
-      env:
-        ANDROID_HOME: $(ANDROID_HOME)
-        JAVA_HOME: $(JAVA_HOME)
-        PATH: $(PATH)
+              # Install necessary SDK components
+              & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="$sdkRoot" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
+          env:
+            ANDROID_HOME: $(ANDROID_HOME)
+            JAVA_HOME: $(JAVA_HOME)
+            PATH: $(PATH)
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Restore MAUI Workloads'
-      inputs:
-        command: 'custom'
-        custom: 'workload'
-        arguments: 'restore'
+        - task: DotNetCoreCLI@2
+          displayName: 'Restore MAUI Workloads'
+          inputs:
+            command: 'custom'
+            custom: 'workload'
+            arguments: 'restore'
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Install MAUI Workloads'
-      inputs:
-        command: 'custom'
-        custom: 'workload'
-        arguments: 'install maui maui-android'
-    - task: PowerShell@2
-      displayName: 'Output GitVersion_BuildVersion'
-      inputs:
-        targetType: 'inline'
-        script: |
-          Write-Host "GitVersion_BuildVersion = $(GitVersion_BuildVersion)"
-          Write-Host "BuildId = $(BuildId)"
-          Write-Host "Formatted = $(formattedVersion)"
+        - task: DotNetCoreCLI@2
+          displayName: 'Install MAUI Workloads'
+          inputs:
+            command: 'custom'
+            custom: 'workload'
+            arguments: 'install maui maui-android'
 
 # Stage 3 - BUILD
 - stage: Build
   dependsOn: Setup
   jobs:
-  - job: BuildApkAndAab
-    steps:
-    - checkout: self
+    - job: BuildApkAndAab
+      steps:
+        - checkout: self
 
-    - task: NuGetCommand@2
-      displayName: 'Restore NuGet Packages'
-      inputs:
-        restoreSolution: 'Photography.sln'
+        - task: NuGetCommand@2
+          displayName: 'Restore NuGet Packages'
+          inputs:
+            restoreSolution: 'Photography.sln'
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Build APK'
-      inputs:
-        command: 'build'
-        projects: '**/Location.Core.csproj'
-        arguments: >
-          -f net9.0-android
-          -p:Configuration=$(buildConfiguration)
-          -p:OutputPath=$(outputDir)-apk
-          -p:Version=$(formattedVersion)
-      env:
-        ANDROID_HOME: $(ANDROID_HOME)
-        JAVA_HOME: $(JAVA_HOME)
-        PATH: $(PATH)
+        - task: DotNetCoreCLI@2
+          displayName: 'Build APK'
+          inputs:
+            command: 'build'
+            projects: '**/Location.Core.csproj'
+            arguments: >
+              -f net9.0-android
+              -p:Configuration=$(buildConfiguration)
+              -p:OutputPath=$(outputDir)-apk
+              -p:Version=$(GitVersion_BuildVersion)
+          env:
+            ANDROID_HOME: $(ANDROID_HOME)
+            JAVA_HOME: $(JAVA_HOME)
+            PATH: $(PATH)
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Build AAB'
-      inputs:
-        command: 'build'
-        projects: '**/Location.Core.csproj'
-        arguments: >
-          -f net9.0-android
-          -p:Configuration=$(buildConfiguration)
-          -p:OutputPath=$(outputDir)-aab
-          -p:AndroidPackageFormat=aab
-          -p:Version=$(formattedVersion)
-      env:
-        ANDROID_HOME: $(ANDROID_HOME)
-        JAVA_HOME: $(JAVA_HOME)
-        PATH: $(PATH)
+        - task: DotNetCoreCLI@2
+          displayName: 'Build AAB'
+          inputs:
+            command: 'build'
+            projects: '**/Location.Core.csproj'
+            arguments: >
+              -f net9.0-android
+              -p:Configuration=$(buildConfiguration)
+              -p:OutputPath=$(outputDir)-aab
+              -p:AndroidPackageFormat=aab
+              -p:Version=$(GitVersion_BuildVersion)
+          env:
+            ANDROID_HOME: $(ANDROID_HOME)
+            JAVA_HOME: $(JAVA_HOME)
+            PATH: $(PATH)
 
 # Stage 4 - PUBLISH
 - stage: Publish
   dependsOn: Build
   condition: succeeded()
   jobs:
-  - job: PublishArtifacts
-    steps:
-    - script: |
-        echo "Pushing APK to Azure Artifacts Feed (apks)..."
-        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(formattedVersion) --path $(outputDir)-apk
-      displayName: 'Push APK to apks Feed'
+    - job: PublishArtifacts
+      steps:
+        - script: |
+            echo "Pushing APK to Azure Artifacts Feed (apks)..."
+            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(GitVersion_BuildVersion) --path $(outputDir)-apk
+          displayName: 'Push APK to apks Feed'
 
-    - script: |
-        echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
-        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(formattedVersion) --path $(outputDir)-aab
-      displayName: 'Push AAB to aabs Feed'
+        - script: |
+            echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
+            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(GitVersion_BuildVersion) --path $(outputDir)-aab
+          displayName: 'Push AAB to aabs Feed'
