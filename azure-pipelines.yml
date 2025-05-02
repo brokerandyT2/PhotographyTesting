@@ -14,7 +14,7 @@ trigger:
       - release/*
   paths:
     exclude:
-      - Location.Core/Platforms/iOS/**
+      - Location.Core/Platforms/iOS/*
 
 pr:
   branches:
@@ -25,7 +25,7 @@ pr:
       - release/*
   paths:
     exclude:
-      - Location.Core/Platforms/iOS/**
+      - Location.Core/Platforms/iOS/*
 
 pool:
   vmImage: 'windows-latest'
@@ -51,9 +51,10 @@ stages:
         targetType: 'inline'
         script: |
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-          if ($gitVersion -and $gitVersion.SemVer) {
-              Write-Host "##vso[build.updatebuildnumber]$($gitVersion.SemVer)"
-              Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$($gitVersion.SemVer)"
+          if ($gitVersion -and $gitVersion.MajorMinorPatch) {
+              $buildVersion = "$($gitVersion.MajorMinorPatch)-$(Build.BuildId)"
+              Write-Host "##vso[build.updatebuildnumber]$buildVersion"
+              Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
           }
 
 # Stage 2 - SETUP
@@ -110,6 +111,14 @@ stages:
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
       displayName: 'Install Android SDK components'
+
+    - script: |
+        yes | %ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat --licenses
+      env:
+        ANDROID_HOME: $(ANDROID_HOME)
+        JAVA_HOME: $(JAVA_HOME)
+        PATH: $(PATH)
+      displayName: 'Accept Android SDK Licenses'
 
     - task: DotNetCoreCLI@2
       displayName: 'Restore MAUI Workloads'
