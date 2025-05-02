@@ -53,7 +53,7 @@ stages:
               $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
               $semVer = $gitVersion.SemVer
               $assemblySemVer = $gitVersion.AssemblySemVer
-              $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId).Replace('.','')"
+              $androidVersionCode = $(Build.BuildNumber)$(Build.BuildId).Replace('.','')
 
               Write-Host "##vso[build.updatebuildnumber]$semVer"
               Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
