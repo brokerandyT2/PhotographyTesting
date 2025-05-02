@@ -72,7 +72,26 @@ stages:
               Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
               Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
               Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
+        - task: PowerShell@2
+          displayName: "Print Debug Variables"
+          inputs:
+            targetType: inline
+            script: |
+              Write-Host "##[group]Build Variables"
+              Write-Host "Build.ArtifactStagingDirectory: $env:BUILD_ARTIFACTSTAGINGDIRECTORY"
+              Write-Host "Build.BuildId: $env:BUILD_BUILDID"
+              Write-Host "Build.BuildNumber: $env:BUILD_BUILDNUMBER"
+              Write-Host "Build.SourceBranch: $env:BUILD_SOURCEBRANCH"
+              Write-Host "System.DefaultWorkingDirectory: $env:SYSTEM_DEFAULTWORKINGDIRECTORY"
+              Write-Host "System.ArtifactsDirectory: $env:SYSTEM_ARTIFACTSDIRECTORY"
+              Write-Host "##[endgroup]"
 
+              Write-Host "##[group]GitVersion Variables"
+              Write-Host "GitVersion.SemVer: $env:GitVersion_SemVer"
+              Write-Host "GitVersion.MajorMinorPatch: $env:GitVersion_MajorMinorPatch"
+              Write-Host "GitVersion.FullSemVer: $env:GitVersion_FullSemVer"
+              Write-Host "GitVersion.BuildMetaData: $env:GitVersion_BuildMetaData"
+              Write-Host "##[endgroup]"
 # Stage 2 - SETUP
 - stage: Setup
   dependsOn: Versioning
@@ -230,8 +249,6 @@ stages:
 
 - stage: Publish
   dependsOn:
-    - Setup
-    - Versioning
     - Build
   condition: succeeded()
   variables:
