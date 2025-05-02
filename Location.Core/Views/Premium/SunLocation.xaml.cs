@@ -20,7 +20,16 @@ public partial class SunLocation : ContentPage
         base.OnNavigatedTo(args);
 
         PageHelpers.CheckVisit(MagicStrings.SunLocationViewed, PageEnums.SunLocation, new Locations.Core.Business.DataAccess.SettingsService(), Navigation);
+        var x = BindingContext as vm.SunLocation;
+        x.BeginMonitoring = true;
   
+    }
+
+    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        base.OnNavigatedFrom(args);
+        var x = BindingContext as vm.SunLocation;
+        x.BeginMonitoring = false;
     }
 
     private void DoTheNeedful()

@@ -77,7 +77,7 @@ namespace Locations.Core.Business
 
             list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "12" });
             
-#if RELEASE
+#if DEBUG
 #if ANDY
             list.Add( new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
             list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
@@ -87,10 +87,10 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(-1).ToString() });
             list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "12" });
 #endif
-#else
-            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
+#elif RELEASE
+            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
             list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
-            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "24" });
+            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "12" });
 #endif
 
             list.Add(new() { Name = MagicStrings.Hemisphere, Value = Hemisphere.HemisphereChoices.North.Name() });
@@ -119,7 +119,8 @@ namespace Locations.Core.Business
 
 #if ANDY
 #if DEBUG
-            list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
+            //list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
+            list.Add(new() { Name = MagicStrings.Email, Value = "" });
 
 #else
             list.Add(new() { Name = MagicStrings.Email, Value = "" });

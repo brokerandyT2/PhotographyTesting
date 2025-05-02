@@ -120,6 +120,9 @@
   <data name="AccessIsFreeByWatchingAds" xml:space="preserve">
     <value>Free Access by Watching Ads</value>
   </data>
+  <data name="AddEmail" xml:space="preserve">
+    <value>Providing your email address will allow us to backup your data to the cloud.  This is needed so that if you change devices, we can restore your data.</value>
+  </data>
   <data name="AddLocationTutorial" xml:space="preserve">
     <value>Add Location Tutorial</value>
   </data>
@@ -269,6 +272,9 @@
   </data>
   <data name="pleasewaitlong" xml:space="preserve">
     <value>This process will take some time.  Depending on your device, it could take several minutes.</value>
+  </data>
+  <data name="ProvideEmail" xml:space="preserve">
+    <value>Providing your email address will allow us to restore your data should you change devices.</value>
   </data>
   <data name="Red" xml:space="preserve">
     <value>Red</value>

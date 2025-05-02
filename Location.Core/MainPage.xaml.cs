@@ -17,31 +17,33 @@ namespace Location.Core
 
         private static SettingsService ss = new SettingsService();
         private static SubscriptionTypeEnum _subType;
-#if !ANDY
-        
-public static bool IsLoggedIn = true;
-#else
+
         public static bool IsLoggedIn
         {
             get { return ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false; }
         }
 
-#endif
 
 
-#if !ANDY
+
+
         public static SubscriptionTypeEnum SubscriptionType = _subType;
-#else
-        public static SubscriptionTypeEnum SubscriptionType = SubscriptionTypeEnum.Premium;
-#endif
+
 
 
         public MainPage()
         {
             SettingsService ss = new SettingsService();
-#if !ANDY
+
+            try
+            {
                 Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
-#endif
+            }
+            catch
+            {
+
+                _subType = SubscriptionTypeEnum.Free;
+            }
 
 
             InitializeComponent();
@@ -104,7 +106,7 @@ public static bool IsLoggedIn = true;
             else
             {
                 AddDefault();
-                Navigation.PushModalAsync(new Login());
+                Navigation.PushAsync(new Login());
 
             }
             this.Children.Add(new Location.Core.Views.Settings());
@@ -119,11 +121,7 @@ public static bool IsLoggedIn = true;
                 var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
                 var statustwo = await Permissions.RequestAsync<Permissions.Camera>();
             });
-            await MainThread.InvokeOnMainThreadAsync(async () =>
-            {
 
-
-            });
         }
 
         private void AddDefault()

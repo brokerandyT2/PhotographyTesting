@@ -2,10 +2,12 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Location.Core.Views.Login"
-             xmlns:models="clr-namespace:Locations.Core.Shared;assembly=Locations.Core.Shared"
+             xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
+             xmlns:strings="clr-namespace:Location.Core.Resources"
+             xmlns:system="clr-namespace:System;assembly=netstandard"             
              Title="Login">
     <ContentPage.BindingContext>
-        <models:LoginViewModel  />
+        <models:SettingsViewModel  />
     </ContentPage.BindingContext>
     <VerticalStackLayout 
         Padding="30"
@@ -13,24 +15,50 @@
         VerticalOptions="Center">
 
         <Label 
-            Text="Welcome!"
+            Text="Welcome! "
             FontSize="32"
             HorizontalOptions="Center" />
-        <ImageButton 
-            Source="android_neutral_rd_ctn.png"
-           
-            Command="{Binding GoogleLoginCommands}"
-            BackgroundColor="#4285F4"
-            
-            CornerRadius="8"
-            HeightRequest="50"
-            HorizontalOptions="Center" 
-            WidthRequest="250" />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Text="{x:Static strings:AppResources.SwitchHemisphere}" Grid.Row="0" Grid.Column="0"></Label>
+            <Label Text="{Binding Hemisphere.Value}" Grid.Row="0" Grid.Column="1"></Label>
 
-        <Label
-            Text="{Binding StatusMessage}"
-            FontSize="16"
-            TextColor="Gray"
-            HorizontalOptions="Center" />
+            <Switch x:Name="HemisphereSwitch" IsToggled="{Binding HemisphereNorth}" Grid.Row="0" Grid.Column="2" Toggled="HemisphereSwitch_Toggled"></Switch>
+            <Label Text="{x:Static strings:AppResources.SwitchClockType}" Grid.Row="1" Grid.Column="0"></Label>
+            <Label Text="{Binding TimeFormat.Value}" Grid.Row="1" Grid.Column="1"></Label>
+            <Switch x:Name="TimeSwitch" IsToggled="{Binding TimeFormatToggle}" Grid.Row="1" Grid.Column="2" Toggled="TimeSwitch_Toggled"></Switch>
+            <Label Text="{x:Static strings:AppResources.SwitchDateFormat}" Grid.Row="2" Grid.Column="0"></Label>
+            <Label Text="{Binding DateFormat.Value}" Grid.Row="2" Grid.Column="1"></Label>
+            <Switch x:Name="DateFormat" IsToggled="{Binding DateFormatToggle}" Grid.Row="2" Grid.Column="2" Toggled="DateFormat_Toggled"></Switch>
+            <Label Text="{x:Static strings:AppResources.WindDirection}" Grid.Row="3" Grid.Column="0"></Label>
+            <Label x:Name="WindDirection" Text="" Grid.Row="3" Grid.Column="1"></Label>
+            <Switch x:Name="WindDirectionSwitch" IsToggled="{Binding WindDirectionBoolean}" Grid.Row="3" Grid.Column="2" Toggled="WindDirectionSwitch_Toggled"></Switch>
+
+            <Label Text="{x:Static strings:AppResources.TemperatureFormat}" Grid.Row="4" Grid.Column="0"></Label>
+            <Label  Text="{Binding TemperatureFormat.Value}" Grid.Row="4" Grid.Column="1"></Label>
+            <Switch x:Name="TempFormatSwitch" IsToggled="{Binding TemperatureFormatToggle}" Grid.Row="4" Grid.Column="2" Toggled="TempFormatSwitch_Toggled"></Switch>
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="5" Grid.ColumnSpan="3" Grid.Column="0"/>
+            <Label Text="{x:Static strings:AppResources.ProvideEmail}" Grid.Row="6" Grid.ColumnSpan="3" Grid.Column="0"/>
+            <Entry x:Name="emailAddress" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="3"/>
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="8" Grid.ColumnSpan="3" Grid.Column="0"/>
+            <Button x:Name="save" Text="{x:Static strings:AppResources.Save}" Grid.Row="9" Grid.ColumnSpan="3" Grid.Column="0" Pressed="save_Pressed"/>
+        </Grid>
     </VerticalStackLayout>
 </ContentPage>

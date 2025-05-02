@@ -70,6 +70,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Providing your email address will allow us to backup your data to the cloud.  This is needed so that if you change devices, we can restore your data..
+        /// </summary>
+        internal static string AddEmail {
+            get {
+                return ResourceManager.GetString("AddEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add Location Tutorial.
         /// </summary>
         internal static string AddLocationTutorial {
@@ -516,6 +525,15 @@ namespace Location.Core.Resources {
         internal static string pleasewaitlong {
             get {
                 return ResourceManager.GetString("pleasewaitlong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Providing your email address will allow us to restore your data should you change devices..
+        /// </summary>
+        internal static string ProvideEmail {
+            get {
+                return ResourceManager.GetString("ProvideEmail", resourceCulture);
             }
         }
         

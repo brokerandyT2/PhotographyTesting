@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0-android</TargetFramework>
-
     <OutputType>Exe</OutputType>
     <RootNamespace>Location.Core</RootNamespace>
     <UseMaui>true</UseMaui>
@@ -10,7 +9,6 @@
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
     <ApplicationTitle>My Photo Locations</ApplicationTitle>
     <ApplicationId>com.x3squaredcircles.locations</ApplicationId>
 
@@ -21,14 +19,18 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>$(Version)</Version>
-    <AssemblyVersion>$(Version)</AssemblyVersion>
-    <FileVersion>$(Version)</FileVersion>
-    <InformationalVersion>$(Version)</InformationalVersion>
+         <!-- These properties will be set via the pipeline -->
+      <AssemblyVersion>$(AssemblySemVer)</AssemblyVersion>
+      <FileVersion>$(AssemblySemVer)</FileVersion>
+      <Version>$(SemVer)</Version>
+      <InformationalVersion>$(SemVer)</InformationalVersion>
+
   </PropertyGroup>
 
   <PropertyGroup>
-    <ApplicationVersion>$(VersionCode)</ApplicationVersion>
+    <!-- Android Versioning -->
+    <AndroidVersionCode>$(AndroidVersionCode)</AndroidVersionCode>
+    <AndroidVersionName>$(Version)</AndroidVersionName>
   </PropertyGroup>
 
   <!-- Configuration-specific constants -->
@@ -50,6 +52,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release For Andy|net9.0-android35.0|AnyCPU'">
     <DefineConstants>PHOTOGRAPHY</DefineConstants>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release For Andy|AnyCPU'">
+    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Testing|AnyCPU'">
+    <DefineConstants>$(DefineConstants);PHOTOGRAPHY</DefineConstants>
   </PropertyGroup>
 
   <!-- Resources -->
@@ -81,5 +99,18 @@
     <ProjectReference Include="..\Locations.Core.Business\Locations.Core.Business.csproj" />
     <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources\AppResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AppResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\AppResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>AppResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

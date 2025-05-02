@@ -8,5 +8,6 @@
             
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
+        <WebView x:Name="tutorial"/>
     </VerticalStackLayout>
 </ContentPage>

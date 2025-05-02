@@ -53,7 +53,7 @@ namespace Location.Photography.Shared.ViewModels
             }
         }
 
-
+        public bool BeginMonitoring = false;
         public SunLocation()
         {
             if (Compass.Default.IsSupported)
@@ -176,9 +176,12 @@ namespace Location.Photography.Shared.ViewModels
        
         private void Compass_ReadingChanged(object sender, CompassChangedEventArgs e)
         {
-            var heading = e.Reading.HeadingMagneticNorth;
-            UpdateNorthRotationAngle(heading);
-            CalculateSunDirection(heading);
+            if (BeginMonitoring)
+            {
+                var heading = e.Reading.HeadingMagneticNorth;
+                UpdateNorthRotationAngle(heading);
+                CalculateSunDirection(heading);
+            }
         }
 
         private void UpdateNorthRotationAngle(double rawHeading)
@@ -215,23 +218,27 @@ namespace Location.Photography.Shared.ViewModels
 
         private async void CheckElevationMatch()
         {
-            if (Math.Abs(DeviceTilt - SunElevation) <= 3)
+
+            if (BeginMonitoring)
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
+                if (Math.Abs(DeviceTilt - SunElevation) <= 3)
                 {
-                    try
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
                     {
-                        Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
-                        await Task.Delay(100);
-                        Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
-                        ElevationMatched = true;
-                    }
-                    catch { }
-                });
-            }
-            else
-            {
-                ElevationMatched = false;
+                        try
+                        {
+                            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
+                            await Task.Delay(100);
+                            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
+                            ElevationMatched = true;
+                        }
+                        catch { }
+                    });
+                }
+                else
+                {
+                    ElevationMatched = false;
+                }
             }
         }
 
