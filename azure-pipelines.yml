@@ -1,8 +1,8 @@
 variables:
   buildConfiguration: 'Release'
-  outputDir: '$(Build.ArtifactStagingDirectory)/drop'
+  outputDir: '$(Build.ArtifactStagingDirectory)\drop'
   androidSdkVersion: '35'
-  androidHome: '$(Agent.ToolsDirectory)/android-sdk'
+  androidHome: '$(Agent.ToolsDirectory)\android-sdk'
   javaHome: 'C:\Java\OpenJDK11'
 
 trigger:
