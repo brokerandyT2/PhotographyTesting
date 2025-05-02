@@ -14,7 +14,7 @@ trigger:
       - release/*
   paths:
     exclude:
-      - Location.Core/Platforms/iOS/*  
+      - Location.Core/Platforms/iOS/*
 
 pr:
   branches:
@@ -47,6 +47,7 @@ stages:
           displayName: 'Install and Run GitVersion'
 
         - task: PowerShell@2
+          name: SetGitVersionVars
           displayName: 'Set GitVersion-based Build Number'
           inputs:
             targetType: 'inline'
@@ -58,23 +59,22 @@ stages:
               $minor = $semVerParts[1]
               $buildId = "$(Build.BuildId)"
               $semVer = "$major.$minor.$buildId"
-              $assemblySemVer = $semVer # Strip pre-release metadata for AssemblyVersion
+              $assemblySemVer = $semVer
               $buildNumber = "$(Build.BuildNumber)"
-              $buildId = "$(Build.BuildId)"
               $androidVersionCode = "$buildNumber$buildId".Replace('.', '')
 
               Write-Host "##vso[build.updatebuildnumber]$semVer"
-              Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
-              Write-Host "SemVer=$semVer"
-              Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
-              Write-Host "AssemblySemVer=$assemblySemVer"
-              Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$androidVersionCode"
-              Write-Host "AndroidVersionCode=$androidVersionCode"
-
+              Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
+              Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
+              Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
 
 # Stage 2 - SETUP
 - stage: Setup
   dependsOn: Versioning
+  variables:
+    SemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.SemVer'] ]
+    AssemblySemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AssemblySemVer'] ]
+    AndroidVersionCode: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AndroidVersionCode'] ]
   jobs:
     - job: EnvironmentSetup
       steps:
@@ -143,21 +143,23 @@ stages:
 # Stage 3 - BUILD
 - stage: Build
   dependsOn: Setup
+  variables:
+    SemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.SemVer'] ]
+    AssemblySemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AssemblySemVer'] ]
+    AndroidVersionCode: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AndroidVersionCode'] ]
   jobs:
     - job: BuildApkAndAab
       steps:
         - checkout: self
+
         - task: PowerShell@2
           displayName: 'Show GitVersion Variables'
           inputs:
             targetType: 'inline'
             script: |
-              Write-Host "SemVer=$env:SemVer"
-              Write-Host "AssemblySemVer=$env:AssemblySemVer"
-              Write-Host "AndroidVersionCode=$env:AndroidVersionCode"
-              $SemVer = $env:SemVer
-              $AssemblySemVer=$env:AssemblySemVer
-              $AndroidVersionCode=$env:AndroidVersionCode 
+              Write-Host "SemVer=$(SemVer)"
+              Write-Host "AssemblySemVer=$(AssemblySemVer)"
+              Write-Host "AndroidVersionCode=$(AndroidVersionCode)"
 
         - task: DotNetCoreCLI@2
           displayName: 'Restore Solution'
@@ -204,6 +206,8 @@ stages:
 - stage: Publish
   dependsOn: Build
   condition: succeeded()
+  variables:
+    SemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.SemVer'] ]
   jobs:
     - job: PublishArtifacts
       steps:
