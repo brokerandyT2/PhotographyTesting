@@ -236,9 +236,6 @@ stages:
   condition: succeeded()
   variables:
     SemVer: $[stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer']]
-    apksFeed: 'apks'
-    aabsFeed: 'aabs'
-    organization: '3squaredcircles'
   jobs:
     - job: PublishArtifacts
       steps:
