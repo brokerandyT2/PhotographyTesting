@@ -56,7 +56,7 @@ stages:
               $buildVersion = "$($gitVersion.MajorMinorPatch)$(Build.BuildId)"
                Write-Host "GitVersion Build Number: $buildVersion"
               Write-Host "##vso[build.updatebuildnumber]$buildVersion"
-              Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$gitVersion.MajorMinorPatch"
+              Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
           }
 
 # Stage 2 - SETUP
