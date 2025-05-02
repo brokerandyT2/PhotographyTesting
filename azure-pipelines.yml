@@ -47,23 +47,27 @@ stages:
           displayName: 'Install and Run GitVersion'
 
         # Set versioning variables based on GitVersion output
-        - script: |
-            $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-            $semVer = $gitVersion.SemVer
-            $assemblySemVer = $gitVersion.AssemblySemVer
-            $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)"
-
-            # Set Azure DevOps variables for versioning
-            Write-Host "##vso[build.updatebuildnumber]$semVer"
-            Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
-            Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
-            Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$androidVersionCode"
-            
-            # Output the values for debugging
-            Write-Host "SemVer=$semVer"
-            Write-Host "AssemblySemVer = $AssemblySemVer"
-            Write-Host "AndroidVersionCode = $androidVersionCode"'
+        - task: PowerShell@2
           displayName: 'Set GitVersion-based Build Number'
+          inputs:
+            targetType: 'inline'
+            script: |
+                      # PowerShell script to read GitVersion output
+                      $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+                      $semVer = $gitVersion.SemVer
+                      $assemblySemVer = $gitVersion.AssemblySemVer
+                      $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)"
+
+                      # Set Azure DevOps variables
+                      Write-Host "##vso[build.updatebuildnumber]$semVer"
+                      Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
+                      Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
+                      Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$androidVersionCode"
+
+                      # Output for debugging
+                      Write-Host "SemVer=$semVer"
+                      Write-Host "AssemblySemVer=$assemblySemVer"
+                      Write-Host "AndroidVersionCode=$androidVersionCode"
 
 # Stage 2 - SETUP
 - stage: Setup
