@@ -4,6 +4,8 @@ variables:
   androidSdkVersion: '35'
   androidHome: '$(Agent.ToolsDirectory)/android-sdk'
   javaHome: 'C:\Java\OpenJDK11'
+  # Format version for NuGet compatibility
+  formattedVersion: $[format('{0}.{1}.{2}.{3}', variables['GitVersion.Major'], variables['GitVersion.Minor'], variables['GitVersion.Patch'], variables['Build.BuildId'])]
 
 trigger:
   branches:
@@ -50,11 +52,10 @@ stages:
         script: |
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
           if ($gitVersion -and $gitVersion.MajorMinorPatch) {
-              # Concatenate GitVersion with the cleaned build number
-              $buildVersion = "$($gitVersion.MajorMinorPatch)-$(Build.BuildId)"
-               Write-Host "GitVersion Build Number: $buildVersion"
-              Write-Host "##vso[build.updatebuildnumber]$buildVersion"
-              Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
+              $formattedVersion = "$($gitVersion.MajorMinorPatch).$(Build.BuildId)"
+              Write-Host "GitVersion Build Number: $formattedVersion"
+              Write-Host "##vso[build.updatebuildnumber]$formattedVersion"
+              Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$formattedVersion"
               Write-Host "##vso[task.setvariable variable=BuildId]$(Build.BuildId)"
           }
     - task: PowerShell@2
@@ -165,7 +166,7 @@ stages:
           -f net9.0-android
           -p:Configuration=$(buildConfiguration)
           -p:OutputPath=$(outputDir)-apk
-          -p:Version=$(GitVersion_BuildVersion)
+          -p:Version=$(formattedVersion)
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
@@ -181,7 +182,7 @@ stages:
           -p:Configuration=$(buildConfiguration)
           -p:OutputPath=$(outputDir)-aab
           -p:AndroidPackageFormat=aab
-          -p:Version=$(GitVersion_BuildVersion)
+          -p:Version=$(formattedVersion)
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
@@ -196,10 +197,10 @@ stages:
     steps:
     - script: |
         echo "Pushing APK to Azure Artifacts Feed (apks)..."
-        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(GitVersion_BuildVersion) --path $(outputDir)-apk
+        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(formattedVersion) --path $(outputDir)-apk
       displayName: 'Push APK to apks Feed'
 
     - script: |
         echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
-        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(GitVersion_BuildVersion) --path $(outputDir)-aab
+        az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(formattedVersion) --path $(outputDir)-aab
       displayName: 'Push AAB to aabs Feed'
