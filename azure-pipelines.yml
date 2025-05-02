@@ -152,7 +152,7 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              Write-Host "Build.BuildNumbe = $(Build.BuildNumbe)"
+              Write-Host "Build.BuildNumbe = $(Build.BuildNumber)"
 # Stage 3 - BUILD
 - stage: Build
   dependsOn: Setup
