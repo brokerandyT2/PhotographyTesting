@@ -4,6 +4,8 @@ variables:
   androidSdkVersion: '35'
   androidHome: '$(Agent.ToolsDirectory)\android-sdk'
   javaHome: 'C:\Java\OpenJDK11'
+  organization: '3squaredcircles'
+  project: 'Photography Locations'
 
 trigger:
   branches:
@@ -72,6 +74,7 @@ stages:
               Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
               Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
               Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
+
         - task: PowerShell@2
           displayName: "Print Debug Variables"
           inputs:
@@ -92,6 +95,7 @@ stages:
               Write-Host "GitVersion.FullSemVer: $env:GitVersion_FullSemVer"
               Write-Host "GitVersion.BuildMetaData: $env:GitVersion_BuildMetaData"
               Write-Host "##[endgroup]"
+
 # Stage 2 - SETUP
 - stage: Setup
   dependsOn: Versioning
@@ -109,32 +113,27 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              # Set feed name and check if it exists
               $feedName = "APKs"
               $organizationUrl = "https://dev.azure.com/$(organization)"
               $existing = az artifacts feed list --organization $organizationUrl --query "[?name=='$feedName']"
-
-              # If feed doesn't exist, create it
               if (-not $existing) {
                 Write-Host "Creating feed '$feedName'..."
-                az artifacts feed create --name "$feedName" --organization $organizationUrl --project $(project)
+                az artifacts feed create --name "$feedName" --organization $organizationUrl --project "$(project)"
               } else {
                 Write-Host "Feed '$feedName' already exists."
               }
+
         - task: PowerShell@2
           displayName: 'Ensure AAB Feed Exists'
           inputs:
             targetType: 'inline'
             script: |
-              # Set feed name and check if it exists
               $feedName = "AABs"
               $organizationUrl = "https://dev.azure.com/$(organization)"
               $existing = az artifacts feed list --organization $organizationUrl --query "[?name=='$feedName']"
-
-              # If feed doesn't exist, create it
               if (-not $existing) {
                 Write-Host "Creating feed '$feedName'..."
-                az artifacts feed create --name "$feedName" --organization $organizationUrl --project $(project)
+                az artifacts feed create --name "$feedName" --organization $organizationUrl --project "$(project)"
               } else {
                 Write-Host "Feed '$feedName' already exists."
               }
@@ -147,6 +146,7 @@ stages:
               Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
               Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
               Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
+
         - task: PowerShell@2
           displayName: 'Show GitVersion Variables'
           inputs:
@@ -155,6 +155,7 @@ stages:
               Write-Host "SemVer=$(SemVer)"
               Write-Host "AssemblySemVer=$(AssemblySemVer)"
               Write-Host "AndroidVersionCode=$(AndroidVersionCode)"
+
         - task: UseDotNet@2
           displayName: 'Install .NET SDK 9.x'
           inputs:
@@ -217,7 +218,7 @@ stages:
 
 # Stage 3 - BUILD
 - stage: Build
-  dependsOn: 
+  dependsOn:
     - Setup
     - Versioning
   jobs:
@@ -283,6 +284,7 @@ stages:
               /p:NuGetVersion=$(SemVer)
               /p:DefineConstants="PHOTOGRAPHY"
 
+# Stage 4 - PUBLISH
 - stage: Publish
   dependsOn:
     - Build
@@ -305,8 +307,8 @@ stages:
               }
 
               az artifacts universal publish `
-                --organization https://dev.azure.com/3squaredcircles/ `
-                --project "Photography Locations" `
+                --organization https://dev.azure.com/$(organization)/ `
+                --project "$(project)" `
                 --scope project `
                 --feed APKs `
                 --name location-core-apk `
@@ -326,14 +328,11 @@ stages:
               }
 
               az artifacts universal publish `
-                --organization https://dev.azure.com/3squaredcircles/ `
-                --project "Photography Locations" `
+                --organization https://dev.azure.com/$(organization)/ `
+                --project "$(project)" `
                 --scope project `
                 --feed APKs `
                 --name location-core-aab `
                 --version "$(SemVer)" `
                 --description "MAUI Android AAB build" `
                 --path "$aabPath"
-
-
-
