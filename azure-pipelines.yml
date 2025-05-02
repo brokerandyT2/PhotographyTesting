@@ -58,6 +58,12 @@ stages:
               Write-Host "##vso[build.updatebuildnumber]$buildVersion"
               Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
           }
+    - task: PowerShell@2
+      displayName: 'Output GitVersion_BuildVersion'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "GitVersion_BuildVersion = $(GitVersion_BuildVersion)"
 
 # Stage 2 - SETUP
 - stage: Setup
