@@ -294,18 +294,7 @@ stages:
       steps:
 
         - task: PowerShell@2
-          displayName: 'Authenticate with Azure DevOps'
-          inputs:
-            targetType: 'inline'
-            script: |
-              az extension add --name azure-devops
-              echo "$(MY_PAT)" | az devops login
-              az devops configure --defaults organization=https://dev.azure.com/$(organization)
-          env:
-            AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
-
-        - task: PowerShell@2
-          displayName: 'Publish APK to APKs Feed'
+          displayName: 'Publish APK to Universal Package Feed'
           inputs:
             targetType: 'inline'
             script: |
@@ -314,15 +303,19 @@ stages:
                 Write-Error "APK output path does not exist: $apkPath"
                 exit 1
               }
+
               az artifacts universal publish `
-                --feed "APKs" `
-                --name "location-core-apk" `
+                --organization https://dev.azure.com/3squaredcircles/ `
+                --project "Photography Locations" `
+                --scope project `
+                --feed APKs `
+                --name location-core-apk `
                 --version "$(SemVer)" `
-                --path "$apkPath" `
-                --organization https://dev.azure.com/$(organization) `
-                --project $(project)
+                --description "MAUI Android APK build" `
+                --path "$apkPath"
+
         - task: PowerShell@2
-          displayName: 'Publish AAB to AABs Feed'
+          displayName: 'Publish AAB to Universal Package Feed'
           inputs:
             targetType: 'inline'
             script: |
@@ -331,12 +324,16 @@ stages:
                 Write-Error "AAB output path does not exist: $aabPath"
                 exit 1
               }
+
               az artifacts universal publish `
-                --feed "AABs" `
-                --name "location-core-aab" `
+                --organization https://dev.azure.com/3squaredcircles/ `
+                --project "Photography Locations" `
+                --scope project `
+                --feed APKs `
+                --name location-core-aab `
                 --version "$(SemVer)" `
-                --path "$aabPath" `
-                --organization https://dev.azure.com/$(organization) `
-                --project $(project)
+                --description "MAUI Android AAB build" `
+                --path "$aabPath"
+
 
 
