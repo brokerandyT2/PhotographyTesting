@@ -4,10 +4,6 @@ variables:
   androidSdkVersion: '35'
   androidHome: '$(Agent.ToolsDirectory)/android-sdk'
   javaHome: 'C:\Java\OpenJDK11'
-  versionPrefix: '0.8'
-  versionFormat: "$(Build.BuildId)"
-  # Use GitVersion for major/minor/patch versioning
-  gitVersion: $[format('{0}.{1}.{2}', variables['GitVersion.Major'], variables['GitVersion.Minor'], variables['GitVersion.Patch'])]
 
 trigger:
   branches:
@@ -55,20 +51,12 @@ stages:
             targetType: 'inline'
             script: |
               $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-              if ($gitVersion -and $gitVersion.MajorMinorPatch) {
-                  # Concatenate GitVersion with the build number
-                  $buildVersion = "$($gitVersion.MajorMinorPatch)-$(Build.BuildId)"
-                  Write-Host "GitVersion Build Number: $gitVersion"
-                  Write-Host "##vso[build.updatebuildnumber]$buildVersion"
-                  Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
-              }
-              
-        - task: PowerShell@2
-          displayName: 'Output GitVersion_BuildVersion'
-          inputs:
-            targetType: 'inline'
-            script: |
-              Write-Host "Build.BuildNumbe = $(Build.BuildNumber)"
+              $semVer = $gitVersion.SemVer
+              $assemblySemVer = $gitVersion.AssemblySemVer
+              Write-Host "##vso[build.updatebuildnumber]$semVer"
+              Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
+              Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
+              Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$(Build.BuildId)"
 
 # Stage 2 - SETUP
 - stage: Setup
@@ -100,19 +88,13 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              # Define Android SDK root path
-              $sdkRoot = "$(ANDROID_HOME)"
-              
-              # URL to download the command-line tools for Android SDK
+              $sdkRoot = "$(androidHome)"
               $toolsUrl = "https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip"
               $zipPath = "$sdkRoot\cmdline-tools.zip"
               $extractTemp = "$sdkRoot\temp"
               $finalToolsDir = "$sdkRoot\cmdline-tools\latest"
 
-              # Create SDK directory if it doesn't exist
               New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
-              
-              # Download and extract Android SDK command-line tools
               Invoke-WebRequest -Uri $toolsUrl -OutFile $zipPath
               Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
               New-Item -ItemType Directory -Force -Path $finalToolsDir | Out-Null
@@ -120,14 +102,10 @@ stages:
               Remove-Item $extractTemp -Recurse -Force
               Remove-Item $zipPath -Force
 
-              # Set ANDROID_HOME and update PATH
               Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
               Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
 
-              # Accept Android SDK licenses
               & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --licenses --sdk_root="$sdkRoot"
-
-              # Install necessary SDK components
               & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="$sdkRoot" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
           env:
             ANDROID_HOME: $(ANDROID_HOME)
@@ -147,12 +125,7 @@ stages:
             command: 'custom'
             custom: 'workload'
             arguments: 'install maui maui-android'
-        - task: PowerShell@2
-          displayName: 'Output GitVersion_BuildVersion'
-          inputs:
-            targetType: 'inline'
-            script: |
-              Write-Host "Build.BuildNumbe = $(Build.BuildNumber)"
+
 # Stage 3 - BUILD
 - stage: Build
   dependsOn: Setup
@@ -175,8 +148,11 @@ stages:
               -f net9.0-android
               -p:Configuration=$(buildConfiguration)
               -p:OutputPath=$(outputDir)-apk
-              -p:Version=$(Build.BuildNumber)
-              -p:VersionCode=$(Build.BuildId)
+              -p:Version=$(SemVer)
+              -p:AssemblySemVer=$(AssemblySemVer)
+              -p:FileVersion=$(AssemblySemVer)
+              -p:InformationalVersion=$(SemVer)
+              -p:AndroidVersionCode=$(AndroidVersionCode)
           env:
             ANDROID_HOME: $(ANDROID_HOME)
             JAVA_HOME: $(JAVA_HOME)
@@ -192,8 +168,11 @@ stages:
               -p:Configuration=$(buildConfiguration)
               -p:OutputPath=$(outputDir)-aab
               -p:AndroidPackageFormat=aab
-              -p:Version=$(Build.BuildNumber)
-              -p:VersionCode=$(Build.BuildId)
+              -p:Version=$(SemVer)
+              -p:AssemblySemVer=$(AssemblySemVer)
+              -p:FileVersion=$(AssemblySemVer)
+              -p:InformationalVersion=$(SemVer)
+              -p:AndroidVersionCode=$(AndroidVersionCode)
           env:
             ANDROID_HOME: $(ANDROID_HOME)
             JAVA_HOME: $(JAVA_HOME)
@@ -208,10 +187,10 @@ stages:
       steps:
         - script: |
             echo "Pushing APK to Azure Artifacts Feed (apks)..."
-            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(Build.BuildNumber) --path $(outputDir)-apk
+            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(apksFeed) --package-name location-core-apk --package-version $(SemVer) --path $(outputDir)-apk
           displayName: 'Push APK to apks Feed'
 
         - script: |
             echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
-            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(Build.BuildNumber) --path $(outputDir)-aab
+            az artifacts universal publish --organization https://dev.azure.com/$(organization) --feed $(aabsFeed) --package-name location-core-aab --package-version $(SemVer) --path $(outputDir)-aab
           displayName: 'Push AAB to aabs Feed'
