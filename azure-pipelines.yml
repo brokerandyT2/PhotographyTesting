@@ -234,7 +234,6 @@ stages:
   jobs:
     - job: PublishArtifacts
       steps:
-        - checkout: self
 
         - script: |
             echo "Pushing APK to Azure Artifacts Feed (apks)..."
