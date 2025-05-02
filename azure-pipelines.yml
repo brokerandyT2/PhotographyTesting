@@ -53,7 +53,7 @@ stages:
               # Remove the period from the build number
               $cleanBuildNumber = "$(Build.BuildNumber)".Replace('.', '')
               # Concatenate GitVersion with the cleaned build number
-              $buildVersion = "$($gitVersion.MajorMinorPatch)$cleanBuildNumber-$(Build.BuildId)"
+              $buildVersion = "$($gitVersion.MajorMinorPatch)$(Build.BuildId)"
                Write-Host "GitVersion Build Number: $buildVersion"
               Write-Host "##vso[build.updatebuildnumber]$buildVersion"
               Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
