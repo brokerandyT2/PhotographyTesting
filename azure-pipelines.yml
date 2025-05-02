@@ -79,7 +79,7 @@ stages:
     - job: EnvironmentSetup
       steps:
         - checkout: self
-        - task: Powershell@2
+        - task: PowerShell@2
           displayName: 'Validate Semver'
           inputs:
             targetType: 'inline'
@@ -155,6 +155,7 @@ stages:
             custom: 'workload'
             arguments: 'install maui maui-android'
 
+# Stage 3 - BUILD
 - stage: Build
   dependsOn: 
     - Setup
@@ -162,9 +163,9 @@ stages:
   jobs:
     - job: BuildApkAndAab
       variables:
-        SemVer: $[ dependencies.Versioning.outputs['SetGitVersionVars.SemVer'] ]
-        AssemblySemVer: $[ dependencies.Versioning.outputs['SetGitVersionVars.AssemblySemVer'] ]
-        AndroidVersionCode: $[ dependencies.Versioning.outputs['SetGitVersionVars.AndroidVersionCode'] ]
+        SemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.SemVer'] ]
+        AssemblySemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AssemblySemVer'] ]
+        AndroidVersionCode: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AndroidVersionCode'] ]
       steps:
         - checkout: self
 
@@ -199,6 +200,7 @@ stages:
               /p:FileVersion=$(AssemblySemVer)
               /p:InformationalVersion=$(SemVer)
               /p:AndroidVersionCode=$(AndroidVersionCode)
+              /p:NuGetVersion=$(SemVer)  # Added NuGetVersion
 
         - task: MSBuild@1
           displayName: 'Build AAB'
@@ -217,8 +219,9 @@ stages:
               /p:FileVersion=$(AssemblySemVer)
               /p:InformationalVersion=$(SemVer)
               /p:AndroidVersionCode=$(AndroidVersionCode)
+              /p:NuGetVersion=$(SemVer)  # Added NuGetVersion
 
-
+# Stage 4 - PUBLISH
 - stage: Publish
   dependsOn: 
     - Setup
@@ -251,4 +254,3 @@ stages:
               --package-version $(SemVer) \
               --path "$(outputDir)-aab"
           displayName: 'Push AAB to aabs Feed'
-
