@@ -14,19 +14,17 @@ trigger:
       - release/*
   paths:
     exclude:
-      - Location.Core/Platforms/iOS/*
-
+      - Location.Core/Platforms/iOS/*  
 pr:
   branches:
     include:
-      - main
-      - master
-      - feature/*
-      - release/*
+    - main
+    - master
+    - feature/*
+    - release/*
   paths:
     exclude:
       - Location.Core/Platforms/iOS/*
-
 pool:
   vmImage: 'windows-latest'
 
@@ -52,7 +50,11 @@ stages:
         script: |
           $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
           if ($gitVersion -and $gitVersion.MajorMinorPatch) {
-              $buildVersion = "$($gitVersion.MajorMinorPatch)-$(Build.BuildId)"
+              # Remove the period from the build number
+              $cleanBuildNumber = "$(Build.BuildNumber)".Replace('.', '')
+              # Concatenate GitVersion with the cleaned build number
+              $buildVersion = "$($gitVersion.MajorMinorPatch)$cleanBuildNumber-$(Build.BuildId)"
+               Write-Host "GitVersion Build Number: $buildVersion"
               Write-Host "##vso[build.updatebuildnumber]$buildVersion"
               Write-Host "##vso[task.setvariable variable=GitVersion_BuildVersion]$buildVersion"
           }
@@ -83,17 +85,23 @@ stages:
           Write-Host "##vso[task.setvariable variable=JAVA_HOME]$(javaHome)"
 
     - task: PowerShell@2
-      displayName: 'Download Android SDK CLI Tools'
+      displayName: 'Install Android SDK and Accept Licenses'
       inputs:
         targetType: 'inline'
         script: |
-          $sdkRoot = "$(androidHome)"
+          # Define Android SDK root path
+          $sdkRoot = "$(ANDROID_HOME)"
+          
+          # URL to download the command-line tools for Android SDK
           $toolsUrl = "https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip"
           $zipPath = "$sdkRoot\cmdline-tools.zip"
           $extractTemp = "$sdkRoot\temp"
           $finalToolsDir = "$sdkRoot\cmdline-tools\latest"
 
+          # Create SDK directory if it doesn't exist
           New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
+          
+          # Download and extract Android SDK command-line tools
           Invoke-WebRequest -Uri $toolsUrl -OutFile $zipPath
           Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
           New-Item -ItemType Directory -Force -Path $finalToolsDir | Out-Null
@@ -101,25 +109,19 @@ stages:
           Remove-Item $extractTemp -Recurse -Force
           Remove-Item $zipPath -Force
 
+          # Set ANDROID_HOME and update PATH
           Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
           Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
 
-    - script: |
-        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="%ANDROID_HOME%" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
-      env:
-        ANDROID_HOME: $(ANDROID_HOME)
-        JAVA_HOME: $(JAVA_HOME)
-        PATH: $(PATH)
-      displayName: 'Install Android SDK components'
+          # Accept Android SDK licenses
+          & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --licenses --sdk_root="$sdkRoot"
 
-    - script: |
-        echo "Accepting Android SDK Licenses..."
-        "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --licenses
+          # Install necessary SDK components
+          & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="$sdkRoot" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
       env:
         ANDROID_HOME: $(ANDROID_HOME)
         JAVA_HOME: $(JAVA_HOME)
         PATH: $(PATH)
-      displayName: 'Accept Android SDK Licenses'
 
     - task: DotNetCoreCLI@2
       displayName: 'Restore MAUI Workloads'
