@@ -39,7 +39,13 @@ stages:
       steps:
         - checkout: self
           fetchDepth: 0
-
+        - script: |
+            echo "organization=$(organization)"
+            echo "apksFeed=$(apksFeed)"
+            echo "SemVer=$(SemVer)"
+            echo "outputDir=$(outputDir)-apk"
+          displayName: 'Debug output variables'
+          
         - script: |
             dotnet new tool-manifest --force
             dotnet tool install GitVersion.Tool --version 6.3.0
@@ -237,9 +243,9 @@ stages:
             - script: |
                 echo "Pushing APK to Azure Artifacts Feed (apks)..."
                 az artifacts universal publish \
-                  --organization https://dev.azure.com/$(organization) \
-                  --feed $(apksFeed) \
-                  --name location-core-apk \
+                  --organization https://dev.azure.com/3squaredcircles \
+                  --feed 'apks' \
+                  --name MyPhotographyLocation.apk \
                   --version $(SemVer) \
                   --path "$(outputDir)-apk"
               displayName: 'Push APK to apks Feed'
