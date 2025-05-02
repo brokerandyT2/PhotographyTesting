@@ -234,23 +234,22 @@ stages:
   jobs:
     - job: PublishArtifacts
       steps:
+            - script: |
+                echo "Pushing APK to Azure Artifacts Feed (apks)..."
+                az artifacts universal publish \
+                  --organization https://dev.azure.com/$(organization) \
+                  --feed $(apksFeed) \
+                  --name location-core-apk \
+                  --version $(SemVer) \
+                  --path "$(outputDir)-apk"
+              displayName: 'Push APK to apks Feed'
 
-        - script: |
-            echo "Pushing APK to Azure Artifacts Feed (apks)..."
-            az artifacts universal publish \
-              --organization https://dev.azure.com/$(organization) \
-              --feed $(apksFeed) \
-              --package-name location-core-apk \
-              --package-version $(SemVer) \
-              --path "$(outputDir)-apk"
-          displayName: 'Push APK to apks Feed'
-
-        - script: |
-            echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
-            az artifacts universal publish \
-              --organization https://dev.azure.com/$(organization) \
-              --feed $(aabsFeed) \
-              --package-name location-core-aab \
-              --package-version $(SemVer) \
-              --path "$(outputDir)-aab"
-          displayName: 'Push AAB to aabs Feed'
+            - script: |
+                echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
+                az artifacts universal publish \
+                  --organization https://dev.azure.com/$(organization) \
+                  --feed $(aabsFeed) \
+                  --name location-core-aab \
+                  --version $(SemVer) \
+                  --path "$(outputDir)-aab"
+              displayName: 'Push AAB to aabs Feed'
