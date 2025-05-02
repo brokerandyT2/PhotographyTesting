@@ -228,64 +228,96 @@ stages:
               /p:NuGetVersion=$(SemVer)
               /p:DefineConstants="PHOTOGRAPHY"
 
-# Stage 4 - PUBLISH
-# Stage 4 - PUBLISH
 - stage: Publish
-  dependsOn: 
+  dependsOn:
     - Setup
     - Versioning
     - Build
   condition: succeeded()
   variables:
     SemVer: $[stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer']]
+    apksFeed: 'apks'
+    aabsFeed: 'aabs'
+    organization: '3squaredcircles'
   jobs:
     - job: PublishArtifacts
       steps:
 
-        # Diagnostic output
-        - powershell: |
-            Write-Host "organization: $(organization)"
-            Write-Host "apksFeed: $(apksFeed)"
-            Write-Host "SemVer: $(SemVer)"
-            Write-Host "outputDir: $(outputDir)"
-            $apkPath = "$(outputDir)-apk"
-            Write-Host "Resolved APK path: $apkPath"
-            if (-Not (Test-Path $apkPath)) {
-              Write-Error "APK output path does not exist: $apkPath"
-            } else {
-              Write-Host "APK path exists:"
-              Get-ChildItem $apkPath
-            }
-          displayName: 'Check APK Output Directory'
+        - task: PowerShell@2
+          displayName: 'Authenticate with Azure DevOps'
+          inputs:
+            targetType: 'inline'
+            script: |
+              az extension add --name azure-devops
+              echo "$(MY_PAT)" | az devops login
+              az devops configure --defaults organization=https://dev.azure.com/$(organization)
+          env:
+            AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
 
-        - powershell: |
-            Write-Host "Pushing APK to Azure Artifacts Feed (apks)..."
-            az artifacts universal publish `
-              --organization "https://dev.azure.com/$(organization)" `
-              --feed "$(apksFeed)" `
-              --name "location-core-apk" `
-              --version "$(SemVer)" `
-              --path "$(outputDir)-apk"
-          displayName: 'Push APK to apks Feed'
+        - task: PowerShell@2
+          displayName: 'Ensure APK Feed Exists'
+          inputs:
+            targetType: 'inline'
+            script: |
+              $feedName = "$(apksFeed)"
+              $existing = az artifacts feed list --query "[?name=='$feedName']"
+              if (-not $existing) {
+                Write-Host "Creating feed '$feedName'..."
+                az artifacts feed create --name $feedName
+              } else {
+                Write-Host "Feed '$feedName' already exists."
+              }
+          env:
+            AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
 
-        # Diagnostic output for AAB
-        - powershell: |
-            $aabPath = "$(outputDir)-aab"
-            Write-Host "Resolved AAB path: $aabPath"
-            if (-Not (Test-Path $aabPath)) {
-              Write-Error "AAB output path does not exist: $aabPath"
-            } else {
-              Write-Host "AAB path exists:"
-              Get-ChildItem $aabPath
-            }
-          displayName: 'Check AAB Output Directory'
+        - task: PowerShell@2
+          displayName: 'Ensure AAB Feed Exists'
+          inputs:
+            targetType: 'inline'
+            script: |
+              $feedName = "$(aabsFeed)"
+              $existing = az artifacts feed list --query "[?name=='$feedName']"
+              if (-not $existing) {
+                Write-Host "Creating feed '$feedName'..."
+                az artifacts feed create --name $feedName
+              } else {
+                Write-Host "Feed '$feedName' already exists."
+              }
+          env:
+            AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
 
-        - powershell: |
-            Write-Host "Pushing AAB to Azure Artifacts Feed (aabs)..."
-            az artifacts universal publish `
-              --organization "https://dev.azure.com/$(organization)" `
-              --feed "$(aabsFeed)" `
-              --name "location-core-aab" `
-              --version "$(SemVer)" `
-              --path "$(outputDir)-aab"
-          displayName: 'Push AAB to aabs Feed'
+        - task: PowerShell@2
+          displayName: 'Publish APK to apks Feed'
+          inputs:
+            targetType: 'inline'
+            script: |
+              $apkPath = "$(outputDir)-apk"
+              if (-Not (Test-Path $apkPath)) {
+                Write-Error "APK output path does not exist: $apkPath"
+                exit 1
+              }
+              az artifacts universal publish `
+                --feed "$(apksFeed)" `
+                --name "location-core-apk" `
+                --version "$(SemVer)" `
+                --path "$apkPath"
+          env:
+            AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
+
+        - task: PowerShell@2
+          displayName: 'Publish AAB to aabs Feed'
+          inputs:
+            targetType: 'inline'
+            script: |
+              $aabPath = "$(outputDir)-aab"
+              if (-Not (Test-Path $aabPath)) {
+                Write-Error "AAB output path does not exist: $aabPath"
+                exit 1
+              }
+              az artifacts universal publish `
+                --feed "$(aabsFeed)" `
+                --name "location-core-aab" `
+                --version "$(SemVer)" `
+                --path "$aabPath"
+          env:
+            AZURE_DEVOPS_EXT_PAT: $(MY_PAT)
