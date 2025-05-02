@@ -147,20 +147,24 @@ stages:
     - job: BuildApkAndAab
       steps:
         - checkout: self
+        - task: PowerShell@2
+          displayName: 'Show GitVersion Variables'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "SemVer=$env:SemVer"
+              Write-Host "AssemblySemVer=$env:AssemblySemVer"
+              Write-Host "AndroidVersionCode=$env:AndroidVersionCode"
+              $SemVer = $env:SemVer
+              $AssemblySemVer=$env:AssemblySemVer
+              $AndroidVersionCode=$env:AndroidVersionCode 
 
         - task: DotNetCoreCLI@2
           displayName: 'Restore Solution'
           inputs:
             command: 'restore'
             projects: 'Photography.sln'
-        - task: PowerShell@2
-          displayName: 'Set GitVersion-based Build Number'
-          inputs:
-            targetType: 'inline'
-            script: |
-              Write-Host "SemVer=$semVer"
-              Write-Host "AssemblySemVer=$assemblySemVer"
-              Write-Host "AndroidVersionCode=$androidVersionCode"
+
         - task: MSBuild@1
           displayName: 'Build APK'
           inputs:
