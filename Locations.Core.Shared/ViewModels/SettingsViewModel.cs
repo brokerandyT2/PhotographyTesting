@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using Locations.Core.Shared.Enums;
 using static Locations.Core.Shared.Enums.Hemisphere;
 using System.ComponentModel;
-
+using Locations.Core.Shared;
 namespace Locations.Core.Shared.ViewModels
 {
     public class SettingsViewModel : ISettingsViewModel, INotifyPropertyChanged
