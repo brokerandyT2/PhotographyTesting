@@ -1,3 +1,5 @@
+# YAML Pipeline
+
 trigger:
   branches:
     include:
@@ -8,6 +10,7 @@ trigger:
     exclude:
       - Platforms/**
       - '!Platforms/Android/**'
+
 pr:
   branches:
     include:
@@ -21,6 +24,7 @@ pr:
       - Platforms/Android/**
     exclude:
       - Platforms/iOS/**
+
 pool:
   vmImage: 'windows-latest'
 
@@ -124,49 +128,36 @@ steps:
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-- task: PowerShell@2
-  displayName: 'Set outputDirectory for APK'
-  inputs:
-    targetType: 'inline'
-    script: |
-      $apkPath = Get-ChildItem -Path "$(Build.SourcesDirectory)" -Recurse -Filter "*.apk" | Select-Object -First 1
-      if (-not $apkPath) {
-        Write-Error "APK not found"
-        exit 1
-      }
-      $outputDir = Split-Path $apkPath.FullName -Parent
-      Write-Host "##vso[task.setvariable variable=outputDirectory]$outputDir"
-
+# Step 11: Upload APK to Azure Artifacts Feed
 - task: AzureCLI@2
   displayName: 'Upload APK to Azure Artifacts Feed'
   inputs:
-        azureSubscription: 'Artifacts'
-        scriptType: 'ps'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az artifacts universal publish `
-            --organization "$(System.TeamFoundationCollectionUri)" `
-            --project "$(System.TeamProject)" `
-            --scope project `
-            --feed apk `
-            --name Location.Core `
-            --version $(semVer) `
-            --description "APK Package" `
-            --path "$(outputDirectory)"
+    azureSubscription: 'Artifacts'  # Optional if you're using service connections
+    scriptType: 'ps'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo $(MY_PAT) | az devops login
+      az artifacts universal publish \
+        --organization https://dev.azure.com/3squaredcircles \
+        --feed apk \
+        --name PixMap \
+        --version $(AssemblyVersion) \
+        --description "APK build for PixMap" \
+        --path "$(Build.ArtifactStagingDirectory)\apk"
 
+# Step 12: Upload AAB to Azure Artifacts Feed
 - task: AzureCLI@2
   displayName: 'Upload AAB to Azure Artifacts Feed'
   inputs:
-        azureSubscription: 'Artifacts'
-        scriptType: 'ps'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az artifacts universal publish `
-            --organization "$(System.TeamFoundationCollectionUri)" `
-            --project "$(System.TeamProject)" `
-            --scope project `
-            --feed aab `
-            --name Location.Core `
-            --version $(semVer) `
-            --description "AAB Package" `
-            --path "$(outputDirectory)"
+    azureSubscription: 'Artifacts'  # Optional if you're using service connections
+    scriptType: 'ps'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo $(MY_PAT) | az devops login
+      az artifacts universal publish \
+        --organization https://dev.azure.com/3squaredcircles \
+        --feed aab \
+        --name PixMap \
+        --version $(AssemblyVersion) \
+        --description "AAB build for PixMap" \
+        --path "$(Build.ArtifactStagingDirectory)\aab"
