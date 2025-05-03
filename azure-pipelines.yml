@@ -32,9 +32,13 @@ steps:
   displayName: 'Install GitVersion.Tool'
 
 # Step 2b: Run GitVersion and generate JSON output
-- script: |
-    dotnet tool run dotnet-gitversion /output json /verbosity diagnostic > gitversion.json
-  displayName: 'Run GitVersion'
+- task: PowerShell@2
+  displayName: 'Run GitVersion and Save Output'
+  inputs:
+    targetType: 'inline'
+    script: |
+      dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion-error.log
+
 
 
 # Step 3: Parse GitVersion JSON Output
