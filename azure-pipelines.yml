@@ -100,7 +100,7 @@ steps:
 - task: MSBuild@1
   displayName: 'Build APK'
   inputs:
-    solution: 'Location.Core.csproj'  # Specify the project file
+    solution: 'Location.Core\Location.Core.csproj'  # Specify the project file
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
@@ -108,7 +108,7 @@ steps:
 - task: MSBuild@1
   displayName: 'Build AAB'
   inputs:
-    solution: 'Location.Core.csproj'  # Specify the project file
+    solution: 'Location.Core\Location.Core.csproj'  # Specify the project file
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
