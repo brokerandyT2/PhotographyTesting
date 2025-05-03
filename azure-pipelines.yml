@@ -89,16 +89,22 @@ steps:
     choco install openjdk11 -y
   displayName: 'Install JDK 11'
 
-# Step 8: Ensure APK Feed Exists
 - task: AzureCLI@2
   inputs:
-    azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Your Service Connection ID
-    scriptType: 'pscore'  # PowerShell Core
-    scriptLocation: 'inlineScript'
-    inlineScript: |
+      azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Your Service Connection ID
+      scriptType: 'pscore'  # PowerShell Core
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        # Ensure the Azure DevOps extension is installed
         az extension add --name azure-devops
-        az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project=Photography%20Locations
+        
+        # Set the context for Azure DevOps organization and project (without URL encoding)
+        az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
+        
+        # Check if the feed 'apks' exists
         $feedExists = az artifacts feed list --org https://dev.azure.com/3squaredcircles --query "[?name=='apks']" -o tsv
+        
+        # If feed does not exist, create it
         if (-not $feedExists) {
             Write-Host "Feed 'apks' does not exist. Creating it..."
             az artifacts feed create --name apks --org https://dev.azure.com/3squaredcircles
@@ -106,6 +112,7 @@ steps:
             Write-Host "Feed 'apks' already exists."
         }
   displayName: 'Check if Feed Exists and Create if Not'
+
 
 - task: AzureCLI@2
   inputs:
