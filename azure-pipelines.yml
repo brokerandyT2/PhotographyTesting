@@ -100,12 +100,12 @@ steps:
         "Content-Type" = "application/json"
     }
     Write-Host 'PAT $(System.AccessToken)'
-    $url = "https://dev.azure.com/3squaredcircles/Photography%20Locations/_apis/packaging/feeds/APKs?api-version=6.0-preview.1"
+    $url = "https://dev.azure.com/3squaredcircles/_apis/packaging/feeds/APKs?api-version=6.0-preview.1"
     $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
     if (-not $response) {
         Write-Host "Feed 'APKs' does not exist. Creating it..."
-        $createFeedUrl = "https://dev.azure.com/3squaredcircles/Photography%20Locations/_apis/packaging/feeds?api-version=6.0-preview.1"
+        $createFeedUrl = "https://dev.azure.com/3squaredcircles/_apis/packaging/feeds?api-version=6.0-preview.1"
         $body = @{
             name = 'APKs'
             capabilities = @{
@@ -132,12 +132,12 @@ steps:
         "Content-Type" = "application/json"
     }
 
-    $url = "https://dev.azure.com/3squaredcircles/Photography%20Locations/_apis/packaging/feeds/AABs?api-version=6.0-preview.1"
+    $url = "https://dev.azure.com/3squaredcircles/_apis/packaging/feeds/AABs?api-version=6.0-preview.1"
     $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
     if (-not $response) {
         Write-Host "Feed 'AABs' does not exist. Creating it..."
-        $createFeedUrl = "https://dev.azure.com/3squaredcircles/Photography%20Locations/_apis/packaging/feeds?api-version=6.0-preview.1"
+        $createFeedUrl = "https://dev.azure.com/3squaredcircles/_apis/packaging/feeds?api-version=6.0-preview.1"
         $body = @{
             name = 'AABs'
             capabilities = @{
