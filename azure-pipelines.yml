@@ -35,7 +35,7 @@ steps:
     dotnet new tool-manifest --force
     dotnet tool install GitVersion.Tool --version 6.3.0
     dotnet tool list
-  displayName: 'Install and Run GitVersion'
+  displayName: 'Install GitVersion'
 
 - script: |
     dotnet tool run dotnet-gitversion /output json /verbosity quiet > $(Build.SourcesDirectory)\gitversion.json 2> $(Build.SourcesDirectory)\gitversion-error.log
@@ -75,8 +75,16 @@ steps:
 - script: |
     echo "Installing Android SDK..."
     choco install android-sdk -y
+    # Set ANDROID_HOME environment variable
+    $env:ANDROID_HOME="C:\Android\android-sdk"
+    # Add tools and platform-tools to PATH
+    $env:PATH += ";$env:ANDROID_HOME\tools;$env:ANDROID_HOME\platform-tools"
+    # Verify sdkmanager is available
+    sdkmanager --version
+    # Install required platforms and build tools
     sdkmanager "platforms;android-$(AndroidSdkVersion)" "build-tools;$(AndroidSdkVersion)"
   displayName: 'Install Android SDK'
+
 
 # Step 6: Install JDK
 - script: |
