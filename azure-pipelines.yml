@@ -29,15 +29,31 @@ steps:
 - script: |
     dotnet new tool-manifest --force
     dotnet tool install GitVersion.Tool --version 6.3.0
-  displayName: 'Install GitVersion.Tool'
+    dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
+  displayName: 'Install and Run GitVersion'
+
 
 # Step 2b: Run GitVersion and generate JSON output
 - task: PowerShell@2
-  displayName: 'Run GitVersion and Save Output'
+  displayName: 'Set GitVersion-based Build Number'
   inputs:
     targetType: 'inline'
     script: |
-      dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion-error.log
+      $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+      $semVer = $gitVersion.SemVer
+      $assemblySemVer = $gitVersion.AssemblySemVer
+      $buildNumber = "$(Build.BuildNumber)"
+      $buildId = "$(Build.BuildId)"
+      $androidVersionCode = "$buildNumber$buildId".Replace('.', '')
+      
+      Write-Host "##vso[build.updatebuildnumber]$semVer"
+      Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
+      Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
+      Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$androidVersionCode"
+
+      Write-Host "SemVer=$semVer"
+      Write-Host "AssemblySemVer = $assemblySemVer"
+      Write-Host "AndroidVersionCode = $androidVersionCode"
 
 
 
