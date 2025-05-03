@@ -14,6 +14,7 @@ using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Logging.Implementation;
 using Microsoft.Extensions.Logging;
+using static Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService;
 
 namespace Locations.Core.Business.DataAccess
 {
@@ -30,7 +31,14 @@ namespace Locations.Core.Business.DataAccess
         }
         public SettingsService()
         {
+            AlertRaised += SettingsService_AlertRaised; ;
         }
+
+        private void SettingsService_AlertRaised(object? sender, AlertEventArgs e)
+        {
+            RaiseError(new Exception(e.Title));
+        }
+
         /// <summary>
         /// Returns the entire ViewModel
         /// </summary>
@@ -209,7 +217,8 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                RaiseError(ex); 
+                AlertRaised?.Invoke(this, new AlertEventArgs("Error", "Unable to load settings", AlertType.Error));
+                 
                 return new SettingsViewModel();
             }
         }

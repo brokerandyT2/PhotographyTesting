@@ -22,10 +22,12 @@ namespace Locations.Core.Business.DataAccess
         private LocationQuery<LocationViewModel> lq = new Data.Queries.LocationQuery<LocationViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
         private IAlertService alertServ;
         private ILoggerService loggerService;
+        public event EventHandler<AlertEventArgs> AlertRaised;
         public LocationsService() {
 
-            
+            AlertRaised += LocationsService_AlertRaised;
         }
+
 
         private void LocationsService_AlertRaised(object? sender, AlertEventArgs e)
         {

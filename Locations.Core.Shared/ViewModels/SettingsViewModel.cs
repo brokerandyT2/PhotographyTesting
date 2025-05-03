@@ -10,9 +10,10 @@ using Locations.Core.Shared.Enums;
 using static Locations.Core.Shared.Enums.Hemisphere;
 using System.ComponentModel;
 using Locations.Core.Shared;
+using Locations.Core.Shared.DTO;
 namespace Locations.Core.Shared.ViewModels
 {
-    public class SettingsViewModel : ISettingsViewModel, INotifyPropertyChanged
+    public class SettingsViewModel : DTOBase, ISettingsViewModel, INotifyPropertyChanged
     {
 
         public SettingsViewModel() { }

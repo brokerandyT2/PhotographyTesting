@@ -9,6 +9,7 @@ using Microsoft.Maui.Authentication;
 using Microsoft.Maui.Controls;
 using System.Diagnostics;
 using System.Net.Mail;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
 
 namespace Location.Core.Views;
 
@@ -66,7 +67,7 @@ public partial class Login : ContentPage
     {
         var settings = ss.GetAllSettings();
         BindingContext = settings;
-
+     
         if (settings.WindDirection.Value == MagicStrings.TowardsWind)
         {
             WindDirection.Text = AppResources.TowardsWind.FirstCharToUpper();
@@ -109,7 +110,7 @@ public partial class Login : ContentPage
     {
         if (string.IsNullOrEmpty(emailAddress.Text))
         {
-            if (DisplayAlert())
+            if (DisplayAlert().Result)
             {
                 Navigation.PopModalAsync();
             }
@@ -121,9 +122,11 @@ public partial class Login : ContentPage
         }
 
     }
-    private bool DisplayAlert()
+    private async Task<bool> DisplayAlert()
     {
-        return alertServ.ShowConfirmationAsync(AppResources.Error, AppResources.BlankEmail, AppResources.OK, AppResources.Cancel, true);
+        AlertService ass = new AlertService();
+        ass.AlertRaised += (s, e) => { };
+        return await DisplayAlert(AppResources.Error, AppResources.BlankEmail, AppResources.OK, AppResources.Cancel);
     }
     private void UpdateEmail()
     {

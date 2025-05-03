@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Location.Core.Helpers;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
@@ -47,7 +48,7 @@ public partial class AddLocation : ContentPage
 
     private void OnRaiseAlert(object? sender, Locations.Core.Shared.Customizations.Alerts.Implementation.AlertEventArgs e)
     {
-        alertServ.
+        ServiceBase<LocationViewModel>.RaiseError(new Exception(e.Message));
     }
 
     public AddLocation(ILocationViewModel viewModel) : this()
