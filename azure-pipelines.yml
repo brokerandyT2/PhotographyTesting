@@ -17,7 +17,8 @@ variables:
   BuildConfiguration: 'Release'
   AndroidSdkVersion: '34.0'
   SemanticVersion: '1.0'
-
+  OrganizationUrl: 'https://dev.azure.com/3squaredcircles'  # Replace with your real org
+  ProjectName: 'Photography Locations'  # Replace with your real project
 steps:
 
 # Step 1: Checkout the full repository
