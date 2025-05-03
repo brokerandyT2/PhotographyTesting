@@ -53,7 +53,7 @@ steps:
       $semVerParts = $baseVersion.TrimStart('v').Split('.')
       $major = $semVerParts[0]
       $minor = $semVerParts[1]
-      $semVer = ".$major.$minor.$buildId"
+      $semVer = "$major.$minor.$buildId"
 
       Write-Host "##vso[build.updatebuildnumber]$semVer"
       Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
