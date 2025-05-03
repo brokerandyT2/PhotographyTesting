@@ -89,48 +89,78 @@ steps:
     choco install openjdk11 -y
   displayName: 'Install JDK 11'
 
-# Step 8: Create Azure Artifacts Feeds if they do not exist
+# Step 8: Ensure APK Feed Exists
 - powershell: |
-    $feeds = "APK,AAB".Split(',')
-    $organizationUrl = "$(System.TeamFoundationCollectionUri)"
-    $projectName = "$(System.TeamProject)"
+    $feed = "APK"
+    $organizationUrl = "https://dev.azure.com/3squaredcircles"
+    $projectName = "Photography Locations"
     $personalAccessToken = "$(System.AccessToken)"
     $headers = @{
         Authorization = "Bearer $personalAccessToken"
         "Content-Type" = "application/json"
     }
 
-    foreach ($feed in $feeds) {
-        $url = "${organizationUrl}${projectName}/_apis/packaging/feeds/$feed?api-version=6.0-preview.1"
-        $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
+    $url = "${organizationUrl}/${projectName}/_apis/packaging/feeds/$feed?api-version=6.0-preview.1"
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
-        if (-not $response) {
-            Write-Host "Feed '$feed' does not exist. Creating it..."
-            $createFeedUrl = "${organizationUrl}${projectName}/_apis/packaging/feeds?api-version=6.0-preview.1"
-            $body = @{
-                name = $feed
-                capabilities = @{
-                    permissions = @()
-                }
-            } | ConvertTo-Json -Depth 10
-            Invoke-RestMethod -Uri $createFeedUrl -Headers $headers -Method Post -Body $body
-            Write-Host "Feed '$feed' created successfully."
-        } else {
-            Write-Host "Feed '$feed' already exists."
-        }
+    if (-not $response) {
+        Write-Host "Feed '$feed' does not exist. Creating it..."
+        $createFeedUrl = "${organizationUrl}/${projectName}/_apis/packaging/feeds?api-version=6.0-preview.1"
+        $body = @{
+            name = $feed
+            capabilities = @{
+                permissions = @()
+            }
+        } | ConvertTo-Json -Depth 10
+        Invoke-RestMethod -Uri $createFeedUrl -Headers $headers -Method Post -Body $body
+        Write-Host "Feed '$feed' created successfully."
+    } else {
+        Write-Host "Feed '$feed' already exists."
     }
-  displayName: 'Ensure Azure Artifacts Feeds Exist'
+  displayName: 'Ensure APK Feed Exists'
   env:
     System.AccessToken: $(System.AccessToken)
 
-# Step 9: Restore NuGet packages
+# Step 9: Ensure AAB Feed Exists
+- powershell: |
+    $feed = "AAB"
+    $organizationUrl = "https://dev.azure.com/3squaredcircles"
+    $projectName = "Photography Locations"
+    $personalAccessToken = "$(System.AccessToken)"
+    $headers = @{
+        Authorization = "Bearer $personalAccessToken"
+        "Content-Type" = "application/json"
+    }
+
+    $url = "${organizationUrl}/${projectName}/_apis/packaging/feeds/$feed?api-version=6.0-preview.1"
+    $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
+
+    if (-not $response) {
+        Write-Host "Feed '$feed' does not exist. Creating it..."
+        $createFeedUrl = "${organizationUrl}/${projectName}/_apis/packaging/feeds?api-version=6.0-preview.1"
+        $body = @{
+            name = $feed
+            capabilities = @{
+                permissions = @()
+            }
+        } | ConvertTo-Json -Depth 10
+        Invoke-RestMethod -Uri $createFeedUrl -Headers $headers -Method Post -Body $body
+        Write-Host "Feed '$feed' created successfully."
+    } else {
+        Write-Host "Feed '$feed' already exists."
+    }
+  displayName: 'Ensure AAB Feed Exists'
+  env:
+    System.AccessToken: $(System.AccessToken)
+
+# Step 10: Restore NuGet packages
 - task: NuGetCommand@2
   displayName: 'Restore NuGet Packages'
   inputs:
     command: 'restore'
     restoreSolution: '**/*.sln'
 
-# Step 10: Build APK
+# Step 11: Build APK
 - task: MSBuild@1
   displayName: 'Build APK'
   inputs:
@@ -138,7 +168,7 @@ steps:
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Step 11: Build AAB
+# Step 12: Build AAB
 - task: MSBuild@1
   displayName: 'Build AAB'
   inputs:
@@ -146,14 +176,14 @@ steps:
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Step 12: Publish APK to Azure Artifacts
+# Step 13: Publish APK to Azure Artifacts
 - task: PublishPipelineArtifact@1
   displayName: 'Publish APK to Azure Artifacts'
   inputs:
     targetPath: '$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.apk'
     artifact: 'APK'
 
-# Step 13: Publish AAB to Azure Artifacts
+# Step 14: Publish AAB to Azure Artifacts
 - task: PublishPipelineArtifact@1
   displayName: 'Publish AAB to Azure Artifacts'
   inputs:
