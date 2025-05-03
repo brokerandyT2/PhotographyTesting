@@ -23,7 +23,7 @@ steps:
   displayName: 'Install .NET SDK'
   inputs:
     packageType: 'sdk'
-    version: '9.0'
+    version: '9.x'
 
 # Step 2: Install GitVersion.Tool and Generate Version Information
 - script: |
