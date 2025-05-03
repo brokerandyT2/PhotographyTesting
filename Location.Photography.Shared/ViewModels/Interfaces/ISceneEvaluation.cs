@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Location.Photography.Shared.ViewModels.Interfaces
 {
-    internal interface ISceneEvaluation: IViewModelBase
+    internal interface ISceneEvaluation: IDTOBase
     {
     }
 }

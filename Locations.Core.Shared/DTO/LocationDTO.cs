@@ -9,7 +9,7 @@ using SQLite;
 namespace Locations.Core.Shared.DTO
 {
     [Table("Location")]
-    public class LocationDTO : ILocationDTO, INotifyPropertyChanged
+    public class LocationDTO : DTOBase, ILocationDTO, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         private string _city;

@@ -1,5 +1,6 @@
 ﻿using Location.Photography.Business.DataAccess.Interfaces;
 using Location.Photography.Data.Queries;
+using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Implementation;
@@ -9,7 +10,7 @@ using Locations.Core.Shared.ViewModels;
 namespace Location.Photography.Business.DataAccess
 {
 
-    public class SettingsService : ISettingService<SettingViewModel>
+    public class SettingsService : ServiceBase<SettingViewModel>, ISettingService<SettingViewModel>
     {
         SettingsQuery<SettingViewModel> sq;
         Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
@@ -60,8 +61,8 @@ namespace Location.Photography.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
-                return new SettingViewModel();
+                RaiseError(ex);
+                return default;
             }
         }
 
@@ -79,8 +80,8 @@ namespace Location.Photography.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
-                return string.Empty;
+                RaiseError(ex);// return string.Empty;
+                return default;
             }
         }
 

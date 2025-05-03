@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Shared.ViewModels.Interface
 {
-    public interface ITipDisplayViewModel : IViewModelBase
+    public interface ITipDisplayViewModel : IDTOBase
     {
        
 

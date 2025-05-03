@@ -9,7 +9,7 @@ using SQLite;
 namespace Locations.Core.Shared.DTO
 {
     [Table("TipType")]
-    public class TipTypeDTO : ITipTypeDTO, INotifyPropertyChanged
+    public class TipTypeDTO : DTOBase, ITipTypeDTO, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         private int _id;

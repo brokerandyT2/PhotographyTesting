@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Shared.DTO
 {
-    public class DeviceInfoDTO : IDeviceInfoDTO
+    public class DeviceInfoDTO : DTOBase, IDeviceInfoDTO
     {
         public string DeviceModel
         {

@@ -9,10 +9,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Locations.Core.Business.DataAccess
 {
-    public class TipTypeService : ITipTypeService
+    public class TipTypeService : ServiceBase<TipTypeViewModel>, ITipTypeService
     {
         TipTypesQuery<TipTypeViewModel> query = new TipTypesQuery<TipTypeViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
-
+        public event EventHandler<AlertEventArgs> AlertRaised;
         private IAlertService alertServ;
         private ILoggerService loggerService;
         public TipTypeService()
@@ -32,7 +32,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return model;
 
             }
@@ -46,7 +46,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return model;
             }
         }
@@ -58,7 +58,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new TipTypeViewModel();
             }
         }
@@ -70,7 +70,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new List<TipTypeViewModel>();
             }
            
@@ -85,7 +85,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return false;
             }
 
@@ -100,7 +100,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return false;
             }
         }

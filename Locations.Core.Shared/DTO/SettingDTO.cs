@@ -11,7 +11,7 @@ using SQLite;
 namespace Locations.Core.Shared.DTO
 {
     [Table("Settings")]
-    public class SettingDTO : ISettingDTO, INotifyPropertyChanged
+    public class SettingDTO : DTOBase, ISettingDTO, INotifyPropertyChanged
     {
         
         public event PropertyChangedEventHandler? PropertyChanged;

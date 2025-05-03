@@ -13,9 +13,11 @@ using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Logging.Implementation;
 using Microsoft.Extensions.Logging;
+using static Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService;
+using Locations.Core.Business.DataAccess;
 namespace Location.Photography.Business.DataAccess
 {
-    public class TipService : ITipService<TipViewModel>
+    public class TipService : ServiceBase<TipViewModel>, ITipService<TipViewModel>
     {
 
 
@@ -29,11 +31,19 @@ namespace Location.Photography.Business.DataAccess
         {
             throw new NotImplementedException();
         }
-        public TipService(IAlertService alertServ, ILoggerService loggerService)
+        public TipService(IAlertService alertServ, ILoggerService loggerService) : this()
         {
             this.alertServ = alertServ;
             this.loggerService = loggerService;
-    
+        }
+
+        public TipService() {
+            alertServ.AlertRaised += AlertServ_AlertRaised;
+        }
+
+        private void AlertServ_AlertRaised(object? sender, AlertEventArgs e)
+        {
+            RaiseError(new Exception(e.Message));
         }
 
         public bool Delete(int id)
@@ -45,7 +55,7 @@ namespace Location.Photography.Business.DataAccess
         {
             throw new NotImplementedException();
         }
-
+        public event EventHandler<AlertEventArgs> AlertRaised;
         public TipViewModel Get(int id)
         {
             try
@@ -54,7 +64,7 @@ namespace Location.Photography.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new TipViewModel();
             }
         }

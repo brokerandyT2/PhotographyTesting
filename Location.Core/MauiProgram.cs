@@ -22,14 +22,7 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
 
-        Serilog.Log.Logger = new LoggerConfiguration()
-          .WriteTo.SQLite(Path.Combine(FileSystem.AppDataDirectory, "photography.db3"))         // Log to the console
-#if DEBUG
-          .MinimumLevel.Information() // Set minimum log level to Information
-#else
-            .MinimumLevel.Error()    // Set minimum log level to Warning
-#endif
-          .CreateLogger();
+       
 
         var builder = MauiApp.CreateBuilder();
         builder
@@ -54,7 +47,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ITipsViewmodel, TipsViewModel>();
         builder.Services.AddTransient<IDetailsView, DetailsViewModel>();
         builder.Services.AddSingleton<IAlertService, AlertService>();
-        builder.Services.AddSingleton<ILoggerService, LoggerService>();
+        builder.Services.AddSingleton<ILoggerService, SqliteLoggerService>();
         builder.Services.AddTransient(typeof(Locations.Core.Data.Queries.SettingsQuery<>));
 
 

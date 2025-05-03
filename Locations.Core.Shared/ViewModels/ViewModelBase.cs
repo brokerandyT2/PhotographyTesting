@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Shared.ViewModels
 {
-    public abstract class ViewModelBase : IViewModelBase
+    public abstract class ViewModelBase : IDTOBase
     {
         public abstract event PropertyChangedEventHandler? PropertyChanged;
     }

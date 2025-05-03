@@ -9,22 +9,38 @@ using Locations.Core.Shared.ViewModels;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OpenWeatherAPI;
+using static Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService;
 
 
 namespace Locations.Core.Business.DataAccess
 {
-    public class WeatherService : IWeatherService
+    public class WeatherService : ServiceBase<WeatherViewModel>, IWeatherService
     {
         WeatherQuery<WeatherViewModel> _weatherQuery = new WeatherQuery<WeatherViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
+
         private IAlertService alertServ;
         private ILoggerService loggerService;
         SettingsService _settingsService = new SettingsService();
         private readonly IConnectivity _connectivity;
+        WeatherViewModel _weatherViewModel;
+        
+        //public event EventHandler<AlertEventArgs> AlertRaised;
+        
+        public WeatherService()
+        {
+            _weatherViewModel = new WeatherViewModel();
+            _weatherViewModel.RaiseAlert += _weatherViewModel_RaiseAlert;
 
-        public WeatherService() { }
+        }
+
+        private void _weatherViewModel_RaiseAlert(object? sender, AlertEventArgs e)
+        {
+            RaiseAlert(sender, new AlertEventArgs("Error", e.Message,AlertType.Error));
+        }
+       
         public WeatherService(IAlertService alertServ, ILoggerService loggerService, IConnectivity connectivity) : this(alertServ, loggerService)
         {
-          
+
             _connectivity = connectivity;
         }
         public WeatherService(IAlertService alertServ, ILoggerService loggerService) : this()
@@ -62,12 +78,13 @@ namespace Locations.Core.Business.DataAccess
                 }
                 else
                 {
+
                     return x;
                 }
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+               RaiseError(ex);
                 return new WeatherViewModel();
             }
 
@@ -372,10 +389,13 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new WeatherViewModel();
             }
         }
+
+
+
         public WeatherViewModel Save(WeatherViewModel model, bool returnNew)
         {
             try
@@ -385,7 +405,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new WeatherViewModel();
             }
         }
@@ -397,7 +417,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new WeatherViewModel();
 
             }
@@ -411,7 +431,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return false;
             }
         }
@@ -423,7 +443,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return false;
             }
         }
@@ -432,9 +452,10 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 return _weatherQuery.DeleteItem<WeatherViewModel>(_weatherQuery.GetWeather(latitude, longitude)) == 420 ? false : true;
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return false;
             }
         }

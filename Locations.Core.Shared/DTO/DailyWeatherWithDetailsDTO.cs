@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Shared.DTO
 {
-    public class DailyWeatherWithDetailsDTO:INotifyPropertyChanged
+    public class DailyWeatherWithDetailsDTO : DTOBase, INotifyPropertyChanged
     {
         private WeatherDetailsDTO _details;
         public WeatherDetailsDTO Details { get => _details; set => _details = value; }

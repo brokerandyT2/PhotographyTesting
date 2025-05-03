@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Locations.Core.Shared.DTO
 {
     [Table("Tips")]
-    public class TipDTO : ITipDTO, INotifyPropertyChanged
+    public class TipDTO : DTOBase, ITipDTO, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         public TipDTO() { }

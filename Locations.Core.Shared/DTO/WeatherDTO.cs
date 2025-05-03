@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Locations.Core.Shared.DTO
 {
     [Table("Weather")]
-    public class WeatherDTO : INotifyPropertyChanged, IWeatherDTO
+    public class WeatherDTO : DTOBase, INotifyPropertyChanged, IWeatherDTO
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         #region Private Backing Fields

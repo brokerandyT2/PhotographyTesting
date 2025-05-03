@@ -45,7 +45,7 @@ namespace Location.Photography.Data.Queries
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+               
 
             }
         }
@@ -57,7 +57,6 @@ namespace Location.Photography.Data.Queries
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
 
             }
         }
@@ -69,7 +68,6 @@ namespace Location.Photography.Data.Queries
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
 
             }
         }

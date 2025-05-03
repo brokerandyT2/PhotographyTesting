@@ -1,4 +1,6 @@
-﻿using Locations.Core.Shared.DTO;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.DTO;
 using Locations.Core.Shared.ViewModels.Interface;
 using System;
 using System.Collections.Generic;
@@ -13,15 +15,35 @@ using System.Windows.Input;
 namespace Locations.Core.Shared.ViewModels
 {
 
-    public class LocationViewModel : LocationDTO, ILocationViewModel
+    public partial class LocationViewModel : LocationDTO, ILocationViewModel
     {
-
+        public event EventHandler<AlertEventArgs> AlertRaised;
         public ICommand _takePhotoCommand;
 
         public LocationViewModel() {
             _takePhotoCommand = new Command(TakePhoto);
+            AlertTitle = string.Empty;
+            AlertMessage = string.Empty;
             StartGPS();
+            this.RaiseAlert += LocationViewModel_RaiseAlert;
+            
         }
+
+        private void LocationViewModel_RaiseAlert(object? sender, AlertEventArgs e)
+        {
+            AlertTitle = e.Title;
+            AlertMessage = e.Message;
+
+            AlertRaised?.Invoke(this, new AlertEventArgs(e.Title, e.Message));
+        }
+
+        [ObservableProperty]
+        private string alertTitle;
+
+        [ObservableProperty]
+        private string alertMessage;
+
+
         private async void StartGPS()
         {
             if (!Geolocation.IsListeningForeground)
@@ -54,6 +76,12 @@ namespace Locations.Core.Shared.ViewModels
 
                     sourceStream.CopyToAsync(localFileStream).RunSynchronously();
                      Photo= localFilePath;
+                }
+                else
+                {                     // Handle the case when the user cancels the photo capture
+                    AlertEventArgs args = new AlertEventArgs("Error", "Photo Not Taken");
+                    OnAlertRaised("Error", "Photo Not Taken");
+                    // For example, you can show an alert or log a message
                 }
             }
         }

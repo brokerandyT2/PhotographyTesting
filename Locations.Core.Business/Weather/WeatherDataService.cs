@@ -14,11 +14,12 @@ using Microsoft.Maui.Animations;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Business.DataAccess;
 
 
 namespace Locations.Core.Business.Weather
 {
-    public class WeatherDataService
+    public class WeatherDataService :ServiceBase<WeatherViewModel>
     {
         private readonly HttpClient _httpClient;
         private string endpoint;
@@ -58,7 +59,7 @@ namespace Locations.Core.Business.Weather
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
+                RaiseError(ex);
                 return new WeatherViewModel();
             }
         }
@@ -89,7 +90,7 @@ namespace Locations.Core.Business.Weather
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
+                RaiseError(ex);
                 return new Placemark();
             }
         }
@@ -112,8 +113,7 @@ namespace Locations.Core.Business.Weather
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
-                return default;
+                RaiseError(ex); return default;
             }
         }
 
@@ -148,8 +148,7 @@ namespace Locations.Core.Business.Weather
             catch (Exception ex)
             {
                 //Because this method is static, we need to use a new AlertService
-                AlertService alertServ = new AlertService();
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
+                RaiseError(ex);
                 return default;
             }
             return default;
@@ -163,7 +162,7 @@ namespace Locations.Core.Business.Weather
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
+                RaiseError(ex);
                 return new List<Daily>();
             }
 
@@ -220,7 +219,7 @@ namespace Locations.Core.Business.Weather
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
+                RaiseError(ex);
                 return new WeatherViewModel();
             }
         }

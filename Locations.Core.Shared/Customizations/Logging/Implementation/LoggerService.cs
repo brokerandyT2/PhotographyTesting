@@ -15,6 +15,11 @@ namespace Locations.Core.Shared.Customizations.Logging.Implementation
             _logger = logger;
         }
 
+        public LoggerService()
+        {
+            // Fallback constructor for non-DI scenarios
+           
+        }
         public void LogInformation(string message)
         {
             _logger.LogInformation(message);

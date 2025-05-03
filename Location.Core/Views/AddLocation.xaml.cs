@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Location.Core.Helpers;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
@@ -40,22 +41,28 @@ public partial class AddLocation : ContentPage
     {
         InitializeComponent();
         CloseModal.IsVisible = CloseModal.IsEnabled = false;
-        //permission.Text = ss.GetSettingByName(MagicStrings.SubscriptionType).Value;
-        //subscription.Text = ss.GetSettingByName(MagicStrings.SubscriptionExpiration).Value;
+       var x = (LocationViewModel)BindingContext;
+        x.RaiseAlert += OnRaiseAlert;
     }
-    public AddLocation(ILocationViewModel viewModel)
+
+    private void OnRaiseAlert(object? sender, Locations.Core.Shared.Customizations.Alerts.Implementation.AlertEventArgs e)
+    {
+        alertServ.
+    }
+
+    public AddLocation(ILocationViewModel viewModel) : this()
     {
         InitializeComponent();
         BindingContext = (LocationViewModel)viewModel;
        CloseModal.IsVisible = CloseModal.IsEnabled = false;
     }
-    public AddLocation(int id)
+    public AddLocation(int id) : this()
     {
         InitializeComponent();
         BindingContext = ls.Get(id);
         CloseModal.IsVisible = CloseModal.IsEnabled = true;
     }
-    public AddLocation(int id, bool isEditMode)
+    public AddLocation(int id, bool isEditMode): this(id)
     {
         InitializeComponent();
         CloseModal.IsVisible = isEditMode;
@@ -65,6 +72,7 @@ public partial class AddLocation : ContentPage
 
     private void Save_Pressed(object sender, EventArgs e)
     {
+        
         var x = (LocationViewModel)BindingContext;
         var y = ls.Save(x, true);
         BindingContext = new LocationViewModel();

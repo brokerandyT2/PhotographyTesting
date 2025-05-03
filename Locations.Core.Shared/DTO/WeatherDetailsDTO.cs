@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Shared.DTO
 {
-    public class WeatherDetailsDTO
+    public class WeatherDetailsDTO: DTOBase
     {
         public DateTime GoldenHourMorning { get; set; }
         public DateTime GoldenHourEvening { get; set; }

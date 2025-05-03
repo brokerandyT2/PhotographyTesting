@@ -11,12 +11,15 @@ namespace Locations.Core.Shared.ViewModels
     /// </summary>
     public class Log
     {
-        private int _id;
-
         [PrimaryKey, AutoIncrement]
-        public int ID { get => _id; set => value = _id; }
-        public string Timestamp;
-        public string Level;
-        public string Message;
+        public int Id { get; set; }
+
+        public DateTime Timestamp { get; set; }
+
+        public string Level { get; set; }
+
+        public string Message { get; set; }
+
+        public string Exception { get; set; }
     }
 }

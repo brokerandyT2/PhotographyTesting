@@ -17,10 +17,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Locations.Core.Business.DataAccess
 {
-    public class SettingsService : ISettingService<SettingViewModel>
+    public class SettingsService : ServiceBase<SettingViewModel>, ISettingService<SettingViewModel>
     {
         private SettingsQuery<SettingViewModel> _query = new SettingsQuery<SettingViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
-
+        public event EventHandler<AlertEventArgs> AlertRaised;
         private IAlertService alertServ;
         private ILoggerService loggerService;
         public SettingsService(IAlertService alert, ILoggerService logger) : this()
@@ -44,7 +44,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new SettingViewModel();
             }
         }
@@ -58,9 +58,10 @@ namespace Locations.Core.Business.DataAccess
                 s.Value = true.ToString();
                 _query.Update(s);
                 return true;
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return false;
             }
         }
@@ -72,7 +73,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new SettingViewModel();
             }
 
@@ -86,7 +87,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
             }
         }
         public void DeleteSetting(string key)
@@ -97,10 +98,10 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
             }
 
-            }
+        }
         public SettingViewModel Save(SettingViewModel model)
         {
             try
@@ -108,9 +109,10 @@ namespace Locations.Core.Business.DataAccess
                 model.Timestamp = DateTime.Now;
                 _query.SaveItem(model);
                 return model;
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return model;
             }
         }
@@ -124,18 +126,19 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return model;
             }
-            }
+        }
         public SettingViewModel Get(int id)
         {
             try
             {
                 return _query.GetItem<SettingViewModel>(id);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new SettingViewModel();
             }
         }
@@ -145,12 +148,16 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 return _query.DeleteItem<SettingViewModel>(model) != 420 ? true : false;
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return false;
             }
         }
+
+
+
         public bool Delete(int id)
         {
             try
@@ -160,10 +167,11 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+
+                RaiseError(ex);
                 return false;
             }
-            }
+        }
         public bool Delete(double latitude, double longitude)
         {
             throw new NotImplementedException();
@@ -201,19 +209,20 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex); 
                 return new SettingsViewModel();
             }
-            }
+        }
         public SettingViewModel SaveSettingWithObjectReturn(SettingViewModel s)
         {
             try
             {
                 s.Timestamp = DateTime.Now;
                 return _query.SaveWithIDReturn(s);
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return s;
             }
         }

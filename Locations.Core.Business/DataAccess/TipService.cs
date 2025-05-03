@@ -16,10 +16,9 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Business.DataAccess
 {
-    public class TipService : ITipService
+    public class TipService : ServiceBase<TipViewModel>, ITipService
     {
         TipQuery<TipViewModel> query = new TipQuery<TipViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
-
         private IAlertService alertServ;
         private ILoggerService loggerService;
         public TipService()
@@ -39,7 +38,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return model;
             }
         }
@@ -52,7 +51,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return model;
             }
 
@@ -65,7 +64,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new TipViewModel();
             }
         }
@@ -79,7 +78,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return false;
             }
         }
@@ -93,7 +92,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return false;
             }
         }
@@ -113,7 +112,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new TipDisplayViewModel();
             }
         }
@@ -126,7 +125,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new List<TipTypeViewModel>();
             }
         }
@@ -150,7 +149,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
+                RaiseError(ex);
                 return new TipDisplayViewModel();
             }
 

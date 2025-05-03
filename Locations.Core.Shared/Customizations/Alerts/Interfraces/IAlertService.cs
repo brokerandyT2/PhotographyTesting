@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,11 +10,11 @@ namespace Locations.Core.Shared.Customizations.Alerts.Interfraces
 {
     public interface IAlertService
     {
-        Task ShowAlertAsync(string title, string message, string cancel);
-        Task ShowAlertAsync(string title, string message, string cancel, bool logged);
-        Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel);
-        bool ShowConfirmationAsync(string title, string message, string accept, string cancel, bool isLogged);
-        bool ShowConfirmationAsync(string title, string message, string accept, string cancel, bool isLogged, Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService.AlertType level);
+
+
+        event EventHandler<AlertEventArgs> AlertRaised;
+
+        
     }
 
 }
