@@ -29,7 +29,10 @@ steps:
 - script: |
     dotnet new tool-manifest --force
     dotnet tool install GitVersion.Tool --version 6.3.0
-    dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
+    # Check if GitVersion is installed correctly
+    dotnet tool list
+    # Run GitVersion and capture both standard output and error
+    dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion-error.log
   displayName: 'Install and Run GitVersion'
 
 
@@ -57,27 +60,6 @@ steps:
 
 
 
-# Step 3: Parse GitVersion JSON Output
-- task: PowerShell@2
-  name: SetGitVersionVars
-  displayName: 'Set GitVersion-based Build Number'
-  inputs:
-    targetType: 'inline'
-    script: |
-      $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-      $semVerRaw = $gitVersion.SemVer
-      $semVerParts = $semVerRaw -split '\.'
-      $major = $semVerParts[0]
-      $minor = $semVerParts[1]
-      $buildId = "$(Build.BuildId)"
-      $semVer = "$major.$minor.$buildId"
-      $assemblySemVer = $semVer
-      $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)".Replace('.', '')
-
-      Write-Host "##vso[build.updatebuildnumber]$semVer"
-      Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
-      Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
-      Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
 
 # Step 4: Install .NET MAUI Android Workload
 - script: |
