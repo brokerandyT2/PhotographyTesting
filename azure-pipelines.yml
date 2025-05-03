@@ -8,7 +8,19 @@ trigger:
     exclude:
       - Platforms/**
       - '!Platforms/Android/**'
-
+pr:
+  branches:
+    include:
+      - main
+      - master
+      - release/*
+      - feature/*
+  paths:
+    include:
+      - '**'
+      - Platforms/Android/**
+    exclude:
+      - Platforms/iOS/**
 pool:
   vmImage: 'windows-latest'
 
@@ -112,39 +124,36 @@ steps:
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Upload APK to 'apk' feed
 - task: AzureCLI@2
   displayName: 'Upload APK to Azure Artifacts Feed'
   inputs:
-    azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'
-    scriptType: 'pscore'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
+        azureSubscription: 'Artifacts'
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az artifacts universal publish `
+            --organization "$(System.TeamFoundationCollectionUri)" `
+            --project "$(System.TeamProject)" `
+            --scope project `
+            --feed apk `
+            --name Location.Core `
+            --version $(AppVersion) `
+            --description "APK Package" `
+            --path "$(outputDirectory)"
 
-      az artifacts universal publish `
-        --feed apk `
-        --name location-apk `
-        --version $(SemVer) `
-        --description "Android APK build version $(SemVer)" `
-        --path "$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/" `
-        --org https://dev.azure.com/3squaredcircles
-
-# Upload AAB to 'aab' feed
 - task: AzureCLI@2
   displayName: 'Upload AAB to Azure Artifacts Feed'
   inputs:
-    azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'
-    scriptType: 'pscore'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
-
-      az artifacts universal publish `
-        --feed aab `
-        --name location-aab `
-        --version $(SemVer) `
-        --description "Android AAB build version $(SemVer)" `
-        --path "$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/" `
-        --org https://dev.azure.com/3squaredcircles
-
+        azureSubscription: 'Artifacts'
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az artifacts universal publish `
+            --organization "$(System.TeamFoundationCollectionUri)" `
+            --project "$(System.TeamProject)" `
+            --scope project `
+            --feed aab `
+            --name Location.Core `
+            --version $(AppVersion) `
+            --description "AAB Package" `
+            --path "$(outputDirectory)"
