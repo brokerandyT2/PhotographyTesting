@@ -8,7 +8,19 @@ trigger:
     exclude:
       - Platforms/**
       - '!Platforms/Android/**'
-
+pr:
+  branches:
+    include:
+      - main
+      - master
+      - release/*
+      - feature/*
+  paths:
+    include:
+      - '**'
+      - Platforms/Android/**
+    exclude:
+      - Platforms/iOS/**
 pool:
   vmImage: 'windows-latest'
 
@@ -53,7 +65,7 @@ steps:
       $semVerParts = $baseVersion.TrimStart('v').Split('.')
       $major = $semVerParts[0]
       $minor = $semVerParts[1]
-      $semVer = ".$major.$minor.$buildId"
+      $semVer = "$major.$minor.$buildId"
 
       Write-Host "##vso[build.updatebuildnumber]$semVer"
       Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
@@ -89,88 +101,59 @@ steps:
     choco install openjdk11 -y
   displayName: 'Install JDK 11'
 
-- task: AzureCLI@2
-  inputs:
-      azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Your Service Connection ID
-      scriptType: 'pscore'  # PowerShell Core
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        # Ensure the Azure DevOps extension is installed
-        az extension add --name azure-devops
-        
-        # Set the context for Azure DevOps organization and project (without URL encoding)
-        az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
-        
-        # Check if the feed 'apks' exists
-        $feedExists = az artifacts feed list --org https://dev.azure.com/3squaredcircles --query "[?name=='apks']" -o tsv
-        
-        # If feed does not exist, create it
-        if (-not $feedExists) {
-            Write-Host "Feed 'apks' does not exist. Creating it..."
-            az artifacts feed create --name apks --org https://dev.azure.com/3squaredcircles
-        } else {
-            Write-Host "Feed 'apks' already exists."
-        }
-  displayName: 'Check if Feed Exists and Create if Not'
-
-
-- task: AzureCLI@2
-  inputs:
-      azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Use the Service Connection ID
-      scriptType: 'pscore'  # PowerShell Core (use 'bash' for non-Windows agents)
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        # Set variables
-        $feedName = "aabs"
-        $project = "Photography%20Locations"
-        $org = "https://dev.azure.com/3squaredcircles"
-        
-        # Check if the feed exists
-        $feedExists = az artifacts feed list --project $project --org $org --query "[?name=='$feedName']" -o tsv
-        
-        # If feed does not exist, create it
-        if (-not $feedExists) {
-            Write-Host "Feed '$feedName' does not exist. Creating it..."
-            az artifacts feed create --name $feedName --project $project --org $org
-        } else {
-            Write-Host "Feed '$feedName' already exists."
-        }
-  displayName: 'Check if Feed Exists and Create if Not'
-
-
-# Step 10: Restore NuGet packages
+# Step 8: Restore NuGet packages
 - task: NuGetCommand@2
   displayName: 'Restore NuGet Packages'
   inputs:
     command: 'restore'
     restoreSolution: '**/*.sln'
 
-# Step 11: Build APK
+# Step 9: Build APK
 - task: MSBuild@1
   displayName: 'Build APK'
   inputs:
-    solution: '**/*.sln'
-    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
+    solution: 'Location.Core\Location.Core.csproj'  # Specify the project file
+    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Step 12: Build AAB
+# Step 10: Build AAB
 - task: MSBuild@1
   displayName: 'Build AAB'
   inputs:
-    solution: '**/*.sln'
-    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
+    solution: 'Location.Core\Location.Core.csproj'  # Specify the project file
+    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Step 13: Publish APK to Azure Artifacts
-- task: PublishPipelineArtifact@1
-  displayName: 'Publish APK to Azure Artifacts'
+- task: AzureCLI@2
+  displayName: 'Upload APK to Azure Artifacts Feed'
   inputs:
-    targetPath: '$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.apk'
-    artifact: 'APK'
+        azureSubscription: 'Artifacts'
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az artifacts universal publish `
+            --organization "$(System.TeamFoundationCollectionUri)" `
+            --project "$(System.TeamProject)" `
+            --scope project `
+            --feed apk `
+            --name Location.Core `
+            --version $(semVer) `
+            --description "APK Package" `
+            --path "$(outputDirectory)"
 
-# Step 14: Publish AAB to Azure Artifacts
-- task: PublishPipelineArtifact@1
-  displayName: 'Publish AAB to Azure Artifacts'
+- task: AzureCLI@2
+  displayName: 'Upload AAB to Azure Artifacts Feed'
   inputs:
-    targetPath: '$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.aab'
-    artifact: 'AAB'
+        azureSubscription: 'Artifacts'
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az artifacts universal publish `
+            --organization "$(System.TeamFoundationCollectionUri)" `
+            --project "$(System.TeamProject)" `
+            --scope project `
+            --feed aab `
+            --name Location.Core `
+            --version $(semVer) `
+            --description "AAB Package" `
+            --path "$(outputDirectory)"
