@@ -91,7 +91,6 @@ steps:
 
 # Step 8: Ensure APK Feed Exists
 - powershell: |
-    $feed = "apk"
     $organizationUrl = "https://dev.azure.com/3squaredcircles"
     $personalAccessToken = "$(System.AccessToken)"
     $headers = @{
@@ -99,47 +98,46 @@ steps:
         "Content-Type" = "application/json"
     }
 
-    $url = "${organizationUrl}/_apis/packaging/feeds/$feed?api-version=6.0-preview.1"
+    $url = "${organizationUrl}/_apis/packaging/feeds/apks?api-version=6.0-preview.1"
     $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
     if (-not $response) {
-        Write-Host "Feed '$feed' does not exist. Creating it..."
+        Write-Host "Feed 'apks' does not exist. Creating it..."
         $createFeedUrl = "${organizationUrl}/_apis/packaging/feeds?api-version=6.0-preview.1"
         $body = @{
-            name = $feed
+            name = 'apks'
             capabilities = @{
                 permissions = @()
             }
         } | ConvertTo-Json -Depth 10
         Invoke-RestMethod -Uri $createFeedUrl -Headers $headers -Method Post -Body $body
-        Write-Host "Feed '$feed' created successfully."
+        Write-Host "Feed 'apks' created successfully."
     } else {
-        Write-Host "Feed '$feed' already exists."
+        Write-Host "Feed 'apks' already exists."
     }
   displayName: 'Ensure APK Feed Exists'
   env:
     System.AccessToken: $(System.AccessToken)
 
 
+
 # Step 9: Ensure AAB Feed Exists
 - powershell: |
-    $feed = "AABs"
     $organizationUrl = "https://dev.azure.com/3squaredcircles"
-    $projectName = "Photography Locations"
     $personalAccessToken = "$(System.AccessToken)"
     $headers = @{
         Authorization = "Bearer $personalAccessToken"
         "Content-Type" = "application/json"
     }
 
-    $url = "https://dev.azure.com/3squaredcircles/_apis/packaging/feeds/AABs?api-version=6.0-preview.1"
+    $url = "${organizationUrl}/_apis/packaging/feeds/aabs?api-version=6.0-preview.1"
     $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
     if (-not $response) {
-        Write-Host "Feed 'AABs' does not exist. Creating it..."
-        $createFeedUrl = "https://dev.azure.com/3squaredcircles/_apis/packaging/feeds?api-version=6.0-preview.1"
+        Write-Host "Feed 'aabs' does not exist. Creating it..."
+        $createFeedUrl = "${organizationUrl}/_apis/packaging/feeds?api-version=6.0-preview.1"
         $body = @{
-            name = 'AABs'
+            name = 'aabs'
             capabilities = @{
                 permissions = @()
             }
@@ -152,6 +150,7 @@ steps:
   displayName: 'Ensure AAB Feed Exists'
   env:
     System.AccessToken: $(System.AccessToken)
+
 
 # Step 10: Restore NuGet packages
 - task: NuGetCommand@2
