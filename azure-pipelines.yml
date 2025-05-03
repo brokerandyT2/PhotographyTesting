@@ -47,24 +47,28 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
+      # Read the GitVersion output
       $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-      $semVer = $gitVersion.SemVer
-      $assemblySemVer = $gitVersion.AssemblySemVer
-      $buildNumber = "$(Build.BuildNumber)"
-      $buildId = "$(Build.BuildId)"
-      $androidVersionCode = "$buildNumber$buildId".Replace('.', '')
+
+      # Extract the base version and Build ID
+      $baseVersion = $gitVersion.SemVer.Split('-')[0] # Extracts v0.8.1
+      $buildId = "$(Build.BuildId)".Replace('.','') # Build ID from pipeline
+
+      # Extract major and minor from the base version (e.g., v0.8.1 becomes 0 and 8)
+      $semVerParts = $baseVersion.TrimStart('v').Split('.')
+      $major = $semVerParts[0] # 0
+      $minor = $semVerParts[1] # 8
+
+      # Create the final version with Build ID replacing the patch version
+      $semVer = ".$major.$minor.$buildId"
       
+      # Set the final version as the build number and output it
       Write-Host "##vso[build.updatebuildnumber]$semVer"
       Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
-      Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
-      Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$androidVersionCode"
+      Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$buildId"
 
       Write-Host "SemVer=$semVer"
-      Write-Host "AssemblySemVer = $assemblySemVer"
-      Write-Host "AndroidVersionCode = $androidVersionCode"
-
-
-
+      Write-Host "BuildId=$buildId"
 
 # Step 4: Install .NET MAUI Android Workload
 - script: |
@@ -75,13 +79,9 @@ steps:
 - script: |
     echo "Installing Android SDK..."
     choco install android-sdk -y
-    # Set ANDROID_HOME environment variable
     $env:ANDROID_HOME="C:\Android\android-sdk"
-    # Add tools and platform-tools to PATH
     $env:PATH += ";$env:ANDROID_HOME\tools;$env:ANDROID_HOME\platform-tools"
-    # Verify sdkmanager is available
     sdkmanager --version
-    # Install required platforms and build tools
     sdkmanager "platforms;android-$(AndroidSdkVersion)" "build-tools;$(AndroidSdkVersion)"
   displayName: 'Install Android SDK'
 
