@@ -112,22 +112,39 @@ steps:
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Step 11: Publish APK to Azure Artifacts
+# Upload APK to 'apk' feed
 - task: AzureCLI@2
+  displayName: 'Upload APK to Azure Artifacts Feed'
   inputs:
-      azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Your Service Connection ID
-      scriptType: 'pscore'  # PowerShell Core
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az artifacts universal publish --feed apk --name PhotographyLocationsAPK --path $(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.apk --version $(AssemblyVersion) --organization https://dev.azure.com/3squaredcircles
-  displayName: 'Publish APK to Azure Artifacts'
+    azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'
+    scriptType: 'pscore'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
 
-# Step 12: Publish AAB to Azure Artifacts
+      az artifacts universal publish `
+        --feed apk `
+        --name location-apk `
+        --version $(SemVer) `
+        --description "Android APK build version $(SemVer)" `
+        --path "$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/" `
+        --org https://dev.azure.com/3squaredcircles
+
+# Upload AAB to 'aab' feed
 - task: AzureCLI@2
+  displayName: 'Upload AAB to Azure Artifacts Feed'
   inputs:
-      azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Your Service Connection ID
-      scriptType: 'pscore'  # PowerShell Core
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az artifacts universal publish --feed aab --name PhotographyLocationsAAB --path $(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.aab --version $(AssemblyVersion) --organization https://dev.azure.com/3squaredcircles
-  displayName: 'Publish AAB to Azure Artifacts'
+    azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'
+    scriptType: 'pscore'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
+
+      az artifacts universal publish `
+        --feed aab `
+        --name location-aab `
+        --version $(SemVer) `
+        --description "Android AAB build version $(SemVer)" `
+        --path "$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/" `
+        --org https://dev.azure.com/3squaredcircles
+
