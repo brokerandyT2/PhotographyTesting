@@ -137,13 +137,7 @@ steps:
     scriptLocation: 'inlineScript'
     inlineScript: |
       echo $(MY_PAT) | az devops login
-      az artifacts universal publish \
-        --organization https://dev.azure.com/3squaredcircles \
-        --feed apk \
-        --name PixMap \
-        --version $(AssemblyVersion) \
-        --description "APK build for PixMap" \
-        --path "$(Build.ArtifactStagingDirectory)\apk"
+      az artifacts universal publish --organization https://dev.azure.com/3squaredcircles --feed apk --name PixMap --version $(AssemblyVersion) --description "APK build for PixMap" --path "$(Build.ArtifactStagingDirectory)\apk"
 
 # Step 12: Upload AAB to Azure Artifacts Feed
 - task: AzureCLI@2
@@ -154,10 +148,4 @@ steps:
     scriptLocation: 'inlineScript'
     inlineScript: |
       echo $(MY_PAT) | az devops login
-      az artifacts universal publish \
-        --organization https://dev.azure.com/3squaredcircles \
-        --feed aab \
-        --name PixMap \
-        --version $(AssemblyVersion) \
-        --description "AAB build for PixMap" \
-        --path "$(Build.ArtifactStagingDirectory)\aab"
+      az artifacts universal publish --organization https://dev.azure.com/3squaredcircles --feed aab --name PixMap --version $(AssemblyVersion) --description "AAB build for PixMap" --path "$(Build.ArtifactStagingDirectory)\aab"
