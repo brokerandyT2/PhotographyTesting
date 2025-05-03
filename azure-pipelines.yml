@@ -9,6 +9,7 @@ trigger:
       - Platforms/**
       - '!Platforms/Android/**'
 
+
 pool:
   vmImage: 'windows-latest'
 
@@ -19,6 +20,10 @@ variables:
 
 steps:
 
+# Step 1: Checkout the full repository
+- checkout: self
+  clean: true
+  fetchDepth: 0
 # Step 1: Install .NET SDK
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
