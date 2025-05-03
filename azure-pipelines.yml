@@ -4,10 +4,10 @@ trigger:
       - '*'
   paths:
     include:
-      - '**' # Include everything
+      - '**'
     exclude:
-      - Platforms/** # Exclude everything under Platforms
-      - '!Platforms/Android/**' # Re-include only Platforms/Android
+      - Platforms/**
+      - '!Platforms/Android/**'
 
 pool:
   vmImage: 'windows-latest'
@@ -15,9 +15,10 @@ pool:
 variables:
   BuildConfiguration: 'Release'
   AndroidSdkVersion: '34.0'
-  SemanticVersion: '1.0' # Default version, will be overridden by git tag if available
+  SemanticVersion: '1.0'
 
 steps:
+
 # Step 1: Install .NET SDK
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
@@ -29,7 +30,15 @@ steps:
 - script: |
     dotnet new tool-manifest --force
     dotnet tool install GitVersion.Tool --version 6.3.0
+
+    echo "Running GitVersion..."
     dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
+    if %ERRORLEVEL% NEQ 0 (
+      echo GitVersion failed
+      type gitversion.json
+      exit /b 1
+    )
+    echo GitVersion succeeded
   displayName: 'Install GitVersion.Tool and Generate Version Information'
 
 # Step 3: Parse GitVersion JSON Output
@@ -37,23 +46,22 @@ steps:
   name: SetGitVersionVars
   displayName: 'Set GitVersion-based Build Number'
   inputs:
-            targetType: 'inline'
-            script: |
-              $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-              $semVerRaw = $gitVersion.SemVer
-              $semVerParts = $semVerRaw -split '\.'
-              $major = $semVerParts[0]
-              $minor = $semVerParts[1]
-              $buildId = "$(Build.BuildId)"
-              $semVer = "$major.$minor.$buildId"
-              $assemblySemVer = $semVer
-              $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)".Replace('.', '')
+    targetType: 'inline'
+    script: |
+      $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+      $semVerRaw = $gitVersion.SemVer
+      $semVerParts = $semVerRaw -split '\.'
+      $major = $semVerParts[0]
+      $minor = $semVerParts[1]
+      $buildId = "$(Build.BuildId)"
+      $semVer = "$major.$minor.$buildId"
+      $assemblySemVer = $semVer
+      $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)".Replace('.', '')
 
-              Write-Host "##vso[build.updatebuildnumber]$semVer"
-              Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
-              Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
-              Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
-
+      Write-Host "##vso[build.updatebuildnumber]$semVer"
+      Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
+      Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
+      Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
 
 # Step 4: Install .NET MAUI Android Workload
 - script: |
@@ -140,4 +148,3 @@ steps:
   inputs:
     targetPath: '$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.aab'
     artifact: 'AAB'
-
