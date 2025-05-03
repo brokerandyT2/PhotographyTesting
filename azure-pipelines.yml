@@ -98,7 +98,7 @@ steps:
         "Content-Type" = "application/json"
     }
 
-    $url = "${organizationUrl}/_apis/packaging/feeds/apks?api-version=6.0-preview.1"
+    $url = "${organizationUrl}/_apis/packaging/feeds/apks/packages?api-version=6.0-preview.1"
     $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
     if (-not $response) {
@@ -118,6 +118,7 @@ steps:
   displayName: 'Ensure APK Feed Exists'
   env:
     System.AccessToken: $(System.AccessToken)
+
 
 
 
