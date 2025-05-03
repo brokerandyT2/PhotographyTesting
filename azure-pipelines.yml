@@ -92,31 +92,21 @@ steps:
 # Step 8: Ensure APK Feed Exists
 - task: AzureCLI@2
   inputs:
-      azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Use the Service Connection ID
-      scriptType: 'pscore'  # PowerShell Core (use 'bash' for non-Windows agents)
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        # Set variables
-        $feedName = "apks"
-        $project = "Photography%20Locations"
-        $org = "https://dev.azure.com/3squaredcircles"
-        
-        # Check if the feed exists
-        $feedExists = az artifacts feed list --project $project --org $org --query "[?name=='$feedName']" -o tsv
-        
-        # If feed does not exist, create it
+    azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Your Service Connection ID
+    scriptType: 'pscore'  # PowerShell Core
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+        az extension add --name azure-devops
+        az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project=Photography%20Locations
+        $feedExists = az artifacts feed list --org https://dev.azure.com/3squaredcircles --query "[?name=='apks']" -o tsv
         if (-not $feedExists) {
-            Write-Host "Feed '$feedName' does not exist. Creating it..."
-            az artifacts feed create --name $feedName --project $project --org $org
+            Write-Host "Feed 'apks' does not exist. Creating it..."
+            az artifacts feed create --name apks --org https://dev.azure.com/3squaredcircles
         } else {
-            Write-Host "Feed '$feedName' already exists."
+            Write-Host "Feed 'apks' already exists."
         }
   displayName: 'Check if Feed Exists and Create if Not'
 
-
-
-
-# Step 9: Ensure AAB Feed Exists
 - task: AzureCLI@2
   inputs:
       azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Use the Service Connection ID
