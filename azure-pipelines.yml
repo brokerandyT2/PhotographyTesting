@@ -23,7 +23,7 @@ steps:
   displayName: 'Install .NET SDK'
   inputs:
     packageType: 'sdk'
-    version: '9.x'
+    version: '9.0'
 
 # Step 2: Install GitVersion.Tool and Generate Version Information
 - script: |
@@ -33,12 +33,27 @@ steps:
   displayName: 'Install GitVersion.Tool and Generate Version Information'
 
 # Step 3: Parse GitVersion JSON Output
-- powershell: |
-    $gitVersion = Get-Content -Raw -Path "gitversion.json" | ConvertFrom-Json
-    $cleanBuildId = "$(Build.BuildId)" -replace '\.', ''
-    Write-Host "##vso[task.setvariable variable=SemanticVersion]$($gitVersion.FullSemVer)"
-    Write-Host "##vso[task.setvariable variable=AssemblyVersion]$($gitVersion.MajorMinorPatch)$cleanBuildId"
-  displayName: 'Parse GitVersion JSON Output'
+- task: PowerShell@2
+  name: SetGitVersionVars
+  displayName: 'Set GitVersion-based Build Number'
+  inputs:
+            targetType: 'inline'
+            script: |
+              $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+              $semVerRaw = $gitVersion.SemVer
+              $semVerParts = $semVerRaw -split '\.'
+              $major = $semVerParts[0]
+              $minor = $semVerParts[1]
+              $buildId = "$(Build.BuildId)"
+              $semVer = "$major.$minor.$buildId"
+              $assemblySemVer = $semVer
+              $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)".Replace('.', '')
+
+              Write-Host "##vso[build.updatebuildnumber]$semVer"
+              Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
+              Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
+              Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
+
 
 # Step 4: Install .NET MAUI Android Workload
 - script: |
