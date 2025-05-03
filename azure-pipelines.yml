@@ -1,256 +1,166 @@
-variables:
-  buildConfiguration: 'Release'
-  outputDir: '$(Build.ArtifactStagingDirectory)/drop'
-  androidSdkVersion: '35'
-  androidHome: '$(Agent.ToolsDirectory)/android-sdk'
-  javaHome: 'C:\Java\OpenJDK11'
-
 trigger:
   branches:
     include:
-      - main
-      - master
-      - feature/*
-      - release/*
+      - '*'
   paths:
-    exclude:
-      - Location.Core/Platforms/iOS/*
-
-pr:
-  branches:
     include:
-      - main
-      - master
-      - feature/*
-      - release/*
-  paths:
+      - '**'
     exclude:
-      - Location.Core/Platforms/iOS/*
+      - Platforms/**
+      - '!Platforms/Android/**'
 
 pool:
   vmImage: 'windows-latest'
 
-stages:
+variables:
+  BuildConfiguration: 'Release'
+  AndroidSdkVersion: '34.0'
+  SemanticVersion: '1.0'
 
-# Stage 1 - VERSIONING
-- stage: Versioning
-  jobs:
-    - job: GitVersion
-      steps:
-        - checkout: self
-          fetchDepth: 0
+steps:
 
-        - script: |
-            dotnet new tool-manifest --force
-            dotnet tool install GitVersion.Tool --version 6.3.0
-            dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
-          displayName: 'Install and Run GitVersion'
+# Step 1: Install .NET SDK
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '9.x'
 
-        - task: PowerShell@2
-          name: SetGitVersionVars
-          displayName: 'Set GitVersion-based Build Number'
-          inputs:
-            targetType: 'inline'
-            script: |
-              $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-              $semVerRaw = $gitVersion.SemVer
-              $semVerParts = $semVerRaw -split '\.'
-              $major = $semVerParts[0]
-              $minor = $semVerParts[1]
-              $buildId = "$(Build.BuildId)"
-              $semVer = "$major.$minor.$buildId"
-              $assemblySemVer = $semVer
-              $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)".Replace('.', '')
-
-              Write-Host "##vso[build.updatebuildnumber]$semVer"
-              Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
-              Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
-              Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
+- script: |
+    dotnet new tool-manifest --force
+    dotnet tool install GitVersion.Tool --version 6.3.0
+    dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
+  displayName: 'Install and Run GitVersion'
 
 
-# Stage 2 - SETUP
-- stage: Setup
-  dependsOn: Versioning
-  variables:
-    SemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.SemVer'] ]
-    AssemblySemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AssemblySemVer'] ]
-    AndroidVersionCode: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AndroidVersionCode'] ]
-  jobs:
-    - job: EnvironmentSetup
-      steps:
-        - checkout: self
-        - task: PowerShell@2
-          displayName: 'Validate Semver'
-          inputs:
-            targetType: 'inline'
-            script: |
-              Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
-              Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
-              Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
-        - task: PowerShell@2
-          displayName: 'Show GitVersion Variables'
-          inputs:
-            targetType: 'inline'
-            script: |
-              Write-Host "SemVer=$(SemVer)"
-              Write-Host "AssemblySemVer=$(AssemblySemVer)"
-              Write-Host "AndroidVersionCode=$(AndroidVersionCode)"
-        - task: UseDotNet@2
-          displayName: 'Install .NET SDK 9.x'
-          inputs:
-            version: '9.x'
-            includePreviewVersions: true
+# Step 2b: Run GitVersion and generate JSON output
+- task: PowerShell@2
+  displayName: 'Set GitVersion-based Build Number'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+      $semVer = $gitVersion.SemVer
+      $assemblySemVer = $gitVersion.AssemblySemVer
+      $buildNumber = "$(Build.BuildNumber)"
+      $buildId = "$(Build.BuildId)"
+      $androidVersionCode = "$buildNumber$buildId".Replace('.', '')
+      
+      Write-Host "##vso[build.updatebuildnumber]$semVer"
+      Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
+      Write-Host "##vso[task.setvariable variable=AssemblySemVer]$assemblySemVer"
+      Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$androidVersionCode"
 
-        - task: PowerShell@2
-          displayName: 'Install OpenJDK 11'
-          inputs:
-            targetType: 'inline'
-            script: |
-              $jdkUrl = "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.21+9/OpenJDK11U-jdk_x64_windows_hotspot_11.0.21_9.msi"
-              $installerPath = "$env:TEMP\openjdk11.msi"
-              Invoke-WebRequest -Uri $jdkUrl -OutFile $installerPath
-              Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installerPath`" INSTALLDIR=`"$(javaHome)`" /quiet /qn /norestart"
-              Write-Host "##vso[task.setvariable variable=JAVA_HOME]$(javaHome)"
+      Write-Host "SemVer=$semVer"
+      Write-Host "AssemblySemVer = $assemblySemVer"
+      Write-Host "AndroidVersionCode = $androidVersionCode"
 
-        - task: PowerShell@2
-          displayName: 'Install Android SDK and Accept Licenses'
-          inputs:
-            targetType: 'inline'
-            script: |
-              $sdkRoot = "$(androidHome)"
-              $toolsUrl = "https://dl.google.com/android/repository/commandlinetools-win-9477386_latest.zip"
-              $zipPath = "$sdkRoot\cmdline-tools.zip"
-              $extractTemp = "$sdkRoot\temp"
-              $finalToolsDir = "$sdkRoot\cmdline-tools\latest"
 
-              New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
-              Invoke-WebRequest -Uri $toolsUrl -OutFile $zipPath
-              Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
-              New-Item -ItemType Directory -Force -Path $finalToolsDir | Out-Null
-              Copy-Item "$extractTemp\cmdline-tools\*" -Destination $finalToolsDir -Recurse -Force
-              Remove-Item $extractTemp -Recurse -Force
-              Remove-Item $zipPath -Force
 
-              Write-Host "##vso[task.setvariable variable=ANDROID_HOME]$sdkRoot"
-              Write-Host "##vso[task.setvariable variable=PATH]$sdkRoot\platform-tools;$sdkRoot\cmdline-tools\latest\bin;$env:PATH"
+# Step 3: Parse GitVersion JSON Output
+- task: PowerShell@2
+  name: SetGitVersionVars
+  displayName: 'Set GitVersion-based Build Number'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+      $semVerRaw = $gitVersion.SemVer
+      $semVerParts = $semVerRaw -split '\.'
+      $major = $semVerParts[0]
+      $minor = $semVerParts[1]
+      $buildId = "$(Build.BuildId)"
+      $semVer = "$major.$minor.$buildId"
+      $assemblySemVer = $semVer
+      $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)".Replace('.', '')
 
-              & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --licenses --sdk_root="$sdkRoot"
-              & "$sdkRoot\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root="$sdkRoot" "platform-tools" "platforms;android-$(androidSdkVersion)" "build-tools;34.0.0" "emulator"
-          env:
-            ANDROID_HOME: $(ANDROID_HOME)
-            JAVA_HOME: $(JAVA_HOME)
-            PATH: $(PATH)
+      Write-Host "##vso[build.updatebuildnumber]$semVer"
+      Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
+      Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
+      Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
 
-        - task: DotNetCoreCLI@2
-          displayName: 'Restore MAUI Workloads'
-          inputs:
-            command: 'custom'
-            custom: 'workload'
-            arguments: 'restore'
+# Step 4: Install .NET MAUI Android Workload
+- script: |
+    dotnet workload install maui-android
+  displayName: 'Install .NET MAUI Android Workload'
 
-        - task: DotNetCoreCLI@2
-          displayName: 'Install MAUI Workloads'
-          inputs:
-            command: 'custom'
-            custom: 'workload'
-            arguments: 'install maui maui-android'
+# Step 5: Install Android SDK
+- script: |
+    echo "Installing Android SDK..."
+    choco install android-sdk -y
+    sdkmanager "platforms;android-$(AndroidSdkVersion)" "build-tools;$(AndroidSdkVersion)"
+  displayName: 'Install Android SDK'
 
-# Stage 3 - BUILD
-- stage: Build
-  dependsOn: 
-    - Setup
-    - Versioning
-  jobs:
-    - job: BuildApkAndAab
-      variables:
-        SemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.SemVer'] ]
-        AssemblySemVer: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AssemblySemVer'] ]
-        AndroidVersionCode: $[ dependencies.Versioning.outputs['GitVersion.SetGitVersionVars.AndroidVersionCode'] ]
-      steps:
-        - checkout: self
+# Step 6: Install JDK
+- script: |
+    choco install openjdk11 -y
+  displayName: 'Install JDK 11'
 
-        - task: PowerShell@2
-          displayName: 'Show GitVersion Variables'
-          inputs:
-            targetType: 'inline'
-            script: |
-              Write-Host "SemVer=$(SemVer)"
-              Write-Host "AssemblySemVer=$(AssemblySemVer)"
-              Write-Host "AndroidVersionCode=$(AndroidVersionCode)"
+# Step 7: Create Azure Artifacts Feeds if they do not exist
+- powershell: |
+    $feeds = "APK,AAB".Split(',')
+    $personalAccessToken = "$(System.AccessToken)"
+    $headers = @{
+        Authorization = "Bearer $personalAccessToken"
+        "Content-Type" = "application/json"
+    }
 
-        - task: DotNetCoreCLI@2
-          displayName: 'Restore Solution'
-          inputs:
-            command: 'restore'
-            projects: 'Photography.sln'
+    foreach ($feed in $feeds) {
+        $url = "$(OrganizationUrl)/$(ProjectName)/_apis/packaging/feeds/$feed?api-version=6.0-preview.1"
+        $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
-        - task: MSBuild@1
-          displayName: 'Build APK'
-          inputs:
-            solution: 'Location.Core/Location.Core.csproj'
-            msbuildArchitecture: 'x64'
-            configuration: '$(buildConfiguration)'
-            platform: 'Any CPU'
-            msbuildArguments: >
-              /t:Build
-              /p:TargetFramework=net9.0-android
-              /p:OutputPath=$(outputDir)-apk
-              /p:Version=$(SemVer)
-              /p:AssemblyVersion=$(AssemblySemVer)
-              /p:FileVersion=$(AssemblySemVer)
-              /p:InformationalVersion=$(SemVer)
-              /p:AndroidVersionCode=$(AndroidVersionCode)
-              /p:NuGetVersion=$(SemVer)  # Added NuGetVersion
+        if (-not $response) {
+            Write-Host "Feed '$feed' does not exist. Creating it..."
+            $createFeedUrl = "$(OrganizationUrl)/$(ProjectName)/_apis/packaging/feeds?api-version=6.0-preview.1"
+            $body = @{
+                name = $feed
+                capabilities = @{
+                    permissions = @()
+                }
+            } | ConvertTo-Json -Depth 10
+            Invoke-RestMethod -Uri $createFeedUrl -Headers $headers -Method Post -Body $body
+            Write-Host "Feed '$feed' created successfully."
+        } else {
+            Write-Host "Feed '$feed' already exists."
+        }
+    }
+  displayName: 'Ensure Azure Artifacts Feeds Exist'
+  env:
+    System.AccessToken: $(System.AccessToken)
 
-        - task: MSBuild@1
-          displayName: 'Build AAB'
-          inputs:
-            solution: 'Location.Core/Location.Core.csproj'
-            msbuildArchitecture: 'x64'
-            configuration: '$(buildConfiguration)'
-            platform: 'Any CPU'
-            msbuildArguments: >
-              /t:Build
-              /p:TargetFramework=net9.0-android
-              /p:OutputPath=$(outputDir)-aab
-              /p:AndroidPackageFormat=aab
-              /p:Version=$(SemVer)
-              /p:AssemblyVersion=$(AssemblySemVer)
-              /p:FileVersion=$(AssemblySemVer)
-              /p:InformationalVersion=$(SemVer)
-              /p:AndroidVersionCode=$(AndroidVersionCode)
-              /p:NuGetVersion=$(SemVer)  # Added NuGetVersion
+# Step 8: Restore NuGet packages
+- task: NuGetCommand@2
+  displayName: 'Restore NuGet Packages'
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
 
-# Stage 4 - PUBLISH
-- stage: Publish
-  dependsOn: 
-    - Setup
-    - Versioning
-    - Build
-  condition: succeeded()
-  variables:
-    SemVer: $[ stageDependencies.Versioning.GitVersion.outputs['SetGitVersionVars.SemVer'] ]
-  jobs:
-    - job: PublishArtifacts
-      steps:
-        - checkout: self
+# Step 9: Build APK
+- task: MSBuild@1
+  displayName: 'Build APK'
+  inputs:
+    solution: '**/*.sln'
+    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
+    configuration: '$(BuildConfiguration)'
 
-        - script: |
-            echo "Pushing APK to Azure Artifacts Feed (apks)..."
-            az artifacts universal publish \
-              --organization https://dev.azure.com/$(organization) \
-              --feed $(apksFeed) \
-              --package-name location-core-apk \
-              --package-version $(SemVer) \
-              --path "$(outputDir)-apk"
-          displayName: 'Push APK to apks Feed'
+# Step 10: Build AAB
+- task: MSBuild@1
+  displayName: 'Build AAB'
+  inputs:
+    solution: '**/*.sln'
+    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
+    configuration: '$(BuildConfiguration)'
 
-        - script: |
-            echo "Pushing AAB to Azure Artifacts Feed (aabs)..."
-            az artifacts universal publish \
-              --organization https://dev.azure.com/$(organization) \
-              --feed $(aabsFeed) \
-              --package-name location-core-aab \
-              --package-version $(SemVer) \
-              --path "$(outputDir)-aab"
-          displayName: 'Push AAB to aabs Feed'
+# Step 11: Publish APK to Azure Artifacts
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish APK to Azure Artifacts'
+  inputs:
+    targetPath: '$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.apk'
+    artifact: 'APK'
+
+# Step 12: Publish AAB to Azure Artifacts
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish AAB to Azure Artifacts'
+  inputs:
+    targetPath: '$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.aab'
+    artifact: 'AAB'
