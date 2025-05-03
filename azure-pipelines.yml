@@ -91,7 +91,7 @@ steps:
 
 # Step 8: Ensure APK Feed Exists
 - powershell: |
-    $feed = "APK"
+    $feed = "APKs"
     $organizationUrl = "https://dev.azure.com/3squaredcircles"
     $projectName = "Photography Locations"
     $personalAccessToken = "$(System.AccessToken)"
@@ -100,22 +100,22 @@ steps:
         "Content-Type" = "application/json"
     }
 
-    $url = "${organizationUrl}/${projectName}/_apis/packaging/feeds/$feed?api-version=6.0-preview.1"
+    $url = "https://dev.azure.com/3squaredcircles/Photography%20Locations/_apis/packaging/feeds/APKs?api-version=6.0-preview.1"
     $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
     if (-not $response) {
-        Write-Host "Feed '$feed' does not exist. Creating it..."
-        $createFeedUrl = "${organizationUrl}/${projectName}/_apis/packaging/feeds?api-version=6.0-preview.1"
+        Write-Host "Feed 'APKs' does not exist. Creating it..."
+        $createFeedUrl = "https://dev.azure.com/3squaredcircles/Photography%20Locations/_apis/packaging/feeds?api-version=6.0-preview.1"
         $body = @{
-            name = $feed
+            name = 'APKs'
             capabilities = @{
                 permissions = @()
             }
         } | ConvertTo-Json -Depth 10
         Invoke-RestMethod -Uri $createFeedUrl -Headers $headers -Method Post -Body $body
-        Write-Host "Feed '$feed' created successfully."
+        Write-Host "Feed 'apks' created successfully."
     } else {
-        Write-Host "Feed '$feed' already exists."
+        Write-Host "Feed 'apks' already exists."
     }
   displayName: 'Ensure APK Feed Exists'
   env:
@@ -123,7 +123,7 @@ steps:
 
 # Step 9: Ensure AAB Feed Exists
 - powershell: |
-    $feed = "AAB"
+    $feed = "AABs"
     $organizationUrl = "https://dev.azure.com/3squaredcircles"
     $projectName = "Photography Locations"
     $personalAccessToken = "$(System.AccessToken)"
@@ -132,22 +132,22 @@ steps:
         "Content-Type" = "application/json"
     }
 
-    $url = "${organizationUrl}/${projectName}/_apis/packaging/feeds/$feed?api-version=6.0-preview.1"
+    $url = "https://dev.azure.com/3squaredcircles/Photography%20Locations/_apis/packaging/feeds/AABs?api-version=6.0-preview.1"
     $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
     if (-not $response) {
-        Write-Host "Feed '$feed' does not exist. Creating it..."
-        $createFeedUrl = "${organizationUrl}/${projectName}/_apis/packaging/feeds?api-version=6.0-preview.1"
+        Write-Host "Feed 'AABs' does not exist. Creating it..."
+        $createFeedUrl = "https://dev.azure.com/3squaredcircles/Photography%20Locations/_apis/packaging/feeds?api-version=6.0-preview.1"
         $body = @{
-            name = $feed
+            name = 'AABs'
             capabilities = @{
                 permissions = @()
             }
         } | ConvertTo-Json -Depth 10
         Invoke-RestMethod -Uri $createFeedUrl -Headers $headers -Method Post -Body $body
-        Write-Host "Feed '$feed' created successfully."
+        Write-Host "Feed 'aabs' created successfully."
     } else {
-        Write-Host "Feed '$feed' already exists."
+        Write-Host "Feed 'aabs' already exists."
     }
   displayName: 'Ensure AAB Feed Exists'
   env:
