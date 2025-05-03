@@ -99,7 +99,7 @@ steps:
         Authorization = "Bearer $personalAccessToken"
         "Content-Type" = "application/json"
     }
-    Write-Host 'PAT $System.AccessToken'
+    Write-Host 'PAT $(System.AccessToken)'
     $url = "https://dev.azure.com/3squaredcircles/Photography%20Locations/_apis/packaging/feeds/APKs?api-version=6.0-preview.1"
     $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
