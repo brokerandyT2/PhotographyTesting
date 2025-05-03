@@ -28,18 +28,11 @@ steps:
 
 # Step 2: Install GitVersion.Tool and Generate Version Information
 - script: |
-    dotnet new tool-manifest --force
-    dotnet tool install GitVersion.Tool --version 6.3.0
+            dotnet new tool-manifest --force
+            dotnet tool install GitVersion.Tool --version 6.3.0
+            dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
+  displayName: 'Install and Run GitVersion'
 
-    echo "Running GitVersion..."
-    dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
-    if %ERRORLEVEL% NEQ 0 (
-      echo GitVersion failed
-      type gitversion.json
-      exit /b 1
-    )
-    echo GitVersion succeeded
-  displayName: 'Install GitVersion.Tool and Generate Version Information'
 
 # Step 3: Parse GitVersion JSON Output
 - task: PowerShell@2
