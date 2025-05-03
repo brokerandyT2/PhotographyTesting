@@ -1,5 +1,3 @@
-# YAML Pipeline
-
 trigger:
   branches:
     include:
@@ -34,19 +32,16 @@ variables:
   SemanticVersion: '1.0'
 
 steps:
-# Step 1: Checkout the full repository
 - checkout: self
   clean: true
   fetchDepth: 0
 
-# Step 2: Install .NET SDK
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
   inputs:
     packageType: 'sdk'
     version: '9.x'
 
-# Step 3: Install GitVersion
 - script: |
     dotnet new tool-manifest --force
     dotnet tool install GitVersion.Tool --version 6.3.0
@@ -57,7 +52,6 @@ steps:
     dotnet tool run dotnet-gitversion /output json /verbosity quiet > $(Build.SourcesDirectory)\gitversion.json 2> $(Build.SourcesDirectory)\gitversion-error.log
   displayName: 'Run GitVersion'
 
-# Step 4: Set GitVersion-based Build Number
 - task: PowerShell@2
   displayName: 'Set GitVersion-based Build Number'
   inputs:
@@ -76,12 +70,10 @@ steps:
       Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$buildId"
       Write-Host "##vso[task.setvariable variable=AssemblyVersion]$semVer"
 
-# Step 5: Install .NET MAUI Android Workload
 - script: |
     dotnet workload install maui-android
   displayName: 'Install .NET MAUI Android Workload'
 
-# Step 6: Install Android SDK and cmdline-tools
 - script: |
     echo "Installing Android SDK..."
     choco install android-sdk -y
@@ -91,61 +83,84 @@ steps:
     set CMDLINE_TOOLS_DIR=%ANDROID_SDK_ROOT%\cmdline-tools\latest
     mkdir %CMDLINE_TOOLS_DIR%
 
-    echo "Downloading cmdline-tools..."
     curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip
     tar -xf cmdline-tools.zip -C %CMDLINE_TOOLS_DIR% --strip-components=1
 
     set PATH=%CMDLINE_TOOLS_DIR%\bin;%PATH%
-    echo "Installing platform tools and build-tools using sdkmanager..."
     sdkmanager.bat "platform-tools" "platforms;android-$(AndroidSdkVersion)" "build-tools;$(AndroidSdkVersion)" --sdk_root=%ANDROID_SDK_ROOT%
   displayName: 'Install Android SDK and cmdline-tools'
 
-# Step 7: Install JDK
 - script: |
     choco install openjdk11 -y
   displayName: 'Install JDK 11'
 
-# Step 8: Restore NuGet packages
 - task: NuGetCommand@2
   displayName: 'Restore NuGet Packages'
   inputs:
     command: 'restore'
     restoreSolution: '**/*.sln'
 
-# Step 9: Build APK
 - task: MSBuild@1
   displayName: 'Build APK'
   inputs:
-    solution: 'Location.Core\Location.Core.csproj'  # Specify the project file
+    solution: 'Location.Core\Location.Core.csproj'
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Step 10: Build AAB
 - task: MSBuild@1
   displayName: 'Build AAB'
   inputs:
-    solution: 'Location.Core\Location.Core.csproj'  # Specify the project file
+    solution: 'Location.Core\Location.Core.csproj'
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Step 11: Upload APK to Azure Artifacts Feed
+# Copy APK
+- task: CopyFiles@2
+  displayName: 'Copy APK to staging directory'
+  inputs:
+    sourceFolder: '$(Build.SourcesDirectory)'
+    contents: '**/*.apk'
+    targetFolder: '$(Build.ArtifactStagingDirectory)\apk'
+
+# Copy AAB
+- task: CopyFiles@2
+  displayName: 'Copy AAB to staging directory'
+  inputs:
+    sourceFolder: '$(Build.SourcesDirectory)'
+    contents: '**/*.aab'
+    targetFolder: '$(Build.ArtifactStagingDirectory)\aab'
+
+# Upload APK
 - task: AzureCLI@2
   displayName: 'Upload APK to Azure Artifacts Feed'
   inputs:
-    azureSubscription: 'Artifacts'  # Optional if you're using service connections
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      echo $(MY_PAT) | az devops login
-      az artifacts universal publish --organization https://dev.azure.com/3squaredcircles --feed apk --name PixMap --version $(AssemblyVersion) --description "APK build for PixMap" --path "$(Build.ArtifactStagingDirectory)\apk"
+      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles
+      az devops login --organization https://dev.azure.com/3squaredcircles --only-show-errors --use-device-code
+      $env:AZURE_DEVOPS_EXT_PAT="$(MY_PAT)"
+      $apk = Get-ChildItem "$(Build.ArtifactStagingDirectory)\apk" -Filter *.apk | Select-Object -First 1
+      az artifacts universal publish `
+        --feed apk `
+        --name PixMap `
+        --version $(AssemblyVersion) `
+        --description "APK build for PixMap" `
+        --path $apk.FullName
 
-# Step 12: Upload AAB to Azure Artifacts Feed
+# Upload AAB
 - task: AzureCLI@2
   displayName: 'Upload AAB to Azure Artifacts Feed'
   inputs:
-    azureSubscription: 'Artifacts'  # Optional if you're using service connections
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      echo $(MY_PAT) | az devops login
-      az artifacts universal publish --organization https://dev.azure.com/3squaredcircles --feed aab --name PixMap --version $(AssemblyVersion) --description "AAB build for PixMap" --path "$(Build.ArtifactStagingDirectory)\aab"
+      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles
+      $env:AZURE_DEVOPS_EXT_PAT="$(MY_PAT)"
+      $aab = Get-ChildItem "$(Build.ArtifactStagingDirectory)\aab" -Filter *.aab | Select-Object -First 1
+      az artifacts universal publish `
+        --feed aab `
+        --name PixMap `
+        --version $(AssemblyVersion) `
+        --description "AAB build for PixMap" `
+        --path $aab.FullName
