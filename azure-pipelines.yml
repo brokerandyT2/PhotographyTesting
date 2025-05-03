@@ -100,66 +100,34 @@ steps:
 - task: MSBuild@1
   displayName: 'Build APK'
   inputs:
-    solution: '**/*.sln'
-    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
+    solution: 'Location.Core.csproj'  # Specify the project file
+    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
 # Step 10: Build AAB
 - task: MSBuild@1
   displayName: 'Build AAB'
   inputs:
-    solution: '**/*.sln'
-    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
+    solution: 'Location.Core.csproj'  # Specify the project file
+    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Step 11: Publish APK to Azure Artifacts Feed 'apk'
+# Step 11: Publish APK to Azure Artifacts
 - task: AzureCLI@2
-  displayName: 'Publish APK to Azure Artifacts Feed'
   inputs:
-    azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'
-    scriptType: 'pscore'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az extension add --name azure-devops
-      
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
+      azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Your Service Connection ID
+      scriptType: 'pscore'  # PowerShell Core
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az artifacts universal publish --feed apk --name PhotographyLocationsAPK --path $(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.apk --version $(AssemblyVersion) --organization https://dev.azure.com/3squaredcircles
+  displayName: 'Publish APK to Azure Artifacts'
 
-      $apkPath = Get-ChildItem -Path "$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android" -Filter *.apk | Select-Object -First 1
-
-      if ($null -eq $apkPath) {
-        Write-Error "No APK file found to publish."
-        exit 1
-      }
-
-      az artifacts universal publish `
-        --feed apk `
-        --name android-apk `
-        --version "$(SemVer)" `
-        --description "Android APK Build" `
-        --path $apkPath.DirectoryName
-
-# Step 12: Publish AAB to Azure Artifacts Feed 'apk'
+# Step 12: Publish AAB to Azure Artifacts
 - task: AzureCLI@2
-  displayName: 'Publish AAB to Azure Artifacts Feed'
   inputs:
-    azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'
-    scriptType: 'pscore'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az extension add --name azure-devops
-
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
-
-      $aabPath = Get-ChildItem -Path "$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android" -Filter *.aab | Select-Object -First 1
-
-      if ($null -eq $aabPath) {
-        Write-Error "No AAB file found to publish."
-        exit 1
-      }
-
-      az artifacts universal publish `
-        --feed apk `
-        --name android-aab `
-        --version "$(SemVer)" `
-        --description "Android AAB Build" `
-        --path $aabPath.DirectoryName
+      azureSubscription: '5f0409de-fc38-4662-845c-cd1e61659c18'  # Your Service Connection ID
+      scriptType: 'pscore'  # PowerShell Core
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az artifacts universal publish --feed aab --name PhotographyLocationsAAB --path $(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.aab --version $(AssemblyVersion) --organization https://dev.azure.com/3squaredcircles
+  displayName: 'Publish AAB to Azure Artifacts'
