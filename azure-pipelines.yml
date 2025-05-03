@@ -26,12 +26,15 @@ steps:
     packageType: 'sdk'
     version: '9.x'
 
-# Step 2: Install GitVersion.Tool and Generate Version Information
 - script: |
-            dotnet new tool-manifest --force
-            dotnet tool install GitVersion.Tool --version 6.3.0
-            dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
-  displayName: 'Install and Run GitVersion'
+    dotnet new tool-manifest --force
+    dotnet tool install GitVersion.Tool --version 6.3.0
+  displayName: 'Install GitVersion.Tool'
+
+# Step 2b: Run GitVersion and generate JSON output
+- script: |
+    dotnet tool run dotnet-gitversion /output json /verbosity diagnostic > gitversion.json
+  displayName: 'Run GitVersion'
 
 
 # Step 3: Parse GitVersion JSON Output
