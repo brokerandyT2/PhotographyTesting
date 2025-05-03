@@ -19,11 +19,16 @@ namespace Location.Core;
 
 public static class MauiProgram
 {
-	public static MauiApp CreateMauiApp()
-	{
-        Log.Logger = new LoggerConfiguration()
-          .WriteTo.Console()         // Log to the console
+    public static MauiApp CreateMauiApp()
+    {
+
+        Serilog.Log.Logger = new LoggerConfiguration()
+          .WriteTo.SQLite(Path.Combine(FileSystem.AppDataDirectory, "photography.db3"))         // Log to the console
+#if DEBUG
           .MinimumLevel.Information() // Set minimum log level to Information
+#else
+            .MinimumLevel.Error()    // Set minimum log level to Warning
+#endif
           .CreateLogger();
 
         var builder = MauiApp.CreateBuilder();
@@ -35,11 +40,11 @@ public static class MauiProgram
             .UseBarcodeReader()
             .UseSkiaSharp()
 
-			.ConfigureFonts(fonts =>
-			{
-				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-			});
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            });
         builder.Services.AddTransient<ILocationViewModel, LocationViewModel>();
         builder.Services.AddTransient<IWeatherViewModel, WeatherViewModel>();
         builder.Services.AddTransient<ITip, TipViewModel>();
@@ -63,5 +68,5 @@ public static class MauiProgram
         });
         Expander.EnableAnimations();
         return builder.Build();
-	}
+    }
 }

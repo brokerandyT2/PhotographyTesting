@@ -45,7 +45,7 @@ namespace Location.Photography.Data.Queries
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
 
             }
         }
@@ -57,7 +57,7 @@ namespace Location.Photography.Data.Queries
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
 
             }
         }
@@ -69,7 +69,7 @@ namespace Location.Photography.Data.Queries
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
 
             }
         }

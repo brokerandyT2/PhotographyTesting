@@ -74,6 +74,7 @@ namespace Locations.Core.Business.DataAccess
                     var c = _connection.CreateTableAsync<TipViewModel>().Result;
                     var d = _connection.CreateTableAsync<TipTypeViewModel>().Result;
                     var e = _connection.CreateTableAsync<LocationViewModel>().Result;
+                    var f = _connection.CreateTableAsync<Log>().Result;
 #if PHOTOGRAPHY
                     DataPopulation.PopulateData();
 #endif

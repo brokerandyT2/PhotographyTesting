@@ -54,7 +54,7 @@ namespace Location.Photography.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new TipViewModel();
             }
         }

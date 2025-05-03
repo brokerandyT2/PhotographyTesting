@@ -11,6 +11,9 @@ using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 using Microsoft.Maui.Platform;
 using Microsoft.Maui.Animations;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
 
 
 namespace Locations.Core.Business.Weather
@@ -55,11 +58,23 @@ namespace Locations.Core.Business.Weather
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
                 return new WeatherViewModel();
             }
         }
+        public WeatherDataService(IAlertService alertService, ILoggerService loggerService)
+        {
+            this.alertServ = alertService;
+            this.loggerService = loggerService;
+        }
+        public WeatherDataService(string endpoint, double latitude, double longitude, string API_KEY, IAlertService alertService, ILoggerService loggerService) : this(endpoint, latitude, longitude, API_KEY)
+        {
+            this.alertServ = alertService;
+            this.loggerService = loggerService;
+        }
 
+        private IAlertService alertServ;
+        private ILoggerService loggerService;
 
 
         public async Task<Placemark> GetPlacemarkAsync()
@@ -74,10 +89,10 @@ namespace Locations.Core.Business.Weather
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
                 return new Placemark();
             }
-            }
+        }
 
         public async Task<T> GetAsyncMethodFactory<T>(TypeMethod typeMethod) where T : class
         {
@@ -94,9 +109,10 @@ namespace Locations.Core.Business.Weather
                 }
 
                 return default;
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
                 return default;
             }
         }
@@ -131,10 +147,13 @@ namespace Locations.Core.Business.Weather
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                //Because this method is static, we need to use a new AlertService
+                AlertService alertServ = new AlertService();
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
                 return default;
             }
-            }
+            return default;
+        }
 
         public async Task<List<Daily>> GetDaysAsync()
         {
@@ -144,10 +163,10 @@ namespace Locations.Core.Business.Weather
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
                 return new List<Daily>();
             }
-            
+
         }
         public async Task<WeatherViewModel> GetWeatherAsync()
         {
@@ -201,7 +220,7 @@ namespace Locations.Core.Business.Weather
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true); ;
                 return new WeatherViewModel();
             }
         }

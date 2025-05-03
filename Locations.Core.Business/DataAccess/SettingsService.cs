@@ -44,7 +44,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new SettingViewModel();
             }
         }
@@ -60,7 +60,7 @@ namespace Locations.Core.Business.DataAccess
                 return true;
             }catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return false;
             }
         }
@@ -72,7 +72,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new SettingViewModel();
             }
 
@@ -86,7 +86,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
             }
         }
         public void DeleteSetting(string key)
@@ -97,7 +97,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
             }
 
             }
@@ -110,7 +110,7 @@ namespace Locations.Core.Business.DataAccess
                 return model;
             }catch(Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return model;
             }
         }
@@ -124,7 +124,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return model;
             }
             }
@@ -135,7 +135,7 @@ namespace Locations.Core.Business.DataAccess
                 return _query.GetItem<SettingViewModel>(id);
             }catch(Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new SettingViewModel();
             }
         }
@@ -147,7 +147,7 @@ namespace Locations.Core.Business.DataAccess
                 return _query.DeleteItem<SettingViewModel>(model) != 420 ? true : false;
             }catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return false;
             }
         }
@@ -160,7 +160,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return false;
             }
             }
@@ -201,7 +201,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new SettingsViewModel();
             }
             }
@@ -213,7 +213,7 @@ namespace Locations.Core.Business.DataAccess
                 return _query.SaveWithIDReturn(s);
             }catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return s;
             }
         }

@@ -10,9 +10,10 @@ namespace Locations.Core.Shared.Customizations.Alerts.Interfraces
     public interface IAlertService
     {
         Task ShowAlertAsync(string title, string message, string cancel);
+        Task ShowAlertAsync(string title, string message, string cancel, bool logged);
         Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel);
-        Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel, bool isLogged);
-        Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel, bool isLogged, Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService.AlertType level);
+        bool ShowConfirmationAsync(string title, string message, string accept, string cancel, bool isLogged);
+        bool ShowConfirmationAsync(string title, string message, string accept, string cancel, bool isLogged, Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService.AlertType level);
     }
 
 }

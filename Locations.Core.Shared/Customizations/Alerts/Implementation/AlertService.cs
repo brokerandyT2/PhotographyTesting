@@ -6,10 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using Microsoft.Extensions.Logging;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 namespace Locations.Core.Shared.Customizations.Alerts.Implementation
 {
     public class AlertService : IAlertService
     {
+
+        private ILoggerService loggerService;
 
         public async Task ShowAlertAsync(string title, string message, string cancel)
         {
@@ -27,18 +30,51 @@ namespace Locations.Core.Shared.Customizations.Alerts.Implementation
                 ? await page.DisplayAlert(title, message, accept, cancel)
                 : false;
         }
-
-        public Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel, bool isLogged)
+        private bool _isLogged;
+        public bool ShowConfirmationAsync(string title, string message, string accept, string cancel, bool isLogged)
         {
-            return null;
+
+            return this.ShowConfirmationAsync(title, message, accept, cancel).Result;
         }
 
-        public Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel, bool isLogged, AlertType level)
+        public bool ShowConfirmationAsync(string title, string message, string accept, string cancel, bool isLogged, AlertType level)
         {
-            throw new NotImplementedException();
+            
+            if ((_isLogged))
+            {
+                LogIt(level, message);
+            }
+            return this.ShowConfirmationAsync(title, message, accept, cancel, isLogged);
+            
         }
 
-              public enum AlertType
+        public Task ShowAlertAsync(string title, string message, string cancel, bool logged)
+        {
+            LogIt(null, message);
+            return ShowAlertAsync(title, message, cancel);
+        }
+        private void LogIt(AlertType? level, string message)
+        {
+            switch (level)
+            {
+                case AlertType.Info:
+                    loggerService.LogInformation(message);
+                    break;
+                case AlertType.Warning:
+                    loggerService.LogWarning(message);
+                    break;
+                case AlertType.Error:
+                    loggerService.LogError(message);
+                    break;
+                case AlertType.Success:
+                    loggerService.LogInformation(message);
+                    break;
+                default:
+                    loggerService.LogInformation(message);
+                    break;
+            }
+        }
+        public enum AlertType
         {
             Info,
             Warning,

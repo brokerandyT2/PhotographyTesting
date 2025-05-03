@@ -38,7 +38,8 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);
+                
                 return new LocationViewModel();
             }
         }
@@ -59,7 +60,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new LocationViewModel();
             }
         }
@@ -76,7 +77,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new LocationViewModel();
             }
         }
@@ -89,7 +90,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new LocationViewModel();
             }
 
@@ -104,7 +105,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new LocationViewModel();
             }
         }
@@ -116,7 +117,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new LocationViewModel();
             }
         }
@@ -129,7 +130,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return false;
             }
         }
@@ -142,7 +143,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return false;
             }
         }
@@ -155,7 +156,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return false;
             }
 
@@ -169,7 +170,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return false;
             }
         }
@@ -181,7 +182,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new List<LocationViewModel>();
             }
         }

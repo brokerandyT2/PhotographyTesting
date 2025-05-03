@@ -102,14 +102,14 @@ public partial class Login : ContentPage
         }
 
         Navigation.PushAsync(new NavigationPage(new MainPage()));
-        //Navigation.PushAsync(new MainPage());
+       
     }
 
     private void ImageButton_Pressed(object sender, EventArgs e)
     {
         if (string.IsNullOrEmpty(emailAddress.Text))
         {
-            if (DisplayAlert().Result)
+            if (DisplayAlert())
             {
                 Navigation.PopModalAsync();
             }
@@ -119,11 +119,11 @@ public partial class Login : ContentPage
         {
             UpdateEmail();
         }
-       // Navigation.PopModalAsync();
+
     }
-    private async Task<bool> DisplayAlert()
+    private bool DisplayAlert()
     {
-        return await Microsoft.Maui.Controls.Application.Current.MainPage.DisplayAlert(AppResources.Error, AppResources.BlankEmail, AppResources.OK, AppResources.Cancel);
+        return alertServ.ShowConfirmationAsync(AppResources.Error, AppResources.BlankEmail, AppResources.OK, AppResources.Cancel, true);
     }
     private void UpdateEmail()
     {

@@ -67,7 +67,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new WeatherViewModel();
             }
 
@@ -372,7 +372,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new WeatherViewModel();
             }
         }
@@ -385,7 +385,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new WeatherViewModel();
             }
         }
@@ -397,7 +397,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return new WeatherViewModel();
 
             }
@@ -411,7 +411,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return false;
             }
         }
@@ -423,7 +423,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return false;
             }
         }
@@ -434,7 +434,7 @@ namespace Locations.Core.Business.DataAccess
                 return _weatherQuery.DeleteItem<WeatherViewModel>(_weatherQuery.GetWeather(latitude, longitude)) == 420 ? false : true;
             }catch (Exception ex)
             {
-                Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+                alertServ.ShowAlertAsync("Error", ex.Message, "OK", true);;
                 return false;
             }
         }
