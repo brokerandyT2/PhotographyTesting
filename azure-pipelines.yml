@@ -137,7 +137,7 @@ steps:
             --scope project `
             --feed apk `
             --name Location.Core `
-            --version $(AppVersion) `
+            --version $(semVer) `
             --description "APK Package" `
             --path "$(outputDirectory)"
 
@@ -154,6 +154,6 @@ steps:
             --scope project `
             --feed aab `
             --name Location.Core `
-            --version $(AppVersion) `
+            --version $(semVer) `
             --description "AAB Package" `
             --path "$(outputDirectory)"
