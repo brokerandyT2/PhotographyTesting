@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using  Locations.Core.Shared;
-using  Locations.Core.Shared.ViewModels;
+﻿using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.ViewModels;
 namespace  Locations.Core.Data.Queries
 {
     public class TipQuery<T> : QueryBase<T> where T : TipViewModel, new()
     {
+        public TipQuery(IAlertService alertSer, Locations.Core.Shared.Customizations.Logging.Interfaces.ILoggerService loggerServic) : base(alertSer, loggerServic)
+        {
+        }
+
         public override T GetItem<T>(int id)
         {
             return (T)Convert.ChangeType(dataB.Table<TipViewModel>().Where(x => x.ID == id).FirstOrDefaultAsync().Result,typeof(T));

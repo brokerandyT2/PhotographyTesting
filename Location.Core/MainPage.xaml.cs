@@ -7,6 +7,8 @@ using Newtonsoft.Json;
 using static Locations.Core.Shared.Enums.Hemisphere;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 #if PHOTOGRAPHY
 
 #endif
@@ -28,8 +30,7 @@ namespace Location.Core
 
 
         public static SubscriptionTypeEnum SubscriptionType = _subType;
-
-
+        private IAlertService alertService;
 
         public MainPage()
         {
@@ -106,12 +107,19 @@ namespace Location.Core
             else
             {
                 AddDefault();
-                Navigation.PushAsync(new Login());
+                Navigation.PushModalAsync(new Login());
+                //Navigation.PushAsync(new NavigationPage(new Login()));
+
 
             }
             this.Children.Add(new Location.Core.Views.Settings());
 
 
+        }
+
+        public MainPage(IAlertService alertService)
+        {
+            this.alertService = alertService;
         }
 
         private async void InitAsync()

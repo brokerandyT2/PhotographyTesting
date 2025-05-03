@@ -4,6 +4,10 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using  Locations.Core.Shared.DTO;
 using  Locations.Core.Shared.ViewModels;
 using  Locations.Core.Shared.ViewModels.Interface;
@@ -13,7 +17,12 @@ namespace  Locations.Core.Data.Queries
 {
     public class LocationQuery<T> : QueryBase<T> where T : LocationViewModel, new()
     {
+        
+        public LocationQuery(IAlertService alertServ, ILoggerService loggerService) : base(alertServ, loggerService)
+        {
 
+        }
+       
         public T GetItem<T>(double latitude, double longitude)
             {
             return (T)Convert.ChangeType(dataB.Table<LocationViewModel>().Where(x => x.Lattitude == latitude && x.Longitude == longitude).FirstOrDefaultAsync().Result, typeof(T));

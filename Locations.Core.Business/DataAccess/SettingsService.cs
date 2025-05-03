@@ -9,12 +9,25 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Microsoft.Extensions.Logging;
 
 namespace Locations.Core.Business.DataAccess
 {
     public class SettingsService : ISettingService<SettingViewModel>
     {
-        private SettingsQuery<SettingViewModel> _query = new SettingsQuery<SettingViewModel>();
+        private SettingsQuery<SettingViewModel> _query = new SettingsQuery<SettingViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
+
+        private IAlertService alertServ;
+        private ILoggerService loggerService;
+        public SettingsService(IAlertService alert, ILoggerService logger) : this()
+        {
+            alertServ = alert;
+            loggerService = logger;
+        }
         public SettingsService()
         {
         }

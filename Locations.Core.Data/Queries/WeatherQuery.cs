@@ -1,4 +1,6 @@
-﻿using Locations.Core.Shared.ViewModels;
+﻿using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
+using Locations.Core.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,10 @@ namespace Locations.Core.Data.Queries
 {
     public class WeatherQuery<T> : QueryBase<T> where T : WeatherViewModel, new()
     {
+        public WeatherQuery(IAlertService alertSer, ILoggerService loggerServic) : base(alertSer, loggerServic)
+        {
+        }
+
         public override T GetItem<T>(int id)
         {
             return (T)Convert.ChangeType(dataB.Table<WeatherViewModel>().Where(x => x.ID == id).FirstOrDefaultAsync().Result, typeof(T));

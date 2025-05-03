@@ -7,11 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using  Locations.Core.Shared.Helpers;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 namespace  Locations.Core.Data.Queries
 {
     public class SettingsQuery<T> : QueryBase<T> where T : SettingViewModel, new()
     {
-       
+        public SettingsQuery(IAlertService alertSer, ILoggerService loggerServic) : base(alertSer, loggerServic)
+        {
+            
+        }
+
         /// <summary>
         /// Do NOT TOUCH / DO NOT USE
         /// </summary>

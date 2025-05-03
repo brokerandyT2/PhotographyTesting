@@ -9,6 +9,11 @@ using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.DTO;
 using Locations.Core.Shared.Helpers;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Locations.Core.Business.DataAccess
 {
@@ -42,8 +47,18 @@ namespace Locations.Core.Business.DataAccess
         private void CheckForDB()
         {
             //_connection = new SQLiteAsyncConnection(MagicStrings.DataBasePath, Constants.Flags);
+            var services = new ServiceCollection();
+            services.AddLogging(); // Registers ILogger<T>
 
-            SettingsQuery<SettingViewModel> setting = new SettingsQuery<SettingViewModel>();
+            // Build it
+            var provider = services.BuildServiceProvider();
+
+            // Get ILogger<LoggerService>
+            var logger = provider.GetRequiredService<ILogger<LoggerService>>();
+
+            // Now you can construct LoggerService
+            var loggerService = new LoggerService(logger);
+            SettingsQuery<SettingViewModel> setting = new SettingsQuery<SettingViewModel>(new AlertService(), loggerService);
             string x = string.Empty;
             try
             {

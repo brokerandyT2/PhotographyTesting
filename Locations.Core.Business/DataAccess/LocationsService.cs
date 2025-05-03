@@ -2,8 +2,13 @@
 using Locations.Core.Business.GeoLocation;
 using Locations.Core.Business.Weather;
 using Locations.Core.Data.Queries;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.Helpers;
 using Locations.Core.Shared.ViewModels;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +19,17 @@ namespace Locations.Core.Business.DataAccess
 {
     public class LocationsService : ILocationService<LocationViewModel>
     {
-        private LocationQuery<LocationViewModel> lq = new Data.Queries.LocationQuery<LocationViewModel>();
+        private LocationQuery<LocationViewModel> lq = new Data.Queries.LocationQuery<LocationViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
+
+        private IAlertService alertServ;
+        private ILoggerService loggerService;
         public LocationsService() { }
+   
+        public LocationsService(IAlertService alertServ, ILoggerService loggerService):this()
+        {
+            this.alertServ = alertServ;
+            this.loggerService = loggerService;
+        }
         public LocationViewModel SaveSettingWithObjectReturn(LocationViewModel s)
         {
             try

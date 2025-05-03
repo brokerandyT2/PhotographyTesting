@@ -1,4 +1,6 @@
 ﻿using Location.Photography.Data.Queries.Interfaces;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,8 @@ namespace Location.Photography.Data.Queries
 {
     public abstract class QueryBase<T> : Database, IDataAccessBase where T : new()
     {
-
+        private IAlertService alertServ;
+        private ILoggerService loggerService;
         public abstract T GetItem<T>(int id);
 
         public abstract string GetValueByString<T>(string name);

@@ -8,17 +8,46 @@ using Locations.Core.Shared.DTO;
 using Locations.Core.Shared;
 using Location.Core.Helpers;
 using Microsoft.Maui.Controls;
+
+using Locations.Core.Shared.ViewModels.Interface;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Microsoft.Extensions.Logging;
 namespace Location.Core.Views.Pro;
 
 public partial class SunCalculations : ContentPage
 {
     lcbd.SettingsService settingsService = new lcbd.SettingsService();
-    LocationService ls = new LocationService();
+    LocationService ls = new LocationService(new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()), new AlertService());
+    private IAlertService alertServ;
+    private ILoggerService loggerService;
+    public SunCalculations(IAlertService alertServ, ILoggerService logger):this()
+    {
+        this.alertServ = alertServ;
+        this.loggerService = logger;
+
+    }
+    public SunCalculations(IAlertService alertServ, ILoggerService logger, LocationViewModel id) : this(id)
+    {
+        this.alertServ = alertServ;
+        this.loggerService = logger;
+    }
+    public SunCalculations(IAlertService alertServ, ILoggerService logger, ILocationViewModel id) : this(id)
+    {
+        this.alertServ = alertServ;
+        this.loggerService = logger;
+    }
     public SunCalculations()
 	{
 		InitializeComponent();
         DoTheNeedful();
 
+    }
+    public SunCalculations(ILocationViewModel id) :this(id as LocationViewModel)
+    {
+        DoTheNeedful(id as LocationViewModel);
     }
     public SunCalculations(LocationViewModel location)
     {

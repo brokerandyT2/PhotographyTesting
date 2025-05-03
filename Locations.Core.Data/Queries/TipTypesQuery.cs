@@ -8,11 +8,17 @@ using System.Threading.Tasks;
 using SQLite;
 using Microsoft.Data.Sqlite;
 using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 
 namespace Locations.Core.Data.Queries
 {
     public class TipTypesQuery<T> : QueryBase<T> where T : TipTypeViewModel, new()
     {
+        public TipTypesQuery(IAlertService alertSer, ILoggerService loggerServic) : base(alertSer, loggerServic)
+        {
+        }
+
         public override T GetItem<T>(int id)
         {
             return (T)Convert.ChangeType(dataB.Table<TipTypeViewModel>().Where(x => x.Id == id), typeof(T));

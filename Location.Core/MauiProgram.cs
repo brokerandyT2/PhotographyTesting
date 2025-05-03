@@ -2,23 +2,31 @@
 using Camera.MAUI;
 using CommunityToolkit.Maui;
 using epj.Expander.Maui;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using SkiaSharp.Views.Maui.Controls.Hosting;
-
 using ZXing.Net.Maui.Controls;
 #if ANDROID
-using Location.Core.Platforms.Android;
+
 #endif
-using Location.Core;
 namespace Location.Core;
 
 public static class MauiProgram
 {
 	public static MauiApp CreateMauiApp()
 	{
-		var builder = MauiApp.CreateBuilder();
+        Log.Logger = new LoggerConfiguration()
+          .WriteTo.Console()         // Log to the console
+          .MinimumLevel.Information() // Set minimum log level to Information
+          .CreateLogger();
+
+        var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
@@ -40,13 +48,19 @@ public static class MauiProgram
         builder.Services.AddTransient<ILocationList, LocationsListViewModel>();
         builder.Services.AddTransient<ITipsViewmodel, TipsViewModel>();
         builder.Services.AddTransient<IDetailsView, DetailsViewModel>();
+        builder.Services.AddSingleton<IAlertService, AlertService>();
+        builder.Services.AddSingleton<ILoggerService, LoggerService>();
+        builder.Services.AddTransient(typeof(Locations.Core.Data.Queries.SettingsQuery<>));
+
+
 #if ANDROID
         //builder.Services.AddSingleton<Platforms.Android.IGoogleAuthService, Platforms.Android.GoogleAuthService>();
 #endif
-#if DEBUG
-
-        builder.Logging.AddDebug();
-#endif
+        builder.Services.AddLogging(logging =>
+        {
+            logging.ClearProviders();   // Remove default providers
+            logging.AddSerilog();       // Add Serilog as the logging provider
+        });
         Expander.EnableAnimations();
         return builder.Build();
 	}

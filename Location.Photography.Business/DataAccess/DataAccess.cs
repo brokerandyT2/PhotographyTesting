@@ -1,11 +1,7 @@
 ﻿using Location.Photography.Business.DataAccess.Interfaces;
-using Microsoft.Maui;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Location.Photography.Business.DataAccess
 {
@@ -16,7 +12,13 @@ namespace Location.Photography.Business.DataAccess
         ISQLiteConnection IBaseData.database { get => database; set => throw new NotImplementedException(); }
 
         public SQLiteConnection DatabaseConnection => throw new NotImplementedException();
-
+        private IAlertService alertServ;
+        private ILoggerService loggerService;
         public DataAccess() { }
+        public DataAccess(IAlertService alertSer, ILoggerService log)
+        {
+            alertServ = alertSer;
+            loggerService = log;
+        }
     }
 }

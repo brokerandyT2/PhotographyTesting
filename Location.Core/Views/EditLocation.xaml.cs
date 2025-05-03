@@ -1,3 +1,5 @@
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared.ViewModels;
 
@@ -7,12 +9,23 @@ public partial class EditLocation : ContentPage
 {
     private int id;
     LocationsService locationService = new LocationsService();
-
+    private IAlertService alertServ;
+    private ILoggerService loggerService;
     public EditLocation()
 	{
 		InitializeComponent();
 	}
-
+    public EditLocation(IAlertService alertServ, ILoggerService logger)
+    {
+        this.alertServ = alertServ;
+        this.loggerService = logger;
+        InitializeComponent();
+    }
+    public EditLocation(IAlertService alertSer, ILoggerService logger, int id) : this(id)
+    {
+        alertServ = alertSer;
+        this.loggerService = logger;
+    }
     public EditLocation(int id)
     {
         InitializeComponent();

@@ -9,12 +9,16 @@ using Location.Core.Helpers;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Maui.Core.Extensions;
 using Microsoft.Maui.Controls;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 
 namespace Location.Core.Views.Premium;
 
 public partial class SunLocation : ContentPage
 {
    Locations.Core.Business.DataAccess.LocationsService ss = new Locations.Core.Business.DataAccess.LocationsService();
+    private IAlertService alertServ;
+    private ILoggerService loggerService;
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
@@ -44,7 +48,11 @@ public partial class SunLocation : ContentPage
         BindingContext = x;
         locationPicker.SelectedIndex = 0;
     }
-
+    public SunLocation(ILoggerService loggerService, IAlertService alert):this()
+    {
+        this.alertServ = alert;
+        this.loggerService = loggerService;
+    }
     public SunLocation()
     {
         InitializeComponent();

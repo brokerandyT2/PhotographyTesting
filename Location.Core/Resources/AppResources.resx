@@ -144,6 +144,9 @@
   <data name="baseexposure" xml:space="preserve">
     <value>Base Exposure:</value>
   </data>
+  <data name="BlankEmail" xml:space="preserve">
+    <value>By not entering your email address, your data will not be backed up to the cloud.</value>
+  </data>
   <data name="Blue" xml:space="preserve">
     <value>Blue</value>
   </data>

@@ -1,4 +1,6 @@
-﻿using Locations.Core.Shared.ViewModels;
+﻿using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
+using Locations.Core.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +19,14 @@ namespace Location.Photography.Data.Queries
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-
+        private IAlertService alertServ;
+        private ILoggerService loggerService;
+        public SettingsQuery(IAlertService alert, ILoggerService logger)
+        {
+            alertServ = alert;
+            loggerService = logger;
+        }
+        
         public override T GetItem<T>(int id)
         {
             return (T)Convert.ChangeType(dataB.Table<SettingViewModel>().Where(x => x.Id == id).FirstOrDefaultAsync().Result, typeof(T));

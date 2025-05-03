@@ -1,7 +1,12 @@
 ﻿using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OpenWeatherAPI;
 
@@ -10,10 +15,23 @@ namespace Locations.Core.Business.DataAccess
 {
     public class WeatherService : IWeatherService
     {
-        WeatherQuery<WeatherViewModel> _weatherQuery = new WeatherQuery<WeatherViewModel>();
+        WeatherQuery<WeatherViewModel> _weatherQuery = new WeatherQuery<WeatherViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
+        private IAlertService alertServ;
+        private ILoggerService loggerService;
         SettingsService _settingsService = new SettingsService();
         private readonly IConnectivity _connectivity;
+
         public WeatherService() { }
+        public WeatherService(IAlertService alertServ, ILoggerService loggerService, IConnectivity connectivity) : this(alertServ, loggerService)
+        {
+          
+            _connectivity = connectivity;
+        }
+        public WeatherService(IAlertService alertServ, ILoggerService loggerService) : this()
+        {
+            this.alertServ = alertServ;
+            this.loggerService = loggerService;
+        }
         public WeatherViewModel GetWeather(double latitude, double longitude)
         {
             try

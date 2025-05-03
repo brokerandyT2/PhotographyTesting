@@ -8,6 +8,8 @@ using System.ComponentModel;
 using Location.Core.Helpers;
 using Locations.Core.Business.DataAccess;
 using Microsoft.Maui.Controls;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 
 namespace Location.Core.Views;
 
@@ -15,6 +17,8 @@ public partial class ListLocations : ContentPage
 {
     lcbd.LocationsService ls = new lcbd.LocationsService();
     lcbd.SettingsService ss = new lcbd.SettingsService();
+    private IAlertService alertServ;
+    private ILoggerService loggerService;
     private ObservableCollection<LocationViewModel> _items = [];
     public ObservableCollection<LocationViewModel> Items { get { return _items; } set { _items = value; } }
     public ListLocations()
@@ -23,7 +27,14 @@ public partial class ListLocations : ContentPage
         BindingContext = this;
         CheckVisit();
     }
-
+    public ListLocations(ILoggerService loggerService, IAlertService alertServ)
+    {
+        InitializeComponent();
+        this.alertServ = alertServ;
+        this.loggerService = loggerService;
+        BindingContext = this;
+        CheckVisit();
+    }
     private void CheckVisit()
     {
         PageHelpers.CheckVisit(MagicStrings.LocationListViewed, PageEnums.ListLocations, ss, Navigation);

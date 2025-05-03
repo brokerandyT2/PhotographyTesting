@@ -1,6 +1,8 @@
 
 using Location.Core.Helpers;
 using Locations.Core.Business.Advertising;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
 using Microsoft.Maui.Controls;
@@ -14,6 +16,19 @@ public partial class ExposureCalculator : ContentPage
     private SettingsService ss = new SettingsService();
     TipService ts = new TipService();
     private bool _adSupport;
+    private IAlertService alertServ;
+    private ILoggerService loggerService;
+    public ExposureCalculator(IAlertService alertServ, ILoggerService loggerService) : this()
+    {
+        this.alertServ = alertServ;
+        this.loggerService = loggerService;
+    }
+    public ExposureCalculator(IAlertService alertServ, ILoggerService loggerService, int tipID, bool isFromTips = false) : this(tipID, isFromTips)
+    {
+        this.alertServ = alertServ;
+
+        this.loggerService = loggerService;
+    }
     public ExposureCalculator()
     {
         _adSupport = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).ToBoolean();
@@ -86,7 +101,7 @@ public partial class ExposureCalculator : ContentPage
 
 
         PageHelpers.CheckVisit(MagicStrings.ExposureCalcViewed, PageEnums.ExposureCalculator, new Locations.Core.Business.DataAccess.SettingsService(), Navigation);
-        
+
 
     }
 
@@ -96,7 +111,7 @@ public partial class ExposureCalculator : ContentPage
     }
     private void calculate_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
-     
+
         Microsoft.Maui.Controls.RadioButton rb = (Microsoft.Maui.Controls.RadioButton)sender;
         var x = rb.Content;
         lps.ViewModels.ExposureCalculator ec = (lps.ViewModels.ExposureCalculator)BindingContext;
@@ -204,5 +219,5 @@ public partial class ExposureCalculator : ContentPage
         x.Calculate();
     }
 
-   
+
 }

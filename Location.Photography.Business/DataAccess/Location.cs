@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace Location.Photography.Business.DataAccess
 {
-#if PHOTOGRAPHY
+
     public class Location : Locations.Core.Business.DataAccess.LocationsService
-#else
-    public class Location : Locations.Core.Business.DataAccess.LocationsService
-#endif
+
     { 
     
     }

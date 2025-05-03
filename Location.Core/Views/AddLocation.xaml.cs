@@ -1,11 +1,10 @@
 using Location.Core.Helpers;
-using Location.Photography.Business.DataAccess;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
-using Microsoft.Maui.Controls;
-using System.Xml;
 
 namespace Location.Core.Views;
 
@@ -13,6 +12,30 @@ public partial class AddLocation : ContentPage
 {
     LocationsService ls = new LocationsService();
     Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
+    private IAlertService alertServ;
+    private ILoggerService loggerService;
+    public AddLocation(ILoggerService loggerService, IAlertService alertServ): this()
+    {
+
+        this.alertServ = alertServ;
+        this.loggerService = loggerService;
+
+    }
+    public AddLocation(IAlertService alertServ, ILoggerService loggerService, ILocationViewModel viewModel) : this(viewModel)
+    {
+        this.alertServ = alertServ;
+        this.loggerService = loggerService;
+    }
+    public AddLocation(IAlertService alertServ, ILoggerService loggerService, ILocationViewModel viewModel, int id) : this(id)
+    {
+        this.alertServ = alertServ;
+        this.loggerService = loggerService;
+    }
+    public AddLocation(IAlertService alertServ, ILoggerService loggerService, ILocationViewModel viewModel, int id, bool isEditMode) : this(id, isEditMode)
+    {
+        this.alertServ = alertServ;
+        this.loggerService = loggerService;
+    }
     public AddLocation()
     {
         InitializeComponent();

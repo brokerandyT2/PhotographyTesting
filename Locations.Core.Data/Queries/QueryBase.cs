@@ -1,5 +1,9 @@
 ﻿using  Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using  Locations.Core.Shared.ViewModels;
 using  Locations.Core.Shared.ViewModels.Interface;
 using System;
@@ -14,7 +18,16 @@ namespace  Locations.Core.Data.Queries
 {
     public abstract class QueryBase<T> : Database, IDataAccessBase where T : new()
     {
-      
+
+        protected readonly IAlertService AlertService;
+        protected readonly ILoggerService LoggerService;
+       
+        public QueryBase(IAlertService alertService, Locations.Core.Shared.Customizations.Logging.Interfaces.ILoggerService loggerService)
+        {
+            AlertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
+            LoggerService = loggerService ?? throw new ArgumentNullException(nameof(loggerService));
+        }
+       
         public abstract T GetItem<T>(int id);
 
         public abstract string GetValueByString<T>(string name);

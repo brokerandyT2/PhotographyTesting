@@ -6,11 +6,15 @@ using System.Timers;
 using Camera.MAUI;
 using Location.Photography.Business.DataAccess;
 using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 
 namespace Location.Core.Views.Premium;
 
 public partial class LightMeter : ContentPage
 {
+    private IAlertService alertServ;
+    private ILoggerService loggerService;
     private readonly vm.LightMeter _viewModel;
     private System.Timers.Timer _captureTimer;
     private bool _isCapturing = false;
@@ -19,6 +23,11 @@ public partial class LightMeter : ContentPage
     {
         InitializeComponent();
         _viewModel = BindingContext as vm.LightMeter;
+    }
+    public LightMeter(IAlertService alertserv, ILoggerService log) : this()
+    {
+        this.alertServ = alertserv;
+        this.loggerService = log;
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)

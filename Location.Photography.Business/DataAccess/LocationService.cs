@@ -1,17 +1,21 @@
 ﻿using Location.Photography.Business.DataAccess.Interfaces;
 using Location.Photography.Data.Queries;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Location.Photography.Business.DataAccess
 {
     public class LocationService : Locations.Core.Business.DataAccess.LocationsService, ILocationService<LocationViewModel>
     {
         LocationsQuery<LocationViewModel> LocationsQuery = new LocationsQuery<LocationViewModel>();
+        private IAlertService alertServ;
+        private ILoggerService loggerService;
+        public LocationService(ILoggerService logger, IAlertService alert)
+        {
+            alertServ = alert;
+            loggerService = logger;
+        }
         public bool Delete(LocationViewModel model)
         {
             throw new NotImplementedException();

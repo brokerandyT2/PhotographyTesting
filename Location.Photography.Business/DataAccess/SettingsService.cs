@@ -1,21 +1,32 @@
 ﻿using Location.Photography.Business.DataAccess.Interfaces;
 using Location.Photography.Data.Queries;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Location.Photography.Business.DataAccess
 {
 
     public class SettingsService : ISettingService<SettingViewModel>
     {
-        SettingsQuery<SettingViewModel> sq = new SettingsQuery<SettingViewModel>();
+        SettingsQuery<SettingViewModel> sq;
         Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
+        private IAlertService alertServ;
+        private ILoggerService loggerService;
         public SettingsService() { }
-
+        public SettingsService(IAlertService alert, ILoggerService logger)
+        {
+            alertServ = alert;
+            loggerService = logger;
+        }
+        public SettingsService(IAlertService alert, ILoggerService logger, SettingsQuery<SettingViewModel> query)
+        {
+            alertServ = alert;
+            loggerService = logger;
+            sq = query;
+        }
         public bool Delete(SettingViewModel model)
         {
             throw new NotImplementedException();

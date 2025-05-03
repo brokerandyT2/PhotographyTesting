@@ -1,7 +1,12 @@
 ﻿using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Data.Queries;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +18,17 @@ namespace Locations.Core.Business.DataAccess
 {
     public class TipService : ITipService
     {
-        TipQuery<TipViewModel> query = new TipQuery<TipViewModel>();
+        TipQuery<TipViewModel> query = new TipQuery<TipViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
+
+        private IAlertService alertServ;
+        private ILoggerService loggerService;
         public TipService()
         {
+        }
+        public TipService(IAlertService alertServ, ILoggerService loggerService) : this()
+        {
+            this.alertServ = alertServ;
+            this.loggerService = loggerService;
         }
         public TipViewModel Save(TipViewModel model)
         {

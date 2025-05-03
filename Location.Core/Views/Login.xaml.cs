@@ -1,5 +1,7 @@
 ﻿using Location.Core.Helpers;
 using Location.Core.Resources;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Enums;
@@ -13,19 +15,27 @@ namespace Location.Core.Views;
 public partial class Login : ContentPage
 {
     Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
+    private IAlertService alertServ;
+    private ILoggerService loggerService;
     public Login()
     {
         InitializeComponent();
     }
+    public Login(IAlertService alert, ILoggerService _logger)
+    {
+       alertServ = alert;
+        loggerService = _logger;
+        InitializeComponent();
+    }
 
-   
+
 
     private void HemisphereSwitch_Toggled(object sender, ToggledEventArgs e)
     {
         var x = ss.GetSettingByName(MagicStrings.Hemisphere);
         x.Value = e.Value ? Hemisphere.HemisphereChoices.North.Name() : Hemisphere.HemisphereChoices.South.Name();
         ss.UpdateSetting(x);
-        
+
         GetSetting();
 
     }
@@ -33,7 +43,7 @@ public partial class Login : ContentPage
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
-        
+
         GetSetting();
     }
     private void TimeSwitch_Toggled(object sender, ToggledEventArgs e)
@@ -84,16 +94,41 @@ public partial class Login : ContentPage
         GetSetting();
     }
 
-    private  void save_Pressed(object sender, EventArgs e)
+    private void save_Pressed(object sender, EventArgs e)
     {
         if (!string.IsNullOrEmpty(emailAddress.Text))
         {
-            var x = ss.GetSettingByName(MagicStrings.Email);
-            x.Value = string.IsNullOrEmpty(emailAddress.Text)? MagicStrings.NoEmailEntered: emailAddress.Text;
-            ss.UpdateSetting(x);
+            UpdateEmail();
         }
-        
+
         Navigation.PushAsync(new NavigationPage(new MainPage()));
         //Navigation.PushAsync(new MainPage());
+    }
+
+    private void ImageButton_Pressed(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(emailAddress.Text))
+        {
+            if (DisplayAlert().Result)
+            {
+                Navigation.PopModalAsync();
+            }
+
+        }
+        else
+        {
+            UpdateEmail();
+        }
+       // Navigation.PopModalAsync();
+    }
+    private async Task<bool> DisplayAlert()
+    {
+        return await Microsoft.Maui.Controls.Application.Current.MainPage.DisplayAlert(AppResources.Error, AppResources.BlankEmail, AppResources.OK, AppResources.Cancel);
+    }
+    private void UpdateEmail()
+    {
+        var x = ss.GetSettingByName(MagicStrings.Email);
+        x.Value = string.IsNullOrEmpty(emailAddress.Text) ? MagicStrings.NoEmailEntered : emailAddress.Text;
+        ss.UpdateSetting(x);
     }
 }

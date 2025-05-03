@@ -142,6 +142,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to By not entering your email address, your data will not be backed up to the cloud..
+        /// </summary>
+        internal static string BlankEmail {
+            get {
+                return ResourceManager.GetString("BlankEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Blue.
         /// </summary>
         internal static string Blue {
