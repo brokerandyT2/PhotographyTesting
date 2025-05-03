@@ -9,7 +9,6 @@ trigger:
       - Platforms/**
       - '!Platforms/Android/**'
 
-
 pool:
   vmImage: 'windows-latest'
 
@@ -17,21 +16,21 @@ variables:
   BuildConfiguration: 'Release'
   AndroidSdkVersion: '34.0'
   SemanticVersion: '1.0'
-  OrganizationUrl: 'https://dev.azure.com/3squaredcircles'  # Replace with your real org
-  ProjectName: 'Photography Locations'  # Replace with your real project
-steps:
 
+steps:
 # Step 1: Checkout the full repository
 - checkout: self
   clean: true
   fetchDepth: 0
-# Step 1: Install .NET SDK
+
+# Step 2: Install .NET SDK
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
   inputs:
     packageType: 'sdk'
     version: '9.x'
 
+# Step 3: Install GitVersion
 - script: |
     dotnet new tool-manifest --force
     dotnet tool install GitVersion.Tool --version 6.3.0
@@ -42,40 +41,31 @@ steps:
     dotnet tool run dotnet-gitversion /output json /verbosity quiet > $(Build.SourcesDirectory)\gitversion.json 2> $(Build.SourcesDirectory)\gitversion-error.log
   displayName: 'Run GitVersion'
 
-# Step 2b: Run GitVersion and generate JSON output
+# Step 4: Set GitVersion-based Build Number
 - task: PowerShell@2
   displayName: 'Set GitVersion-based Build Number'
   inputs:
     targetType: 'inline'
     script: |
-      # Read the GitVersion output
       $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-
-      # Extract the base version and Build ID
-      $baseVersion = $gitVersion.SemVer.Split('-')[0] # Extracts v0.8.1
-      $buildId = "$(Build.BuildId)".Replace('.','') # Build ID from pipeline
-
-      # Extract major and minor from the base version (e.g., v0.8.1 becomes 0 and 8)
+      $baseVersion = $gitVersion.SemVer.Split('-')[0]
+      $buildId = "$(Build.BuildId)".Replace('.','')
       $semVerParts = $baseVersion.TrimStart('v').Split('.')
-      $major = $semVerParts[0] # 0
-      $minor = $semVerParts[1] # 8
-
-      # Create the final version with Build ID replacing the patch version
+      $major = $semVerParts[0]
+      $minor = $semVerParts[1]
       $semVer = ".$major.$minor.$buildId"
-      
-      # Set the final version as the build number and output it
+
       Write-Host "##vso[build.updatebuildnumber]$semVer"
       Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
       Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$buildId"
+      Write-Host "##vso[task.setvariable variable=AssemblyVersion]$semVer"
 
-      Write-Host "SemVer=$semVer"
-      Write-Host "BuildId=$buildId"
-
-# Step 4: Install .NET MAUI Android Workload
+# Step 5: Install .NET MAUI Android Workload
 - script: |
     dotnet workload install maui-android
   displayName: 'Install .NET MAUI Android Workload'
 
+# Step 6: Install Android SDK and cmdline-tools
 - script: |
     echo "Installing Android SDK..."
     choco install android-sdk -y
@@ -89,19 +79,21 @@ steps:
     curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip
     tar -xf cmdline-tools.zip -C %CMDLINE_TOOLS_DIR% --strip-components=1
 
+    set PATH=%CMDLINE_TOOLS_DIR%\bin;%PATH%
     echo "Installing platform tools and build-tools using sdkmanager..."
-    %CMDLINE_TOOLS_DIR%\bin\sdkmanager.bat "platform-tools" "platforms;android-$(AndroidSdkVersion)" "build-tools;$(AndroidSdkVersion)" --sdk_root=%ANDROID_SDK_ROOT%
+    sdkmanager.bat "platform-tools" "platforms;android-$(AndroidSdkVersion)" "build-tools;$(AndroidSdkVersion)" --sdk_root=%ANDROID_SDK_ROOT%
   displayName: 'Install Android SDK and cmdline-tools'
 
-
-# Step 6: Install JDK
+# Step 7: Install JDK
 - script: |
     choco install openjdk11 -y
   displayName: 'Install JDK 11'
 
-# Step 7: Create Azure Artifacts Feeds if they do not exist
+# Step 8: Create Azure Artifacts Feeds if they do not exist
 - powershell: |
     $feeds = "APK,AAB".Split(',')
+    $organizationUrl = "$(System.TeamFoundationCollectionUri)"
+    $projectName = "$(System.TeamProject)"
     $personalAccessToken = "$(System.AccessToken)"
     $headers = @{
         Authorization = "Bearer $personalAccessToken"
@@ -109,12 +101,12 @@ steps:
     }
 
     foreach ($feed in $feeds) {
-        $url = "$(OrganizationUrl)/$(ProjectName)/_apis/packaging/feeds/$feed?api-version=6.0-preview.1"
+        $url = "${organizationUrl}${projectName}/_apis/packaging/feeds/$feed?api-version=6.0-preview.1"
         $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
         if (-not $response) {
             Write-Host "Feed '$feed' does not exist. Creating it..."
-            $createFeedUrl = "$(OrganizationUrl)/$(ProjectName)/_apis/packaging/feeds?api-version=6.0-preview.1"
+            $createFeedUrl = "${organizationUrl}${projectName}/_apis/packaging/feeds?api-version=6.0-preview.1"
             $body = @{
                 name = $feed
                 capabilities = @{
@@ -131,14 +123,14 @@ steps:
   env:
     System.AccessToken: $(System.AccessToken)
 
-# Step 8: Restore NuGet packages
+# Step 9: Restore NuGet packages
 - task: NuGetCommand@2
   displayName: 'Restore NuGet Packages'
   inputs:
     command: 'restore'
     restoreSolution: '**/*.sln'
 
-# Step 9: Build APK
+# Step 10: Build APK
 - task: MSBuild@1
   displayName: 'Build APK'
   inputs:
@@ -146,7 +138,7 @@ steps:
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Step 10: Build AAB
+# Step 11: Build AAB
 - task: MSBuild@1
   displayName: 'Build AAB'
   inputs:
@@ -154,14 +146,14 @@ steps:
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-# Step 11: Publish APK to Azure Artifacts
+# Step 12: Publish APK to Azure Artifacts
 - task: PublishPipelineArtifact@1
   displayName: 'Publish APK to Azure Artifacts'
   inputs:
     targetPath: '$(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/*.apk'
     artifact: 'APK'
 
-# Step 12: Publish AAB to Azure Artifacts
+# Step 13: Publish AAB to Azure Artifacts
 - task: PublishPipelineArtifact@1
   displayName: 'Publish AAB to Azure Artifacts'
   inputs:
