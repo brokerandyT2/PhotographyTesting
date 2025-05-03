@@ -29,9 +29,7 @@ steps:
 - script: |
     dotnet new tool-manifest --force
     dotnet tool install GitVersion.Tool --version 6.3.0
-    # Check if GitVersion is installed correctly
     dotnet tool list
-    # Run GitVersion and capture both standard output and error
     dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json 2> gitversion-error.log
   displayName: 'Install and Run GitVersion'
 
