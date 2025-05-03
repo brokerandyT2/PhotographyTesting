@@ -9,6 +9,7 @@ trigger:
       - Platforms/**
       - '!Platforms/Android/**'
 
+
 pool:
   vmImage: 'windows-latest'
 
@@ -19,6 +20,10 @@ variables:
 
 steps:
 
+# Step 1: Checkout the full repository
+- checkout: self
+  clean: true
+  fetchDepth: 0
 # Step 1: Install .NET SDK
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
@@ -29,9 +34,12 @@ steps:
 - script: |
     dotnet new tool-manifest --force
     dotnet tool install GitVersion.Tool --version 6.3.0
-    dotnet tool run dotnet-gitversion /output json /verbosity quiet > gitversion.json
+    dotnet tool list
   displayName: 'Install and Run GitVersion'
 
+- script: |
+    dotnet tool run dotnet-gitversion /output json /verbosity quiet > $(Build.SourcesDirectory)\gitversion.json 2> $(Build.SourcesDirectory)\gitversion-error.log
+  displayName: 'Run GitVersion'
 
 # Step 2b: Run GitVersion and generate JSON output
 - task: PowerShell@2
@@ -57,27 +65,6 @@ steps:
 
 
 
-# Step 3: Parse GitVersion JSON Output
-- task: PowerShell@2
-  name: SetGitVersionVars
-  displayName: 'Set GitVersion-based Build Number'
-  inputs:
-    targetType: 'inline'
-    script: |
-      $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-      $semVerRaw = $gitVersion.SemVer
-      $semVerParts = $semVerRaw -split '\.'
-      $major = $semVerParts[0]
-      $minor = $semVerParts[1]
-      $buildId = "$(Build.BuildId)"
-      $semVer = "$major.$minor.$buildId"
-      $assemblySemVer = $semVer
-      $androidVersionCode = "$(Build.BuildNumber)$(Build.BuildId)".Replace('.', '')
-
-      Write-Host "##vso[build.updatebuildnumber]$semVer"
-      Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
-      Write-Host "##vso[task.setvariable variable=AssemblySemVer;isOutput=true]$assemblySemVer"
-      Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$androidVersionCode"
 
 # Step 4: Install .NET MAUI Android Workload
 - script: |
