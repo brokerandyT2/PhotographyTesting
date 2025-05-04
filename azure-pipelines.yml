@@ -145,6 +145,8 @@ steps:
     publishDirectory: '$(Build.ArtifactStagingDirectory)'
     vstsFeedPublish: 'Photography Locations/apk'
     vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
+    versionOption: 'custom' # Or major, minor, patch
+    versionPublish: $(SemVer)
 
 - task: MSBuild@1
   displayName: 'Build Unsigned AAB'
@@ -191,3 +193,5 @@ steps:
     publishDirectory: '$(Build.ArtifactStagingDirectory)'
     vstsFeedPublish: 'Photography Locations/aab'
     vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
+    versionOption: 'custom' # Or major, minor, patch
+    versionPublish: $(SemVer)
