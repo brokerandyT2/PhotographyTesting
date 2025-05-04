@@ -66,9 +66,9 @@ steps:
       $semVer = "$major.$minor.$buildId"
 
       Write-Host "##vso[build.updatebuildnumber]$semVer"
-      Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
-      Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$buildId"
-      Write-Host "##vso[task.setvariable variable=AssemblyVersion;isOutput=true]$semVer"
+      Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
+      Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$buildId"
+      Write-Host "##vso[task.setvariable variable=AssemblyVersion]$semVer"
 
 - script: |
     dotnet workload install maui-android
@@ -145,8 +145,8 @@ steps:
     publishDirectory: '$(Build.ArtifactStagingDirectory)'
     vstsFeedPublish: 'Photography Locations/apk'
     vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
-    versionOption: 'custom' # Or major, minor, patch
-    versionPublish: $(SemVer)
+    versionOption: 'custom'
+    versionPublish: '$(SemVer)'
 
 - task: MSBuild@1
   displayName: 'Build Unsigned AAB'
@@ -193,5 +193,5 @@ steps:
     publishDirectory: '$(Build.ArtifactStagingDirectory)'
     vstsFeedPublish: 'Photography Locations/aab'
     vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
-    versionOption: 'custom' # Or major, minor, patch
-    versionPublish: $(SemVer)
+    versionOption: 'custom'
+    versionPublish: '$(SemVer)'
