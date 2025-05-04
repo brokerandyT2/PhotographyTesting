@@ -65,7 +65,7 @@ steps:
       solution: '**/Location.Core.csproj'
       msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk'
       configuration: '$(BuildConfiguration)'
-      
+
   - script: |
       echo "Listing files in output directory..."
       dir $(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\
@@ -83,14 +83,15 @@ steps:
         -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
         -storepass "$(KeystorePassword)" ^
         -keypass "$(KeyPassword)" ^
-        -signedjar "$(Build.ArtifactStagingDirectory)\PixMap-$(Build.BuildId).apk" ^
-        "$(Build.SourcesDirectory)\bin\$(BuildConfiguration)\net9.0-android\PixMap.apk" ^
+        -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).apk" ^
+        "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.apk" ^
         $(KeyAlias)
     displayName: 'Sign APK'
     env:
       KeystorePassword: $(KeystorePassword)
       KeyPassword: $(KeyPassword)
       KeyAlias: $(KeyAlias)
+
 
 
   # Step 9: Publish Signed APK to Azure Artifacts
