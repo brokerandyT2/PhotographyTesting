@@ -120,8 +120,8 @@ steps:
 - script: |
     jarsigner -verbose ^
       -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
-      -storepass "$(KeystorePassword)" ^
-      -keypass "$(KeyPassword)" ^
+      -storepass "Mustang76!" ^
+      -keypass "Mustang76!" ^
       -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).apk" ^
       "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.apk" ^
       $(KeyAlias)
@@ -129,7 +129,7 @@ steps:
   env:
     KeystorePassword: $(KeystorePassword)
     KeyPassword: $(KeyPassword)
-    KeyAlias: $(KeyAlias)
+    KeyAlias: 'pixmap-key'
 
 - task: CopyFiles@2
   displayName: 'Copy Signed APK to Artifact Staging Directory'
@@ -166,8 +166,8 @@ steps:
 - script: |
     jarsigner -verbose ^
       -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
-      -storepass "$(KeystorePassword)" ^
-      -keypass "$(KeyPassword)" ^
+      -storepass "Mustang76!" ^
+      -keypass "Mustang76!" ^
       -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).aab" ^
       "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.aab" ^
       $(KeyAlias)
@@ -175,7 +175,7 @@ steps:
   env:
     KeystorePassword: $(KeystorePassword)
     KeyPassword: $(KeyPassword)
-    KeyAlias: $(KeyAlias)
+    KeyAlias: 'pixmap-key'
 
 - task: CopyFiles@2
   displayName: 'Copy Signed AAB to Artifact Staging Directory'
