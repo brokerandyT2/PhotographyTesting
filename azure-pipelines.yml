@@ -66,10 +66,11 @@ steps:
       $artifact = $baseVersion.TrimStart('v')
       $dayOfYear = (Get-Date).DayOfYear
       $buildId = "$(Build.BuildId)"
-      $artifact ="$major.$minor
+
       $semVer = "$major.$minor.$dayOfYear.$buildId"
       Write-Host "##vso[task.setvariable variable=artifact]$artifact"
       Write-Host $semVer
+      Write-Host $artifact
       Write-Host "##vso[build.updatebuildnumber]$semVer"
       Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
       Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$buildId"
