@@ -59,12 +59,11 @@ steps:
     script: |
       $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
       $baseVersion = $gitVersion.SemVer.Split('-')[0]
-      $buildId = "$(Build.BuildId)".Replace('.','')
+      $buildId = "$(Build.BuildNumber)".Replace('.','')
       $semVerParts = $baseVersion.TrimStart('v').Split('.')
       $major = $semVerParts[0]
       $minor = $semVerParts[1]
-      $date = $(Date:yyyyMMdd)
-      $semVer = "$major.$minor.$(Date:yyyyMMdd)$buildId"
+      $semVer = "$major.$minor.$buildId"
 
       Write-Host "##vso[build.updatebuildnumber]$semVer"
       Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
