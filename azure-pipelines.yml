@@ -124,15 +124,26 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
+
       $env:AZURE_DEVOPS_EXT_PAT = "$(MY_PAT)"
       az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
-      $apk = Get-ChildItem "$(Build.ArtifactStagingDirectory)\apk" -Filter *.apk | Select-Object -First 1
+
+      $apk = Get-ChildItem "$(Build.ArtifactStagingDirectory)\apk" -Recurse -Filter *.apk | Select-Object -First 1
+
+      if ($apk -eq $null) {
+        Write-Error "APK file not found!"
+        exit 1
+      } else {
+        Write-Host "Found APK: $($apk.FullName)"
+      }
+
       az artifacts universal publish `
         --feed apk `
         --name PixMap `
         --version $(AssemblyVersion) `
         --description "APK build for PixMap" `
         --path $apk.FullName
+
 
 
 # Upload AAB
