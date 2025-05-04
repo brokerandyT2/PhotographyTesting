@@ -76,16 +76,17 @@ steps:
   - script: |
       jarsigner -verbose ^
         -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
-        -storepass "Mustang76!" ^
-        -keypass "Mustang76!" ^
-        -signedjar "$(Build.ArtifactStagingDirectory)\LocationCore-$(Build.BuildId).apk" ^
-        "$(Build.SourcesDirectory)\bin\$(BuildConfiguration)\net9.0-android\app-release-unsigned.apk" ^
+        -storepass "$(KeystorePassword)" ^
+        -keypass "$(KeyPassword)" ^
+        -signedjar "$(Build.ArtifactStagingDirectory)\PixMap-$(Build.BuildId).apk" ^
+        "$(Build.SourcesDirectory)\bin\$(BuildConfiguration)\net9.0-android\PixMap.apk" ^
         $(KeyAlias)
     displayName: 'Sign APK'
     env:
       KeystorePassword: $(KeystorePassword)
       KeyPassword: $(KeyPassword)
       KeyAlias: $(KeyAlias)
+
 
   # Step 9: Publish Signed APK to Azure Artifacts
   - task: UniversalPackages@0
