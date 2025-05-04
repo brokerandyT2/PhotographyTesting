@@ -92,15 +92,12 @@ steps:
       KeyPassword: $(KeyPassword)
       KeyAlias: $(KeyAlias)
 
-
-
-  # Step 9: Publish Signed APK to Azure Artifacts
   - task: UniversalPackages@0
     displayName: 'Publish Signed APK to Azure Artifacts'
     inputs:
       command: 'publish'
-      publishDirectory: '$(Build.ArtifactStagingDirectory)'
+      publishDirectory: '$(Build.ArtifactStagingDirectory)'  # Make sure this is correct
       feedsToUse: 'select'
-      feedPublish: 'apk'
-      packagePublish: 'LocationCore_APK'
-      versionPublish: '1.0.0'
+      feedPublish: 'apk'  # Specify the feed name here
+      packagePublish: 'com.x3squaredcircles.locations-Signed.apk'  # Specify the package name
+      versionPublish: '1.0.0'  # Update the version if needed
