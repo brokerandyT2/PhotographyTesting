@@ -17,7 +17,7 @@ steps:
   inputs:
     packageType: 'sdk'
     version: '9.x'
-    
+
 - script: |
     dotnet workload install maui-android
   displayName: 'Install .NET MAUI Android Workload'
@@ -44,7 +44,7 @@ steps:
   displayName: 'Restore NuGet Packages'
   inputs:
     command: 'restore'
-    restoreSolution: '**/Location.Core.csproj'
+    restoreSolution: '**/Photography.sln'
 
 # Step 4: Build Unsigned APK
 - task: MSBuild@1
