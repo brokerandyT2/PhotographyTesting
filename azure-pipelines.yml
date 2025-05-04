@@ -33,7 +33,7 @@ variables:
 
 jobs:
 - job: SetVersionAndBuild
-  displayName: 'Set Up Environment and Set Version'
+  displayName: 'Set Version and Build APK/AAB'
   variables:
     SemVer: $[counter(variables['Build.SourceBranchName'], 1)]  # Incremental versioning
   steps:
