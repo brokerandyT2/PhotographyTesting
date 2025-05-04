@@ -17,6 +17,10 @@ steps:
   inputs:
     packageType: 'sdk'
     version: '9.x'
+    
+- script: |
+    dotnet workload install maui-android
+  displayName: 'Install .NET MAUI Android Workload'
 
 # Step 2: Install Android SDK and Command-Line Tools
 - script: |
