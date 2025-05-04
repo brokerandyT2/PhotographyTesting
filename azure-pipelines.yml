@@ -64,7 +64,7 @@ steps:
       $major = $semVerParts[0]
       $minor = $semVerParts[1]
       $semVer = "$major.$minor.$buildId"
-
+      Wirte-Out $semVer
       Write-Host "##vso[build.updatebuildnumber]$semVer"
       Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
       Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$buildId"
