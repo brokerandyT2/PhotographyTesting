@@ -16,7 +16,7 @@ steps:
   displayName: 'Install .NET SDK'
   inputs:
     packageType: 'sdk'
-    version: '9.0'
+    version: '9.x'
 
 # Step 2: Install Android SDK and Command-Line Tools
 - script: |
