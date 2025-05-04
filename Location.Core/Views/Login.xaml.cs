@@ -24,7 +24,7 @@ public partial class Login : ContentPage
     }
     public Login(IAlertService alert, ILoggerService _logger)
     {
-       alertServ = alert;
+        alertServ = alert;
         loggerService = _logger;
         InitializeComponent();
     }
@@ -67,7 +67,7 @@ public partial class Login : ContentPage
     {
         var settings = ss.GetAllSettings();
         BindingContext = settings;
-     
+
         if (settings.WindDirection.Value == MagicStrings.TowardsWind)
         {
             WindDirection.Text = AppResources.TowardsWind.FirstCharToUpper();
@@ -103,17 +103,16 @@ public partial class Login : ContentPage
         }
 
         Navigation.PushAsync(new NavigationPage(new MainPage()));
-       
+
     }
 
     private void ImageButton_Pressed(object sender, EventArgs e)
     {
         if (string.IsNullOrEmpty(emailAddress.Text))
         {
-            if (DisplayAlert().Result)
-            {
-                Navigation.PopModalAsync();
-            }
+
+            Navigation.PopModalAsync();
+
 
         }
         else
@@ -125,7 +124,7 @@ public partial class Login : ContentPage
     private async Task<bool> DisplayAlert()
     {
         AlertService ass = new AlertService();
-        ass.AlertRaised += (s, e) => { };
+
         return await DisplayAlert(AppResources.Error, AppResources.BlankEmail, AppResources.OK, AppResources.Cancel);
     }
     private void UpdateEmail()

@@ -393,6 +393,9 @@
   <data name="WeatherDisplayTutorial" xml:space="preserve">
     <value>Weather Display Tutorial</value>
   </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Welcome to PixMap.  Please take this opportunity to configure your application.  You may return to this screen using the 'gear' icon in the top right corner of your screen.</value>
+  </data>
   <data name="Wind" xml:space="preserve">
     <value>Wind Direction</value>
   </data>

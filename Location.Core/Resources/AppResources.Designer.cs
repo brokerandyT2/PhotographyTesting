@@ -889,6 +889,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Welcome to PixMap.  Please take this opportunity to configure your application.  You may return to this screen using the &apos;gear&apos; icon in the top right corner of your screen..
+        /// </summary>
+        internal static string Welcome {
+            get {
+                return ResourceManager.GetString("Welcome", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wind Direction.
         /// </summary>
         internal static string Wind {

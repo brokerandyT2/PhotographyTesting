@@ -15,8 +15,8 @@
         VerticalOptions="Center">
   <ImageButton Source="closeoutlinecustom.png" HorizontalOptions="End" Pressed="ImageButton_Pressed"/>
         <Label 
-            Text="Welcome! "
-            FontSize="32"
+            Text="{x:Static strings:AppResources.Welcome}"
+            FontSize="20"
             HorizontalOptions="Center" />
         <Grid>
             <Grid.RowDefinitions>

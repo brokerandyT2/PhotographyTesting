@@ -1,142 +1,156 @@
 ﻿using vm = Location.Photography.Shared.ViewModels;
 using SkiaSharp;
-using SkiaSharp.Views.Maui;
 using Locations.Core.Business.DataAccess;
-using System.Timers;
-using Camera.MAUI;
-using Location.Photography.Business.DataAccess;
-using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Interfaces;
+using Location.Photography.Shared.ViewModels;
+using Location.Photography.Business.DataAccess;
 
-namespace Location.Core.Views.Premium;
-
-public partial class LightMeter : ContentPage
+namespace Location.Core.Views.Premium
 {
-    private IAlertService alertServ;
-    private ILoggerService loggerService;
-    private readonly vm.LightMeter _viewModel;
-    private System.Timers.Timer _captureTimer;
-    private bool _isCapturing = false;
-    Locations.Core.Business.DataAccess.SettingsService _settingsService = new Locations.Core.Business.DataAccess.SettingsService();
-    public LightMeter()
+    public partial class LightMeter : ContentPage
     {
-        InitializeComponent();
-        _viewModel = BindingContext as vm.LightMeter;
-    }
-    public LightMeter(IAlertService alertserv, ILoggerService log) : this()
-    {
-        this.alertServ = alertserv;
-        this.loggerService = log;
-    }
+        private readonly vm.LightMeterViewModel _viewModel;
+        private System.Timers.Timer _captureTimer;
+        private bool _isCapturing = false;
 
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
-    {
-        base.OnNavigatedTo(args);
-
-        // Start camera timer loop 
-       var timer = _settingsService.GetSetting(MagicStrings.CameraRefresh).Value;
-        _captureTimer = new System.Timers.Timer(Convert.ToInt16(timer)); // 1000 ms = 1 second
-        _captureTimer.Elapsed += async (s, e) => await CaptureAndProcessFrameAsync();
-        _captureTimer.Start();
-    }
-
-    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
-    {
-        base.OnNavigatedFrom(args);
-        _captureTimer?.Stop();
-        _captureTimer?.Dispose();
-    }
-
-    private async Task CaptureAndProcessFrameAsync()
-    {
-        if (_isCapturing || cameraView == null || !cameraView.IsEnabled)
-            return;
-
-        _isCapturing = true;
-
-        try
+        public LightMeter()
         {
-            var stream = await cameraView.TakePhotoAsync();
-            if (stream != null)
+            InitializeComponent();
+            _viewModel = BindingContext as vm.LightMeterViewModel;
+            LightMeterScaleDrawable.Instance.BindViewModel(_viewModel);
+
+
+
+        }
+        protected override void OnNavigatedTo(NavigatedToEventArgs args)
+        {
+            var settingsService = new Locations.Core.Business.DataAccess.SettingsService();
+            base.OnNavigatedTo(args);
+            int interval;
+            try
             {
-                using var memoryStream = new MemoryStream();
-                await stream.CopyToAsync(memoryStream);
-                memoryStream.Seek(0, SeekOrigin.Begin);
-
-                var bitmap = SKBitmap.Decode(memoryStream);
-                if (bitmap != null)
+                var value = settingsService.GetSetting("CameraRefresh").Value;
+                interval = Convert.ToInt32(value);
+            }
+            catch { interval = 2000; }
+            _captureTimer = new System.Timers.Timer(interval);
+            _captureTimer.Elapsed += async (s, e) => await CaptureAndProcessFrameAsync();
+            _captureTimer.Start();
+        }
+        private async Task CaptureAndProcessFrameAsync()
+        {
+            if (_isCapturing || cameraView == null || !cameraView.IsEnabled) return;
+            _isCapturing = true;
+            try
+            {
+                var stream = cameraView.TakePhotoAsync().Result;
+                if (stream != null)
                 {
+                    using var memoryStream = new MemoryStream();
+                    await stream.CopyToAsync(memoryStream);
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+                    var bitmap = SKBitmap.Decode(memoryStream);
                     _viewModel?.ProcessFrame(bitmap);
-
-                    // Request redraw
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        canvasView.InvalidateSurface();
-                    });
+                    MainThread.BeginInvokeOnMainThread(() => graphicsView.Invalidate());
                 }
             }
+            catch (Exception) { }
+            finally { _isCapturing = false; }
         }
-        catch (Exception ex)
+
+        private void Button_Pressed(object sender, EventArgs e)
         {
-            // Optional: Log error
-        }
-        finally
-        {
-            _isCapturing = false;
+            var x = cameraView.TakePhotoAsync().Result;
+            var z = string.Empty;
         }
     }
 
-    private void Button_Pressed(object sender, EventArgs e)
+
+
+
+
+    public class LightMeterScaleDrawable : IDrawable
     {
-        // You could optionally trigger a single snapshot manually here
-        _ = CaptureAndProcessFrameAsync();
-    }
+        private static readonly Lazy<LightMeterScaleDrawable> _instance = new(() => new LightMeterScaleDrawable());
+        public static LightMeterScaleDrawable Instance => _instance.Value;
 
-    private void OnCanvasViewPaintSurface(object sender, SKPaintSurfaceEventArgs e)
-    {
-        var canvas = e.Surface.Canvas;
-        var info = e.Info;
-        canvas.Clear();
+        private vm.LightMeterViewModel? _viewModel;
+        private float _animatedRotation = 135f;
 
-        float centerX = info.Width / 2f;
-        float centerY = info.Height / 2f;
-        float radius = Math.Min(centerX, centerY) * 0.8f;
-
-        // Draw background
-        using var bgPaint = new SKPaint
+        public void BindViewModel(LightMeterViewModel viewModel)
         {
-            Style = SKPaintStyle.Stroke,
-            Color = SKColors.Gray,
-            StrokeWidth = 5
-        };
-        canvas.DrawCircle(centerX, centerY, radius, bgPaint);
+            _viewModel = viewModel;
+        }
 
-        // Draw needle
-        using var needlePaint = new SKPaint
+        public void Draw(ICanvas canvas, RectF dirtyRect)
         {
-            Style = SKPaintStyle.Stroke,
-            Color = SKColors.Red,
-            StrokeWidth = 4,
-            IsAntialias = true
-        };
+            if (_viewModel == null) return;
 
-        float angle = (float)(_viewModel?.NeedleRotation ?? 0);
-        var radMatrix = SKMatrix.CreateRotationDegrees(angle, centerX, centerY);
+            var centerX = dirtyRect.Width / 2;
+            var centerY = dirtyRect.Height / 2;
+            var radius = Math.Min(centerX, centerY) - 20;
 
-        SKPoint start = new(centerX, centerY);
-        SKPoint end = new(centerX, centerY - radius);
-        end = radMatrix.MapPoint(end);
-        canvas.DrawLine(start, end, needlePaint);
+            // Retro cream dial background
+            canvas.FillColor = Color.FromArgb("#F5F5DC"); // beige/cream
+            canvas.FillCircle(centerX, centerY, radius);
 
-        // Draw EV text
-        using var textPaint = new SKPaint
-        {
-            Color = SKColors.White,
-            TextSize = 48,
-            IsAntialias = true,
-            TextAlign = SKTextAlign.Center
-        };
-        canvas.DrawText($"EV: {Math.Round(_viewModel?.EVValue ?? 0, 1)}", centerX, centerY + radius + 50, textPaint);
+            // Outer circle stroke
+            canvas.StrokeColor = Colors.DarkGray;
+            canvas.StrokeSize = 4;
+            canvas.DrawCircle(centerX, centerY, radius);
+
+            // Inner ring for retro styling
+            canvas.StrokeColor = Colors.LightGray;
+            canvas.StrokeSize = 2;
+            canvas.DrawCircle(centerX, centerY, radius - 20);
+
+            // Tick marks and EV labels
+            for (int ev = -5; ev <= 5; ev++)
+            {
+                float angle = 135 + (ev + 5) * (270f / 10f);
+                float rad = angle * (float)Math.PI / 180f;
+
+                float tickStart = radius - 10;
+                float tickEnd = radius;
+                float x1 = centerX + (float)Math.Cos(rad) * tickStart;
+                float y1 = centerY + (float)Math.Sin(rad) * tickStart;
+                float x2 = centerX + (float)Math.Cos(rad) * tickEnd;
+                float y2 = centerY + (float)Math.Sin(rad) * tickEnd;
+
+                canvas.StrokeColor = ev == 0 ? Colors.OrangeRed : Colors.Black;
+                canvas.StrokeSize = 2;
+                canvas.DrawLine(x1, y1, x2, y2);
+
+                var labelX = centerX + (float)Math.Cos(rad) * (radius - 25);
+                var labelY = centerY + (float)Math.Sin(rad) * (radius - 25);
+                canvas.FontColor = Colors.Black;
+                canvas.FontSize = ev == 0 ? 18 : 14;
+                canvas.DrawString(ev.ToString(), labelX, labelY, HorizontalAlignment.Center);
+            }
+
+            // Smooth needle animation with subtle jitter
+            float baseTargetAngle = 135 + (float)(_viewModel.EVValue + 5) * (270f / 10f);
+
+            // Subtle random jitter (±0.5°)
+            float jitter = (float)(Random.Shared.NextDouble() - 0.5) * 1f;
+
+            // Slowly blend toward target + jitter
+            float jitteredTarget = baseTargetAngle + jitter;
+            _animatedRotation += (jitteredTarget - _animatedRotation) * 0.05f;
+
+            var needleRad = _animatedRotation * (float)Math.PI / 180f;
+            float nx = centerX + (float)Math.Cos(needleRad) * (radius - 30);
+            float ny = centerY + (float)Math.Sin(needleRad) * (radius - 30);
+
+            // Needle
+            canvas.StrokeColor = Colors.Red;
+            canvas.StrokeSize = 4;
+            canvas.DrawLine(centerX, centerY, nx, ny);
+
+            // Needle base hub
+            canvas.FillColor = Colors.Black;
+            canvas.FillCircle(centerX, centerY, 6);
+        }
     }
 }
