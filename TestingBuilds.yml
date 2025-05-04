@@ -66,6 +66,11 @@ steps:
       msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk'
       configuration: '$(BuildConfiguration)'
 
+  - script: |
+      echo "Listing files in output directory..."
+      dir $(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\
+    displayName: 'List Files in Build Output Directory'
+
   # Step 7: Download Keystore File
   - task: DownloadSecureFile@1
     displayName: 'Download Keystore File'
@@ -76,10 +81,10 @@ steps:
   - script: |
       jarsigner -verbose ^
         -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
-        -storepass "Mustang76!" ^
-        -keypass "Mustang76!" ^
-        -signedjar "$(Build.ArtifactStagingDirectory)\LocationCore-$(Build.BuildId).apk" ^
-        "$(Build.SourcesDirectory)\bin\$(BuildConfiguration)\net9.0-android\app-release-unsigned.apk" ^
+        -storepass "$(KeystorePassword)" ^
+        -keypass "$(KeyPassword)" ^
+        -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).apk" ^
+        "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.apk" ^
         $(KeyAlias)
     displayName: 'Sign APK'
     env:
@@ -87,13 +92,19 @@ steps:
       KeyPassword: $(KeyPassword)
       KeyAlias: $(KeyAlias)
 
-  # Step 9: Publish Signed APK to Azure Artifacts
+  # Step 1: Copy the signed APK to the staging directory
+  - task: CopyFiles@2
+    displayName: 'Copy Signed APK to Artifact Staging Directory'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/Location.Core/bin/Release/net9.0-android'
+      Contents: 'com.x3squaredcircles.locations-Signed.apk'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  # Step 2: Publish the APK to the Azure Artifacts feed
   - task: UniversalPackages@0
     displayName: 'Publish Signed APK to Azure Artifacts'
     inputs:
-      command: 'publish'
+      command: publish
       publishDirectory: '$(Build.ArtifactStagingDirectory)'
-      feedsToUse: 'select'
-      feedPublish: 'apk'
-      packagePublish: 'LocationCore_APK'
-      versionPublish: '1.0.0'
+      vstsFeedPublish: 'Photography Locations/apk'
+      vstsFeedPackagePublish: 'com.x3squaredcircles.locations'

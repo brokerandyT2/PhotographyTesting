@@ -35,31 +35,6 @@ steps:
 - checkout: self
   clean: true
   fetchDepth: 0
-- task: PowerShell@2
-  displayName: 'Install latest Azure CLI'
-  inputs:
-    targetType: 'inline'
-    script: |
-      Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
-      Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
-
-- task: PowerShell@2
-  displayName: 'List Azure Artifacts Feeds'
-  inputs:
-    targetType: 'inline'
-    script: |
-      $env:AZURE_DEVOPS_EXT_PAT = "$(MY_PAT)"
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
-
-      # Force update or reinstall of azure-devops extension
-      az extension remove --name azure-devops
-      az extension add --name azure-devops
-
-      # Check extension list
-      az extension list
-
-      # Run artifacts feed listing
-      az artifacts feed list --output table
 
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
@@ -84,12 +59,12 @@ steps:
     script: |
       $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
       $baseVersion = $gitVersion.SemVer.Split('-')[0]
-      $buildId = "$(Build.BuildId)".Replace('.','')
+      $buildId = "$(Build.BuildNumber)".Replace('.','')
       $semVerParts = $baseVersion.TrimStart('v').Split('.')
       $major = $semVerParts[0]
       $minor = $semVerParts[1]
       $semVer = "$major.$minor.$buildId"
-
+      Write-Host $semVer
       Write-Host "##vso[build.updatebuildnumber]$semVer"
       Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
       Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$buildId"
@@ -126,64 +101,97 @@ steps:
     restoreSolution: '**/*.sln'
 
 - task: MSBuild@1
-  displayName: 'Build APK'
+  displayName: 'Build Unsigned APK'
   inputs:
-    solution: 'Location.Core\Location.Core.csproj'
-    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
+    solution: '**/Location.Core.csproj'
+    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk'
     configuration: '$(BuildConfiguration)'
 
+- script: |
+    echo "Listing files in output directory..."
+    dir $(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\
+  displayName: 'List Files in Build Output Directory'
 
-# Copy APK
+- task: DownloadSecureFile@1
+  displayName: 'Download Keystore File'
+  inputs:
+    secureFile: 'pixmap-release.keystore'
+
+- script: |
+    jarsigner -verbose ^
+      -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
+      -storepass "Mustang76!" ^
+      -keypass "Mustang76!" ^
+      -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).apk" ^
+      "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.apk" ^
+      "pixmap-key"
+  displayName: 'Sign APK'
+  env:
+    KeystorePassword: $(KeystorePassword)
+    KeyPassword: $(KeyPassword)
+    KeyAlias: 'pixmap-key'
+
 - task: CopyFiles@2
-  displayName: 'Copy APK to staging directory'
+  displayName: 'Copy Signed APK to Artifact Staging Directory'
   inputs:
-    sourceFolder: '$(Build.SourcesDirectory)'
-    contents: '**/*.apk'
-    targetFolder: '$(Build.ArtifactStagingDirectory)\apk'
+    SourceFolder: '$(Build.SourcesDirectory)/Location.Core/bin/Release/net9.0-android'
+    Contents: 'com.x3squaredcircles.locations-Signed.apk'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-# Copy AAB
-
-# Upload APK
-- task: PowerShell@2
-  displayName: 'Upload APK to Azure Artifacts Feed'
+- task: UniversalPackages@0
+  displayName: 'Publish Signed APK to Azure Artifacts'
   inputs:
-    targetType: 'inline'
-    script: |
+    command: publish
+    publishDirectory: '$(Build.ArtifactStagingDirectory)'
+    vstsFeedPublish: 'Photography Locations/apk'
+    vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
+    versionOption: 'custom'
+    versionPublish: '$(SemVer)'
 
-      $env:AZURE_DEVOPS_EXT_PAT = "$(MY_PAT)"
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
-
-      $apk = Get-ChildItem "$(Build.ArtifactStagingDirectory)\apk" -Recurse -Filter *.apk | Select-Object -First 1
-
-      if ($apk -eq $null) {
-        Write-Error "APK file not found!"
-        exit 1
-      } else {
-        Write-Host "Found APK: $($apk.FullName)"
-      }
-
-      az artifacts universal publish `
-        --feed apk `
-        --name PixMap `
-        --version $(AssemblyVersion) `
-        --description "APK build for PixMap" `
-        --path $apk.FullName
-
-
-
-# Upload AAB
-- task: AzureCLI@2
-  displayName: 'Upload AAB to Azure Artifacts Feed'
+- task: MSBuild@1
+  displayName: 'Build Unsigned AAB'
   inputs:
-    scriptType: 'ps'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles
-      $env:AZURE_DEVOPS_EXT_PAT="$(MY_PAT)"
-      $aab = Get-ChildItem "$(Build.ArtifactStagingDirectory)\aab" -Filter *.aab | Select-Object -First 1
-      az artifacts universal publish `
-        --feed aab `
-        --name PixMap `
-        --version $(AssemblyVersion) `
-        --description "AAB build for PixMap" `
-        --path $aab.FullName
+    solution: '**/Location.Core.csproj'
+    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=aab'
+    configuration: '$(BuildConfiguration)'
+
+- script: |
+    echo "Listing files in output directory..."
+    dir $(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\
+  displayName: 'List Files in Build Output Directory'
+
+- task: DownloadSecureFile@1
+  displayName: 'Download Keystore File'
+  inputs:
+    secureFile: 'pixmap-release.keystore'
+
+- script: |
+    jarsigner -verbose ^
+      -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
+      -storepass "Mustang76!" ^
+      -keypass "Mustang76!" ^
+      -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).aab" ^
+      "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.aab" ^
+      "pixmap-key"
+  displayName: 'Sign AAB'
+  env:
+    KeystorePassword: $(KeystorePassword)
+    KeyPassword: $(KeyPassword)
+    KeyAlias: 'pixmap-key'
+
+- task: CopyFiles@2
+  displayName: 'Copy Signed AAB to Artifact Staging Directory'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/Location.Core/bin/Release/net9.0-android'
+    Contents: 'com.x3squaredcircles.locations-Signed.aab'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: UniversalPackages@0
+  displayName: 'Publish Signed AAB to Azure Artifacts'
+  inputs:
+    command: publish
+    publishDirectory: '$(Build.ArtifactStagingDirectory)'
+    vstsFeedPublish: 'Photography Locations/aab'
+    vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
+    versionOption: 'custom'
+    versionPublish: '$(SemVer)'
