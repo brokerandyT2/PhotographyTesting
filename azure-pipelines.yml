@@ -124,7 +124,7 @@ steps:
       -keypass "Mustang76!" ^
       -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).apk" ^
       "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.apk" ^
-      $(KeyAlias)
+      "pixmap-key"
   displayName: 'Sign APK'
   env:
     KeystorePassword: $(KeystorePassword)
@@ -170,7 +170,7 @@ steps:
       -keypass "Mustang76!" ^
       -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).aab" ^
       "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.aab" ^
-      $(KeyAlias)
+      "pixmap-key"
   displayName: 'Sign AAB'
   env:
     KeystorePassword: $(KeystorePassword)
