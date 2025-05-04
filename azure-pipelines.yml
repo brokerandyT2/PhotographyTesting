@@ -35,7 +35,14 @@ steps:
 - checkout: self
   clean: true
   fetchDepth: 0
-
+- task: PowerShell@2
+  displayName: 'List Azure Artifacts Feeds'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $env:AZURE_DEVOPS_EXT_PAT = "$(MY_PAT)"
+      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
+      az artifacts feed list --output table
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
   inputs:
