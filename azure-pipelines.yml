@@ -59,7 +59,7 @@ steps:
     script: |
       $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
       $baseVersion = $gitVersion.SemVer.Split('-')[0]
-      $buildId = "$(Build.BuildNumber)".Replace('.','')
+      $buildId = "$(DayOfYear)$(Build.BuildId)".Replace('.','')
       $semVerParts = $baseVersion.TrimStart('v').Split('.')
       $major = $semVerParts[0]
       $minor = $semVerParts[1]
