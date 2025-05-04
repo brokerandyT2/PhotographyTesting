@@ -42,6 +42,11 @@ steps:
     script: |
       $env:AZURE_DEVOPS_EXT_PAT = "$(MY_PAT)"
       az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
+
+      # Install the Azure DevOps extension (needed for az artifacts)
+      az extension add --name azure-devops
+
+      # List all feeds
       az artifacts feed list --output table
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
