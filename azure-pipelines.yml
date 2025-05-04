@@ -31,159 +31,182 @@ variables:
   AndroidSdkVersion: '34.0'
   SemanticVersion: '1.0'
 
-steps:
-- checkout: self
-  clean: true
-  fetchDepth: 0
-- task: PowerShell@2
-  displayName: 'Install latest Azure CLI'
-  inputs:
-    targetType: 'inline'
-    script: |
-      Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
-      Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+jobs:
+- job: SetVersionAndBuild
+  displayName: 'Set Version and Build APK/AAB'
+  variables:
+    SemVer: $[counter(variables['Build.SourceBranchName'], 1)]  # Incremental versioning
+  steps:
+  - checkout: self
+    clean: true
+    fetchDepth: 0
 
-- task: PowerShell@2
-  displayName: 'List Azure Artifacts Feeds'
-  inputs:
-    targetType: 'inline'
-    script: |
-      $env:AZURE_DEVOPS_EXT_PAT = "$(MY_PAT)"
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
+  - task: UseDotNet@2
+    displayName: 'Install .NET SDK'
+    inputs:
+      packageType: 'sdk'
+      version: '9.x'
 
-      # Force update or reinstall of azure-devops extension
-      az extension remove --name azure-devops
-      az extension add --name azure-devops
+  - script: |
+      dotnet new tool-manifest --force
+      dotnet tool install GitVersion.Tool --version 6.3.0
+      dotnet tool list
+    displayName: 'Install GitVersion'
 
-      # Check extension list
-      az extension list
+  - script: |
+      dotnet tool run dotnet-gitversion /output json /verbosity quiet > $(Build.SourcesDirectory)\gitversion.json 2> $(Build.SourcesDirectory)\gitversion-error.log
+    displayName: 'Run GitVersion'
 
-      # Run artifacts feed listing
-      az artifacts feed list --output table
+  - task: PowerShell@2
+    displayName: 'Set GitVersion-based Build Number'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
+        $baseVersion = $gitVersion.SemVer.Split('-')[0]
+        $buildId = "$(Build.BuildId)".Replace('.','')
+        $semVerParts = $baseVersion.TrimStart('v').Split('.')
+        $major = $semVerParts[0]
+        $minor = $semVerParts[1]
+        $semVer = "$major.$minor.$buildId"
 
-- task: UseDotNet@2
-  displayName: 'Install .NET SDK'
-  inputs:
-    packageType: 'sdk'
-    version: '9.x'
+        Write-Host "##vso[build.updatebuildnumber]$semVer"
+        Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$semVer"
+        Write-Host "##vso[task.setvariable variable=AndroidVersionCode;isOutput=true]$buildId"
+        Write-Host "##vso[task.setvariable variable=AssemblyVersion;isOutput=true]$semVer"
 
-- script: |
-    dotnet new tool-manifest --force
-    dotnet tool install GitVersion.Tool --version 6.3.0
-    dotnet tool list
-  displayName: 'Install GitVersion'
+  - script: |
+      dotnet workload install maui-android
+    displayName: 'Install .NET MAUI Android Workload'
 
-- script: |
-    dotnet tool run dotnet-gitversion /output json /verbosity quiet > $(Build.SourcesDirectory)\gitversion.json 2> $(Build.SourcesDirectory)\gitversion-error.log
-  displayName: 'Run GitVersion'
+  - script: |
+      echo "Installing Android SDK..."
+      choco install android-sdk -y
+      refreshenv
 
-- task: PowerShell@2
-  displayName: 'Set GitVersion-based Build Number'
-  inputs:
-    targetType: 'inline'
-    script: |
-      $gitVersion = Get-Content 'gitversion.json' | ConvertFrom-Json
-      $baseVersion = $gitVersion.SemVer.Split('-')[0]
-      $buildId = "$(Build.BuildId)".Replace('.','')
-      $semVerParts = $baseVersion.TrimStart('v').Split('.')
-      $major = $semVerParts[0]
-      $minor = $semVerParts[1]
-      $semVer = "$major.$minor.$buildId"
+      set ANDROID_SDK_ROOT=C:\Android\android-sdk
+      set CMDLINE_TOOLS_DIR=%ANDROID_SDK_ROOT%\cmdline-tools\latest
+      mkdir %CMDLINE_TOOLS_DIR%
 
-      Write-Host "##vso[build.updatebuildnumber]$semVer"
-      Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
-      Write-Host "##vso[task.setvariable variable=AndroidVersionCode]$buildId"
-      Write-Host "##vso[task.setvariable variable=AssemblyVersion]$semVer"
+      curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip
+      tar -xf cmdline-tools.zip -C %CMDLINE_TOOLS_DIR% --strip-components=1
 
-- script: |
-    dotnet workload install maui-android
-  displayName: 'Install .NET MAUI Android Workload'
+      set PATH=%CMDLINE_TOOLS_DIR%\bin;%PATH%
+      sdkmanager.bat "platform-tools" "platforms;android-$(AndroidSdkVersion)" "build-tools;$(AndroidSdkVersion)" --sdk_root=%ANDROID_SDK_ROOT%
+    displayName: 'Install Android SDK and cmdline-tools'
 
-- script: |
-    echo "Installing Android SDK..."
-    choco install android-sdk -y
-    refreshenv
+  - script: |
+      choco install openjdk11 -y
+    displayName: 'Install JDK 11'
 
-    set ANDROID_SDK_ROOT=C:\Android\android-sdk
-    set CMDLINE_TOOLS_DIR=%ANDROID_SDK_ROOT%\cmdline-tools\latest
-    mkdir %CMDLINE_TOOLS_DIR%
+  - task: NuGetCommand@2
+    displayName: 'Restore NuGet Packages'
+    inputs:
+      command: 'restore'
+      restoreSolution: '**/*.sln'
 
-    curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip
-    tar -xf cmdline-tools.zip -C %CMDLINE_TOOLS_DIR% --strip-components=1
+- job: BuildAndPublishApk
+  displayName: 'Build, Sign, and Publish APK'
+  dependsOn: SetVersionAndBuild
+  variables:
+    AssemblyVersion: $[dependencies.SetVersionAndBuild.outputs['SemVer']]
 
-    set PATH=%CMDLINE_TOOLS_DIR%\bin;%PATH%
-    sdkmanager.bat "platform-tools" "platforms;android-$(AndroidSdkVersion)" "build-tools;$(AndroidSdkVersion)" --sdk_root=%ANDROID_SDK_ROOT%
-  displayName: 'Install Android SDK and cmdline-tools'
+  steps:
+  - task: MSBuild@1
+    displayName: 'Build Unsigned APK'
+    inputs:
+      solution: '**/Location.Core.csproj'
+      msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk'
+      configuration: '$(BuildConfiguration)'
 
-- script: |
-    choco install openjdk11 -y
-  displayName: 'Install JDK 11'
+  - script: |
+      echo "Listing files in output directory..."
+      dir $(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\
+    displayName: 'List Files in Build Output Directory'
 
-- task: NuGetCommand@2
-  displayName: 'Restore NuGet Packages'
-  inputs:
-    command: 'restore'
-    restoreSolution: '**/*.sln'
+  - task: DownloadSecureFile@1
+    displayName: 'Download Keystore File'
+    inputs:
+      secureFile: 'pixmap-release.keystore'
 
-- task: MSBuild@1
-  displayName: 'Build APK'
-  inputs:
-    solution: 'Location.Core\Location.Core.csproj'
-    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
-    configuration: '$(BuildConfiguration)'
+  - script: |
+      jarsigner -verbose ^
+        -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
+        -storepass "$(KeystorePassword)" ^
+        -keypass "$(KeyPassword)" ^
+        -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).apk" ^
+        "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.apk" ^
+        $(KeyAlias)
+    displayName: 'Sign APK'
+    env:
+      KeystorePassword: $(KeystorePassword)
+      KeyPassword: $(KeyPassword)
+      KeyAlias: $(KeyAlias)
 
+  - task: CopyFiles@2
+    displayName: 'Copy Signed APK to Artifact Staging Directory'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/Location.Core/bin/Release/net9.0-android'
+      Contents: 'com.x3squaredcircles.locations-Signed.apk'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-# Copy APK
-- task: CopyFiles@2
-  displayName: 'Copy APK to staging directory'
-  inputs:
-    sourceFolder: '$(Build.SourcesDirectory)'
-    contents: '**/*.apk'
-    targetFolder: '$(Build.ArtifactStagingDirectory)\apk'
+  - task: UniversalPackages@0
+    displayName: 'Publish Signed APK to Azure Artifacts'
+    inputs:
+      command: publish
+      publishDirectory: '$(Build.ArtifactStagingDirectory)'
+      vstsFeedPublish: 'Photography Locations/apk'
+      vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
 
-# Copy AAB
+- job: BuildAndPublishAab
+  displayName: 'Build, Sign, and Publish AAB'
+  dependsOn: SetVersionAndBuild
+  variables:
+    AssemblyVersion: $[dependencies.SetVersionAndBuild.outputs['SemVer']]
 
-# Upload APK
-- task: PowerShell@2
-  displayName: 'Upload APK to Azure Artifacts Feed'
-  inputs:
-    targetType: 'inline'
-    script: |
+  steps:
+  - task: MSBuild@1
+    displayName: 'Build Unsigned AAB'
+    inputs:
+      solution: '**/Location.Core.csproj'
+      msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=aab'
+      configuration: '$(BuildConfiguration)'
 
-      $env:AZURE_DEVOPS_EXT_PAT = "$(MY_PAT)"
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
+  - script: |
+      echo "Listing files in output directory..."
+      dir $(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\
+    displayName: 'List Files in Build Output Directory'
 
-      $apk = Get-ChildItem "$(Build.ArtifactStagingDirectory)\apk" -Recurse -Filter *.apk | Select-Object -First 1
+  - task: DownloadSecureFile@1
+    displayName: 'Download Keystore File'
+    inputs:
+      secureFile: 'pixmap-release.keystore'
 
-      if ($apk -eq $null) {
-        Write-Error "APK file not found!"
-        exit 1
-      } else {
-        Write-Host "Found APK: $($apk.FullName)"
-      }
+  - script: |
+      jarsigner -verbose ^
+        -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
+        -storepass "$(KeystorePassword)" ^
+        -keypass "$(KeyPassword)" ^
+        -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).aab" ^
+        "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.aab" ^
+        $(KeyAlias)
+    displayName: 'Sign AAB'
+    env:
+      KeystorePassword: $(KeystorePassword)
+      KeyPassword: $(KeyPassword)
+      KeyAlias: $(KeyAlias)
 
-      az artifacts universal publish `
-        --feed apk `
-        --name PixMap `
-        --version $(AssemblyVersion) `
-        --description "APK build for PixMap" `
-        --path $apk.FullName
+  - task: CopyFiles@2
+    displayName: 'Copy Signed AAB to Artifact Staging Directory'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/Location.Core/bin/Release/net9.0-android'
+      Contents: 'com.x3squaredcircles.locations-Signed.aab'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-
-
-# Upload AAB
-- task: AzureCLI@2
-  displayName: 'Upload AAB to Azure Artifacts Feed'
-  inputs:
-    scriptType: 'ps'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles
-      $env:AZURE_DEVOPS_EXT_PAT="$(MY_PAT)"
-      $aab = Get-ChildItem "$(Build.ArtifactStagingDirectory)\aab" -Filter *.aab | Select-Object -First 1
-      az artifacts universal publish `
-        --feed aab `
-        --name PixMap `
-        --version $(AssemblyVersion) `
-        --description "AAB build for PixMap" `
-        --path $aab.FullName
+  - task: UniversalPackages@0
+    displayName: 'Publish Signed AAB to Azure Artifacts'
+    inputs:
+      command: publish
+      publishDirectory: '$(Build.ArtifactStagingDirectory)'
+      vstsFeedPublish: 'Photography Locations/aab'
+      vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
