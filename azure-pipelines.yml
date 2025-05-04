@@ -63,10 +63,12 @@ steps:
       $semVerParts = $baseVersion.TrimStart('v').Split('.')
       $major = $semVerParts[0]
       $minor = $semVerParts[1]
+      $artifact = $baseVersion.TrimStart('v')
       $dayOfYear = (Get-Date).DayOfYear
       $buildId = "$(Build.BuildId)"
-
+      $artifact ="$major.$minor
       $semVer = "$major.$minor.$dayOfYear.$buildId"
+      Write-Host "##vso[task.setvariable variable=artifact]$artifact"
       Write-Host $semVer
       Write-Host "##vso[build.updatebuildnumber]$semVer"
       Write-Host "##vso[task.setvariable variable=SemVer]$semVer"
@@ -149,7 +151,7 @@ steps:
     vstsFeedPublish: 'Photography Locations/apk'
     vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
     versionOption: 'custom'
-    versionPublish: '$(SemVer)'
+    versionPublish: '$(artifact)'
 
 - task: MSBuild@1
   displayName: 'Build Unsigned AAB'
@@ -197,4 +199,4 @@ steps:
     vstsFeedPublish: 'Photography Locations/aab'
     vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
     versionOption: 'custom'
-    versionPublish: '$(SemVer)'
+    versionPublish: '$(artifact)'
