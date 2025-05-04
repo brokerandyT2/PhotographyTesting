@@ -76,8 +76,8 @@ steps:
   - script: |
       jarsigner -verbose ^
         -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
-        -storepass "$(KeystorePassword)" ^
-        -keypass "$(KeyPassword)" ^
+        -storepass "Mustang76!" ^
+        -keypass "Mustang76!" ^
         -signedjar "$(Build.ArtifactStagingDirectory)\LocationCore-$(Build.BuildId).apk" ^
         "$(Build.SourcesDirectory)\bin\$(BuildConfiguration)\net9.0-android\app-release-unsigned.apk" ^
         $(KeyAlias)
