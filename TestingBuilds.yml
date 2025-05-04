@@ -92,12 +92,19 @@ steps:
       KeyPassword: $(KeyPassword)
       KeyAlias: $(KeyAlias)
 
+  # Step 1: Copy the signed APK to the staging directory
+  - task: CopyFiles@2
+    displayName: 'Copy Signed APK to Artifact Staging Directory'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/Location.Core/bin/Release/net9.0-android'
+      Contents: 'com.x3squaredcircles.locations-Signed.apk'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  # Step 2: Publish the APK to the Azure Artifacts feed
   - task: UniversalPackages@0
     displayName: 'Publish Signed APK to Azure Artifacts'
     inputs:
-      command: 'publish'
-      publishDirectory: '$(Build.ArtifactStagingDirectory)'  # Make sure this is correct
-      feedsToUse: 'select'
-      feedPublish: 'apk'  # Specify the feed name here
-      packagePublish: 'com.x3squaredcircles.locations-Signed.apk'  # Specify the package name
-      versionPublish: '1.0.0'  # Update the version if needed
+      command: publish
+      publishDirectory: '$(Build.ArtifactStagingDirectory)'
+      vstsFeedPublish: 'Photography Locations/apk'
+      vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
