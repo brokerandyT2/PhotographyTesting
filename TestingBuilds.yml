@@ -11,18 +11,29 @@ variables:
   AndroidSdkVersion: '34.0'
 
 steps:
-# Step 1: Install .NET SDK
+# Step 1: Verify Variables
+- script: |
+    echo "Verifying pipeline variables..."
+    echo "KeystorePassword: $(KeystorePassword)"
+    echo "KeyAlias: $(KeyAlias)"
+    echo "KeyPassword: $(KeyPassword)"
+    echo "Feed Name: apk"
+    echo "Package Name: LocationCore_APK"
+  displayName: 'Verify Variables'
+
+# Step 2: Install .NET SDK
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
   inputs:
     packageType: 'sdk'
-    version: '9.x'
+    version: '9.0'
 
+# Step 3: Install .NET MAUI Android Workload
 - script: |
     dotnet workload install maui-android
   displayName: 'Install .NET MAUI Android Workload'
 
-# Step 2: Install Android SDK and Command-Line Tools
+# Step 4: Install Android SDK and Command-Line Tools
 - script: |
     echo "Installing Android SDK..."
     choco install android-sdk -y
@@ -39,14 +50,14 @@ steps:
     sdkmanager.bat "platform-tools" "platforms;android-$(AndroidSdkVersion)" "build-tools;$(AndroidSdkVersion)" --sdk_root=%ANDROID_SDK_ROOT%
   displayName: 'Install Android SDK and cmdline-tools'
 
-# Step 3: Restore NuGet Packages
+# Step 5: Restore NuGet Packages for the Solution
 - task: NuGetCommand@2
   displayName: 'Restore NuGet Packages'
   inputs:
     command: 'restore'
     restoreSolution: '**/Photography.sln'
 
-# Step 4: Build Unsigned APK
+# Step 6: Build Unsigned APK
 - task: MSBuild@1
   displayName: 'Build Unsigned APK'
   inputs:
@@ -54,31 +65,31 @@ steps:
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk'
     configuration: '$(BuildConfiguration)'
 
-# Step 5: Download Keystore File
+# Step 7: Download Keystore File
 - task: DownloadSecureFile@1
   displayName: 'Download Keystore File'
   inputs:
     secureFile: 'pixmap-release.keystore'
 
-# Step 6: Sign APK
+# Step 8: Sign APK
 - script: |
-    jarsigner -verbose -keystore $(Agent.TempDirectory)/pixmap-release.keystore -storepass $(KeystorePassword) -keypass $(KeyPassword) -signedjar $(Build.ArtifactStagingDirectory)/LocationCore-$(Build.BuildId).apk $(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/app-release-unsigned.apk $(KeyAlias)
+    jarsigner -verbose -keystore $(Agent.TempDirectory)/pixmap-release.keystore -storepass $(KeystorePassword) -keypass $(KeyPassword) -signedjar $(Build.ArtifactStagingDirectory)/LocationCore-$(Build.BuildId).apk $(Build.SourcesDirectory)/bin/$(BuildConfiguration)/net9.0-android/app-release-unsigned.apk pixmap-key
   displayName: 'Sign APK'
   env:
     KeystorePassword: $(KeystorePassword)
-    KeyAlias: $(KeyAlias)
+    KeyAlias: pixmap-key
     KeyPassword: $(KeyPassword)
 
-# Step 7: Publish Signed APK to Azure Artifacts
+# Step 9: Publish Signed APK to Azure Artifacts
 - task: UniversalPackages@0
   displayName: 'Publish Signed APK to Azure Artifacts'
   inputs:
     command: 'publish'
     publishDirectory: '$(Build.ArtifactStagingDirectory)'
     feedsToUse: 'select'
-    feedPublish: 'apk'
-    packagePublish: 'LocationCore-APK'
-    versionPublish: '1.0.0'
+    feedPublish: 'apk' # Ensure this matches the feed name in Azure Artifacts
+    packagePublish: 'LocationCore_APK' # Valid package name
+    versionPublish: '1.0.0' # Version of the package
 
 
 
