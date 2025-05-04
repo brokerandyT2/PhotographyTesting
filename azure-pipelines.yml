@@ -107,12 +107,6 @@ steps:
     msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk /p:Version=$(AssemblyVersion)'
     configuration: '$(BuildConfiguration)'
 
-- task: MSBuild@1
-  displayName: 'Build AAB'
-  inputs:
-    solution: 'Location.Core\Location.Core.csproj'
-    msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=aab /p:Version=$(AssemblyVersion)'
-    configuration: '$(BuildConfiguration)'
 
 # Copy APK
 - task: CopyFiles@2
@@ -123,23 +117,15 @@ steps:
     targetFolder: '$(Build.ArtifactStagingDirectory)\apk'
 
 # Copy AAB
-- task: CopyFiles@2
-  displayName: 'Copy AAB to staging directory'
-  inputs:
-    sourceFolder: '$(Build.SourcesDirectory)'
-    contents: '**/*.aab'
-    targetFolder: '$(Build.ArtifactStagingDirectory)\aab'
 
 # Upload APK
-- task: AzureCLI@2
+- task: PowerShell@2
   displayName: 'Upload APK to Azure Artifacts Feed'
   inputs:
-    scriptType: 'ps'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles
-      az devops login --organization https://dev.azure.com/3squaredcircles --only-show-errors --use-device-code
-      $env:AZURE_DEVOPS_EXT_PAT="$(MY_PAT)"
+    targetType: 'inline'
+    script: |
+      $env:AZURE_DEVOPS_EXT_PAT = "$(MY_PAT)"
+      az devops configure --defaults organization=https://dev.azure.com/3squaredcircles project="Photography Locations"
       $apk = Get-ChildItem "$(Build.ArtifactStagingDirectory)\apk" -Filter *.apk | Select-Object -First 1
       az artifacts universal publish `
         --feed apk `
@@ -147,6 +133,7 @@ steps:
         --version $(AssemblyVersion) `
         --description "APK build for PixMap" `
         --path $apk.FullName
+
 
 # Upload AAB
 - task: AzureCLI@2
