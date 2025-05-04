@@ -65,9 +65,10 @@ steps:
       solution: '**/Location.Core.csproj'
       msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk'
       configuration: '$(BuildConfiguration)'
+      
   - script: |
       echo "Listing files in output directory..."
-      dir $(Build.SourcesDirectory)\bin\$(BuildConfiguration)\net9.0-android\
+      dir $(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\
     displayName: 'List Files in Build Output Directory'
 
   # Step 7: Download Keystore File
