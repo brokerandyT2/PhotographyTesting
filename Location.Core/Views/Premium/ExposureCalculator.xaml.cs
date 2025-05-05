@@ -94,6 +94,25 @@ public partial class ExposureCalculator : ContentPage
         closebtn.IsVisible = this._isFromTips;
     }
 
+    public ExposureCalculator(string? steps, float iso1, float shutter1, float fstop)
+    {
+        if (steps.ToLower() == "full")
+        {
+            exposurefull.IsChecked = true;
+        }
+        else if (steps.ToLower() == "half")
+        {
+            exposurehalfstop.IsChecked = true;
+        }
+        else
+        {
+            exposurethirdstop.IsChecked = true;
+        }
+        ShutterSpeed_Picker.SelectedItem = shutter1.ToString();
+        fstop_Picker.SelectedItem = fstop.ToString();
+        ISO_Picker.SelectedItem = iso1.ToString();
+    }
+
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);

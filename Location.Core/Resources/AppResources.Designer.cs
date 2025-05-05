@@ -430,6 +430,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Information.
+        /// </summary>
+        internal static string Information {
+            get {
+                return ResourceManager.GetString("Information", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ISO: .
         /// </summary>
         internal static string iso {
@@ -498,6 +507,15 @@ namespace Location.Core.Resources {
         internal static string Low {
             get {
                 return ResourceManager.GetString("Low", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Light Meter Stopped.
+        /// </summary>
+        internal static string MeasuringStopped {
+            get {
+                return ResourceManager.GetString("MeasuringStopped", resourceCulture);
             }
         }
         
@@ -876,6 +894,15 @@ namespace Location.Core.Resources {
         internal static string ViewAll {
             get {
                 return ResourceManager.GetString("ViewAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NOTE: Ambient Light is deteremend from your &quot;selfie camera&quot; location.  When facing the sensor away from you, you may use your Volume Butons to &quot;stop&quot; the light meter.  Subsequently you may use them to &quot;start&quot; the light meter..
+        /// </summary>
+        internal static string VolumeUpDown {
+            get {
+                return ResourceManager.GetString("VolumeUpDown", resourceCulture);
             }
         }
         

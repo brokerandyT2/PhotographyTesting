@@ -4,41 +4,19 @@
              xmlns:cv="clr-namespace:Camera.MAUI;assembly=Camera.MAUI"
              xmlns:local="clr-namespace:Location.Core.Views.Premium"
              x:Class="Location.Core.Views.Premium.LightMeter"
+                          xmlns:system="clr-namespace:System;assembly=netstandard"
+xmlns:strings="clr-namespace:Location.Core.Resources"
              Title="LightMeter">
 
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <local:LightMeterScaleDrawable x:Key="lightMeterDrawable" />
-        </ResourceDictionary>
-    </ContentPage.Resources>
-
-    <ScrollView>
-        <Grid RowDefinitions="*,Auto,Auto" ColumnDefinitions="*">
-
-            <!-- Retro Meter Display -->
-            <GraphicsView x:Name="graphicsView"
-                      Grid.Row="0"
-                      Drawable="{x:Static local:LightMeterScaleDrawable.Instance}"
-                      HeightRequest="300"
-                      WidthRequest="400"
-                      InputTransparent="True" />
-
-            <!-- Controls -->
-            <StackLayout Grid.Row="1"
-                     Orientation="Horizontal"
-                     HorizontalOptions="Center"
-                     Spacing="20">
-                <Label Text="ISO:" VerticalOptions="Center" />
-                <Picker x:Name="isoPicker" WidthRequest="100" />
-                <Label Text="Aperture:" VerticalOptions="Center" />
-                <Picker x:Name="aperturePicker" WidthRequest="100" />
-                <Label Text="Shutter Speed:" VerticalOptions="Center" />
-                <Picker x:Name="shutterPicker" WidthRequest="100" />
-            </StackLayout>
-
-            <StackLayout Grid.Row="2" HorizontalOptions="Center">
-                <Button x:Name="cameraAction" Text="Start Monitoring" Pressed="Button_Pressed_1" />
-            </StackLayout>
-        </Grid>
-    </ScrollView>
+    <!-- Light Meter Scales -->
+    <VerticalStackLayout>
+        <GraphicsView x:Name="graphicsView"
+                  HeightRequest="300"
+                  WidthRequest="300" />
+        <Picker x:Name="stepPicker"
+            Title="Step Size"
+            ItemsSource="{Binding StepOptions}" />
+        <Label Text="{x:Static system:Environment.NewLine}"></Label>
+        <Button x:Name="expButton" Text="{x:Static strings:AppResources.SendToExposureCalculator}" HeightRequest="50" Pressed="Button_Pressed"/>
+    </VerticalStackLayout>
 </ContentPage>

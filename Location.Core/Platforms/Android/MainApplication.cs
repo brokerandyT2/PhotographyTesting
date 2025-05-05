@@ -1,5 +1,7 @@
-﻿using Android.App;
+﻿using aa= Android.App;
 using Android.Runtime;
+using Android.Views;
+using Location.Core.Platforms.Android.Interface;
 
 namespace Location.Core.Platforms.Android;
 
@@ -11,5 +13,5 @@ public class MainApplication : MauiApplication
 	{
 	}
 
-	protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+    protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 }

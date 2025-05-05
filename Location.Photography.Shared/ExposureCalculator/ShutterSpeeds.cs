@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Location.Photography.Shared.ExposureCalculator
 {
-    internal class ShutterSpeeds
+    public class ShutterSpeeds
     {
         public static string[] Thirds = { "30\"",
     "25\"",
@@ -123,5 +123,16 @@ namespace Location.Photography.Shared.ExposureCalculator
             "1/4000",
             "1/8000"
         };
+
+        public static string[] GetScale(string step)
+        {
+            return step switch
+            {
+                "Full" => Full,
+                "Halves" => Halves,
+                "Thirds" => Thirds,
+                _ => Full
+            };
+        }
     }
 }

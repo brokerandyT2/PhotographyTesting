@@ -240,6 +240,9 @@
   <data name="High" xml:space="preserve">
     <value>High:</value>
   </data>
+  <data name="Information" xml:space="preserve">
+    <value>Information</value>
+  </data>
   <data name="iso" xml:space="preserve">
     <value>ISO: </value>
   </data>
@@ -263,6 +266,9 @@
   </data>
   <data name="Low" xml:space="preserve">
     <value>Low:</value>
+  </data>
+  <data name="MeasuringStopped" xml:space="preserve">
+    <value>Light Meter Stopped</value>
   </data>
   <data name="NorthernHemisphere" xml:space="preserve">
     <value>Northern Hemisphere</value>
@@ -389,6 +395,9 @@
   </data>
   <data name="ViewAll" xml:space="preserve">
     <value>View All Graphs</value>
+  </data>
+  <data name="VolumeUpDown" xml:space="preserve">
+    <value>NOTE: Ambient Light is deteremend from your "selfie camera" location.  When facing the sensor away from you, you may use your Volume Butons to "stop" the light meter.  Subsequently you may use them to "start" the light meter.</value>
   </data>
   <data name="Weather" xml:space="preserve">
     <value>Weather</value>

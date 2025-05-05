@@ -1,268 +1,327 @@
-﻿using vm = Location.Photography.Shared.ViewModels;
-using SkiaSharp;
-using Locations.Core.Business.DataAccess;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using Location.Photography.Shared.ViewModels;
-using Location.Photography.Business.DataAccess;
-using Location.Core.Resources;
-using Android.Hardware;
-using Location.Core.Platforms.Android.Interface;
+﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
+using Location.Photography.Shared.ExposureCalculator;
+using System;
+using System.Linq;
 using Microsoft.Maui;
-using Java.Interop;
+using Syncfusion.Maui.Toolkit.Graphics.Internals;
+using System.Threading.Tasks;
+using Location.Core.Platforms.Android.Interface;
+using Location.Core.Resources;
+using Location.Core.Platforms.Android.Implementation;
+using Location.Photography.Business.DataAccess;
+using Xamarin.Google.Crypto.Tink.Subtle;
+using Locations.Core.Shared;
+using Android.Telephony;
+using static Locations.Core.Shared.Enums.SubscriptionType;
 
 namespace Location.Core.Views.Premium
 {
-    public partial class LightMeter : ContentPage, ISensorEventListener
+    public partial class LightMeter : ContentPage, IVolumeKeyHandler
     {
-        private readonly IAmbientLightSensorService _lightSensorService;
-        private double _evValue;
-        private double _needleRotation;
-        private double _peakNeedleRotation;
-        private bool disposedValue;
+        private const double NeedleAnimationDuration = 0.5; // Duration of the needle animation in seconds
+        private float apertureValue;
+        private float shutterSpeedValue;
+        private float isoValue;
+        private string selectedStepSize = "Full"; // Default step size
+        private bool isNeedleAtPeak = false; // Track whether the needle is at the peak
 
-        public List<int> ISOs { get; set; }
-        public List<double> Apertures { get; set; }
-        public List<double> ShutterSpeeds { get; set; }
-
-        public nint Handle => throw new NotImplementedException();
-
-        public int JniIdentityHashCode => throw new NotImplementedException();
-
-        public JniObjectReference PeerReference => throw new NotImplementedException();
-
-        public JniPeerMembers JniPeerMembers => throw new NotImplementedException();
-
-        public JniManagedPeerStates JniManagedPeerState => throw new NotImplementedException();
+        private IAmbientLightSensorService _lightSensorService;
+        private float _peakLux;
 
         public LightMeter()
         {
             InitializeComponent();
+            this.BindingContext = this;
+            graphicsView.Drawable = new LightMeterScaleDrawable(this);
+
+            stepPicker.SelectedIndexChanged += StepPicker_SelectedIndexChanged;
 
             // Initialize the light sensor service
             _lightSensorService = DependencyService.Get<IAmbientLightSensorService>();
-
-            // Set up ISO, Aperture, and Shutter Speed options
-            ISOs = new List<int> { 100, 200, 400, 800, 1600 };
-            Apertures = new List<double> { 1.4, 2.0, 2.8, 4.0, 5.6, 8.0, 11.0, 16.0 };
-            ShutterSpeeds = new List<double> { 1 / 1000.0, 1 / 500.0, 1 / 250.0, 1 / 125.0, 1 / 60.0, 1 / 30.0, 1 / 15.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1 };
-
-            // Bind the collections to the pickers
-            isoPicker.ItemsSource = ISOs;
-            aperturePicker.ItemsSource = Apertures;
-            shutterPicker.ItemsSource = ShutterSpeeds;
-
-            // Set default selections
-            isoPicker.SelectedItem = ISOs[0];
-            aperturePicker.SelectedItem = Apertures[2]; // f/2.8
-            shutterPicker.SelectedItem = ShutterSpeeds[3]; // 1/125s
-
-            // Initialize the light sensor
             _lightSensorService.LightLevelChanged += OnLightLevelChanged;
+
+
+            // Set initial values for the exposure dials
+            apertureValue = 5.6f;
+            shutterSpeedValue = 1 / 60f;
+            isoValue = 100f;
+
+            // Initialize the dials (this can be updated based on saved values)
+            UpdateNeedlePosition();
+
+            // Gesture recognizers for dragging the dials
+            AddGestureRecognizers();
+            SettingsService ss = new SettingsService();
+
+            SubscriptionTypeEnum _subType;
+            Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
+             expButton.IsVisible = _subType == SubscriptionTypeEnum.Premium ? true : false;
+
+        }
+        protected override void OnNavigatedTo(NavigatedToEventArgs args)
+        {
+            base.OnNavigatedTo(args);
+            _lightSensorService.StartListening();
+            DisplayAlert(AppResources.Information, AppResources.VolumeUpDown, AppResources.OK);
+        }
+        public string[] StepOptions => new[] { "Full", "Half", "Thirds" };
+
+        private void StepPicker_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (stepPicker.SelectedIndex != -1)
+            {
+                selectedStepSize = stepPicker.ItemsSource[stepPicker.SelectedIndex].ToString();
+                UpdateNeedlePosition();
+            }
         }
 
-        // Handle light sensor changes
+        // Add gesture recognizers for dragging
+        private void AddGestureRecognizers()
+        {
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += (s, e) =>
+            {
+                // Logic for handling tapping gestures on the LightMeter scales if necessary
+            };
+
+            graphicsView.GestureRecognizers.Add(tapGesture);
+
+            // Example for dragging interaction (simplified for demonstration)
+            var panGesture = new PanGestureRecognizer();
+            panGesture.PanUpdated += (sender, args) =>
+            {
+                if (args.StatusType == GestureStatus.Running)
+                {
+                    var deltaX = args.TotalX;
+
+                    // Update the value based on the drag direction (this is just an example, you can tweak it)
+                    if (Math.Abs(deltaX) > 0.5) // Threshold for significant drag
+                    {
+                        var valueChange = Math.Sign(deltaX); // Drag direction
+                        UpdateDialValues(valueChange);
+                    }
+                }
+            };
+
+            graphicsView.GestureRecognizers.Add(panGesture);
+        }
+
+        // Update the dial values based on the drag direction
+        private void UpdateDialValues(float valueChange)
+        {
+            var apertureValues = Apetures.GetScale(selectedStepSize);
+            var shutterSpeedValues = ShutterSpeeds.GetScale(selectedStepSize);
+            var isoValues = ISOs.GetScale(selectedStepSize);
+
+            // Simulate value change for aperture, shutter speed, or ISO based on the direction of the drag
+            apertureValue = SnapToClosestValue(apertureValues, apertureValue + valueChange);
+            shutterSpeedValue = SnapToClosestValue(shutterSpeedValues, shutterSpeedValue + valueChange);
+            isoValue = SnapToClosestValue(isoValues, isoValue + valueChange);
+
+            // Update the display with the new dial values
+            UpdateNeedlePosition();
+        }
+
+        // Snap a value to the closest value from the provided scale
+        private float SnapToClosestValue(string[] scaleValues, float value)
+        {
+            var parsedValues = scaleValues.Select(v => ParseValue(v)).ToList();
+            var closestValue = parsedValues.OrderBy(v => Math.Abs(v - value)).First();
+            return closestValue;
+        }
+
+        private float ParseValue(string value)
+        {
+            // Parse different formats for aperture (f/1.8), shutter speed (1/60), and ISO
+            if (value.StartsWith("f/"))
+            {
+                return float.Parse(value.Substring(2)); // Remove "f/" and parse
+            }
+            else if (value.Contains("/"))
+            {
+                // This is a shutter speed, e.g., "1/60"
+                var parts = value.Split('/');
+                return 1 / float.Parse(parts[1]);
+            }
+            else
+            {
+                // Assume it's ISO
+                return float.Parse(value);
+            }
+        }
+
+        // Method to handle dynamic dragging for ISO, Aperture, and Shutter Speed dials
+        private void UpdateNeedlePosition()
+        {
+            // Get the dial values based on the selected step size
+            var apertureValues = Apetures.GetScale(selectedStepSize);
+            var shutterSpeedValues = ShutterSpeeds.GetScale(selectedStepSize);
+            var isoValues = ISOs.GetScale(selectedStepSize);
+
+            // Convert the values to numbers
+            var apertureIndex = Array.IndexOf(apertureValues, apertureValue.ToString());
+            var shutterSpeedIndex = Array.IndexOf(shutterSpeedValues, shutterSpeedValue.ToString());
+            var isoIndex = Array.IndexOf(isoValues, isoValue.ToString());
+
+            // Update the drawable with the calculated positions
+            if (graphicsView.Drawable is LightMeterScaleDrawable drawable)
+            {
+                // Corrected SetNeedlePosition with only one argument (index or angle)
+                drawable.SetNeedlePosition((float)apertureIndex); // Assuming angle here, convert as necessary
+
+                // Add a needle animation (twitch effect when reaching peak)
+                AnimateNeedle(drawable);
+
+                // Invalidate only the graphics view
+                graphicsView.Invalidate(); // Redraw the light meter
+            }
+        }
+
+        private void AnimateNeedle(LightMeterScaleDrawable drawable)
+        {
+            // Trigger a twitch effect when the needle reaches the peak (just a simple example)
+            if (isNeedleAtPeak)
+            {
+                // Perform a "twitch" by briefly changing the needle's position and then reverting it
+                drawable.SetNeedlePosition(drawable.NeedlePosition + 2); // Move needle slightly
+                graphicsView.Invalidate();
+
+                // Revert the needle after the twitch duration
+                Task.Delay(100).ContinueWith(_ =>
+                {
+                    drawable.SetNeedlePosition(drawable.NeedlePosition - 2); // Move needle back to peak
+                    graphicsView.Invalidate();
+                });
+            }
+
+            // Set the needle position with animation
+            drawable.AnimateNeedleTo(graphicsView, drawable.NeedlePosition, NeedleAnimationDuration);
+        }
+
+        private string[] GetScaleValues(dynamic scale)
+        {
+            return selectedStepSize switch
+            {
+                "Full" => scale.Full,
+                "Half" => scale.Halves,
+                "Thirds" => scale.Thirds,
+                _ => scale.Full
+            };
+        }
+
         private void OnLightLevelChanged(object sender, float lux)
         {
-            // Update EV and Needle Rotation based on the light level (lux)
-            _evValue = CalculateExposureValue(lux);
-            _needleRotation = MapEVToNeedleRotation(_evValue);
+            // Calculate EV based on ISO, Aperture, and Shutter Speed
+            var ev = ExposureValueCalculator.CalculateEV(lux, isoValue, apertureValue, shutterSpeedValue);
 
-            // Update peak needle if necessary
-            if (_needleRotation > _peakNeedleRotation)
+            // Update the peak needle
+            if (lux > _peakLux)
             {
-                _peakNeedleRotation = _needleRotation;
+                _peakLux = lux;
+                isNeedleAtPeak = true;
+            }
+            else
+            {
+                isNeedleAtPeak = false;
             }
 
-            // Update the UI (needle rotation in graphics view)
-            graphicsView.Invalidate(); // Trigger a redraw of the meter
+            // Update the needle positions
+            UpdateNeedlePosition();
         }
 
-        // Button click event to start light sensor monitoring
-        private void Button_Pressed_1(object sender, EventArgs e)
+        public void OnVolumeKeyPressed()
         {
-            _lightSensorService.StartListening();
-        }
-
-        // Calculate Exposure Value (EV) based on lux, ISO, Aperture, and Shutter Speed
-        private double CalculateExposureValue(float lux)
-        {
-            double isoFactor = (int)isoPicker.SelectedItem / 100.0; // ISO divided by 100
-            double apertureFactor = (double)aperturePicker.SelectedItem * (double)aperturePicker.SelectedItem; // f-stop squared
-            double shutterSpeedFactor = 1 / (double)shutterPicker.SelectedItem; // Shutter speed (in seconds)
-
-            // EV = log2(lux / (ISO * Aperture * Shutter Speed))
-            double ev = Math.Log2(lux / (isoFactor * apertureFactor * shutterSpeedFactor));
-            return ev;
-        }
-
-        // Map EV to needle rotation (e.g., -5 EV to +20 EV mapped to 135–270 degrees)
-        private double MapEVToNeedleRotation(double ev)
-        {
-            return 135 + (ev + 5) * (270 / 25); // Maps EV -5 to +20 onto 135–270 degrees
-        }
-
-        // Sensor Event Listener methods (not used here but needed by interface)
-        public void OnAccuracyChanged(Sensor sensor, SensorStatus accuracy) { }
-        public void OnSensorChanged(SensorEvent e)
-        {
-            if (e.Sensor.Type == SensorType.Light)
+            if (((AmbientLightSensorService)_lightSensorService).IsRunning)
             {
-                float lux = e.Values[0];
-                OnLightLevelChanged(this, lux);
+                _lightSensorService.StopListening();
+                DisplayAlert(AppResources.Information, AppResources.MeasuringStopped, AppResources.OK);
+            }
+            else
+            {
+                _lightSensorService.StartListening();
             }
         }
 
-        public void SetJniIdentityHashCode(int value)
+
+        public enum ExposureStep
         {
-            throw new NotImplementedException();
+            Full,
+            Half,
+            Third
         }
 
-        public void SetPeerReference(JniObjectReference reference)
+        private void Button_Pressed(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
-        }
+            var steps = stepPicker.SelectedItem.ToString();
+            var iso = isoValue;
+            var shutter = shutterSpeedValue;
+            var fstop = apertureValue;
+            Navigation.PushAsync(new ExposureCalculator(steps, iso, shutter, fstop));
 
-        public void SetJniManagedPeerState(JniManagedPeerStates value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UnregisterFromRuntime()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DisposeUnlessReferenced()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Disposed()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Finalized()
-        {
-            throw new NotImplementedException();
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                disposedValue = true;
-            }
-        }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~LightMeter()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 
-
-
-
+    public static class ExposureValueCalculator
+    {
+        // Placeholder for actual EV calculation logic
+        public static double CalculateEV(float lux, float iso, float aperture, float shutterSpeed)
+        {
+            // Implement EV calculation here
+            return lux * iso * aperture / shutterSpeed; // Example calculation
+        }
+    }
 
     public class LightMeterScaleDrawable : IDrawable
     {
-        private static readonly Lazy<LightMeterScaleDrawable> _instance = new(() => new LightMeterScaleDrawable());
-        public static LightMeterScaleDrawable Instance => _instance.Value;
+        private float _needleAngle;
+        private bool _isAnimatingNeedle = false; // Flag to track if the needle is animating
+        private float _currentNeedleAngle; // The current angle during animation
+        private float _targetNeedleAngle; // The target angle to animate towards
 
-        private vm.LightMeterViewModel? _viewModel;
-        private float _animatedRotation = 135f;
+        private readonly LightMeter _lightMeter;
 
-        public void BindViewModel(LightMeterViewModel viewModel)
+        public LightMeterScaleDrawable(LightMeter lightMeter)
         {
-            _viewModel = viewModel;
+            _lightMeter = lightMeter;
+        }
+
+        public float NeedlePosition
+        {
+            get => _needleAngle;
+            set
+            {
+                _needleAngle = value;
+                _currentNeedleAngle = value; // Ensure current angle reflects change
+                _isAnimatingNeedle = false; // Stop animation if set manually
+            }
+        }
+
+        public void SetNeedlePosition(float angle)
+        {
+            NeedlePosition = angle;
+        }
+
+        public void AnimateNeedleTo(IAnimatable animatable, float targetAngle, double duration)
+        {
+            // Start animation towards the target needle angle
+            _targetNeedleAngle = targetAngle;
+            _isAnimatingNeedle = true;
+
+            // Start a simple animation loop to update the needle's position
+            var animation = new Animation(v =>
+            {
+                _currentNeedleAngle = (float)v;
+                (animatable as GraphicsView)?.Invalidate(); // Redraw the drawable while animating
+            }, _currentNeedleAngle, _targetNeedleAngle);
+
+            animation.Commit(animatable, "NeedleAnimation", 16, Convert.ToUInt32(duration * 1000), Easing.Linear);
         }
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
-            if (_viewModel == null) return;
-
-            var centerX = dirtyRect.Width / 2;
-            var centerY = dirtyRect.Height / 2;
-            var radius = Math.Min(centerX, centerY) - 20;
-
-            // Retro cream dial background
-            canvas.FillColor = Color.FromArgb("#F5F5DC"); // beige/cream
-            canvas.FillCircle(centerX, centerY, radius);
-
-            // Outer circle stroke
-            canvas.StrokeColor = Colors.DarkGray;
-            canvas.StrokeSize = 4;
-            canvas.DrawCircle(centerX, centerY, radius);
-
-            // Inner ring for retro styling
-            canvas.StrokeColor = Colors.LightGray;
-            canvas.StrokeSize = 2;
-            canvas.DrawCircle(centerX, centerY, radius - 20);
-
-            // Tick marks and EV labels
-            for (int ev = -5; ev <= 5; ev++)
-            {
-                float angle = 135 + (ev + 5) * (270f / 10f);
-                float rad = angle * (float)Math.PI / 180f;
-
-                float tickStart = radius - 10;
-                float tickEnd = radius;
-                float x1 = centerX + (float)Math.Cos(rad) * tickStart;
-                float y1 = centerY + (float)Math.Sin(rad) * tickStart;
-                float x2 = centerX + (float)Math.Cos(rad) * tickEnd;
-                float y2 = centerY + (float)Math.Sin(rad) * tickEnd;
-
-                canvas.StrokeColor = ev == 0 ? Colors.OrangeRed : Colors.Black;
-                canvas.StrokeSize = 2;
-                canvas.DrawLine(x1, y1, x2, y2);
-
-                var labelX = centerX + (float)Math.Cos(rad) * (radius - 25);
-                var labelY = centerY + (float)Math.Sin(rad) * (radius - 25);
-                canvas.FontColor = Colors.Black;
-                canvas.FontSize = ev == 0 ? 18 : 14;
-                canvas.DrawString(ev.ToString(), labelX, labelY, HorizontalAlignment.Center);
-            }
-
-            // Smooth needle animation with subtle jitter
-            float baseTargetAngle = 135 + (float)(_viewModel.EVValue + 5) * (270f / 10f);
-
-            // Subtle random jitter (±0.5°)
-            float jitter = (float)(Random.Shared.NextDouble() - 0.5) * 1f;
-
-            // Slowly blend toward target + jitter
-            float jitteredTarget = baseTargetAngle + jitter;
-            _animatedRotation += (jitteredTarget - _animatedRotation) * 0.05f;
-
-            var needleRad = _animatedRotation * (float)Math.PI / 180f;
-            float nx = centerX + (float)Math.Cos(needleRad) * (radius - 30);
-            float ny = centerY + (float)Math.Sin(needleRad) * (radius - 30);
-
-            // Needle
-            canvas.StrokeColor = Colors.Red;
-            canvas.StrokeSize = 4;
-            canvas.DrawLine(centerX, centerY, nx, ny);
-
-            // Needle base hub
-            canvas.FillColor = Colors.Black;
-            canvas.FillCircle(centerX, centerY, 6);
+            // Drawing code for your light meter scale
+            canvas.DrawLine(0, 0, 100, 100); // Example drawing (replace with actual scale drawing code)
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Location.Photography.Shared.ExposureCalculator
 {
-    internal class Apetures
+    public class Apetures
     {
         public static string[] Thirds = { "f/1",
     "f/1.1",
@@ -82,5 +82,16 @@ namespace Location.Photography.Shared.ExposureCalculator
     "f/32",
     "f/45",
     "f/64" };
+
+        public static string[] GetScale(string step)
+        {
+            return step switch
+            {
+                "Full" => Full,
+                "Halves" => Halves,
+                "Thirds" => Thirds,
+                _ => Full
+            };
+        }
     }
 }

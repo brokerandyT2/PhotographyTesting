@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Location.Photography.Shared.ExposureCalculator
 {
-    internal class ISOs
+    public class ISOs
     {
         public static string[] Thirds = { "25600",
     "20000",
@@ -65,5 +65,16 @@ namespace Location.Photography.Shared.ExposureCalculator
     "200",
     "100",
     "50" };
+
+        public static string[] GetScale(string step)
+        {
+            return step switch
+            {
+                "Full" => Full,
+                "Halves" => Halves,
+                "Thirds" => Thirds,
+                _ => Full
+            };
+        }
     }
 }

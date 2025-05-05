@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace Location.Core.Platforms.Android.Interface
 {
-    public interface IAmbientLightSensorService
+    public interface IVolumeKeyHandler
     {
-        public event EventHandler<float> LightLevelChanged;
-   
-        void StartListening();
-        void StopListening();
+        void OnVolumeKeyPressed();
     }
 }
