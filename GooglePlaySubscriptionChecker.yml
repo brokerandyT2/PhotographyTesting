@@ -7,7 +7,11 @@ trigger:
       - master
       - feature/*
       - release/*
-
+  paths:
+    include:
+      - '**'
+    exclude:
+      - '!GooglePlaySubscriptionChecker/GooglePlaySubscriptionChecker/**'
 pool:
   vmImage: 'windows-latest'
 
