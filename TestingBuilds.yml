@@ -33,7 +33,7 @@ steps:
 
   - task: XplatGenerateReleaseNotes@4
     inputs:
-      outputfile: '$(Build.ArtifactStagingDirectory)/$(Get-Date).md'
+      outputfile: '$(Build.ArtifactStagingDirectory)/$(Get-Date)-$(Build.ID).md'
       templateLocation: 'File'
       dumpPayloadToConsole: false
       dumpPayloadToFile: false
