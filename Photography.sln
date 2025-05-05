@@ -27,6 +27,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackendAPI", "BackendAPI", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GooglePlaySubscriptionChecker", "GooglePlaySubscriptionChecker\GooglePlaySubscriptionChecker\GooglePlaySubscriptionChecker.csproj", "{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		build-handlebars-template.md = build-handlebars-template.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Andy|Any CPU = Andy|Any CPU

@@ -268,6 +268,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Stop Monitoring.
+        /// </summary>
+        internal static string EndMonitoring {
+            get {
+                return ResourceManager.GetString("EndMonitoring", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Equivalent Exposure: .
         /// </summary>
         internal static string equivalentexposure {

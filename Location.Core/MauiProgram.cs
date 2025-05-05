@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using ZXing.Net.Maui.Controls;
+
 #if ANDROID
 
 #endif
@@ -22,8 +23,6 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
 
-       
-
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
@@ -32,7 +31,7 @@ public static class MauiProgram
             .UseExpander()
             .UseBarcodeReader()
             .UseSkiaSharp()
-
+            .UseMauiCameraView()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

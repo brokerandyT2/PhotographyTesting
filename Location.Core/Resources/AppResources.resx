@@ -186,6 +186,9 @@
   <data name="Direction" xml:space="preserve">
     <value>Direction</value>
   </data>
+  <data name="EndMonitoring" xml:space="preserve">
+    <value>Stop Monitoring</value>
+  </data>
   <data name="equivalentexposure" xml:space="preserve">
     <value>Equivalent Exposure: </value>
   </data>

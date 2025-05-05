@@ -5,64 +5,176 @@ using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Location.Photography.Shared.ViewModels;
 using Location.Photography.Business.DataAccess;
+using Location.Core.Resources;
+using Android.Hardware;
+using Location.Core.Platforms.Android.Interface;
+using Microsoft.Maui;
+using Java.Interop;
 
 namespace Location.Core.Views.Premium
 {
-    public partial class LightMeter : ContentPage
+    public partial class LightMeter : ContentPage, ISensorEventListener
     {
-        private readonly vm.LightMeterViewModel _viewModel;
-        private System.Timers.Timer _captureTimer;
-        private bool _isCapturing = false;
+        private readonly IAmbientLightSensorService _lightSensorService;
+        private double _evValue;
+        private double _needleRotation;
+        private double _peakNeedleRotation;
+        private bool disposedValue;
+
+        public List<int> ISOs { get; set; }
+        public List<double> Apertures { get; set; }
+        public List<double> ShutterSpeeds { get; set; }
+
+        public nint Handle => throw new NotImplementedException();
+
+        public int JniIdentityHashCode => throw new NotImplementedException();
+
+        public JniObjectReference PeerReference => throw new NotImplementedException();
+
+        public JniPeerMembers JniPeerMembers => throw new NotImplementedException();
+
+        public JniManagedPeerStates JniManagedPeerState => throw new NotImplementedException();
 
         public LightMeter()
         {
             InitializeComponent();
-            _viewModel = BindingContext as vm.LightMeterViewModel;
-            LightMeterScaleDrawable.Instance.BindViewModel(_viewModel);
 
+            // Initialize the light sensor service
+            _lightSensorService = DependencyService.Get<IAmbientLightSensorService>();
 
+            // Set up ISO, Aperture, and Shutter Speed options
+            ISOs = new List<int> { 100, 200, 400, 800, 1600 };
+            Apertures = new List<double> { 1.4, 2.0, 2.8, 4.0, 5.6, 8.0, 11.0, 16.0 };
+            ShutterSpeeds = new List<double> { 1 / 1000.0, 1 / 500.0, 1 / 250.0, 1 / 125.0, 1 / 60.0, 1 / 30.0, 1 / 15.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1 };
 
+            // Bind the collections to the pickers
+            isoPicker.ItemsSource = ISOs;
+            aperturePicker.ItemsSource = Apertures;
+            shutterPicker.ItemsSource = ShutterSpeeds;
+
+            // Set default selections
+            isoPicker.SelectedItem = ISOs[0];
+            aperturePicker.SelectedItem = Apertures[2]; // f/2.8
+            shutterPicker.SelectedItem = ShutterSpeeds[3]; // 1/125s
+
+            // Initialize the light sensor
+            _lightSensorService.LightLevelChanged += OnLightLevelChanged;
         }
-        protected override void OnNavigatedTo(NavigatedToEventArgs args)
+
+        // Handle light sensor changes
+        private void OnLightLevelChanged(object sender, float lux)
         {
-            var settingsService = new Locations.Core.Business.DataAccess.SettingsService();
-            base.OnNavigatedTo(args);
-            int interval;
-            try
+            // Update EV and Needle Rotation based on the light level (lux)
+            _evValue = CalculateExposureValue(lux);
+            _needleRotation = MapEVToNeedleRotation(_evValue);
+
+            // Update peak needle if necessary
+            if (_needleRotation > _peakNeedleRotation)
             {
-                var value = settingsService.GetSetting("CameraRefresh").Value;
-                interval = Convert.ToInt32(value);
+                _peakNeedleRotation = _needleRotation;
             }
-            catch { interval = 2000; }
-            _captureTimer = new System.Timers.Timer(interval);
-            _captureTimer.Elapsed += async (s, e) => await CaptureAndProcessFrameAsync();
-            _captureTimer.Start();
+
+            // Update the UI (needle rotation in graphics view)
+            graphicsView.Invalidate(); // Trigger a redraw of the meter
         }
-        private async Task CaptureAndProcessFrameAsync()
+
+        // Button click event to start light sensor monitoring
+        private void Button_Pressed_1(object sender, EventArgs e)
         {
-            if (_isCapturing || cameraView == null || !cameraView.IsEnabled) return;
-            _isCapturing = true;
-            try
+            _lightSensorService.StartListening();
+        }
+
+        // Calculate Exposure Value (EV) based on lux, ISO, Aperture, and Shutter Speed
+        private double CalculateExposureValue(float lux)
+        {
+            double isoFactor = (int)isoPicker.SelectedItem / 100.0; // ISO divided by 100
+            double apertureFactor = (double)aperturePicker.SelectedItem * (double)aperturePicker.SelectedItem; // f-stop squared
+            double shutterSpeedFactor = 1 / (double)shutterPicker.SelectedItem; // Shutter speed (in seconds)
+
+            // EV = log2(lux / (ISO * Aperture * Shutter Speed))
+            double ev = Math.Log2(lux / (isoFactor * apertureFactor * shutterSpeedFactor));
+            return ev;
+        }
+
+        // Map EV to needle rotation (e.g., -5 EV to +20 EV mapped to 135–270 degrees)
+        private double MapEVToNeedleRotation(double ev)
+        {
+            return 135 + (ev + 5) * (270 / 25); // Maps EV -5 to +20 onto 135–270 degrees
+        }
+
+        // Sensor Event Listener methods (not used here but needed by interface)
+        public void OnAccuracyChanged(Sensor sensor, SensorStatus accuracy) { }
+        public void OnSensorChanged(SensorEvent e)
+        {
+            if (e.Sensor.Type == SensorType.Light)
             {
-                var stream = cameraView.TakePhotoAsync().Result;
-                if (stream != null)
+                float lux = e.Values[0];
+                OnLightLevelChanged(this, lux);
+            }
+        }
+
+        public void SetJniIdentityHashCode(int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetPeerReference(JniObjectReference reference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetJniManagedPeerState(JniManagedPeerStates value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UnregisterFromRuntime()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeUnlessReferenced()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Disposed()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Finalized()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
                 {
-                    using var memoryStream = new MemoryStream();
-                    await stream.CopyToAsync(memoryStream);
-                    memoryStream.Seek(0, SeekOrigin.Begin);
-                    var bitmap = SKBitmap.Decode(memoryStream);
-                    _viewModel?.ProcessFrame(bitmap);
-                    MainThread.BeginInvokeOnMainThread(() => graphicsView.Invalidate());
+                    // TODO: dispose managed state (managed objects)
                 }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
             }
-            catch (Exception) { }
-            finally { _isCapturing = false; }
         }
 
-        private void Button_Pressed(object sender, EventArgs e)
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~LightMeter()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
         {
-            var x = cameraView.TakePhotoAsync().Result;
-            var z = string.Empty;
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 

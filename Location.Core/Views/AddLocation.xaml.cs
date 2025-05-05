@@ -106,7 +106,20 @@ public partial class AddLocation : ContentPage
             }
         }
     }
+    /*using SkiaSharp;
 
+// Resize to 800x600 for example
+const int newWidth = 800;
+const int newHeight = 600;
+
+using var original = SKBitmap.Decode(stream);
+using var resized = original.Resize(new SKImageInfo(newWidth, newHeight), SKFilterQuality.Medium);
+
+using var image = SKImage.FromBitmap(resized);
+using var data = image.Encode(SKEncodedImageFormat.Jpeg, 80); // 80 = quality
+
+// Save to file or use it
+var resizedStream = data.AsStream();*/
     private void CloseModal_Pressed(object sender, EventArgs e)
     {
         Navigation.PopModalAsync();
