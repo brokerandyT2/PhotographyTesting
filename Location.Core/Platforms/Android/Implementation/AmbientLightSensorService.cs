@@ -4,7 +4,8 @@ using Android.Hardware;
 using aa=Android.App;
 using Location.Core.Platforms.Android.Interface;
 using Microsoft.Maui.Controls;
-
+using Location.Core.Platforms.Android.Implementation;
+[assembly: Dependency(typeof(AmbientLightSensorService))]
 namespace Location.Core.Platforms.Android.Implementation
 {
     public class AmbientLightSensorService : Java.Lang.Object, IAmbientLightSensorService, ISensorEventListener

@@ -1,327 +1,99 @@
-﻿using Microsoft.Maui.Controls;
+﻿using Location.Core.Views.Premium;
+using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using Location.Photography.Shared.ExposureCalculator;
 using System;
-using System.Linq;
-using Microsoft.Maui;
-using Syncfusion.Maui.Toolkit.Graphics.Internals;
-using System.Threading.Tasks;
-using Location.Core.Platforms.Android.Interface;
-using Location.Core.Resources;
-using Location.Core.Platforms.Android.Implementation;
-using Location.Photography.Business.DataAccess;
-using Xamarin.Google.Crypto.Tink.Subtle;
-using Locations.Core.Shared;
-using Android.Telephony;
-using static Locations.Core.Shared.Enums.SubscriptionType;
 
 namespace Location.Core.Views.Premium
 {
-    public partial class LightMeter : ContentPage, IVolumeKeyHandler
+    public partial class LightMeter : ContentPage
     {
-        private const double NeedleAnimationDuration = 0.5; // Duration of the needle animation in seconds
-        private float apertureValue;
-        private float shutterSpeedValue;
-        private float isoValue;
-        private string selectedStepSize = "Full"; // Default step size
-        private bool isNeedleAtPeak = false; // Track whether the needle is at the peak
-
-        private IAmbientLightSensorService _lightSensorService;
-        private float _peakLux;
+        public LunaProDrawable LunaDrawable { get; set; }
+        private int _activeDialIndex = -1;
+        private Point _lastPanPoint;
 
         public LightMeter()
         {
             InitializeComponent();
-            this.BindingContext = this;
-            graphicsView.Drawable = new LightMeterScaleDrawable(this);
+            BindingContext = this;
 
-            stepPicker.SelectedIndexChanged += StepPicker_SelectedIndexChanged;
+            LunaDrawable = new LunaProDrawable();
+            // Create instance of LunaProDrawable
+            LunaMeterView.Drawable = LunaDrawable; // Set the drawable for the view
+            LunaMeterView.Invalidate();           // Force the redraw
 
-            // Initialize the light sensor service
-            _lightSensorService = DependencyService.Get<IAmbientLightSensorService>();
-            _lightSensorService.LightLevelChanged += OnLightLevelChanged;
+            // Set initial state for step size radio buttons
+            FullRadioButton.IsChecked = true;
+            HalvesRadioButton.IsChecked = ThirdsRadioButton.IsChecked = false;
 
-
-            // Set initial values for the exposure dials
-            apertureValue = 5.6f;
-            shutterSpeedValue = 1 / 60f;
-            isoValue = 100f;
-
-            // Initialize the dials (this can be updated based on saved values)
-            UpdateNeedlePosition();
-
-            // Gesture recognizers for dragging the dials
-            AddGestureRecognizers();
-            SettingsService ss = new SettingsService();
-
-            SubscriptionTypeEnum _subType;
-            Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
-             expButton.IsVisible = _subType == SubscriptionTypeEnum.Premium ? true : false;
-
-        }
-        protected override void OnNavigatedTo(NavigatedToEventArgs args)
-        {
-            base.OnNavigatedTo(args);
-            _lightSensorService.StartListening();
-            DisplayAlert(AppResources.Information, AppResources.VolumeUpDown, AppResources.OK);
-        }
-        public string[] StepOptions => new[] { "Full", "Half", "Thirds" };
-
-        private void StepPicker_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (stepPicker.SelectedIndex != -1)
-            {
-                selectedStepSize = stepPicker.ItemsSource[stepPicker.SelectedIndex].ToString();
-                UpdateNeedlePosition();
-            }
-        }
-
-        // Add gesture recognizers for dragging
-        private void AddGestureRecognizers()
-        {
-            var tapGesture = new TapGestureRecognizer();
-            tapGesture.Tapped += (s, e) =>
-            {
-                // Logic for handling tapping gestures on the LightMeter scales if necessary
-            };
-
-            graphicsView.GestureRecognizers.Add(tapGesture);
-
-            // Example for dragging interaction (simplified for demonstration)
+            // Gesture handling for pan gestures
             var panGesture = new PanGestureRecognizer();
-            panGesture.PanUpdated += (sender, args) =>
-            {
-                if (args.StatusType == GestureStatus.Running)
-                {
-                    var deltaX = args.TotalX;
+            panGesture.PanUpdated += OnPanUpdated;
+            LunaMeterView.GestureRecognizers.Add(panGesture);
 
-                    // Update the value based on the drag direction (this is just an example, you can tweak it)
-                    if (Math.Abs(deltaX) > 0.5) // Threshold for significant drag
+            LunaMeterView.Invalidate();  // Redraw the view after initializing
+        }
+        private void OnStepSizeChanged(object sender, CheckedChangedEventArgs e)
+        {
+            // Logic to handle step size change
+            if (e.Value)
+            {
+                var radioButton = sender as Microsoft.Maui.Controls.RadioButton;
+                if (radioButton != null)
+                {
+                    // Perform actions based on which radio button is checked
+                    if (radioButton == FullRadioButton)
                     {
-                        var valueChange = Math.Sign(deltaX); // Drag direction
-                        UpdateDialValues(valueChange);
+                        LunaDrawable._isoValues = Location.Photography.Shared.ExposureCalculator.ISOs.Full.ToList();
+                        LunaDrawable._fStopValues = Location.Photography.Shared.ExposureCalculator.Apetures.Full.ToList();
+                        LunaDrawable._shutterSpeedValues = Location.Photography.Shared.ExposureCalculator.ShutterSpeeds.Full.ToList();
+
+                    }
+                    else if (radioButton == HalvesRadioButton)
+                    {
+                        LunaDrawable._isoValues = Location.Photography.Shared.ExposureCalculator.ISOs.Halves.ToList();
+                        LunaDrawable._fStopValues = Location.Photography.Shared.ExposureCalculator.Apetures.Halves.ToList();
+                        LunaDrawable._shutterSpeedValues = Location.Photography.Shared.ExposureCalculator.ShutterSpeeds.Halves.ToList();
+                    }
+                    else if (radioButton == ThirdsRadioButton)
+                    {
+                        LunaDrawable._isoValues = Location.Photography.Shared.ExposureCalculator.ISOs.Thirds.ToList();
+                        LunaDrawable._fStopValues = Location.Photography.Shared.ExposureCalculator.Apetures.Thirds.ToList();
+                        LunaDrawable._shutterSpeedValues = Location.Photography.Shared.ExposureCalculator.ShutterSpeeds.Thirds.ToList();
                     }
                 }
-            };
-
-            graphicsView.GestureRecognizers.Add(panGesture);
-        }
-
-        // Update the dial values based on the drag direction
-        private void UpdateDialValues(float valueChange)
-        {
-            var apertureValues = Apetures.GetScale(selectedStepSize);
-            var shutterSpeedValues = ShutterSpeeds.GetScale(selectedStepSize);
-            var isoValues = ISOs.GetScale(selectedStepSize);
-
-            // Simulate value change for aperture, shutter speed, or ISO based on the direction of the drag
-            apertureValue = SnapToClosestValue(apertureValues, apertureValue + valueChange);
-            shutterSpeedValue = SnapToClosestValue(shutterSpeedValues, shutterSpeedValue + valueChange);
-            isoValue = SnapToClosestValue(isoValues, isoValue + valueChange);
-
-            // Update the display with the new dial values
-            UpdateNeedlePosition();
-        }
-
-        // Snap a value to the closest value from the provided scale
-        private float SnapToClosestValue(string[] scaleValues, float value)
-        {
-            var parsedValues = scaleValues.Select(v => ParseValue(v)).ToList();
-            var closestValue = parsedValues.OrderBy(v => Math.Abs(v - value)).First();
-            return closestValue;
-        }
-
-        private float ParseValue(string value)
-        {
-            // Parse different formats for aperture (f/1.8), shutter speed (1/60), and ISO
-            if (value.StartsWith("f/"))
-            {
-                return float.Parse(value.Substring(2)); // Remove "f/" and parse
-            }
-            else if (value.Contains("/"))
-            {
-                // This is a shutter speed, e.g., "1/60"
-                var parts = value.Split('/');
-                return 1 / float.Parse(parts[1]);
-            }
-            else
-            {
-                // Assume it's ISO
-                return float.Parse(value);
             }
         }
-
-        // Method to handle dynamic dragging for ISO, Aperture, and Shutter Speed dials
-        private void UpdateNeedlePosition()
+        private void OnPanUpdated(object sender, PanUpdatedEventArgs e)
         {
-            // Get the dial values based on the selected step size
-            var apertureValues = Apetures.GetScale(selectedStepSize);
-            var shutterSpeedValues = ShutterSpeeds.GetScale(selectedStepSize);
-            var isoValues = ISOs.GetScale(selectedStepSize);
-
-            // Convert the values to numbers
-            var apertureIndex = Array.IndexOf(apertureValues, apertureValue.ToString());
-            var shutterSpeedIndex = Array.IndexOf(shutterSpeedValues, shutterSpeedValue.ToString());
-            var isoIndex = Array.IndexOf(isoValues, isoValue.ToString());
-
-            // Update the drawable with the calculated positions
-            if (graphicsView.Drawable is LightMeterScaleDrawable drawable)
+            switch (e.StatusType)
             {
-                // Corrected SetNeedlePosition with only one argument (index or angle)
-                drawable.SetNeedlePosition((float)apertureIndex); // Assuming angle here, convert as necessary
+                case GestureStatus.Started:
+                    // Start gesture - determine the dial being touched
+                    var startPoint = new Point(e.TotalX, e.TotalY);
+                    _activeDialIndex = LunaDrawable.HitTestDial(startPoint);
+                    _lastPanPoint = startPoint;
+                    break;
 
-                // Add a needle animation (twitch effect when reaching peak)
-                AnimateNeedle(drawable);
+                case GestureStatus.Running:
+                    if (_activeDialIndex != -1)
+                    {
+                        var currentPoint = new Point(e.TotalX, e.TotalY);
 
-                // Invalidate only the graphics view
-                graphicsView.Invalidate(); // Redraw the light meter
+                        // Calculate angle difference for dial rotation
+                        double angleStart = Math.Atan2(_lastPanPoint.Y - LunaDrawable.CenterY, _lastPanPoint.X - LunaDrawable.CenterX);
+                        double angleCurrent = Math.Atan2(currentPoint.Y - LunaDrawable.CenterY, currentPoint.X - LunaDrawable.CenterX);
+                        double angleDelta = angleCurrent - angleStart;
+
+                        LunaDrawable.RotateDial(_activeDialIndex, angleDelta);
+                        _lastPanPoint = currentPoint;
+                    }
+                    break;
+
+                case GestureStatus.Completed:
+                case GestureStatus.Canceled:
+                    _activeDialIndex = -1;
+                    break;
             }
-        }
-
-        private void AnimateNeedle(LightMeterScaleDrawable drawable)
-        {
-            // Trigger a twitch effect when the needle reaches the peak (just a simple example)
-            if (isNeedleAtPeak)
-            {
-                // Perform a "twitch" by briefly changing the needle's position and then reverting it
-                drawable.SetNeedlePosition(drawable.NeedlePosition + 2); // Move needle slightly
-                graphicsView.Invalidate();
-
-                // Revert the needle after the twitch duration
-                Task.Delay(100).ContinueWith(_ =>
-                {
-                    drawable.SetNeedlePosition(drawable.NeedlePosition - 2); // Move needle back to peak
-                    graphicsView.Invalidate();
-                });
-            }
-
-            // Set the needle position with animation
-            drawable.AnimateNeedleTo(graphicsView, drawable.NeedlePosition, NeedleAnimationDuration);
-        }
-
-        private string[] GetScaleValues(dynamic scale)
-        {
-            return selectedStepSize switch
-            {
-                "Full" => scale.Full,
-                "Half" => scale.Halves,
-                "Thirds" => scale.Thirds,
-                _ => scale.Full
-            };
-        }
-
-        private void OnLightLevelChanged(object sender, float lux)
-        {
-            // Calculate EV based on ISO, Aperture, and Shutter Speed
-            var ev = ExposureValueCalculator.CalculateEV(lux, isoValue, apertureValue, shutterSpeedValue);
-
-            // Update the peak needle
-            if (lux > _peakLux)
-            {
-                _peakLux = lux;
-                isNeedleAtPeak = true;
-            }
-            else
-            {
-                isNeedleAtPeak = false;
-            }
-
-            // Update the needle positions
-            UpdateNeedlePosition();
-        }
-
-        public void OnVolumeKeyPressed()
-        {
-            if (((AmbientLightSensorService)_lightSensorService).IsRunning)
-            {
-                _lightSensorService.StopListening();
-                DisplayAlert(AppResources.Information, AppResources.MeasuringStopped, AppResources.OK);
-            }
-            else
-            {
-                _lightSensorService.StartListening();
-            }
-        }
-
-
-        public enum ExposureStep
-        {
-            Full,
-            Half,
-            Third
-        }
-
-        private void Button_Pressed(object sender, EventArgs e)
-        {
-            var steps = stepPicker.SelectedItem.ToString();
-            var iso = isoValue;
-            var shutter = shutterSpeedValue;
-            var fstop = apertureValue;
-            Navigation.PushAsync(new ExposureCalculator(steps, iso, shutter, fstop));
-
-        }
-    }
-
-    public static class ExposureValueCalculator
-    {
-        // Placeholder for actual EV calculation logic
-        public static double CalculateEV(float lux, float iso, float aperture, float shutterSpeed)
-        {
-            // Implement EV calculation here
-            return lux * iso * aperture / shutterSpeed; // Example calculation
-        }
-    }
-
-    public class LightMeterScaleDrawable : IDrawable
-    {
-        private float _needleAngle;
-        private bool _isAnimatingNeedle = false; // Flag to track if the needle is animating
-        private float _currentNeedleAngle; // The current angle during animation
-        private float _targetNeedleAngle; // The target angle to animate towards
-
-        private readonly LightMeter _lightMeter;
-
-        public LightMeterScaleDrawable(LightMeter lightMeter)
-        {
-            _lightMeter = lightMeter;
-        }
-
-        public float NeedlePosition
-        {
-            get => _needleAngle;
-            set
-            {
-                _needleAngle = value;
-                _currentNeedleAngle = value; // Ensure current angle reflects change
-                _isAnimatingNeedle = false; // Stop animation if set manually
-            }
-        }
-
-        public void SetNeedlePosition(float angle)
-        {
-            NeedlePosition = angle;
-        }
-
-        public void AnimateNeedleTo(IAnimatable animatable, float targetAngle, double duration)
-        {
-            // Start animation towards the target needle angle
-            _targetNeedleAngle = targetAngle;
-            _isAnimatingNeedle = true;
-
-            // Start a simple animation loop to update the needle's position
-            var animation = new Animation(v =>
-            {
-                _currentNeedleAngle = (float)v;
-                (animatable as GraphicsView)?.Invalidate(); // Redraw the drawable while animating
-            }, _currentNeedleAngle, _targetNeedleAngle);
-
-            animation.Commit(animatable, "NeedleAnimation", 16, Convert.ToUInt32(duration * 1000), Easing.Linear);
-        }
-
-        public void Draw(ICanvas canvas, RectF dirtyRect)
-        {
-            // Drawing code for your light meter scale
-            canvas.DrawLine(0, 0, 100, 100); // Example drawing (replace with actual scale drawing code)
         }
     }
 }

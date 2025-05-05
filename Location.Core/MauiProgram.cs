@@ -2,6 +2,8 @@
 using Camera.MAUI;
 using CommunityToolkit.Maui;
 using epj.Expander.Maui;
+using Location.Core.Platforms.Android.Implementation;
+using Location.Core.Platforms.Android.Interface;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Implementation;
@@ -47,6 +49,7 @@ public static class MauiProgram
         builder.Services.AddTransient<IDetailsView, DetailsViewModel>();
         builder.Services.AddSingleton<IAlertService, AlertService>();
         builder.Services.AddSingleton<ILoggerService, SqliteLoggerService>();
+        builder.Services.AddSingleton<IAmbientLightSensorService, AmbientLightSensorService>();
         builder.Services.AddTransient(typeof(Locations.Core.Data.Queries.SettingsQuery<>));
 
 

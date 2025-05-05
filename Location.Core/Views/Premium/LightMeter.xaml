@@ -1,22 +1,40 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:cv="clr-namespace:Camera.MAUI;assembly=Camera.MAUI"
-             xmlns:local="clr-namespace:Location.Core.Views.Premium"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Location.Core.Views.Premium.LightMeter"
-                          xmlns:system="clr-namespace:System;assembly=netstandard"
-xmlns:strings="clr-namespace:Location.Core.Resources"
-             Title="LightMeter">
+             Title="Light Meter">
+    <!-- Layout to contain GraphicsView and the Radio Buttons -->
+    <VerticalStackLayout Padding="10" Spacing="10">
+        <!-- GraphicsView for drawing the light meter -->
+        <GraphicsView x:Name="LunaMeterView"
+              Drawable="{Binding LunaDrawable}"
+              HeightRequest="400"
+              WidthRequest="400" >
+            <GraphicsView.GestureRecognizers>
+                <PanGestureRecognizer PanUpdated="OnPanUpdated" />
+            </GraphicsView.GestureRecognizers>
+        </GraphicsView>
 
-    <!-- Light Meter Scales -->
-    <VerticalStackLayout>
-        <GraphicsView x:Name="graphicsView"
-                  HeightRequest="300"
-                  WidthRequest="300" />
-        <Picker x:Name="stepPicker"
-            Title="Step Size"
-            ItemsSource="{Binding StepOptions}" />
-        <Label Text="{x:Static system:Environment.NewLine}"></Label>
-        <Button x:Name="expButton" Text="{x:Static strings:AppResources.SendToExposureCalculator}" HeightRequest="50" Pressed="Button_Pressed"/>
+        <!-- StackLayout for Radio Buttons (Horizontal layout) -->
+        <StackLayout Padding="10" Spacing="10" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+            <!-- Radio Button for Full Step Size -->
+            <RadioButton x:Name="FullRadioButton" 
+                         Content="Full" 
+                         GroupName="StepSize" 
+                         IsChecked="True" 
+                         CheckedChanged="OnStepSizeChanged" />
+
+            <!-- Radio Button for Halves Step Size -->
+            <RadioButton x:Name="HalvesRadioButton" 
+                         Content="Halves" 
+                         GroupName="StepSize" 
+                         CheckedChanged="OnStepSizeChanged" />
+
+            <!-- Radio Button for Thirds Step Size -->
+            <RadioButton x:Name="ThirdsRadioButton" 
+                         Content="Thirds" 
+                         GroupName="StepSize" 
+                         CheckedChanged="OnStepSizeChanged" />
+        </StackLayout>
+
     </VerticalStackLayout>
 </ContentPage>

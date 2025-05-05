@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Gestures;
+
 
 namespace Location.Photography.Shared.ExposureCalculator
 {
@@ -47,7 +47,7 @@ namespace Location.Photography.Shared.ExposureCalculator
                 float angle = startAngle + (i * angleStep);
                 var x = center.X + radius * (float)Math.Cos(angle * Math.PI / 180);
                 var y = center.Y + radius * (float)Math.Sin(angle * Math.PI / 180);
-                canvas.DrawText(scale[i], x, y);
+                //canvas.DrawText(scale[i], x, y);
             }
         }
 
@@ -61,7 +61,7 @@ namespace Location.Photography.Shared.ExposureCalculator
             var needleEndY = center.Y + radius * (float)Math.Sin(_needleAngle * Math.PI / 180);
 
             // Draw the needle
-            canvas.DrawLine(center.X, center.Y, needleEndX, needleEndY, new StrokeStyle { LineWidth = 2, LineColor = Colors.Red });
+            //canvas.DrawLine(center.X, center.Y, needleEndX, needleEndY, new StrokeStyle { LineWidth = 2, LineColor = Colors.Red });
         }
 
         private void DrawSecondNeedle(ICanvas canvas)
@@ -74,7 +74,7 @@ namespace Location.Photography.Shared.ExposureCalculator
             var needleEndY = center.Y + radius * (float)Math.Sin(_secondNeedleAngle * Math.PI / 180);
 
             // Draw the second needle
-            canvas.DrawLine(center.X, center.Y, needleEndX, needleEndY, new StrokeStyle { LineWidth = 2, LineColor = Colors.Blue });
+            //canvas.DrawLine(center.X, center.Y, needleEndX, needleEndY, new StrokeStyle { LineWidth = 2, LineColor = Colors.Blue });
         }
 
         // Handle dragging of the scales
