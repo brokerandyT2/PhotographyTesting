@@ -34,77 +34,17 @@ steps:
       dotnet workload install maui-android
     displayName: 'Install .NET MAUI Android Workload'
 
-  # Step 4: Install Android SDK and Command-Line Tools
-  - script: |
-      echo "Installing Android SDK..."
-      choco install android-sdk -y
-      refreshenv
-
-      set ANDROID_SDK_ROOT=C:\Android\android-sdk
-      set CMDLINE_TOOLS_DIR=%ANDROID_SDK_ROOT%\cmdline-tools\latest
-      mkdir %CMDLINE_TOOLS_DIR%
-
-      curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip
-      tar -xf cmdline-tools.zip -C %CMDLINE_TOOLS_DIR% --strip-components=1
-
-      set PATH=%CMDLINE_TOOLS_DIR%\bin;%PATH%
-      sdkmanager.bat "platform-tools" "platforms;android-$(AndroidSdkVersion)" "build-tools;$(AndroidSdkVersion)" --sdk_root=%ANDROID_SDK_ROOT%
-    displayName: 'Install Android SDK and cmdline-tools'
-
-  # Step 5: Restore NuGet Packages for the Solution
-  - task: NuGetCommand@2
-    displayName: 'Restore NuGet Packages'
+  - task: XplatGenerateReleaseNotes@4
     inputs:
-      command: 'restore'
-      restoreSolution: '**/Photography.sln'
-
-  # Step 6: Build Unsigned APK
-  - task: MSBuild@1
-    displayName: 'Build Unsigned APK'
-    inputs:
-      solution: '**/Location.Core.csproj'
-      msbuildArguments: '/p:Configuration=$(BuildConfiguration) /p:AndroidPackageFormat=apk'
-      configuration: '$(BuildConfiguration)'
-
-  - script: |
-      echo "Listing files in output directory..."
-      dir $(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\
-    displayName: 'List Files in Build Output Directory'
-
-  # Step 7: Download Keystore File
-  - task: DownloadSecureFile@1
-    displayName: 'Download Keystore File'
-    inputs:
-      secureFile: 'pixmap-release.keystore'
-
-  # Step 8: Sign APK
-  - script: |
-      jarsigner -verbose ^
-        -keystore "$(Agent.TempDirectory)\pixmap-release.keystore" ^
-        -storepass "$(KeystorePassword)" ^
-        -keypass "$(KeyPassword)" ^
-        -signedjar "$(Build.ArtifactStagingDirectory)\com.x3squaredcircles.locations-Signed-$(Build.BuildId).apk" ^
-        "$(Build.SourcesDirectory)\Location.Core\bin\$(BuildConfiguration)\net9.0-android\com.x3squaredcircles.locations.apk" ^
-        $(KeyAlias)
-    displayName: 'Sign APK'
-    env:
-      KeystorePassword: $(KeystorePassword)
-      KeyPassword: $(KeyPassword)
-      KeyAlias: $(KeyAlias)
-
-  # Step 1: Copy the signed APK to the staging directory
-  - task: CopyFiles@2
-    displayName: 'Copy Signed APK to Artifact Staging Directory'
-    inputs:
-      SourceFolder: '$(Build.SourcesDirectory)/Location.Core/bin/Release/net9.0-android'
-      Contents: 'com.x3squaredcircles.locations-Signed.apk'
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-  # Step 2: Publish the APK to the Azure Artifacts feed
-  - task: UniversalPackages@0
-    displayName: 'Publish Signed APK to Azure Artifacts'
-    inputs:
-      command: publish
-      publishDirectory: '$(Build.ArtifactStagingDirectory)'
-      vstsFeedPublish: 'Photography Locations/apk'
-      vstsFeedPackagePublish: 'com.x3squaredcircles.locations'
+      outputfile: '$(Build.ArtifactStagingDirectory)/$(Get-Date).md'
+      templateLocation: 'File'
+      dumpPayloadToConsole: false
+      dumpPayloadToFile: false
+      replaceFile: true
+      getParentsAndChildren: False
+      getAllParents: False
+      getIndirectPullRequests: False
+      stopOnError: False
+      considerPartiallySuccessfulReleases: False
+      checkForManuallyLinkedWI: False
+      wiqlFromTarget: 'WorkItems'
