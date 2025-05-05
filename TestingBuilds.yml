@@ -35,6 +35,7 @@ steps:
     inputs:
       outputfile: '$(Build.ArtifactStagingDirectory)/$(Get-Date)-$(Build.ID).md'
       templateLocation: 'File'
+      templatefile: 'build-handlebars-template.md'
       dumpPayloadToConsole: false
       dumpPayloadToFile: false
       replaceFile: true
