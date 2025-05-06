@@ -38,7 +38,7 @@ namespace Location.Photography.Business.DataAccess
             if (string.IsNullOrEmpty(x))
             {
                 loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
-                throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
+                RaiseError(new ArgumentException("Email is not set.  Cannot use encrypted database."));
             }
 
             sq.dataB = EncryptedSQLite.DataEncrypted.GetConnection(email);

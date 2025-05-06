@@ -48,10 +48,16 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 query.SaveItem(model);
+                if (IsError)
+                {
+                    RaiseError(new Exception("Error Saving Tip Type"));
+                                        return model;
+                }
                 return model;
             }
             catch (Exception ex)
             {
+                IsError = true;
                 RaiseError(ex);
                 return model;
             }

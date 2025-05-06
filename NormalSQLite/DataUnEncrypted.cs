@@ -31,5 +31,12 @@ namespace NormalSQLite
             var conn = new sql.SQLiteAsyncConnection(MagicStrings.DataBasePath, Constants.Flags);
             return conn;
         }
+        public static sql.SQLiteConnection GetSyncConnection()
+        {
+            SQLitePCL.Batteries_V2.Init();
+
+            var conn = new sql.SQLiteConnection(MagicStrings.DataBasePath, Constants.Flags);
+            return conn;
+        }
     }
 }

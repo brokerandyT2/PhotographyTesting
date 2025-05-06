@@ -18,6 +18,7 @@ namespace  Locations.Core.Data.Queries
 
         private IAlertService alertServ;
         private ILoggerService loggerService;
+        public bool IsError { get; set; } = false;
         public static string DatabasePath => MagicStrings.DataBasePath;
         public Database(IAlertService alert, ILoggerService log):this()
         {

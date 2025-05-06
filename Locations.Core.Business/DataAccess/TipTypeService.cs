@@ -34,6 +34,10 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 query.SaveItem(model);
+                if (model.IsError)
+                {
+                    RaiseError(new Exception("Error Saving Tip Type"));
+                }
                 return model;
             }
             catch (Exception ex)
@@ -48,6 +52,10 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 var x = Save(model);
+                if (x.IsError || model.IsError)
+                {
+                    RaiseError(new Exception("Error Saving Tip Type"));
+                }
                 return returnNew ? new TipTypeViewModel() : x;
             }
             catch (Exception ex)
@@ -60,6 +68,7 @@ namespace Locations.Core.Business.DataAccess
         {
             try
             {
+
                 return query.GetItem<TipTypeViewModel>(id);
             }
             catch (Exception ex)
@@ -72,14 +81,22 @@ namespace Locations.Core.Business.DataAccess
         {
             try
             {
-                return (List<TipTypeViewModel>)query.GetItems<TipTypeViewModel>();
+                var x = (List<TipTypeViewModel>)query.GetItems<TipTypeViewModel>();
+                foreach (var z in x)
+                {
+                    if (z.IsError)
+                    {
+                        RaiseError(new Exception("Error Getting Tip Types"));
+                    }
+                }
+                return x;
             }
             catch (Exception ex)
             {
                 RaiseError(ex);
                 return new List<TipTypeViewModel>();
             }
-           
+
         }
 
         public bool Delete(TipTypeViewModel model)
@@ -87,6 +104,11 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 var x = query.DeleteItem(model);
+                if (x == 420)
+                {
+                    RaiseError(new Exception("Error Deleting Tip Type"));
+                    return false;
+                }
                 return x != 420 ? true : false;
             }
             catch (Exception ex)
@@ -102,6 +124,11 @@ namespace Locations.Core.Business.DataAccess
             {
                 var model = query.GetItem<TipTypeViewModel>(id);
                 var x = query.DeleteItem(model);
+                if (x == 420)
+                {
+                    RaiseError(new Exception("Error Deleting Tip Type"));
+                    return false;
+                }
                 return x != 420 ? true : false;
             }
             catch (Exception ex)

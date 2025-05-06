@@ -35,5 +35,13 @@ namespace EncryptedSQLite
             var conn = new sql.SQLiteAsyncConnection(x);
             return conn;
         }
+
+        public static sql.SQLiteConnection GetSyncConnection(string email)
+        {
+            SQLitePCL.Batteries_V2.Init();
+            var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, key: email);
+            var conn = new sql.SQLiteConnection(x);
+            return conn;
+        }
     }
 }

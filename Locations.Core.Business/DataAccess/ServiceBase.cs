@@ -11,25 +11,31 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Business.DataAccess
 {
-    public class ServiceBase<T> where T: IDTOBase
+    public class ServiceBase<T> where T : IDTOBase
     {
         public static event EventHandler<AlertEventArgs> AlertRaised;
         private IAlertService alertService;
-        private ILoggerService loggerService;
+        private static ILoggerService loggerService;
+        public static bool IsError { get; set; } = false;
         public ServiceBase() { }
 
         public ServiceBase(ILoggerService logger, IAlertService alertService)
         {
-            this.loggerService = logger;
+            ServiceBase<T>.loggerService = logger;
             this.alertService = alertService;
         }
         public static void RaiseAlert(object? sender, AlertEventArgs e)
         {
             AlertRaised?.Invoke(null, e);
+            IsError = true;
+            loggerService = new LoggerService();
+            loggerService.LogError(e.Message);
         }
-        public static void RaiseError(Exception ex) 
+        public static void RaiseError(Exception ex)
         {
             RaiseAlert(null, new AlertEventArgs("Error", ex.Message, true, AlertService.AlertType.Error));
+            IsError = true;
+            loggerService.LogError(ex.Message);
         }
         public static void LogInfo(string message)
         {

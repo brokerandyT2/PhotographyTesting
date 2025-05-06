@@ -14,7 +14,7 @@ namespace Locations.Core.Shared.Customizations.Alerts.Implementation
     {
         public event EventHandler<AlertEventArgs> AlertRaised;
         private ILoggerService loggerService;
-
+        
         public AlertService()
         {
         }
@@ -45,6 +45,12 @@ namespace Locations.Core.Shared.Customizations.Alerts.Implementation
                     break;
             }
         }
+
+        public void ShowAlert(string title, string message, AlertType alertType)
+        {
+            throw new NotImplementedException();
+        }
+
         public enum AlertType
         {
             Info,

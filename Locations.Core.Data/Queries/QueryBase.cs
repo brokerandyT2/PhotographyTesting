@@ -1,11 +1,11 @@
-﻿using  Locations.Core.Data.Queries.Interfaces;
+﻿using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Implementation;
 using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using  Locations.Core.Shared.ViewModels;
-using  Locations.Core.Shared.ViewModels.Interface;
+using Locations.Core.Shared.ViewModels;
+using Locations.Core.Shared.ViewModels.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +13,11 @@ using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using EncryptedSQLite;
+using NormalSQLite;
+using static Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService;
 
-namespace  Locations.Core.Data.Queries
+namespace Locations.Core.Data.Queries
 {
     public abstract class QueryBase<T> : Database, IDataAccessBase where T : new()
     {
@@ -22,13 +25,18 @@ namespace  Locations.Core.Data.Queries
         protected readonly IAlertService AlertService;
         protected readonly ILoggerService LoggerService;
         private string email;
+        public bool IsError;
         public QueryBase(IAlertService alertService, Locations.Core.Shared.Customizations.Logging.Interfaces.ILoggerService loggerService)
         {
             email = string.Empty;
             AlertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
             LoggerService = loggerService ?? throw new ArgumentNullException(nameof(loggerService));
         }
-       
+
+        public QueryBase(IAlertService alertService, ILoggerService loggerService, string email) : this(alertService, loggerService)
+        {
+            this.email = email;
+        }
         public abstract T GetItem<T>(int id);
 
         public abstract string GetValueByString<T>(string name);
@@ -39,10 +47,20 @@ namespace  Locations.Core.Data.Queries
         {
             try
             {
-                
-                return dataB.DeleteAsync(item).Result; 
+                var x = dataB.DeleteAsync(item).Result;
+                if (x != 0)
+                {
+                    IsError = true;
+                    return 69;
+                }
+                else
+                {
+                    IsError = false;
+                    return x;
+                }
             }
-            catch {
+            catch
+            {
                 return 420;
             }
         }
@@ -50,12 +68,29 @@ namespace  Locations.Core.Data.Queries
 
         public void DeleteItem<T>(int id)
         {
-            var x = GetItem<T>(id);
-            var y = dataB.DeleteAsync(x).Result;
+            try
+            {
+                var x = GetItem<T>(id);
+                var y = dataB.DeleteAsync(x).Result;
+            }
+            catch (Exception ex)
+            {
+                IsError = true;
+                LoggerService.LogError(ex.Message);
+            }
         }
         public void SaveItem(T item)
         {
-           var x = dataB.InsertOrReplaceAsync(item).Result;
+            try
+            {
+                var x = dataB.InsertOrReplaceAsync(item).Result;
+            }
+            catch (Exception ex)
+            {
+                IsError = true;
+                LoggerService.LogError(ex.Message);
+
+            }
         }
         public void Update(T item)
         {
@@ -68,10 +103,27 @@ namespace  Locations.Core.Data.Queries
         /// <returns></returns>
         public T SaveWithIDReturn(T item)
         {
-            SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(Constants.FullDatabasePath, Constants.Flags);
-            
-            conn.Insert(item);
+            SQLite.SQLiteConnection conn;
+            if (string.IsNullOrEmpty(email))
+            {
+                conn = DataUnEncrypted.GetSyncConnection();
 
+            }
+            else
+            {
+                conn = DataEncrypted.GetSyncConnection(this.email);
+            }
+
+            try
+            {
+                conn.Insert(item);
+            }
+            catch (Exception ex)
+            {
+                IsError = true;
+                LoggerService.LogError(ex.Message);
+                
+            }
             return (T)Convert.ChangeType(item, typeof(T));
         }
 

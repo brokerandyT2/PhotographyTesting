@@ -12,7 +12,7 @@ namespace Locations.Core.Shared.DTO
     public partial class DTOBase : ObservableObject, IDTOBase
     {
         public event EventHandler<AlertEventArgs> RaiseAlert;
-
+        public bool IsError { get; set; } = false;
         public DTOBase()
         { 
             this.RaiseAlert += OnAlertRaised;
@@ -21,11 +21,13 @@ namespace Locations.Core.Shared.DTO
         private void OnAlertRaised(object? sender, AlertEventArgs e)
         {
             RaiseAlert?.Invoke(this, e);
+            IsError = true;
         }
 
         protected virtual void OnAlertRaised(string title, string message)
         {
             RaiseAlert?.Invoke(this, new AlertEventArgs(title, message));
+            IsError = true;
         }
     }
 }
