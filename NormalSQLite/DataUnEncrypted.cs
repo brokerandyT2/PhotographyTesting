@@ -22,13 +22,13 @@ namespace NormalSQLite
         {
             SQLitePCL.Batteries_V2.Init();
            
-            _conn = new sql.SQLiteAsyncConnection(MagicStrings.DataBasePathEncrypted, Constants.Flags);
+            _conn = new sql.SQLiteAsyncConnection(MagicStrings.DataBasePath, Constants.Flags);
         }
         public static sql.SQLiteAsyncConnection GetConnection()
         {
             SQLitePCL.Batteries_V2.Init();
 
-            var conn = new sql.SQLiteAsyncConnection(MagicStrings.DataBasePathEncrypted, Constants.Flags);
+            var conn = new sql.SQLiteAsyncConnection(MagicStrings.DataBasePath, Constants.Flags);
             return conn;
         }
     }

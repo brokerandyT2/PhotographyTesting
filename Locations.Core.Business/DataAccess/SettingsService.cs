@@ -25,11 +25,19 @@ namespace Locations.Core.Business.DataAccess
         public event EventHandler<AlertEventArgs> AlertRaised;
         private IAlertService alertServ;
         private ILoggerService loggerService;
+        public SettingsService() 
+        {
+            alertServ = new AlertService();
+            loggerService = new LoggerService();
+            _query = new SettingsQuery<SettingViewModel>(alertServ, loggerService);
+
+        }
         public SettingsService(IAlertService alert, ILoggerService logger) : this()
         {
             alertServ = alert;
             loggerService = logger;
-            
+            _query = new SettingsQuery<SettingViewModel>(alertServ, loggerService);
+
         }
         public SettingsService(IAlertService alert, ILoggerService logger, string email) :this(alert, logger)
         {
@@ -42,10 +50,7 @@ namespace Locations.Core.Business.DataAccess
             }
             _query = new SettingsQuery<SettingViewModel>(alertServ, loggerService, email);
         }
-        public SettingsService()
-        {
-            AlertRaised += SettingsService_AlertRaised; ;
-        }
+       
 
         private void SettingsService_AlertRaised(object? sender, AlertEventArgs e)
         {
