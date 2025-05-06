@@ -53,7 +53,7 @@ namespace Locations.Core.Shared
         public static string AppOpenCounter = "appopencounter";
 #if PHOTOGRAPHY
         public static string DataBasePath = Path.Combine(FileSystem.AppDataDirectory,"photography.db3");
-
+        public static string DataBasePathEncrypted = Path.Combine(FileSystem.AppDataDirectory, "photography_encrypted.db3");
         public static string USTimeformat_Pattern = "hh:mm tt";
         public static string InternationalTimeFormat_Pattern = "HH:mm";
         public static string FreePremiumAdSupported = "free_premium_ad_supported";

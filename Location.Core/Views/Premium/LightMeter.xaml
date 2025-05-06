@@ -1,40 +1,20 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Location.Core.Views.Premium.LightMeter"
+             xmlns:local="clr-namespace:Location.Photography.Business.LightMeter;assembly=Location.Photography.Business"
              Title="Light Meter">
+
+    <ContentPage.Resources>
+        <local:LunaProDrawable x:Key="LightMeterDrawable" />
+    </ContentPage.Resources>
     <!-- Layout to contain GraphicsView and the Radio Buttons -->
     <VerticalStackLayout Padding="10" Spacing="10">
         <!-- GraphicsView for drawing the light meter -->
-        <GraphicsView x:Name="LunaMeterView"
-              Drawable="{Binding LunaDrawable}"
-              HeightRequest="400"
-              WidthRequest="400" >
-            <GraphicsView.GestureRecognizers>
-                <PanGestureRecognizer PanUpdated="OnPanUpdated" />
-            </GraphicsView.GestureRecognizers>
-        </GraphicsView>
+        <GraphicsView Drawable="{StaticResource LightMeterDrawable}" HeightRequest="400" WidthRequest="400" />
+
 
         <!-- StackLayout for Radio Buttons (Horizontal layout) -->
-        <StackLayout Padding="10" Spacing="10" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
-            <!-- Radio Button for Full Step Size -->
-            <RadioButton x:Name="FullRadioButton" 
-                         Content="Full" 
-                         GroupName="StepSize" 
-                         IsChecked="True" 
-                         CheckedChanged="OnStepSizeChanged" />
-
-            <!-- Radio Button for Halves Step Size -->
-            <RadioButton x:Name="HalvesRadioButton" 
-                         Content="Halves" 
-                         GroupName="StepSize" 
-                         CheckedChanged="OnStepSizeChanged" />
-
-            <!-- Radio Button for Thirds Step Size -->
-            <RadioButton x:Name="ThirdsRadioButton" 
-                         Content="Thirds" 
-                         GroupName="StepSize" 
-                         CheckedChanged="OnStepSizeChanged" />
-        </StackLayout>
+        
 
     </VerticalStackLayout>
 </ContentPage>
