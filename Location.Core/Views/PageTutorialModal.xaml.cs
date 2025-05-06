@@ -1,3 +1,4 @@
+using Android.Text;
 using Location.Core.Helpers;
 using Location.Core.Resources;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
@@ -21,41 +22,46 @@ public partial class PageTutorialModal : ContentPage
     public PageTutorialModal(PageEnums page)
     {
         InitializeComponent();
+        var file = string.Empty;
         switch (page)
         {
             case PageEnums.WeatherDisplay:
-                content.Text = AppResources.WeatherDisplayTutorial;
+                file = "WeatherDisplay.html";
                 break;
             case PageEnums.ExposureCalculator:
-                content.Text = AppResources.ExposureCalculatorTutorial;
+                file = "ExposureCalculator.html";
                 break;
             case PageEnums.LightMeter:
-                content.Text = AppResources.LightMeterTutorial;
+                file = "LightMeter.html";
                 break;
             case PageEnums.SunLocation:
-                content.Text = AppResources.SunLocationTutorial;
+                file = "SunLocation.html";
                 break;
             case PageEnums.SceneEvaluation:
-                content.Text = AppResources.SceneEvaluationTutorial;
+                file = "SceneEvaluation.html";
                 break;
             case PageEnums.SunCalculations:
-                content.Text = AppResources.SunCalculationsTutorial;
+                file = "SunCalculations.html";
                 break;
             case PageEnums.AddLocation:
-                content.Text = AppResources.AddLocationTutorial;
+                file = "AddLocation.html";
                 break;
             case PageEnums.ListLocations:
-                content.Text = AppResources.ListLocationsTutorial;
+                file = "ListLocations.html";
                 break;
             case PageEnums.Settings:
-                content.Text = AppResources.SettingsTutorial;
+                file = "Settings.html";
                 break;
             case PageEnums.Tips:
-                content.Text = AppResources.TipsTutorial;
+                file = "Tips.html";
                 break;
             default:
                 content.Text = "Page Not Found";
                 break;
         }
+        using var stream = FileSystem.OpenAppPackageFileAsync(file).Result;
+        using var reader = new StreamReader(stream);
+        var html = reader.ReadToEndAsync().Result;
+        tutorial.Source = new HtmlWebViewSource { Html = html };
     }
 }
