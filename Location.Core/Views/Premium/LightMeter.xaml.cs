@@ -1,5 +1,7 @@
 ﻿
+using Location.Core.Helpers;
 using Location.Photography.Business.LightMeter;
+using Locations.Core.Shared;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using System;
@@ -15,7 +17,10 @@ public partial class LightMeter : ContentPage
     {
         InitializeComponent();
         BindingContext = this;
-       
-
+    }
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        PageHelpers.CheckVisit(MagicStrings.LightMeterViewed, PageEnums.LightMeter, new Locations.Core.Business.DataAccess.SettingsService(), Navigation);
     }
 }

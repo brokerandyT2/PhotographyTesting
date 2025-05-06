@@ -21,9 +21,10 @@ namespace  Locations.Core.Data.Queries
 
         protected readonly IAlertService AlertService;
         protected readonly ILoggerService LoggerService;
-       
+        private string email;
         public QueryBase(IAlertService alertService, Locations.Core.Shared.Customizations.Logging.Interfaces.ILoggerService loggerService)
         {
+            email = string.Empty;
             AlertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
             LoggerService = loggerService ?? throw new ArgumentNullException(nameof(loggerService));
         }

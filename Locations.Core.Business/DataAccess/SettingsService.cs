@@ -15,7 +15,8 @@ using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Logging.Implementation;
 using Microsoft.Extensions.Logging;
 using static Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService;
-
+using EncryptedSQLite;
+using NormalSQLite;
 namespace Locations.Core.Business.DataAccess
 {
     public class SettingsService : ServiceBase<SettingViewModel>, ISettingService<SettingViewModel>
@@ -28,6 +29,18 @@ namespace Locations.Core.Business.DataAccess
         {
             alertServ = alert;
             loggerService = logger;
+            
+        }
+        public SettingsService(IAlertService alert, ILoggerService logger, string email) :this(alert, logger)
+        {
+            var q = new SettingsQuery<SettingViewModel>(alert, logger);
+            var x = q.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
+            if (string.IsNullOrEmpty(x))
+            {
+                loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
+                throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
+            }
+            _query = new SettingsQuery<SettingViewModel>(alertServ, loggerService, email);
         }
         public SettingsService()
         {

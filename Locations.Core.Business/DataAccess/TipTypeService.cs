@@ -18,10 +18,16 @@ namespace Locations.Core.Business.DataAccess
         public TipTypeService()
         {
         }
-        public TipTypeService(IAlertService alertServ, ILoggerService log): this()
+        public TipTypeService(IAlertService alertServ, ILoggerService log) : this()
         {
             this.alertServ = alertServ;
             this.loggerService = log;
+        }
+        public TipTypeService(IAlertService alertServ, ILoggerService log, string email) : this(alertServ, log)
+        {
+            this.alertServ = alertServ;
+            this.loggerService = log;
+            query = new TipTypesQuery<TipTypeViewModel>(alertServ, log, email);
         }
         public TipTypeViewModel Save(TipTypeViewModel model)
         {

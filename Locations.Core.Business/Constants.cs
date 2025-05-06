@@ -27,27 +27,5 @@ namespace Locations.Core.Business
             // enable multi-threaded database access
             SQLite.SQLiteOpenFlags.SharedCache;
 
-        private static SettingsService ss = new SettingsService();
-        public static string userSubscriptionType_string = ss.GetSettingByName(MagicStrings.SubscriptionType).Value;//.Value;
-
-        public static string userSubscriptionExpiration_string = DateTime.Parse(ss.GetSettingByName(MagicStrings.SubscriptionExpiration).Value).ToString(ss.GetSettingByName(MagicStrings.TimeFormat).Value);
-       
-        public static string DefaultHemisphere = Hemisphere.HemisphereChoices.North.Name();
-        public static string DateFormat_string => ss.GetSettingByName(MagicStrings.DateFormat).Value;
-        public static string Time_Format_string => ss.GetSettingByName(MagicStrings.TimeFormat).Value;
-        public static string SubscriptionType => ss.GetSettingByName(MagicStrings.SubscriptionType).Value;
-        public static string FirstName => ss.GetSettingByName(MagicStrings.FirstName).Value;
-        public static string LastName => ss.GetSettingByName(MagicStrings.LastName).Value;
-        public static string TimeFormat_string => ss.GetSettingByName(MagicStrings.TimeFormat).Value;
-
-        public static string DevInfo_string = Newtonsoft.Json.JsonConvert.SerializeObject(new DeviceInformation()).ToString();
-        public static readonly string Weather_API_Key_string = ss.GetSettingByName(MagicStrings.Weather_API_Key).Value;
-        public static readonly string WeatherURL_string = ss.GetSettingByName(MagicStrings.WeatherURL).Value;
-        public static readonly string UniqueID_string = ss.GetSettingByName(MagicStrings.UniqueID).Value;
-        public static readonly string LastBulkWeatherUpdate_string = ss.GetSettingByName(MagicStrings.LastBulkWeatherUpdate).Value;
-        public static readonly string DeviceInformation_string = ss.GetSettingByName(MagicStrings.DeviceInformation).Value;
-        public static readonly string Hemisphere_string = ss.GetSettingByName(MagicStrings.Hemisphere).Value;
-        public static readonly string SubscriptionType_string = ss.GetSettingByName(MagicStrings.SubscriptionType).Value;
-
     }
 }

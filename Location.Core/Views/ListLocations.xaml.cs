@@ -65,14 +65,7 @@ public partial class ListLocations : ContentPage
     {
         base.OnNavigatedTo(args);
         PopulateData();
-        var x = ss.GetSettingByName(MagicStrings.LocationListViewed);
-        if(x.ToBoolean() == false)
-        {
-            Navigation.PushModalAsync(new Views.DetailViews.HoldingPage(0));
-            x.Value = MagicStrings.True_string;
-            ss.Save(x);
-        }
-        CheckVisit();
+      PageHelpers.CheckVisit(MagicStrings.LocationListViewed, PageEnums.ListLocations, ss, Navigation);     
 
     }
     private void ImageButton_Pressed(object sender, EventArgs e)

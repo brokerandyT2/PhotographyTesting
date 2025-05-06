@@ -15,6 +15,9 @@ using Locations.Core.Shared.Customizations.Logging.Implementation;
 using Microsoft.Extensions.Logging;
 using static Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService;
 using Locations.Core.Business.DataAccess;
+using Microsoft.Maui.Animations;
+using Serilog.Core;
+using Locations.Core.Shared;
 namespace Location.Photography.Business.DataAccess
 {
     public class TipService : ServiceBase<TipViewModel>, ITipService<TipViewModel>
@@ -36,10 +39,29 @@ namespace Location.Photography.Business.DataAccess
             this.alertServ = alertServ;
             this.loggerService = loggerService;
         }
+        public TipService(string email):this(new AlertService(), new LoggerService())
+        {
+            var q = new TipQuery<TipViewModel>(new AlertService(), new LoggerService());
+            var x = q.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
+            if (string.IsNullOrEmpty(x))
+            {
+                loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
+                throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
+            }
+            query = new TipQuery<TipViewModel>(new AlertService(), new LoggerService(), email);
+        }
 
-        public TipService() {
+        public TipService() 
+        {
+            if(alertServ == null)
+                alertServ = new AlertService();
+            if(loggerService == null)
+                loggerService = new LoggerService();
+
+            query = new TipQuery<TipViewModel>(new AlertService(), new LoggerService());
             alertServ.AlertRaised += AlertServ_AlertRaised;
         }
+        
 
         private void AlertServ_AlertRaised(object? sender, AlertEventArgs e)
         {

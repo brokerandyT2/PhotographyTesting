@@ -2,6 +2,7 @@
 using Locations.Core.Business.GeoLocation;
 using Locations.Core.Business.Weather;
 using Locations.Core.Data.Queries;
+using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Implementation;
@@ -9,6 +10,8 @@ using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.Helpers;
 using Locations.Core.Shared.ViewModels;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Animations;
+using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +42,17 @@ namespace Locations.Core.Business.DataAccess
             this.alertServ = alertServ;
             this.loggerService = loggerService;
         }
+        public LocationsService(IAlertService alertServ, ILoggerService loggerService, string email) : this(alertServ, loggerService)
+        {
+            var q = new SettingsQuery<SettingViewModel>(alertServ, loggerService);
+            var x = q.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
+            if (string.IsNullOrEmpty(x))
+            {
+                loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
+                throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
+            }
+            lq = new LocationQuery<LocationViewModel>(alertServ, loggerService, email);
+        }
         public LocationViewModel SaveSettingWithObjectReturn(LocationViewModel s)
         {
             try
@@ -60,7 +74,7 @@ namespace Locations.Core.Business.DataAccess
                 {
                     SettingsService set = new Business.DataAccess.SettingsService();
 
-                    WeatherAPI weatherAPI = new WeatherAPI(set.GetSettingByName(Constants.Weather_API_Key_string).GetValue(), locationViewModel.Lattitude, locationViewModel.Longitude, set.GetSettingByName(Constants.WeatherURL_string).GetValue());
+                    WeatherAPI weatherAPI = new WeatherAPI(set.GetSettingByName(MagicStrings.Weather_API_Key).GetValue(), locationViewModel.Lattitude, locationViewModel.Longitude, set.GetSettingByName(MagicStrings.WeatherURL).GetValue());
                     WeatherService weatherService = new WeatherService();
                     weatherService.Save(weatherAPI.GetWeatherAsync().Result);
                 }

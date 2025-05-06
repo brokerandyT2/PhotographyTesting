@@ -1,12 +1,13 @@
 ﻿using Location.Photography.Business.DataAccess.Interfaces;
 using Location.Photography.Data.Queries;
 using Locations.Core.Business.DataAccess;
+using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Implementation;
 using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
-
+using NormalSQLite;
 namespace Location.Photography.Business.DataAccess
 {
 
@@ -17,16 +18,30 @@ namespace Location.Photography.Business.DataAccess
         private IAlertService alertServ;
         private ILoggerService loggerService;
         public SettingsService() { }
-        public SettingsService(IAlertService alert, ILoggerService logger)
+        public SettingsService(IAlertService alert, ILoggerService logger): this()
         {
             alertServ = alert;
             loggerService = logger;
+            sq.dataB = NormalSQLite.DataUnEncrypted.GetConnection();
         }
         public SettingsService(IAlertService alert, ILoggerService logger, SettingsQuery<SettingViewModel> query)
         {
             alertServ = alert;
             loggerService = logger;
             sq = query;
+        }
+        public SettingsService(IAlertService alert, ILoggerService logger, string email)
+        {
+            alertServ = alert;
+            loggerService = logger;
+            var x = GetSettingByName(MagicStrings.Email).Value;
+            if (string.IsNullOrEmpty(x))
+            {
+                loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
+                throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
+            }
+
+            sq.dataB = EncryptedSQLite.DataEncrypted.GetConnection(email);
         }
         public bool Delete(SettingViewModel model)
         {

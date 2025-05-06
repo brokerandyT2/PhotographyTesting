@@ -1,5 +1,6 @@
 ﻿using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Data.Queries;
+using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Implementation;
@@ -7,6 +8,8 @@ using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Animations;
+using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +31,17 @@ namespace Locations.Core.Business.DataAccess
         {
             this.alertServ = alertServ;
             this.loggerService = loggerService;
+        }
+        public TipService(IAlertService alertServ, ILoggerService loggerService, string email) : this(alertServ, loggerService)
+        {
+            var q = new TipQuery<TipViewModel>(alertServ, loggerService);
+            var x = q.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
+            if (string.IsNullOrEmpty(x))
+            {
+                loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
+                throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
+            }
+            query = new TipQuery<TipViewModel>(alertServ, loggerService, email);
         }
         public TipViewModel Save(TipViewModel model)
         {

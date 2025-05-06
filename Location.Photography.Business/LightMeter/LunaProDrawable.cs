@@ -7,118 +7,146 @@ namespace Location.Photography.Business.LightMeter
 {
     public class LunaProDrawable : IDrawable
     {
+        public float EvValue { get; set; } = 10.0f;
+        public int IsoIndex { get; set; } = 5;
+        public int ApertureIndex { get; set; } = 5;
+        public int ShutterIndex { get; set; } = 5;
 
-        private float outerDialAngle = 0f;
-        private float middleDialAngle = 0f;
-        private float innerDialAngle = 0f;
-        private float evNeedleValue = 2.3f; // Simulated EV reading
-        public LunaProDrawable()
-        { }
+        public List<int> IsoValues { get; set; } = new() { 25, 50, 100, 200, 400, 800, 1600 };
+        public List<float> ApertureValues { get; set; } = new() { 1.0f, 1.4f, 2.0f, 2.8f, 4.0f, 5.6f, 8.0f, 11.0f, 16.0f, 22.0f, 32.0f };
+        public List<string> ShutterValues { get; set; } = new() { "1s", "1/2", "1/4", "1/8", "1/15", "1/30", "1/60", "1/125", "1/250", "1/500", "1/1000" };
+
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
             canvas.SaveState();
 
-            float centerX = dirtyRect.Center.X;
-            float centerY = dirtyRect.Center.Y;
-            float radius = Math.Min(dirtyRect.Width, dirtyRect.Height) / 2f - 20f;
+            // Outer casing
+            float cornerRadius = 20f;
+            canvas.FillColor = Colors.Black.WithAlpha(0.1f);
+            canvas.FillRoundedRectangle(dirtyRect, cornerRadius);
 
-            canvas.Translate(centerX, centerY);
+            canvas.StrokeColor = Colors.DarkGray;
+            canvas.StrokeSize = 2;
+            canvas.DrawRoundedRectangle(dirtyRect, cornerRadius);
 
-            DrawEVArc(canvas, radius * 0.65f);
-            DrawReferenceNeedle(canvas, radius * 0.65f, evNeedleValue);
-            DrawDials(canvas, radius);
-            DrawCenterDisc(canvas, radius * 0.3f);
+            // Split layout into top (meter) and bottom (dials)
+            float meterHeight = dirtyRect.Height * 0.35f;
+            var meterRect = new RectF(dirtyRect.Left + 10, dirtyRect.Top + 10, dirtyRect.Width - 20, meterHeight - 20);
+            var dialRect = new RectF(dirtyRect.Left + 10, dirtyRect.Top + meterHeight + 10, dirtyRect.Width - 20, dirtyRect.Height - meterHeight - 20);
+
+            DrawEvScaleAndNeedle(canvas, meterRect);
+            DrawExposureDials(canvas, dialRect);
 
             canvas.RestoreState();
         }
 
-        private void DrawEVArc(ICanvas canvas, float radius)
-        {
-            canvas.StrokeColor = Colors.Black;
-            canvas.StrokeSize = 2;
-
-            float startAngle = 150;
-            float sweepAngle = 240;
-
-            canvas.DrawArc(-radius, -radius, radius * 2, radius * 2, startAngle, sweepAngle, false, false);
-
-            // Tick marks and numbers
-            int min = -5;
-            int max = 5;
-            for (int i = min; i <= max; i++)
-            {
-                float angle = 180 + ((i - min) / (float)(max - min)) * sweepAngle - sweepAngle / 2;
-                float rad = DegreesToRadians(angle);
-                float x1 = radius * (float)Math.Cos(rad);
-                float y1 = radius * (float)Math.Sin(rad);
-                float x2 = (radius - 10) * (float)Math.Cos(rad);
-                float y2 = (radius - 10) * (float)Math.Sin(rad);
-                canvas.DrawLine(x1, y1, x2, y2);
-
-                float labelRadius = radius + 10;
-                float lx = labelRadius * (float)Math.Cos(rad);
-                float ly = labelRadius * (float)Math.Sin(rad);
-                canvas.FontSize = 12;
-                canvas.DrawString(i.ToString(), lx - 6, ly - 6, 20, 20, HorizontalAlignment.Center, VerticalAlignment.Center);
-            }
-        }
-
-        private void DrawReferenceNeedle(ICanvas canvas, float radius, float ev)
-        {
-            float sweepAngle = 240f;
-            float angle = 180 + ((ev + 5) / 10f) * sweepAngle - sweepAngle / 2;
-            float rad = DegreesToRadians(angle);
-            float x = (radius - 15) * (float)Math.Cos(rad);
-            float y = (radius - 15) * (float)Math.Sin(rad);
-
-            canvas.StrokeColor = Colors.Red;
-            canvas.StrokeSize = 3;
-            canvas.DrawLine(0, 0, x, y);
-        }
-
-        private void DrawDials(ICanvas canvas, float radius)
-        {
-            DrawDialRing(canvas, radius, outerDialAngle, Colors.LightGreen, 0, 20, "EV");
-            DrawDialRing(canvas, radius * 0.85f, middleDialAngle, Colors.Gray, 1, 15, "F");
-            DrawDialRing(canvas, radius * 0.7f, innerDialAngle, Colors.DarkGray, 25, 6400, "ISO");
-        }
-
-        private void DrawDialRing(ICanvas canvas, float radius, float angle, Color color, int min, int max, string label)
+        private void DrawEvScaleAndNeedle(ICanvas canvas, RectF rect)
         {
             canvas.SaveState();
-            canvas.Rotate(angle);
-            canvas.StrokeColor = color;
-            canvas.FontSize = 10;
 
-            int stepCount = 12;
-            for (int i = 0; i < stepCount; i++)
+            // Background for meter area
+            canvas.FillColor = Colors.White;
+            canvas.FillRoundedRectangle(rect, 10);
+
+            canvas.StrokeColor = Colors.Gray;
+            canvas.StrokeSize = 1;
+            canvas.DrawRoundedRectangle(rect, 10);
+
+            // Draw EV arc scale (EV 1 to 20)
+            float centerX = rect.Center.X;
+            float centerY = rect.Bottom;
+            float radius = rect.Width * 0.45f;
+
+            for (int i = 1; i <= 20; i++)
             {
-                float a = DegreesToRadians(i * (360f / stepCount));
-                float x = radius * (float)Math.Cos(a);
-                float y = radius * (float)Math.Sin(a);
-                string value = label switch
+                float angle = Map(i, 1, 20, 135, 45); // clockwise arc
+                float rad = DegreesToRadians(angle);
+                float x1 = centerX + radius * (float)Math.Cos(rad);
+                float y1 = centerY - radius * (float)Math.Sin(rad);
+                float x2 = centerX + (radius - 10) * (float)Math.Cos(rad);
+                float y2 = centerY - (radius - 10) * (float)Math.Sin(rad);
+
+                canvas.StrokeColor = Colors.Black;
+                canvas.StrokeSize = 1;
+                canvas.DrawLine(x1, y1, x2, y2);
+
+                if (i % 2 == 0)
                 {
-                    "EV" => (min + i).ToString(),
-                    "F" => $"f/{Math.Pow(2, i / 2.0):0.#}",
-                    "ISO" => ((int)(min * Math.Pow(2, i))).ToString(),
-                    _ => "?"
-                };
-                canvas.DrawString(value, x - 10, y - 6, 20, 12, HorizontalAlignment.Center, VerticalAlignment.Center);
+                    float tx = centerX + (radius - 20) * (float)Math.Cos(rad);
+                    float ty = centerY - (radius - 20) * (float)Math.Sin(rad);
+                    canvas.FontSize = 10;
+                    canvas.DrawString(i.ToString(), tx, ty, HorizontalAlignment.Center);
+                }
             }
+
+            // Draw needle
+            float needleAngle = Map(EvValue, 1, 20, 135, 45);
+            float needleRad = DegreesToRadians(needleAngle);
+            float needleLength = radius - 15;
+
+            float nx = centerX + needleLength * (float)Math.Cos(needleRad);
+            float ny = centerY - needleLength * (float)Math.Sin(needleRad);
+
+            canvas.StrokeColor = Colors.Red;
+            canvas.StrokeSize = 2;
+            canvas.DrawLine(centerX, centerY, nx, ny);
 
             canvas.RestoreState();
         }
 
-        private void DrawCenterDisc(ICanvas canvas, float radius)
+        private void DrawExposureDials(ICanvas canvas, RectF rect)
         {
-            canvas.FillColor = Colors.Black;
-            canvas.FillCircle(0, 0, radius);
-            canvas.FontColor = Colors.White;
-            canvas.FontSize = 18;
-            canvas.DrawString("PixMap", -radius, -12, radius * 2, 24, HorizontalAlignment.Center, VerticalAlignment.Center);
+            canvas.SaveState();
+
+            float centerX = rect.Center.X;
+            float centerY = rect.Center.Y;
+            float outerRadius = Math.Min(rect.Width, rect.Height) / 2 - 10;
+
+            // Outer dial: Shutter Speed
+            DrawDial(canvas, centerX, centerY, outerRadius, ShutterValues, ShutterIndex, Colors.DarkSlateBlue);
+
+            // Middle dial: Aperture
+            DrawDial(canvas, centerX, centerY, outerRadius * 0.75f, ApertureValues.ConvertAll(v => $"f/{v}"), ApertureIndex, Colors.Teal);
+
+            // Inner dial: ISO
+            DrawDial(canvas, centerX, centerY, outerRadius * 0.5f, IsoValues.ConvertAll(v => v.ToString()), IsoIndex, Colors.Orange);
+
+            canvas.RestoreState();
         }
 
-        private float DegreesToRadians(float degrees) => (float)(Math.PI / 180) * degrees;
+        private void DrawDial(ICanvas canvas, float cx, float cy, float radius, List<string> values, int selectedIndex, Color color)
+        {
+            canvas.SaveState();
+
+            int count = values.Count;
+            float angleStep = 360f / count;
+
+            for (int i = 0; i < count; i++)
+            {
+                float angle = -90 + i * angleStep;
+                float rad = DegreesToRadians(angle);
+                float tx = cx + radius * (float)Math.Cos(rad);
+                float ty = cy + radius * (float)Math.Sin(rad);
+
+                canvas.FontSize = 10;
+                canvas.FontColor = i == selectedIndex ? Colors.Yellow : Colors.White;
+                canvas.DrawString(values[i], tx, ty, HorizontalAlignment.Center);
+            }
+
+            // Circle outline
+            canvas.StrokeColor = color;
+            canvas.StrokeSize = 2;
+            canvas.DrawCircle(cx, cy, radius);
+
+            canvas.RestoreState();
+        }
+
+        private static float Map(float value, float fromSource, float toSource, float fromTarget, float toTarget)
+        {
+            return fromTarget + (value - fromSource) * (toTarget - fromTarget) / (toSource - fromSource);
+        }
+
+        private static float DegreesToRadians(float degrees) => (float)(Math.PI / 180) * degrees;
     }
 }
 

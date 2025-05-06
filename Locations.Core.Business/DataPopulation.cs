@@ -78,32 +78,12 @@ namespace Locations.Core.Business
             List<SettingViewModel> list = new List<SettingViewModel>();
             SettingsService ss = new SettingsService();
 
-            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "12" });
-            
-#if DEBUG
-#if ANDY
-            list.Add( new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
-            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
-            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "24" });
-#else
-            list.Add( new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
-            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(-1).ToString() });
-            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "12" });
-#endif
-#elif RELEASE
-            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
-            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
-            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "12" });
-#endif
 
+            #region DEFAULT DATA No Matter if Debug or not
             list.Add(new() { Name = MagicStrings.Hemisphere, Value = Hemisphere.HemisphereChoices.North.Name() });
             list.Add(new() { Name = MagicStrings.FirstName, Value = "" });
             list.Add(new() { Name = MagicStrings.LastName, Value = "" });
-
-
-
             list.Add(new() { Name = MagicStrings.UniqueID, Value = Guid.NewGuid().ToString() });
-
             list.Add(new() { Name = MagicStrings.LastBulkWeatherUpdate, Value = DateTime.Now.AddDays(-2).ToString() });
             list.Add(new() { Name = MagicStrings.DefaultLanguage, Value = "en-US" });
             list.Add(new() { Name = MagicStrings.WindDirection, Value = MagicStrings.TowardsWind });
@@ -115,19 +95,15 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.Weather_API_Key, Value = "aa24f449cced50c0491032b2f955d610" });
             list.Add(new() { Name = MagicStrings.FreePremiumAdSupported, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.TemperatureType, Value = MagicStrings.Fahrenheit });
+            #endregion
 
 
 
 
-
-#if ANDY
 #if DEBUG
-            //list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
-            list.Add(new() { Name = MagicStrings.Email, Value = "" });
 
-#else
+            list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
             list.Add(new() { Name = MagicStrings.Email, Value = "" });
-#endif
             list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.True_string });
@@ -138,10 +114,17 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.AddLocationViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.WeatherDisplayViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.True_string });
-
-
-
+            list.Add(new() { Name = MagicStrings.ExposureCalcAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Name = MagicStrings.LightMeterAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Name = MagicStrings.SceneEvaluationAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Name = MagicStrings.SunCalculatorViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Name = MagicStrings.SunLocationAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Name = MagicStrings.WeatherDisplayAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
+            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
+            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "24" });
 #else
+            list.Add(new() { Name = MagicStrings.Email, Value = "" });
             list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.False_string });
@@ -153,38 +136,27 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.WeatherDisplayViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.Email, Value = "" });    
-#endif
-
-            /*#else
-                        list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
-                        list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.True_string });
-                        list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.True_string });
-                        list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.True_string });
-                        list.Add(new() { Name = MagicStrings.TipsViewed, Value = MagicStrings.True_string });
-                        list.Add(new() { Name = MagicStrings.ExposureCalcViewed, Value = MagicStrings.True_string });
-                        list.Add(new() { Name = MagicStrings.LightMeterViewed, Value = MagicStrings.True_string });
-                        list.Add(new() { Name = MagicStrings.SceneEvaluationViewed, Value = MagicStrings.True_string });
-                        list.Add(new() { Name = MagicStrings.AddLocationViewed, Value = MagicStrings.True_string });
-                        list.Add(new() { Name = MagicStrings.WeatherDisplayViewed, Value = MagicStrings.True_string });
-                        list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.True_string });
-            #endif*/
-
-
-
-
             list.Add(new() { Name = MagicStrings.ExposureCalcAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
             list.Add(new() { Name = MagicStrings.LightMeterAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
             list.Add(new() { Name = MagicStrings.SceneEvaluationAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
             list.Add(new() { Name = MagicStrings.SunCalculatorViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
             list.Add(new() { Name = MagicStrings.SunLocationAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
             list.Add(new() { Name = MagicStrings.WeatherDisplayAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add( new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
+            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "12" });
+#endif
+
+
+
+
             foreach (var x in list)
             {
                 var z = ss.SaveSettingWithObjectReturn(x);
             }
 
             var zz = ss.SaveSettingWithObjectReturn(new SettingViewModel() { Name = MagicStrings.DeviceInfo, Value = "" });
-            SettingViewModel n = new() { Name = MagicStrings.TimeFormat, Value = Constants.TimeFormat_string };
+            SettingViewModel n = new() { Name = MagicStrings.TimeFormat, Value = MagicStrings.USTimeformat_Pattern };
             ss.SaveSettingWithObjectReturn(n);
         }
 

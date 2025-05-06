@@ -82,7 +82,7 @@ public partial class AddLocation : ContentPage
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
-        PageHelpers.CheckVisit(MagicStrings.SunCalculatorViewed, PageEnums.SunCalculations, ss, Navigation);
+        PageHelpers.CheckVisit(MagicStrings.AddLocationViewed, PageEnums.AddLocation, ss, Navigation);
 
 
     }

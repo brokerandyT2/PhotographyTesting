@@ -24,6 +24,11 @@ namespace  Locations.Core.Data.Queries
             alertServ = alert;
             loggerService = log;
         }
+        public Database(IAlertService alert, ILoggerService log, string email) : this()
+        {
+            alertServ = alert;
+            loggerService = log;
+        }
         public Database()
         {
             dataB = new SQLiteAsyncConnection(MagicStrings.DataBasePath, Constants.Flags);

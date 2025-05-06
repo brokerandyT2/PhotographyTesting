@@ -33,10 +33,13 @@
 
   <ItemGroup>
 
+    <ProjectReference Include="..\EncryptedSQLite\EncryptedSQLite.csproj" />
+
     <ProjectReference Include="..\Location.Photography.Data\Location.Photography.Data.csproj" />
     <ProjectReference Include="..\Location.Photography.Shared\Location.Photography.Shared.csproj" />
     <ProjectReference Include="..\Locations.Core.Business\Locations.Core.Business.csproj" />
     <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
+    <ProjectReference Include="..\NormalSQLite\NormalSQLite.csproj" />
   </ItemGroup>
 
 </Project>
