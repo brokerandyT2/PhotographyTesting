@@ -77,13 +77,19 @@ namespace Locations.Core.Business
 
             List<SettingViewModel> list = new List<SettingViewModel>();
             SettingsService ss = new SettingsService();
+            var guid = Guid.NewGuid().ToString();
+
+
+            SecureStorage.SetAsync(MagicStrings.UniqueID, guid);
+            SecureStorage.SetAsync(MagicStrings.Email, string.Empty);
+
 
 
             #region DEFAULT DATA No Matter if Debug or not
             list.Add(new() { Name = MagicStrings.Hemisphere, Value = Hemisphere.HemisphereChoices.North.Name() });
             list.Add(new() { Name = MagicStrings.FirstName, Value = "" });
             list.Add(new() { Name = MagicStrings.LastName, Value = "" });
-            list.Add(new() { Name = MagicStrings.UniqueID, Value = Guid.NewGuid().ToString() });
+            list.Add(new() { Name = MagicStrings.UniqueID, Value = guid });
             list.Add(new() { Name = MagicStrings.LastBulkWeatherUpdate, Value = DateTime.Now.AddDays(-2).ToString() });
             list.Add(new() { Name = MagicStrings.DefaultLanguage, Value = "en-US" });
             list.Add(new() { Name = MagicStrings.WindDirection, Value = MagicStrings.TowardsWind });

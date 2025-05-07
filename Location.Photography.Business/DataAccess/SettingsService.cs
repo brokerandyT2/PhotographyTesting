@@ -1,13 +1,10 @@
 ﻿using Location.Photography.Business.DataAccess.Interfaces;
 using Location.Photography.Data.Queries;
 using Locations.Core.Business.DataAccess;
+using Locations.Core.Business.Logging.Interfaces;
 using Locations.Core.Shared;
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using NormalSQLite;
 namespace Location.Photography.Business.DataAccess
 {
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Locations.Core.Shared.Customizations.Logging.Interfaces
+namespace Locations.Core.Business.Logging.Interfaces
 {
     public interface ILoggerService
     {

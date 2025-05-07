@@ -6,9 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Locations.Core.Shared.DTO;
 namespace Location.Photography.Shared.ViewModels
 {
-    public abstract class ViewModelBase : ObservableObject, INotifyPropertyChanged
+    public abstract class ViewModelBase : DTOBase, INotifyPropertyChanged
     {
         protected ViewModelBase()
         {

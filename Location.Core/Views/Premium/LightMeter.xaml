@@ -2,19 +2,60 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Location.Core.Views.Premium.LightMeter"
              xmlns:local="clr-namespace:Location.Photography.Business.LightMeter;assembly=Location.Photography.Business"
+                          xmlns:strings="clr-namespace:Location.Core.Resources" 
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+
              Title="Light Meter">
 
     <ContentPage.Resources>
         <local:LunaProDrawable x:Key="LightMeterDrawable" />
     </ContentPage.Resources>
-    <!-- Layout to contain GraphicsView and the Radio Buttons -->
-    <VerticalStackLayout Padding="10" Spacing="10">
-        <!-- GraphicsView for drawing the light meter -->
-        <GraphicsView Drawable="{StaticResource LightMeterDrawable}" HeightRequest="400" WidthRequest="400" />
+    <RefreshView x:Name="myRefreshView" IsRefreshing="false" Command="{Binding RefreshCommand}" RefreshColor="Blue">
+        <!-- Layout to contain GraphicsView and the Radio Buttons -->
+        <VerticalStackLayout Padding="10" Spacing="10">
+            <!-- GraphicsView for drawing the light meter -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="600"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+                <Grid x:Name="LightMeterContainer" 
+              Grid.Row="0"
+              HorizontalOptions="Center">
+
+                    <GraphicsView x:Name="LightMeterView"
+                         HeightRequest="600"
+                         WidthRequest="400" />
+
+                </Grid>
 
 
-        <!-- StackLayout for Radio Buttons (Horizontal layout) -->
-        
+                <!-- StackLayout for Radio Buttons (Horizontal layout) -->
+                <StackLayout Padding="10" Spacing="10"  Orientation="Horizontal" HorizontalOptions="CenterAndExpand" Grid.Row="2">
+                    <!-- Radio Button for Full Step Size -->
+                    <RadioButton x:Name="FullRadioButton" 
+                         Content="Full" 
+                         GroupName="StepSize" 
+                         IsChecked="True" 
+                         CheckedChanged="FullRadioButton_CheckedChanged" />
 
-    </VerticalStackLayout>
+                    <!-- Radio Button for Halves Step Size -->
+                    <RadioButton x:Name="HalvesRadioButton" 
+                         Content="Halves" 
+                         GroupName="StepSize" 
+                         CheckedChanged="FullRadioButton_CheckedChanged" />
+
+                    <!-- Radio Button for Thirds Step Size -->
+                    <RadioButton x:Name="ThirdsRadioButton" 
+                         Content="Thirds" 
+                         GroupName="StepSize" 
+                         CheckedChanged="FullRadioButton_CheckedChanged" />
+                </StackLayout>
+                <Button x:Name="SendToExpCalc" Text="{x:Static strings:AppResources.SendToExposureCalculator}" Pressed="SendToExpCalc_Pressed" HeightRequest="50" Grid.Row="4"/>
+            </Grid>
+        </VerticalStackLayout>
+    </RefreshView>
 </ContentPage>

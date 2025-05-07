@@ -1,17 +1,8 @@
-﻿using  Locations.Core.Data.Queries.Interfaces;
-using  Locations.Core.Shared.ViewModels;
-using  Locations.Core.Shared.ViewModels.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using  Locations.Core.Shared.Helpers;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using EncryptedSQLite;
-using NormalSQLite;
+﻿using EncryptedSQLite;
 using Locations.Core.Shared;
+using Locations.Core.Shared.StorageSvc;
+using Locations.Core.Shared.ViewModels;
+using NormalSQLite;
 namespace  Locations.Core.Data.Queries
 {
     public class SettingsQuery<T> : QueryBase<T> where T : SettingViewModel, new()
@@ -23,26 +14,15 @@ namespace  Locations.Core.Data.Queries
         /// <param name="loggerService"></param>
         /// <param name="email"></param>
         /// <exception cref="ArgumentException"></exception>
-        public SettingsQuery(IAlertService alertServ, ILoggerService loggerService, string email) : this(alertServ, loggerService)
-        {
-            SettingsQuery<SettingViewModel> settings = new SettingsQuery<SettingViewModel>(alertServ, loggerService);
-            var addy = settings.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
-
-            if (string.IsNullOrEmpty(addy))
-            {
-                loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {addy}");
-                throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
-            }
-            dataB = DataEncrypted.GetConnection(email);
-        }
+       
         /// <summary>
         /// Use this constructor for unencrypted database.
         /// </summary>
         /// <param name="alertServ"></param>
         /// <param name="loggerService"></param>
-        public SettingsQuery(IAlertService alertServ, ILoggerService loggerService) : base(alertServ, loggerService)
+        public SettingsQuery() :base()
         {
-            dataB = DataUnEncrypted.GetConnection();
+            dataB = DataEncrypted.GetAsyncConnection(KEY);
         }
 
         /// <summary>

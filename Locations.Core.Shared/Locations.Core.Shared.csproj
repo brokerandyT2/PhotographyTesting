@@ -36,4 +36,8 @@
     <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Customizations\" />
+  </ItemGroup>
+
 </Project>

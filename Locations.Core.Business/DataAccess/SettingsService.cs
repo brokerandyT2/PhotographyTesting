@@ -1,54 +1,42 @@
 ﻿using Locations.Core.Business.DataAccess.Interfaces;
+using Locations.Core.Business.Logging.Implementation;
+using Locations.Core.Business.Logging.Interfaces;
+using Locations.Core.Business.StorageSvc;
 using Locations.Core.Data.Queries;
-using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
-using Microsoft.Extensions.Logging;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.ViewModels;
 using static Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService;
-using EncryptedSQLite;
-using NormalSQLite;
 namespace Locations.Core.Business.DataAccess
 {
     public class SettingsService : ServiceBase<SettingViewModel>, ISettingService<SettingViewModel>
     {
-        private SettingsQuery<SettingViewModel> _query = new SettingsQuery<SettingViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
+        private SettingsQuery<SettingViewModel> _query;
         public event EventHandler<AlertEventArgs> AlertRaised;
         private IAlertService alertServ;
         private ILoggerService loggerService;
+
+        
         public SettingsService() 
         {
             alertServ = new AlertService();
             loggerService = new LoggerService();
-            _query = new SettingsQuery<SettingViewModel>(alertServ, loggerService);
+
+            _query = new SettingsQuery<SettingViewModel>( );
 
         }
-        public SettingsService(IAlertService alert, ILoggerService logger) : this()
+       
+        public SettingsService(IAlertService alert, ILoggerService logger, string email) :this()
         {
-            alertServ = alert;
-            loggerService = logger;
-            _query = new SettingsQuery<SettingViewModel>(alertServ, loggerService);
-
-        }
-        public SettingsService(IAlertService alert, ILoggerService logger, string email) :this(alert, logger)
-        {
-            var q = new SettingsQuery<SettingViewModel>(alert, logger);
+            var q = new SettingsQuery<SettingViewModel>();
             var x = q.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
             if (string.IsNullOrEmpty(x))
             {
                 loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
                 throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
             }
-            _query = new SettingsQuery<SettingViewModel>(alertServ, loggerService, email);
+            _query = new SettingsQuery<SettingViewModel>();
         }
        
 

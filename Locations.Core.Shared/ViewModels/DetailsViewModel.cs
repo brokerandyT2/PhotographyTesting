@@ -11,7 +11,7 @@ namespace Locations.Core.Shared.ViewModels
 {
     public class DetailsViewModel : ViewModelBase, IDetailsView
     {
-        public override event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private LocationViewModel _locationViewModel;
         private WeatherViewModel _weatherViewModel;

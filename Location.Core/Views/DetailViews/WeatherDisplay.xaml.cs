@@ -1,4 +1,5 @@
 using Location.Core.Helpers;
+using Location.Core.Resources;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
@@ -39,9 +40,20 @@ public partial class WeatherDisplay : ContentPage
     }
     public WeatherDisplay(LocationViewModel name) : this()
     {
-        var x = ws.GetWeather(name.Lattitude, name.Longitude);
+        WeatherViewModel x = ws.GetWeather(name.Lattitude, name.Longitude);
+        try
+        {
+            if (x.IsError)
+            {
+                DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+            }
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
+        }
+
         x.WindDirectionArrow = ss.GetSettingByName(MagicStrings.WindDirection).Value;
-        // WeatherControl.BindingContext = x;
         this.BindingContext = x;
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)

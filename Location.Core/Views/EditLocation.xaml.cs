@@ -2,6 +2,7 @@ using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared.ViewModels;
+using Location.Core.Resources;
 
 namespace Location.Core.Views;
 
@@ -28,16 +29,40 @@ public partial class EditLocation : ContentPage
     }
     public EditLocation(int id)
     {
+        LocationViewModel x = new LocationViewModel();
         InitializeComponent();
         this.id = id;
-        var x = locationService.Get(id);
-        BindingContext = x;
+        try
+        {
+            x = locationService.Get(id);
+            BindingContext = x;
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, ex.Message, AppResources.OK);
+        }
+        if (x.IsError)
+        {
+            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
-        var x = locationService.Get(id);
-        BindingContext = x;
+        LocationViewModel x = new LocationViewModel();
+        try
+        {
+            x = locationService.Get(id);
+            BindingContext = x;
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, ex.Message, AppResources.OK);
+        }
+        if (x.IsError)
+        {
+            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
     }
 
     private void WeatherButton_Pressed(object sender, EventArgs e)

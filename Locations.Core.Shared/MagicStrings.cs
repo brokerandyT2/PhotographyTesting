@@ -43,6 +43,7 @@ namespace Locations.Core.Shared
         public static readonly string CameraRefresh = "camerarefresh";
         public static readonly string NoEmailEntered = "no_email_entered";
         public static readonly string Dismiss_LightMeter_Alert= "dismiss_lightmeter_alert";
+        public static readonly string RegEx_Email = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
         public const string ExposureCalculator = "exposurecalculator";
         public static string LocationListViewed = "locationlistviewed";
 

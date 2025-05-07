@@ -10,6 +10,7 @@ using Locations.Core.Business.DataAccess;
 using Microsoft.Maui.Controls;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Interfaces;
+using Location.Core.Resources;
 
 namespace Location.Core.Views;
 
@@ -52,15 +53,28 @@ public partial class ListLocations : ContentPage
     }
     private void PopulateData()
     {
-        var loc = ls.GetLocations();
-        Items.Clear();
-        foreach (var z in loc)
+        try
         {
-            _items.Add(z);
+            var loc = ls.GetLocations();
+            Items.Clear();
+            foreach (var z in loc)
+            {
+                _items.Add(z);
+
+                if (z.IsError)
+                {
+                    DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
+                }
+            }
+            BindingContext = Items;
+            cv.ItemsSource = Items;
         }
-        BindingContext = Items;
-        cv.ItemsSource = Items;
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
+        }
     }
+       
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
@@ -72,8 +86,21 @@ public partial class ListLocations : ContentPage
     {
         var z = (Microsoft.Maui.Controls.ImageButton)sender;
         var id = (int)z.CommandParameter;
+        LocationViewModel yt = new LocationViewModel();
 
-        LocationViewModel yt = ls.Get(id);
+        try
+        {
+            yt =   ls.Get(id);
+            if (yt.IsError)
+            {
+                DisplayAlert(AppResources.Error, yt.alertEventArgs.Message, AppResources.OK);
+            }
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
+        }
+     
 
         var location = new Microsoft.Maui.Devices.Sensors.Location(yt.Lattitude, yt.Longitude);
         var options = new MapLaunchOptions { Name = yt.Title };

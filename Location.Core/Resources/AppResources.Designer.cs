@@ -295,6 +295,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There was an error saving your preference.  Please try again..
+        /// </summary>
+        internal static string ErrorUpdatingSetting {
+            get {
+                return ResourceManager.GetString("ErrorUpdatingSetting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Evaluate Scene.
         /// </summary>
         internal static string EvaluateScene {

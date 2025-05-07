@@ -10,25 +10,44 @@ using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.DTO;
 using Locations.Core.Shared.Helpers;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
+using EncryptedSQLite;
+using Locations.Core.Business.StorageSvc;
+using Locations.Core.Business.Logging.Implementation;
 namespace Locations.Core.Business.DataAccess
 {
-    public class DataAccess
+    public class DataAccess: DataAccessBase
     {
+        public event EventHandler<AlertEventArgs> RaiseAlert;
+        public bool IsError { get; set; } = false;
+        public AlertEventArgs alertEventArgs;
         SQLiteAsyncConnection _connection;
+
         public DataAccess()
         {
             
-                _connection = new SQLiteAsyncConnection(MagicStrings.DataBasePath, Constants.Flags);
+
+            var x  = new NativeStorageService(new AlertService(), new LoggerService());
+            var email = NativeStorageService.GetSetting(MagicStrings.Email);
+            if (string.IsNullOrEmpty(email))
+            {
+                RaiseError(new ArgumentException("Eror"));
+            }
+             
+            _connection = EncryptedSQLite.DataEncrypted.GetAsyncConnection(KEY);
                 
            
                 CheckForDB();
             
         }
+
+        private void DataAccess_RaiseAlert(object? sender, AlertEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         public ISQLiteAsyncConnection Connection
         {
             get
@@ -58,7 +77,7 @@ namespace Locations.Core.Business.DataAccess
 
             // Now you can construct LoggerService
             var loggerService = new LoggerService(logger);
-            SettingsQuery<SettingViewModel> setting = new SettingsQuery<SettingViewModel>(new AlertService(), loggerService);
+            SettingsQuery<SettingViewModel> setting = new SettingsQuery<SettingViewModel>();
             string x = string.Empty;
             try
             {

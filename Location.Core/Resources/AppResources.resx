@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AccessIsFreeByWatchingAds" xml:space="preserve">
-    <value>Free Access by Watching Ads</value>
-  </data>
   <data name="AddEmail" xml:space="preserve">
     <value>Providing your email address will allow us to backup your data to the cloud.  This is needed so that if you change devices, we can restore your data.</value>
   </data>
@@ -419,5 +416,11 @@
   </data>
   <data name="WithWind" xml:space="preserve">
     <value>With Wind</value>
+  </data>
+  <data name="AccessIsFreeByWatchingAds" xml:space="preserve">
+    <value>Free Access by Watching Ads</value>
+  </data>
+  <data name="ErrorUpdatingSetting" xml:space="preserve">
+    <value>There was an error saving your preference.  Please try again.</value>
   </data>
 </root>

@@ -1,13 +1,5 @@
-﻿using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Maui.Controls;
-using Microsoft.Extensions.Logging;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
+﻿using Locations.Core.Business.Logging.Interfaces;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 namespace Locations.Core.Shared.Customizations.Alerts.Implementation
 {
     public class AlertService : IAlertService

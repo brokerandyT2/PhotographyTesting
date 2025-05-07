@@ -1,34 +1,40 @@
 ﻿using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Business.GeoLocation;
+using Locations.Core.Business.Logging.Implementation;
+using Locations.Core.Business.Logging.Interfaces;
+using Locations.Core.Business.StorageSvc;
 using Locations.Core.Business.Weather;
 using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.Helpers;
 using Locations.Core.Shared.ViewModels;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Animations;
-using Serilog.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Locations.Core.Business.DataAccess
 {
     public class LocationsService : ServiceBase<LocationViewModel>, ILocationService<LocationViewModel>
     {
-        private LocationQuery<LocationViewModel> lq = new Data.Queries.LocationQuery<LocationViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
+        private LocationQuery<LocationViewModel> lq;
         private IAlertService alertServ;
         private ILoggerService loggerService;
         public event EventHandler<AlertEventArgs> AlertRaised;
-        public LocationsService() {
+        private string email;
+        private string guid;
+        public LocationsService()
+        {
 
+            email = NativeStorageService.GetSetting(MagicStrings.Email);
+            guid = NativeStorageService.GetSetting(MagicStrings.UniqueID);
+            lq = new Data.Queries.LocationQuery<LocationViewModel>();
             AlertRaised += LocationsService_AlertRaised;
+            if (string.IsNullOrEmpty(email))
+            {
+                //loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
+                throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
+            }
+            lq = new LocationQuery<LocationViewModel>();
         }
 
 
@@ -37,21 +43,16 @@ namespace Locations.Core.Business.DataAccess
             RaiseError(new Exception(e.Title));
         }
 
-        public LocationsService(IAlertService alertServ, ILoggerService loggerService):this()
+        public LocationsService(IAlertService alertServ, ILoggerService loggerService) : this()
         {
             this.alertServ = alertServ;
             this.loggerService = loggerService;
         }
         public LocationsService(IAlertService alertServ, ILoggerService loggerService, string email) : this(alertServ, loggerService)
         {
-            var q = new SettingsQuery<SettingViewModel>(alertServ, loggerService);
+            var q = new SettingsQuery<SettingViewModel>();
             var x = q.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
-            if (string.IsNullOrEmpty(x))
-            {
-                loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
-                throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
-            }
-            lq = new LocationQuery<LocationViewModel>(alertServ, loggerService, email);
+
         }
         public LocationViewModel SaveSettingWithObjectReturn(LocationViewModel s)
         {
@@ -61,7 +62,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-               RaiseError(ex);
+                RaiseError(ex);
 
                 return new LocationViewModel();
             }
@@ -100,7 +101,7 @@ namespace Locations.Core.Business.DataAccess
             }
             catch (Exception ex)
             {
-           RaiseError(ex);
+                RaiseError(ex);
                 return new LocationViewModel();
             }
         }

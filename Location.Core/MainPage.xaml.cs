@@ -9,6 +9,7 @@ using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Interfaces;
+using Locations.Core.Business.StorageSvc;
 #if PHOTOGRAPHY
 
 #endif
@@ -18,19 +19,30 @@ namespace Location.Core
     {
 
         private static SettingsService ss = new SettingsService();
+#if DEBUG
+        private static SubscriptionTypeEnum _subType = SubscriptionTypeEnum.Premium;
+#else
         private static SubscriptionTypeEnum _subType;
+#endif
+        public static bool IsLoggedIn { get; set; } = false;
 
-        public static bool IsLoggedIn
-        {
-            get { return ss.GetSettingByName(MagicStrings.Email).Value != string.Empty ? true : false; }
-        }
-
-
-
-
+        internal static string EmailAddress;
+        internal static string AppID;
 
         public static SubscriptionTypeEnum SubscriptionType = _subType;
-        private IAlertService alertService;
+        internal IAlertService alertService;
+        internal ILoggerService loggerService;
+        public INativeStorageService nativeService;
+
+        public MainPage(IAlertService alertService, ILoggerService loggerService, INativeStorageService nativeService) : this(alertService)
+        {
+            this.loggerService = loggerService;
+            this.nativeService = nativeService;
+            this.nativeService = new NativeStorageService(alertService, loggerService);
+            EmailAddress = NativeStorageService.GetSetting(MagicStrings.Email);
+            IsLoggedIn = !string.IsNullOrEmpty(EmailAddress);
+            AppID = NativeStorageService.GetSetting(MagicStrings.UniqueID);
+        }
 
         public MainPage()
         {
@@ -98,7 +110,7 @@ namespace Location.Core
                     {
 #if PHOTOGRAPHY
                         this.Children.Add(new Views.Premium.ExposureCalculator());
-                        //this.Children.Add(new Views.Premium.LightMeter());
+                        this.Children.Add(new Views.Premium.LightMeter());
                         this.Children.Add(new Views.Premium.SunLocation());
 #endif
                     }
@@ -117,7 +129,7 @@ namespace Location.Core
 
         }
 
-        public MainPage(IAlertService alertService)
+        public MainPage(IAlertService alertService) : this()
         {
             this.alertService = alertService;
         }
@@ -137,7 +149,7 @@ namespace Location.Core
             this.Children.Add(new Location.Core.Views.AddLocation());
             this.Children.Add(new Location.Core.Views.ListLocations());
             this.Children.Add(new Location.Core.Views.Tips());
-            this.Children.Add(new Views.Premium.LightMeter());
+
         }
     }
 

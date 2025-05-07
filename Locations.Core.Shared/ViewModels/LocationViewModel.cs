@@ -1,15 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Alerts.Implementation;
 using Locations.Core.Shared.DTO;
 using Locations.Core.Shared.ViewModels.Interface;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 //using Locations.Core.Business.DataAccess;
 namespace Locations.Core.Shared.ViewModels
@@ -25,8 +17,16 @@ namespace Locations.Core.Shared.ViewModels
             AlertTitle = string.Empty;
             AlertMessage = string.Empty;
             StartGPS();
-            this.RaiseAlert += LocationViewModel_RaiseAlert;
-            
+            AlertRaised += this.LocationViewModel_RaiseAlert1; 
+
+        }
+
+        private void LocationViewModel_RaiseAlert1(object? sender, AlertEventArgs e)
+        {
+            AlertTitle = e.Title;
+            AlertMessage = e.Message;
+
+            AlertRaised?.Invoke(this, new AlertEventArgs(e.Title, e.Message));
         }
 
         private void LocationViewModel_RaiseAlert(object? sender, AlertEventArgs e)

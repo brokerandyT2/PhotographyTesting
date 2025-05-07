@@ -1,38 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Locations.Core.Shared;
+using Locations.Core.Shared.StorageSvc;
 using SQLite;
-using Microsoft.Maui;
-using Microsoft.Maui.Storage;
-using  Locations.Core.Shared;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-namespace  Locations.Core.Data.Queries
+namespace Locations.Core.Data.Queries
 {
     public abstract class Database
 
     {
 
-        private IAlertService alertServ;
-        private ILoggerService loggerService;
         public bool IsError { get; set; } = false;
         public static string DatabasePath => MagicStrings.DataBasePath;
-        public Database(IAlertService alert, ILoggerService log):this()
-        {
-            alertServ = alert;
-            loggerService = log;
-        }
-        public Database(IAlertService alert, ILoggerService log, string email) : this()
-        {
-            alertServ = alert;
-            loggerService = log;
-        }
+
+        public static string Email = NativeStorageService.GetSetting(MagicStrings.Email);
+        public static string Guid = NativeStorageService.GetSetting(MagicStrings.UniqueID);
+        public static string KEY { get { return Guid + Email; } }
         public Database()
         {
-            dataB = new SQLiteAsyncConnection(MagicStrings.DataBasePath, Constants.Flags);
+            dataB = EncryptedSQLite.DataEncrypted.GetAsyncConnection(KEY);
         }
         public SQLiteAsyncConnection dataB;
 

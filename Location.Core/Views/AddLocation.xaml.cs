@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Location.Core.Helpers;
+using Location.Core.Resources;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
@@ -16,7 +17,7 @@ public partial class AddLocation : ContentPage
     Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
     private IAlertService alertServ;
     private ILoggerService loggerService;
-    public AddLocation(ILoggerService loggerService, IAlertService alertServ): this()
+    public AddLocation(ILoggerService loggerService, IAlertService alertServ) : this()
     {
 
         this.alertServ = alertServ;
@@ -42,7 +43,7 @@ public partial class AddLocation : ContentPage
     {
         InitializeComponent();
         CloseModal.IsVisible = CloseModal.IsEnabled = false;
-       var x = (LocationViewModel)BindingContext;
+        var x = (LocationViewModel)BindingContext;
         x.RaiseAlert += OnRaiseAlert;
     }
 
@@ -55,7 +56,7 @@ public partial class AddLocation : ContentPage
     {
         InitializeComponent();
         BindingContext = (LocationViewModel)viewModel;
-       CloseModal.IsVisible = CloseModal.IsEnabled = false;
+        CloseModal.IsVisible = CloseModal.IsEnabled = false;
     }
     public AddLocation(int id) : this()
     {
@@ -63,7 +64,7 @@ public partial class AddLocation : ContentPage
         BindingContext = ls.Get(id);
         CloseModal.IsVisible = CloseModal.IsEnabled = true;
     }
-    public AddLocation(int id, bool isEditMode): this(id)
+    public AddLocation(int id, bool isEditMode) : this(id)
     {
         InitializeComponent();
         CloseModal.IsVisible = isEditMode;
@@ -73,9 +74,21 @@ public partial class AddLocation : ContentPage
 
     private void Save_Pressed(object sender, EventArgs e)
     {
-        
+
         var x = (LocationViewModel)BindingContext;
-        var y = ls.Save(x, true);
+        try
+        {
+            var y = ls.Save(x, true);
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
+
+        if (x.IsError)
+        {
+            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
         BindingContext = new LocationViewModel();
 
     }
@@ -89,21 +102,34 @@ public partial class AddLocation : ContentPage
     private async void AddPhoto_Pressed(object sender, EventArgs e)
     {
         var x = (LocationViewModel)BindingContext;
-        if (MediaPicker.Default.IsCaptureSupported)
+        try
         {
-            FileResult photo = await MediaPicker.Default.CapturePhotoAsync();
-
-            if (photo != null)
+            
+            if (MediaPicker.Default.IsCaptureSupported)
             {
-                // save the file into local storage
-                string localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, photo.FileName);
+                FileResult photo = await MediaPicker.Default.CapturePhotoAsync();
 
-                using Stream sourceStream = await photo.OpenReadAsync();
-                using FileStream localFileStream = File.OpenWrite(localFilePath);
-                await sourceStream.CopyToAsync(localFileStream);
-                x.Photo = localFilePath;
-                AddPhoto.ImageSource = localFilePath;
+                if (photo != null)
+                {
+                    // save the file into local storage
+                    string localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, photo.FileName);
+
+                    using Stream sourceStream = await photo.OpenReadAsync();
+                    using FileStream localFileStream = File.OpenWrite(localFilePath);
+                    await sourceStream.CopyToAsync(localFileStream);
+                    x.Photo = localFilePath;
+                    AddPhoto.ImageSource = localFilePath;
+                }
             }
+        }
+        catch (Exception ex)
+        {
+           await DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
+
+        if (x.IsError)
+        {
+           await DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
         }
     }
     /*using SkiaSharp;
@@ -123,6 +149,8 @@ var resizedStream = data.AsStream();*/
     private void CloseModal_Pressed(object sender, EventArgs e)
     {
         Navigation.PopModalAsync();
+        var x = (LocationViewModel)BindingContext;
+
     }
 
 

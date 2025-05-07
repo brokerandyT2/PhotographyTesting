@@ -53,7 +53,19 @@ public partial class Settings : ContentPage
     {
         var x = ss.GetSettingByName(MagicStrings.Hemisphere);
         x.Value = e.Value ? Hemisphere.HemisphereChoices.North.Name() : Hemisphere.HemisphereChoices.South.Name();
-        ss.UpdateSetting(x);
+        try
+        {
+            ss.UpdateSetting(x);
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
+            
+        }
+        if(x.IsError)
+        {
+            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
         GetSetting();
 
     }
@@ -63,7 +75,19 @@ public partial class Settings : ContentPage
     {
         var x = ss.GetSettingByName(MagicStrings.TimeFormat);
         x.Value = e.Value ? MagicStrings.USTimeformat_Pattern : MagicStrings.InternationalTimeFormat_Pattern;
-        ss.UpdateSetting(x);
+        try
+        {
+            ss.UpdateSetting(x);
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
+
+        }
+        if (x.IsError)
+        {
+            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
         GetSetting();
     }
 
@@ -71,7 +95,19 @@ public partial class Settings : ContentPage
     {
         var x = ss.GetSettingByName(MagicStrings.DateFormat);
         x.Value = e.Value ? MagicStrings.USDateFormat : MagicStrings.InternationalFormat;
-        ss.UpdateSetting(x);
+        try
+        {
+            ss.UpdateSetting(x);
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
+
+        }
+        if (x.IsError)
+        {
+            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
         GetSetting();
     }
 
@@ -79,7 +115,19 @@ public partial class Settings : ContentPage
     {
         var x = ss.GetSettingByName(MagicStrings.FreePremiumAdSupported);
         x.Value = e.Value ? MagicStrings.True_string : MagicStrings.False_string;
-        ss.UpdateSetting(x);
+        try
+        {
+            ss.UpdateSetting(x);
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
+
+        }
+        if (x.IsError)
+        {
+            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
         GetSetting();
     }
 
@@ -87,7 +135,19 @@ public partial class Settings : ContentPage
     {
         var x = ss.GetSettingByName(MagicStrings.WindDirection);
         x.Value = e.Value ? MagicStrings.TowardsWind : MagicStrings.WithWind;
-        ss.UpdateSetting(x);
+        try
+        {
+            ss.UpdateSetting(x);
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
+
+        }
+        if (x.IsError)
+        {
+            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
         GetSetting();
 
     }
@@ -96,7 +156,19 @@ public partial class Settings : ContentPage
     {
         var x =ss.GetSettingByName(MagicStrings.TemperatureType);
         x.Value = e.Value ? MagicStrings.Fahrenheit : MagicStrings.Celsius;
-        ss.UpdateSetting(x);
+        try
+        {
+            ss.UpdateSetting(x);
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
+
+        }
+        if (x.IsError)
+        {
+            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+        }
         GetSetting();
     }
 }

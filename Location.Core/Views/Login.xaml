@@ -60,7 +60,7 @@
             <Switch x:Name="TempFormatSwitch" IsToggled="{Binding TemperatureFormatToggle}" Grid.Row="5" Grid.Column="2" Toggled="TempFormatSwitch_Toggled"></Switch>
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="6" Grid.ColumnSpan="3" Grid.Column="0"/>
             <Label Text="{x:Static strings:AppResources.ProvideEmail}" Grid.Row="7" Grid.ColumnSpan="3" Grid.Column="0"/>
-            <Entry x:Name="emailAddress" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3"/>
+            <Entry x:Name="emailAddress" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3" />
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="9" Grid.ColumnSpan="3" Grid.Column="0"/>
             <Button x:Name="save" Text="{x:Static strings:AppResources.Save}" Grid.Row="10" Grid.ColumnSpan="3" Grid.Column="0" Pressed="save_Pressed"/>
         </Grid>

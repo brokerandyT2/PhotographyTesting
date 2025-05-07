@@ -5,12 +5,13 @@ using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared;
 using Microsoft.Maui.Controls;
+using Location.Core.Resources;
 
 
 namespace Location.Core.Views.Pro;
 
 public partial class SceneEvaluation : ContentPage
-{
+{        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
     private IAlertService alertServ;
     private ILoggerService loggerService;
     public SceneEvaluationViewModel Item
@@ -24,7 +25,7 @@ public partial class SceneEvaluation : ContentPage
     }
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
+
         base.OnNavigatedTo(args);
 
         PageHelpers.CheckVisit(MagicStrings.SceneEvaluationViewed, PageEnums.SceneEvaluation, ss, Navigation);
@@ -36,10 +37,10 @@ public partial class SceneEvaluation : ContentPage
         this.loggerService = log;
         
     }
-    public SceneEvaluation(IAlertService alertserv, ILoggerService log, SceneEvaluationViewModel viewModel) 
+    public SceneEvaluation(IAlertService alertserv, ILoggerService log, SceneEvaluationViewModel viewModel) : this(alertserv, log)
     {
-        this.alertServ = alertserv;
-        this.loggerService = log;
+
+        Item = viewModel;
     }
     public SceneEvaluation()
     {
@@ -51,25 +52,35 @@ public partial class SceneEvaluation : ContentPage
     private async void EvaluateSceneBtn_Clicked(object sender, EventArgs e)
     {
         SceneEvaluationViewModel viewModel = new SceneEvaluationViewModel();
-        
-        await Task.Run(async () =>
-         {
-             Dispatcher.Dispatch(() =>
+        try
+        {
+            await Task.Run(async () =>
              {
-                 processing.IsVisible = true;
-                 processing.IsRunning = true;
-             });
-             await viewModel.EvaluateScene(sender);
+                 Dispatcher.Dispatch(() =>
+                 {
+                     processing.IsVisible = true;
+                     processing.IsRunning = true;
+                 });
+                 await viewModel.EvaluateScene(sender);
 
-              Dispatcher.Dispatch(() =>
-              {
-                  processing.IsVisible = false;
-                  processing.IsRunning = false;
-              });
-              
-          }); 
-             Item = viewModel;
-       // selectors.IsVisible = true;
+                 Dispatcher.Dispatch(() =>
+             {
+                      processing.IsVisible = false;
+                      processing.IsRunning = false;
+                  });
+
+             });
+            Item = viewModel;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert(AppResources.Error, AppResources.Error, AppResources.OK);
+        }
+        if (Item.IsError)
+        {
+            await DisplayAlert(AppResources.Error, Item.alertEventArgs.Message, AppResources.OK);
+        }
+        // selectors.IsVisible = true;
 
     }
     private void CheckedChanged(object sender, CheckedChangedEventArgs e)

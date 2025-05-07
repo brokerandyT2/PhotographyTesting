@@ -29,7 +29,7 @@ namespace Location.Photography.Business.DataAccess
 
         private IAlertService alertServ;
         private ILoggerService loggerService;
-        TipQuery<TipViewModel> query = new TipQuery<TipViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));   
+        TipQuery<TipViewModel> query = new TipQuery<TipViewModel>();   
         public bool Delete(TipViewModel model)
         {
             RaiseError(new NotImplementedException());

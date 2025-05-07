@@ -4,6 +4,7 @@ using CommunityToolkit.Maui;
 using epj.Expander.Maui;
 using Location.Core.Platforms.Android.Implementation;
 using Location.Core.Platforms.Android.Interface;
+using Locations.Core.Business.StorageSvc;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Customizations.Logging.Implementation;
@@ -51,7 +52,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ILoggerService, SqliteLoggerService>();
         builder.Services.AddSingleton<IAmbientLightSensorService, AmbientLightSensorService>();
         builder.Services.AddTransient(typeof(Locations.Core.Data.Queries.SettingsQuery<>));
-
+        builder.Services.AddSingleton<INativeStorageService, NativeStorageService>();
 
 #if ANDROID
         //builder.Services.AddSingleton<Platforms.Android.IGoogleAuthService, Platforms.Android.GoogleAuthService>();
