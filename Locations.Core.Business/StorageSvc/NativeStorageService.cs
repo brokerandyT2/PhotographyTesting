@@ -1,27 +1,20 @@
 ﻿using Locations.Core.Business.DataAccess;
 using Locations.Core.Business.Logging.Interfaces;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Locations.Core.Business.StorageSvc
 {
     public class NativeStorageService : ServiceBase<DummyViewModel>, INativeStorageService
     {
 
-        private static IAlertService _alertService;
-        private static ILoggerService _loggerService;
 
-        public NativeStorageService(IAlertService alertService, ILoggerService loggerService)
+
+
+        public NativeStorageService()
         {
-            _alertService = alertService;
-            _loggerService = loggerService;
+
+            
         }
         public static bool DeleteSetting(string key)
         {
@@ -32,7 +25,7 @@ namespace Locations.Core.Business.StorageSvc
             catch (Exception ex)
             {
                 RaiseError(ex);
-                _loggerService.LogError(ex.Message);
+               
 
                 return false;
             }
@@ -47,7 +40,6 @@ namespace Locations.Core.Business.StorageSvc
             catch (Exception ex)
             {
                 RaiseError(ex);
-                _loggerService.LogError(ex.Message);
                 return string.Empty;
             }
             return SecureStorage.GetAsync(key).Result;
@@ -63,7 +55,6 @@ namespace Locations.Core.Business.StorageSvc
             catch (Exception ex)
             {
                 RaiseError(ex);
-                _loggerService.LogError(ex.Message);
             }
         }
         public static async Task SaveSetting(string key, object value)
@@ -76,7 +67,6 @@ namespace Locations.Core.Business.StorageSvc
             catch (Exception ex)
             {
                 RaiseError(ex);
-                _loggerService.LogError(ex.Message);
             }
         }
         public static Task UpdateSetting(string key, string oldValue, string newValue)
@@ -97,7 +87,6 @@ namespace Locations.Core.Business.StorageSvc
             }catch(Exception ex)
             {
                 RaiseError(ex);
-                _loggerService.LogError(ex.Message);
                 return Task.FromResult(false);
             }
         }
@@ -119,7 +108,6 @@ namespace Locations.Core.Business.StorageSvc
             }catch (Exception ex)
             {
                 RaiseError(ex);
-                _loggerService.LogError(ex.Message);
                 return Task.FromResult(false);
             }
         }

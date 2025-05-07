@@ -1,16 +1,11 @@
-using Location.Photography.Business.DataAccess;
-using lcbd = Locations.Core.Business.DataAccess;
+using Location.Core.Helpers;
+using Location.Core.Resources;
 using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using Location.Core.Helpers;
-using Locations.Core.Business.DataAccess;
-using Microsoft.Maui.Controls;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using Location.Core.Resources;
+using lcbd = Locations.Core.Business.DataAccess;
 
 namespace Location.Core.Views;
 
@@ -19,7 +14,7 @@ public partial class ListLocations : ContentPage
     lcbd.LocationsService ls = new lcbd.LocationsService();
     lcbd.SettingsService ss = new lcbd.SettingsService();
     private IAlertService alertServ;
-    private ILoggerService loggerService;
+
     private ObservableCollection<LocationViewModel> _items = [];
     public ObservableCollection<LocationViewModel> Items { get { return _items; } set { _items = value; } }
     public ListLocations()
@@ -28,11 +23,10 @@ public partial class ListLocations : ContentPage
         BindingContext = this;
         CheckVisit();
     }
-    public ListLocations(ILoggerService loggerService, IAlertService alertServ)
+    public ListLocations(IAlertService alertServ)
     {
         InitializeComponent();
-        this.alertServ = alertServ;
-        this.loggerService = loggerService;
+
         BindingContext = this;
         CheckVisit();
     }

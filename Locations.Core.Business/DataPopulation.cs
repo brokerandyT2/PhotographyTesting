@@ -1,22 +1,11 @@
 ﻿using Locations.Core.Business.DataAccess;
 using Locations.Core.Data.Queries;
-using Locations.Core.Shared.Enums;
 using Locations.Core.Shared;
-using Locations.Core.Shared.DTO;
-using Locations.Core.Shared.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Locations.Core.Shared.Enums.SubscriptionType;
-using Microsoft.Maui.Platform;
-using Newtonsoft.Json.Linq;
-using System.ComponentModel.Design;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
+using Locations.Core.Shared.Enums;
+using Locations.Core.Shared.ViewModels;
 using Microsoft.Extensions.Logging;
+using static Locations.Core.Shared.Enums.SubscriptionType;
 
 namespace Locations.Core.Business
 {
@@ -50,8 +39,8 @@ namespace Locations.Core.Business
             types.Add(new TipTypeViewModel { Name = "Golden Hour", I8n = MagicStrings.English_for_i8n });
             types.Add(new TipTypeViewModel { Name = "Sunset", I8n = MagicStrings.English_for_i8n });
 
-            TipTypesQuery<TipTypeViewModel> tipTypesQuery = new TipTypesQuery<TipTypeViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
-            TipQuery<TipViewModel> tq = new TipQuery<TipViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
+            TipTypesQuery<TipTypeViewModel> tipTypesQuery = new TipTypesQuery<TipTypeViewModel>();
+            TipQuery<TipViewModel> tq = new TipQuery<TipViewModel>();
             int i = 1;
             foreach (var type in types)
             {

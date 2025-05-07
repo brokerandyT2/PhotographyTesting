@@ -1,8 +1,5 @@
 ﻿using EncryptedSQLite;
-using Locations.Core.Business.Logging.Implementation;
-using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
-using NormalSQLite;
 namespace  Locations.Core.Data.Queries
 {
     public class LocationQuery<T> : QueryBase<T> where T : LocationViewModel, new()

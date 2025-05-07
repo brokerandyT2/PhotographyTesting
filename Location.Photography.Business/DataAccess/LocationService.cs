@@ -1,27 +1,25 @@
-﻿using EncryptedSQLite;
-using Location.Photography.Business.DataAccess.Interfaces;
+﻿using Location.Photography.Business.DataAccess.Interfaces;
 using Location.Photography.Data.Queries;
 using Locations.Core.Business.Logging.Interfaces;
 using Locations.Core.Shared;
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+
 using Locations.Core.Shared.ViewModels;
+using SQLite;
 namespace Location.Photography.Business.DataAccess
 {
     public class LocationService : Locations.Core.Business.DataAccess.LocationsService, ILocationService<LocationViewModel>
     {
         LocationsQuery<LocationViewModel> LocationsQuery = new LocationsQuery<LocationViewModel>();
-
-        public LocationService(ILoggerService logger, IAlertService alert, string email) : this( )
+        SQLiteAsyncConnection conn;
+        public LocationService(ILoggerService logger, string email) : this( )
         {
-            var ss = new SettingsService(alert, logger);
+            var ss = new SettingsService();
             var x = ss.GetSettingByName(MagicStrings.Email).Value;
             if (string.IsNullOrEmpty(x))
             {
                 //loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
                 RaiseError(new ArgumentException("Email is not set.  Cannot use encrypted database."));
             }
-            LocationsQuery.dataB = DataEncrypted.GetAsyncConnection(KEY);
 
         }
         public LocationService()
@@ -37,7 +35,6 @@ namespace Location.Photography.Business.DataAccess
                 RaiseError(new ArgumentException("Email is not set.  Cannot use encrypted database."));
             }
 
-            LocationsQuery.dataB = DataEncrypted.GetAsyncConnection(KEY);
         }
         public bool Delete(LocationViewModel model)
         {

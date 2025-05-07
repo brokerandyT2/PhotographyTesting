@@ -1,19 +1,9 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using iLog = Locations.Core.Business.Logging.Interfaces;
-using log = Locations.Core.Business.Logging.Implementation;
-
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Business.Logging.Implementation;
+﻿using Locations.Core.Business.Logging.Implementation;
 using Locations.Core.Business.StorageSvc;
 using Locations.Core.Shared;
-using Microsoft.Data.Sqlite;
-using SQLite;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using iLog = Locations.Core.Business.Logging.Interfaces;
 
 namespace Locations.Core.Business.DataAccess
 {

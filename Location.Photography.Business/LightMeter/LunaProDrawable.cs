@@ -459,41 +459,7 @@ namespace Location.Photography.Business.LightMeter
                 meter?.Invalidate();
             }
         }
-        private void HandlePanUpdated(PanUpdatedEventArgs e)
-        {
-            // Update our tracking of the latest pan event
-            lastPanEventArgs = e;
-
-            // Skip if we're not dragging any dial
-            if (!isDraggingOuterDial && !isDraggingMiddleDial && !isDraggingInnerDial)
-                return;
-
-            // Get the current touch position
-            Point touchPoint = GetCurrentTouchPosition();
-
-            // Calculate the new angle based on the touch point
-            float newAngle = CalculateAngle((float)touchPoint.X, (float)touchPoint.Y);
-
-            // Apply the angle to the appropriate dial
-            if (isDraggingOuterDial)
-            {
-                outerDialAngle = newAngle;
-            }
-            else if (isDraggingMiddleDial)
-            {
-                middleDialAngle = newAngle;
-            }
-            else if (isDraggingInnerDial)
-            {
-                innerDialAngle = newAngle;
-            }
-
-            // Save the current point for future calculations
-            lastDragPoint = new PointF((float)touchPoint.X, (float)touchPoint.Y);
-
-            // Request a redraw of the control
-            meter.Invalidate();
-        }
+      
         private float CalculateAngle(float x, float y)
         {
             // Calculate the angle between the center of the dial and the touch point
@@ -521,11 +487,80 @@ namespace Location.Photography.Business.LightMeter
             switch (e.StatusType)
             {
                 case GestureStatus.Started:
-                    HandlePanStart(e);
+                    // Get the touch point from the GraphicsView
+                    var view = sender as GraphicsView;
+                    if (view != null)
+                    {
+                        // Get the touch point directly from the view - this is crucial
+                        Point touchPoint = new Point(
+                            dialCenterX + e.TotalX,
+                            dialCenterY + e.TotalY);
+
+                        // Calculate distance from touch point to dial center
+                        float dx = (float)touchPoint.X - dialCenterX;
+                        float dy = (float)touchPoint.Y - dialCenterY;
+                        float distance = (float)Math.Sqrt(dx * dx + dy * dy);
+
+                        // Determine which dial was touched based on distance
+                        isDraggingOuterDial = false;
+                        isDraggingMiddleDial = false;
+                        isDraggingInnerDial = false;
+
+                        if (distance <= outerDialRadius && distance > middleDialRadius)
+                        {
+                            isDraggingOuterDial = true;
+                        }
+                        else if (distance <= middleDialRadius && distance > innerDialRadius)
+                        {
+                            isDraggingMiddleDial = true;
+                        }
+                        else if (distance <= innerDialRadius && distance > innerDialRadius * 0.5f)
+                        {
+                            isDraggingInnerDial = true;
+                        }
+
+                        // Save the current point for angle calculations
+                        lastDragPoint = new PointF((float)touchPoint.X, (float)touchPoint.Y);
+                    }
                     break;
 
                 case GestureStatus.Running:
-                    HandlePanRunning(e);
+                    if (!isDraggingOuterDial && !isDraggingMiddleDial && !isDraggingInnerDial)
+                        return;
+
+                    // Calculate the current touch position based on the total movement
+                    Point currentTouchPoint = new Point(
+                        dialCenterX + e.TotalX,
+                        dialCenterY + e.TotalY);
+
+                    PointF currentPoint = new PointF((float)currentTouchPoint.X, (float)currentTouchPoint.Y);
+
+                    // Calculate angle between last point and current point relative to dial center
+                    float angleDelta = CalculateAngleDelta(lastDragPoint, currentPoint);
+
+                    // Apply rotation to the appropriate dial
+                    if (isDraggingOuterDial)
+                    {
+                        // Convert from radians to degrees for consistency
+                        outerDialAngle += angleDelta;
+                        SnapOuterDialToValue();
+                    }
+                    else if (isDraggingMiddleDial)
+                    {
+                        middleDialAngle += angleDelta;
+                        SnapMiddleDialToValue();
+                    }
+                    else if (isDraggingInnerDial)
+                    {
+                        innerDialAngle += angleDelta;
+                        SnapInnerDialToValue();
+                    }
+
+                    // Update last drag point
+                    lastDragPoint = currentPoint;
+
+                    // Request redraw
+                    meter?.Invalidate();
                     break;
 
                 case GestureStatus.Completed:
@@ -537,49 +572,8 @@ namespace Location.Photography.Business.LightMeter
             }
         }
 
-        private void HandlePanStart(PanUpdatedEventArgs e)
-        {
-            // Store the current pan event arguments for position tracking
-            lastPanEventArgs = e;
 
-            // Initialize the starting position reference point
-            // For a pan start, we don't have a direct way to get position
-            // Instead, we'll use a default position and track relative movement
-            // This is typically the center of your control
-            initialTouchPosition = new Point(dialCenterX, dialCenterY);
-
-            // IMPORTANT: We don't use e.GetPosition() because it doesn't exist
-            // Instead, we use our custom method
-            Point touchPoint = GetCurrentTouchPosition();
-
-            // Calculate distance from touch point to dial center
-            float dx = (float)touchPoint.X - dialCenterX;
-            float dy = (float)touchPoint.Y - dialCenterY;
-            float distance = (float)Math.Sqrt(dx * dx + dy * dy);
-
-            // Determine which dial was touched based on distance
-            if (distance <= outerDialRadius && distance > middleDialRadius)
-            {
-                isDraggingOuterDial = true;
-                isDraggingMiddleDial = false;
-                isDraggingInnerDial = false;
-            }
-            else if (distance <= middleDialRadius && distance > innerDialRadius)
-            {
-                isDraggingOuterDial = false;
-                isDraggingMiddleDial = true;
-                isDraggingInnerDial = false;
-            }
-            else if (distance <= innerDialRadius && distance > innerDialRadius * 0.5f)
-            {
-                isDraggingOuterDial = false;
-                isDraggingMiddleDial = false;
-                isDraggingInnerDial = true;
-            }
-
-            // Save the current point for angle calculations
-            lastDragPoint = new PointF((float)touchPoint.X, (float)touchPoint.Y);
-        }
+      
 
         private Point GetCurrentTouchPosition()
         {
@@ -611,44 +605,7 @@ namespace Location.Photography.Business.LightMeter
 
         private PanUpdatedEventArgs lastPanEventArgs;
         private Point? initialTouchPosition;
-        private void HandlePanRunning(PanUpdatedEventArgs e)
-        {
-            if (!isDraggingOuterDial && !isDraggingMiddleDial && !isDraggingInnerDial)
-                return;
-
-            // Get current touch position
-            Point currentTouchPoint = GetCurrentTouchPosition();
-            if (currentTouchPoint == null)
-                return;
-
-            PointF currentPoint = new PointF((float)currentTouchPoint.X, (float)currentTouchPoint.Y);
-
-            // Calculate angle between last point and current point relative to dial center
-            float angleDelta = CalculateAngleDelta(lastDragPoint, currentPoint);
-
-            // Apply rotation to the appropriate dial
-            if (isDraggingOuterDial)
-            {
-                outerDialAngle -= angleDelta; // Negative for clockwise rotation
-                SnapOuterDialToValue();
-            }
-            else if (isDraggingMiddleDial)
-            {
-                middleDialAngle -= angleDelta;
-                SnapMiddleDialToValue();
-            }
-            else if (isDraggingInnerDial)
-            {
-                innerDialAngle -= angleDelta;
-                SnapInnerDialToValue();
-            }
-
-            // Update last drag point
-            lastDragPoint = currentPoint;
-
-            // Request redraw
-            meter?.Invalidate();
-        }
+       
 
         private float CalculateAngleDelta(PointF point1, PointF point2)
         {

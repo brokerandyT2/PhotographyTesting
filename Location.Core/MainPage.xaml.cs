@@ -1,15 +1,11 @@
-﻿using System.Globalization;
-using Locations.Core.Shared;
+﻿using Location.Core.Views;
 using Locations.Core.Business.DataAccess;
-using Location.Core.Views;
-using static Locations.Core.Shared.Enums.SubscriptionType;
-using Newtonsoft.Json;
-using static Locations.Core.Shared.Enums.Hemisphere;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Controls;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Business.StorageSvc;
+using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Newtonsoft.Json;
+using System.Globalization;
+using static Locations.Core.Shared.Enums.SubscriptionType;
 #if PHOTOGRAPHY
 
 #endif
@@ -31,14 +27,13 @@ namespace Location.Core
 
         public static SubscriptionTypeEnum SubscriptionType = _subType;
         internal IAlertService alertService;
-        internal ILoggerService loggerService;
+
         public INativeStorageService nativeService;
 
-        public MainPage(IAlertService alertService, ILoggerService loggerService, INativeStorageService nativeService) : this(alertService)
+        public MainPage(IAlertService alertService, INativeStorageService nativeService) : this(alertService)
         {
-            this.loggerService = loggerService;
-            this.nativeService = nativeService;
-            this.nativeService = new NativeStorageService(alertService, loggerService);
+
+
             EmailAddress = NativeStorageService.GetSetting(MagicStrings.Email);
             IsLoggedIn = !string.IsNullOrEmpty(EmailAddress);
             AppID = NativeStorageService.GetSetting(MagicStrings.UniqueID);

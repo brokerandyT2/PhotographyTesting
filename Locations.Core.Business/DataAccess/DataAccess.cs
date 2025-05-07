@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SQLite;
+﻿using Locations.Core.Business.Logging.Implementation;
+using Locations.Core.Business.StorageSvc;
 using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
-using Locations.Core.Shared.ViewModels;
-using Locations.Core.Shared.DTO;
-using Locations.Core.Shared.Helpers;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
-
-using Microsoft.Extensions.DependencyInjection;
+using Locations.Core.Shared.Helpers;
+using Locations.Core.Shared.ViewModels;
 using Microsoft.Extensions.Logging;
-using EncryptedSQLite;
-using Locations.Core.Business.StorageSvc;
-using Locations.Core.Business.Logging.Implementation;
+using SQLite;
 namespace Locations.Core.Business.DataAccess
 {
     public class DataAccess: DataAccessBase
@@ -29,9 +20,8 @@ namespace Locations.Core.Business.DataAccess
         {
             
 
-            var x  = new NativeStorageService(new AlertService(), new LoggerService());
-            var email = NativeStorageService.GetSetting(MagicStrings.Email);
-            if (string.IsNullOrEmpty(email))
+           
+            if (string.IsNullOrEmpty(KEY))
             {
                 RaiseError(new ArgumentException("Eror"));
             }

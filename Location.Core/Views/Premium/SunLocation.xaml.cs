@@ -1,16 +1,8 @@
-using vm = Location.Photography.Shared.ViewModels;
-using Locations.Core.Shared.ViewModels;
-using Locations.Core.Business.DataAccess;
-using Locations.Core.Shared;
-using Locations.Core.Shared.Enums;
-using Location.Photography.Shared.ViewModels;
-using Location.Photography.Business.DataAccess;
 using Location.Core.Helpers;
-using System.Collections.ObjectModel;
-using CommunityToolkit.Maui.Core.Extensions;
-using Microsoft.Maui.Controls;
+using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
+using Locations.Core.Shared.ViewModels;
+using vm = Location.Photography.Shared.ViewModels;
 
 namespace Location.Core.Views.Premium;
 
@@ -18,7 +10,7 @@ public partial class SunLocation : ContentPage
 {
    Locations.Core.Business.DataAccess.LocationsService ss = new Locations.Core.Business.DataAccess.LocationsService();
     private IAlertService alertServ;
-    private ILoggerService loggerService;
+
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
@@ -48,10 +40,10 @@ public partial class SunLocation : ContentPage
         BindingContext = x;
         locationPicker.SelectedIndex = 0;
     }
-    public SunLocation(ILoggerService loggerService, IAlertService alert):this()
+    public SunLocation(IAlertService alert):this()
     {
         this.alertServ = alert;
-        this.loggerService = loggerService;
+
     }
     public SunLocation()
     {

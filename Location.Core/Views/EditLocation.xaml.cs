@@ -1,8 +1,7 @@
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using Locations.Core.Business.DataAccess;
-using Locations.Core.Shared.ViewModels;
 using Location.Core.Resources;
+using Locations.Core.Business.DataAccess;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.ViewModels;
 
 namespace Location.Core.Views;
 
@@ -11,21 +10,21 @@ public partial class EditLocation : ContentPage
     private int id;
     LocationsService locationService = new LocationsService();
     private IAlertService alertServ;
-    private ILoggerService loggerService;
+
     public EditLocation()
 	{
 		InitializeComponent();
 	}
-    public EditLocation(IAlertService alertServ, ILoggerService logger)
+    public EditLocation(IAlertService alertServ)
     {
         this.alertServ = alertServ;
-        this.loggerService = logger;
+
         InitializeComponent();
     }
-    public EditLocation(IAlertService alertSer, ILoggerService logger, int id) : this(id)
+    public EditLocation(IAlertService alertSer, int id) : this(id)
     {
         alertServ = alertSer;
-        this.loggerService = logger;
+
     }
     public EditLocation(int id)
     {
@@ -36,6 +35,10 @@ public partial class EditLocation : ContentPage
         {
             x = locationService.Get(id);
             BindingContext = x;
+            if (x.IsError)
+            {
+                DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+            }
         }
         catch (Exception ex)
         {
@@ -54,6 +57,10 @@ public partial class EditLocation : ContentPage
         {
             x = locationService.Get(id);
             BindingContext = x;
+            if (x.IsError)
+            {
+                DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+            }
         }
         catch (Exception ex)
         {

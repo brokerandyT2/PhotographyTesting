@@ -1,11 +1,9 @@
 
 using Location.Core.Helpers;
-using Location.Photography.Shared.ViewModels;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using Locations.Core.Shared;
-using Microsoft.Maui.Controls;
 using Location.Core.Resources;
+using Location.Photography.Shared.ViewModels;
+using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 
 
 namespace Location.Core.Views.Pro;
@@ -13,7 +11,7 @@ namespace Location.Core.Views.Pro;
 public partial class SceneEvaluation : ContentPage
 {        Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
     private IAlertService alertServ;
-    private ILoggerService loggerService;
+
     public SceneEvaluationViewModel Item
     {
         get => BindingContext as SceneEvaluationViewModel;
@@ -31,13 +29,12 @@ public partial class SceneEvaluation : ContentPage
         PageHelpers.CheckVisit(MagicStrings.SceneEvaluationViewed, PageEnums.SceneEvaluation, ss, Navigation);
 
     }
-    public SceneEvaluation(IAlertService alertserv, ILoggerService log): this()
+    public SceneEvaluation(IAlertService alertserv): this()
     {
         this.alertServ = alertserv;
-        this.loggerService = log;
-        
+
     }
-    public SceneEvaluation(IAlertService alertserv, ILoggerService log, SceneEvaluationViewModel viewModel) : this(alertserv, log)
+    public SceneEvaluation(IAlertService alertserv, SceneEvaluationViewModel viewModel) : this(alertserv)
     {
 
         Item = viewModel;

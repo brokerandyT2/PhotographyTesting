@@ -37,7 +37,6 @@
     <ProjectReference Include="..\EncryptedSQLite\EncryptedSQLite.csproj" />
     <ProjectReference Include="..\Location.Photography.Shared\Location.Photography.Shared.csproj" />
     <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
-    <ProjectReference Include="..\NormalSQLite\NormalSQLite.csproj" />
   </ItemGroup>
 
 </Project>

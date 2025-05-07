@@ -1,30 +1,21 @@
 using Location.Core.Helpers;
 using Location.Core.Resources;
-using Location.Photography.Business.DataAccess;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared;
+
 using Locations.Core.Shared.Enums;
-using Microsoft.Maui.Controls;
-using OpenWeatherMap;
 
 namespace Location.Core.Views;
 
 public partial class Settings : ContentPage
 {
     Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
-    private IAlertService alertServ;
-    private ILoggerService loggerService;
-    public Settings(IAlertService alertServ, ILoggerService loggerService)
-    {
-        InitializeComponent();
-        this.alertServ = alertServ;
-        this.loggerService = loggerService;
-        
-    }
+
+
+
 
     public Settings()
 	{
+      
 		InitializeComponent();
 	}
     protected override void OnNavigatedTo(NavigatedToEventArgs args)

@@ -1,44 +1,36 @@
-using Location.Photography.Business.DataAccess;
-using Location.Photography.Business.SunCalculator.Interface;
-using lpsv = Location.Photography.Shared.ViewModels;
-using lcbd = Locations.Core.Business.DataAccess;
-using Locations.Core.Shared.ViewModels;
-using Location.Photography.Shared.ViewModels;
-using Locations.Core.Shared.DTO;
-using Locations.Core.Shared;
 using Location.Core.Helpers;
-using Microsoft.Maui.Controls;
-
-using Locations.Core.Shared.ViewModels.Interface;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
-using Microsoft.Extensions.Logging;
 using Location.Core.Resources;
+using Location.Photography.Business.DataAccess;
+using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.ViewModels;
+using Locations.Core.Shared.ViewModels.Interface;
+using Microsoft.Extensions.Logging;
+using lcbd = Locations.Core.Business.DataAccess;
+using lpsv = Location.Photography.Shared.ViewModels;
 namespace Location.Core.Views.Pro;
 
 public partial class SunCalculations : ContentPage
 {
     lcbd.SettingsService settingsService = new lcbd.SettingsService();
-    LocationService ls = new LocationService(new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()), new AlertService());
+    LocationService ls = new LocationService();
     private IAlertService alertServ;
-    private ILoggerService loggerService;
-    public SunCalculations(IAlertService alertServ, ILoggerService logger) : this()
+    public SunCalculations(IAlertService alertServ) : this()
     {
         this.alertServ = alertServ;
-        this.loggerService = logger;
+
 
     }
-    public SunCalculations(IAlertService alertServ, ILoggerService logger, LocationViewModel id) : this(id)
+    public SunCalculations(IAlertService alertServ, LocationViewModel id) : this(id)
     {
         this.alertServ = alertServ;
-        this.loggerService = logger;
+
     }
-    public SunCalculations(IAlertService alertServ, ILoggerService logger, ILocationViewModel id) : this(id)
+    public SunCalculations(IAlertService alertServ,  ILocationViewModel id) : this(id)
     {
         this.alertServ = alertServ;
-        this.loggerService = logger;
+
     }
     public SunCalculations()
     {

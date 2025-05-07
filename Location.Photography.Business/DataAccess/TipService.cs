@@ -1,23 +1,9 @@
 ﻿using Location.Photography.Business.DataAccess.Interfaces;
-using Location.Photography.Shared.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Location.Photography.Shared.ViewModels;
-using Locations.Core.Shared.ViewModels;
-using Locations.Core.Data.Queries;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
-using Microsoft.Extensions.Logging;
-using static Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService;
 using Locations.Core.Business.DataAccess;
-using Microsoft.Maui.Animations;
-using Serilog.Core;
+using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
+using Locations.Core.Shared.Alerts.Implementation;
+using Locations.Core.Shared.ViewModels;
 namespace Location.Photography.Business.DataAccess
 {
     public class TipService : ServiceBase<TipViewModel>, ITipService<TipViewModel>
@@ -27,41 +13,31 @@ namespace Location.Photography.Business.DataAccess
         // Now you can construct LoggerService
 
 
-        private IAlertService alertServ;
-        private ILoggerService loggerService;
+
         TipQuery<TipViewModel> query = new TipQuery<TipViewModel>();   
         public bool Delete(TipViewModel model)
         {
             RaiseError(new NotImplementedException());
             return default;
         }
-        public TipService(IAlertService alertServ, ILoggerService loggerService) : this()
+        public TipService() 
         {
-            this.alertServ = alertServ;
-            this.loggerService = loggerService;
+            
+       
         }
-        public TipService(string email):this(new AlertService(), new LoggerService())
+        public TipService(string email):this()
         {
-            var q = new TipQuery<TipViewModel>(new AlertService(), new LoggerService());
+            var q = new TipQuery<TipViewModel>();
             var x = q.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
             if (string.IsNullOrEmpty(x))
             {
-                loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
+                //loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
                 throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
             }
-            query = new TipQuery<TipViewModel>(new AlertService(), new LoggerService(), email);
+            query = new TipQuery<TipViewModel>();
         }
 
-        public TipService() 
-        {
-            if(alertServ == null)
-                alertServ = new AlertService();
-            if(loggerService == null)
-                loggerService = new LoggerService();
-
-            query = new TipQuery<TipViewModel>(new AlertService(), new LoggerService());
-            alertServ.AlertRaised += AlertServ_AlertRaised;
-        }
+        
         
 
         private void AlertServ_AlertRaised(object? sender, AlertEventArgs e)
@@ -83,7 +59,12 @@ namespace Location.Photography.Business.DataAccess
         {
             try
             {
-                return query.GetItem<TipViewModel>(id);
+                var x= query.GetItem<TipViewModel>(id);
+            if(x.IsError)
+                {
+                    RaiseAlert(this, new Locations.Core.Shared.Customizations.Alerts.Implementation.AlertEventArgs(x.alertEventArgs.Title, x.alertEventArgs.Message, true));
+                }
+                return x;
             }
             catch (Exception ex)
             {

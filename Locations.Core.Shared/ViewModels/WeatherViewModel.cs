@@ -10,5 +10,6 @@ namespace Locations.Core.Shared.ViewModels
 {
     public class WeatherViewModel : WeatherDTO, IWeatherViewModel
     {
+        public WeatherViewModel():base() { }
     }
 }

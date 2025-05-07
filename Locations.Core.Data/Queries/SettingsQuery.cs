@@ -2,7 +2,7 @@
 using Locations.Core.Shared;
 using Locations.Core.Shared.StorageSvc;
 using Locations.Core.Shared.ViewModels;
-using NormalSQLite;
+
 namespace  Locations.Core.Data.Queries
 {
     public class SettingsQuery<T> : QueryBase<T> where T : SettingViewModel, new()

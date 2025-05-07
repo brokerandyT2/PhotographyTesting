@@ -1,12 +1,8 @@
 using Location.Core.Helpers;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Enums;
 using Locations.Core.Shared.ViewModels;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Devices.Sensors;
 namespace Location.Core.Views;
 
 public partial class Tips : ContentPage
@@ -22,16 +18,7 @@ public partial class Tips : ContentPage
         //exposurecalc.IsEnabled = settingsService.GetSettingByName(MagicStrings.SubscriptionType).Value == SubscriptionType.SubscriptionTypeEnum.Professional.Name() ? true: false;
 	}
 
-    private IAlertService alertServ;
-    private ILoggerService loggerService;
-    private Tips(ILoggerService loggerService, IAlertService alertServ)
-    {
-        this.alertServ = alertServ;
-        this.loggerService = loggerService;
-        InitializeComponent();
-        BindingContext = ts.GetDisplay();
-        pick.SelectedIndex = 0;
-    }   
+  
 
     private void pick_SelectedIndexChanged(object sender, EventArgs e)
     {

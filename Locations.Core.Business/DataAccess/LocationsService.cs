@@ -1,6 +1,5 @@
 ﻿using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Business.GeoLocation;
-using Locations.Core.Business.Logging.Implementation;
 using Locations.Core.Business.Logging.Interfaces;
 using Locations.Core.Business.StorageSvc;
 using Locations.Core.Business.Weather;
@@ -10,7 +9,6 @@ using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Helpers;
 using Locations.Core.Shared.ViewModels;
-using Microsoft.Extensions.Logging;
 
 namespace Locations.Core.Business.DataAccess
 {
@@ -18,8 +16,7 @@ namespace Locations.Core.Business.DataAccess
     {
         private LocationQuery<LocationViewModel> lq;
         private IAlertService alertServ;
-        private ILoggerService loggerService;
-        public event EventHandler<AlertEventArgs> AlertRaised;
+
         private string email;
         private string guid;
         public LocationsService()
@@ -46,7 +43,6 @@ namespace Locations.Core.Business.DataAccess
         public LocationsService(IAlertService alertServ, ILoggerService loggerService) : this()
         {
             this.alertServ = alertServ;
-            this.loggerService = loggerService;
         }
         public LocationsService(IAlertService alertServ, ILoggerService loggerService, string email) : this(alertServ, loggerService)
         {
@@ -58,13 +54,18 @@ namespace Locations.Core.Business.DataAccess
         {
             try
             {
-                return lq.SaveWithIDReturn(s);
+                var x = lq.SaveWithIDReturn(s);
+                if (x.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(x.alertEventArgs.Title, x.alertEventArgs.Message, true));
+                }
+                return s;
             }
             catch (Exception ex)
             {
                 RaiseError(ex);
 
-                return new LocationViewModel();
+                return s;
             }
         }
         public LocationViewModel Save(LocationViewModel locationViewModel, bool getWeather, bool returnNew)
@@ -80,6 +81,10 @@ namespace Locations.Core.Business.DataAccess
                     weatherService.Save(weatherAPI.GetWeatherAsync().Result);
                 }
                 lq.SaveItem(locationViewModel);
+                if (lq.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(lq.alertEventArgs.Title, lq.alertEventArgs.Message, true));
+                }
                 return returnNew ? new LocationViewModel() : locationViewModel;
             }
             catch (Exception ex)
@@ -97,6 +102,10 @@ namespace Locations.Core.Business.DataAccess
 
 
                 lq.SaveItem(locationViewModel);
+                if (lq.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(lq.alertEventArgs.Title, lq.alertEventArgs.Message));
+                }
                 return locationViewModel;
             }
             catch (Exception ex)
@@ -109,7 +118,11 @@ namespace Locations.Core.Business.DataAccess
         {
             try
             {
-                Save(locationViewModel);
+                var x = Save(locationViewModel);
+                if (x.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(x.alertEventArgs.Title, x.alertEventArgs.Message, true));
+                }
                 return new LocationViewModel();
             }
             catch (Exception ex)
@@ -125,7 +138,12 @@ namespace Locations.Core.Business.DataAccess
 
             try
             {
-                return lq.GetItem<LocationViewModel>(id);
+                var x = lq.GetItem<LocationViewModel>(id);
+                if (x.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(x.alertEventArgs.Title, x.alertEventArgs.Message, true));
+                }
+                return x;
             }
             catch (Exception ex)
             {
@@ -137,7 +155,12 @@ namespace Locations.Core.Business.DataAccess
         {
             try
             {
-                return lq.GetItem<LocationViewModel>(latitude, longitude);
+                var x = lq.GetItem<LocationViewModel>(latitude, longitude);
+                if (x.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(x.alertEventArgs.Title, x.alertEventArgs.Message, true));
+                }
+                return x;
             }
             catch (Exception ex)
             {
@@ -150,6 +173,10 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 var x = lq.DeleteItem<LocationViewModel>(locationViewModel);
+                if (lq.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(lq.alertEventArgs.Title, lq.alertEventArgs.Message, true));
+                }
                 return x != 420 ? true : false;
             }
             catch (Exception ex)
@@ -163,7 +190,12 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 var y = Get(id);
-                return lq.DeleteItem<LocationViewModel>(y) == 420 ? false : true;
+                var x = lq.DeleteItem<LocationViewModel>(y);
+                if (lq.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(lq.alertEventArgs.Title, lq.alertEventArgs.Message, true));
+                }
+                return x == 420 ? false : true;
             }
             catch (Exception ex)
             {
@@ -176,7 +208,12 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 var x = lq.GetItem<LocationViewModel>(latitude, longitude);
-                return Delete(x.Id);
+                var z= Delete(x.Id);
+                if (lq.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(lq.alertEventArgs.Title, lq.alertEventArgs.Message, true));
+                }
+                return z;
             }
             catch (Exception ex)
             {
@@ -190,6 +227,10 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 lq.Update(locationViewModel);
+                if (lq.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(lq.alertEventArgs.Title, lq.alertEventArgs.Message, true));
+                }
                 return true;
             }
             catch (Exception ex)
@@ -202,7 +243,12 @@ namespace Locations.Core.Business.DataAccess
         {
             try
             {
-                return lq.GetItems<LocationViewModel>().Where(x => x.IsDeleted == false).ToList();
+              var x =   lq.GetItems<LocationViewModel>().Where(x => x.IsDeleted == false).ToList();
+                if (lq.IsError)
+                {
+                    RaiseAlert(this, new AlertEventArgs(lq.alertEventArgs.Title, lq.alertEventArgs.Message, true)) ;
+                }
+                return x ;
             }
             catch (Exception ex)
             {

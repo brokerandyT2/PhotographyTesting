@@ -1,11 +1,8 @@
 
 using Location.Core.Helpers;
-using Locations.Core.Business.Advertising;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
-using Microsoft.Maui.Controls;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using lps = Location.Photography.Shared;
 using lpv = Location.Photography.Shared.ViewModels;
 namespace Location.Core.Views.Premium;
@@ -17,17 +14,17 @@ public partial class ExposureCalculator : ContentPage
     TipService ts = new TipService();
     private bool _adSupport;
     private IAlertService alertServ;
-    private ILoggerService loggerService;
-    public ExposureCalculator(IAlertService alertServ, ILoggerService loggerService) : this()
+
+    public ExposureCalculator(IAlertService alertServ) : this()
     {
         this.alertServ = alertServ;
-        this.loggerService = loggerService;
+;
     }
-    public ExposureCalculator(IAlertService alertServ, ILoggerService loggerService, int tipID, bool isFromTips = false) : this(tipID, isFromTips)
+    public ExposureCalculator(IAlertService alertServ, int tipID, bool isFromTips = false) : this(tipID, isFromTips)
     {
         this.alertServ = alertServ;
 
-        this.loggerService = loggerService;
+
     }
     public ExposureCalculator()
     {

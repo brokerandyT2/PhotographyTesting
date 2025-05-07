@@ -1,20 +1,10 @@
 ﻿
+using Locations.Core.Business.DataAccess;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.ViewModels;
-using newtonsoft = Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
-using System.Threading.Tasks;
-using Microsoft.Maui.Platform;
-using Microsoft.Maui.Animations;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
-using Locations.Core.Business.DataAccess;
+using newtonsoft = Newtonsoft.Json;
 
 
 namespace Locations.Core.Business.Weather
@@ -63,19 +53,19 @@ namespace Locations.Core.Business.Weather
                 return new WeatherViewModel();
             }
         }
-        public WeatherDataService(IAlertService alertService, ILoggerService loggerService)
+        public WeatherDataService(IAlertService alertService)
         {
             this.alertServ = alertService;
-            this.loggerService = loggerService;
+
         }
-        public WeatherDataService(string endpoint, double latitude, double longitude, string API_KEY, IAlertService alertService, ILoggerService loggerService) : this(endpoint, latitude, longitude, API_KEY)
+        public WeatherDataService(string endpoint, double latitude, double longitude, string API_KEY, IAlertService alertService) : this(endpoint, latitude, longitude, API_KEY)
         {
             this.alertServ = alertService;
-            this.loggerService = loggerService;
+
         }
 
         private IAlertService alertServ;
-        private ILoggerService loggerService;
+
 
 
         public async Task<Placemark> GetPlacemarkAsync()

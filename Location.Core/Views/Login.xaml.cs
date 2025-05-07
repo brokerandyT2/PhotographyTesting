@@ -1,33 +1,31 @@
-﻿using Location.Core.Helpers;
+﻿using CommunityToolkit.Maui.Behaviors;
 using Location.Core.Resources;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
-using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
-using Locations.Core.Shared.Enums;
-using Microsoft.Maui.Authentication;
-using Microsoft.Maui.Controls;
-using System.Diagnostics;
-using System.Net.Mail;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
-using CommunityToolkit.Maui.Behaviors;
-using CommunityToolkit.Maui;
-using System.ComponentModel.DataAnnotations;
+using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Shared.Enums;
 namespace Location.Core.Views;
 
 public partial class Login : ContentPage
 {
     Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
     private IAlertService alertServ;
-    private ILoggerService loggerService;
+
     public Login()
     {
         InitializeComponent();
+        ss.AlertRaised += Ss_AlertRaised;
     }
-    public Login(IAlertService alert, ILoggerService _logger)
+
+    private void Ss_AlertRaised(object? sender, AlertEventArgs e)
+    {
+        DisplayAlert(e.Title, e.Message, AppResources.OK);
+    }
+
+    public Login(IAlertService alert): this()
     {
         alertServ = alert;
-        loggerService = _logger;
+
         InitializeComponent();
     }
 
@@ -216,21 +214,20 @@ public partial class Login : ContentPage
         }
 
     }
-    private async Task<bool> DisplayAlert()
-    {
-        AlertService ass = new AlertService();
 
-        return await DisplayAlert(AppResources.Error, AppResources.BlankEmail, AppResources.OK, AppResources.Cancel);
-    }
     private void UpdateEmail()
     {
-
+        
         var x = ss.GetSettingByName(MagicStrings.Email);
         x.Value = string.IsNullOrEmpty(emailAddress.Text) ? MagicStrings.NoEmailEntered : emailAddress.Text;
         SecureStorage.SetAsync(MagicStrings.Email, x.Value);
         try
         {
             ss.UpdateSetting(x);
+            if (x.IsError)
+            {
+                DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+            }
         }
         catch (Exception ex)
         {

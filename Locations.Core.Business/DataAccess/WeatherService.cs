@@ -3,12 +3,8 @@ using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using OpenWeatherAPI;
 using static Locations.Core.Shared.Customizations.Alerts.Implementation.AlertService;
 
 
@@ -16,37 +12,38 @@ namespace Locations.Core.Business.DataAccess
 {
     public class WeatherService : ServiceBase<WeatherViewModel>, IWeatherService
     {
-        WeatherQuery<WeatherViewModel> _weatherQuery = new WeatherQuery<WeatherViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
+        WeatherQuery<WeatherViewModel> _weatherQuery = new WeatherQuery<WeatherViewModel>();
 
-        private IAlertService alertServ;
-        private ILoggerService loggerService;
+
         SettingsService _settingsService = new SettingsService();
         private readonly IConnectivity _connectivity;
         WeatherViewModel _weatherViewModel;
-        
+
         //public event EventHandler<AlertEventArgs> AlertRaised;
-        
+
         public WeatherService()
         {
             _weatherViewModel = new WeatherViewModel();
-            _weatherViewModel.RaiseAlert += _weatherViewModel_RaiseAlert;
+            _weatherViewModel.RaiseAlert += _weatherViewModel_RaiseAlert1;
+
 
         }
 
-        private void _weatherViewModel_RaiseAlert(object? sender, AlertEventArgs e)
+        private void _weatherViewModel_RaiseAlert1(object? sender, Shared.Alerts.Implementation.AlertEventArgs e)
         {
-            RaiseAlert(sender, new AlertEventArgs("Error", e.Message,AlertType.Error));
+            RaiseAlert(sender, new AlertEventArgs("Error", e.Message, AlertType.Error));
         }
-       
-        public WeatherService(IAlertService alertServ, ILoggerService loggerService, IConnectivity connectivity) : this(alertServ, loggerService)
+
+
+
+        public WeatherService(IAlertService alertServ, IConnectivity connectivity) : this()
         {
 
             _connectivity = connectivity;
         }
-        public WeatherService(IAlertService alertServ, ILoggerService loggerService) : this()
+        public WeatherService(IAlertService alertServ) : this()
         {
-            this.alertServ = alertServ;
-            this.loggerService = loggerService;
+
         }
         public WeatherViewModel GetWeather(double latitude, double longitude)
         {
@@ -78,7 +75,10 @@ namespace Locations.Core.Business.DataAccess
                 }
                 else
                 {
-
+                    if (x.IsError)
+                    {
+                        RaiseError(new Exception("Error Downloading Weather"));
+                    }
                     return x;
                 }
             }
@@ -94,9 +94,10 @@ namespace Locations.Core.Business.DataAccess
         private WeatherViewModel StringToWeatherViewModel(string output)
         {
             WeatherViewModel wvm = new WeatherViewModel();
-            try { 
+            try
+            {
 
-            var jsonData = JObject.Parse(output);
+                var jsonData = JObject.Parse(output);
                 if (jsonData != null && output != string.Empty)
                 {
 
@@ -377,9 +378,13 @@ namespace Locations.Core.Business.DataAccess
 
                         i++;
                     }
-                
 
-            }
+
+                }
+                if (wvm.IsError)
+                {
+                    RaiseError(new Exception("Error mapping Weather JSON to ViewModel"));
+                }
             }
             catch (Exception ex)
             {
@@ -394,6 +399,11 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 _weatherQuery.SaveItem(model);
+                if (_weatherQuery.IsError)
+                {
+                    RaiseError(new Exception("Error saving Weather ViewModel"));
+                }
+
                 return model;
             }
             catch (Exception ex)
@@ -410,6 +420,10 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 var x = Save(model);
+                if (x.IsError)
+                {
+                    RaiseError(new Exception("Error saving Weather ViewModel"));
+                }
                 return returnNew ? new WeatherViewModel() : model;
             }
             catch (Exception ex)
@@ -422,7 +436,12 @@ namespace Locations.Core.Business.DataAccess
         {
             try
             {
-                return _weatherQuery.GetItem<WeatherViewModel>(id);
+                var x = _weatherQuery.GetItem<WeatherViewModel>(id);
+                if (x.IsError)
+                {
+                    RaiseError(new Exception("Error saving Weather ViewModel"));
+                }
+                return x;
             }
             catch (Exception ex)
             {
@@ -436,6 +455,10 @@ namespace Locations.Core.Business.DataAccess
             try
             {
                 var y = _weatherQuery.DeleteItem<WeatherViewModel>(model);
+                if (_weatherQuery.IsError)
+                {
+                    RaiseError(new Exception("Error deleting a weather record by viewmodel"));
+                }
                 return y == 420 ? false : true;
             }
             catch (Exception ex)
@@ -448,7 +471,12 @@ namespace Locations.Core.Business.DataAccess
         {
             try
             {
-                return _weatherQuery.DeleteItem<WeatherViewModel>(_weatherQuery.GetItem<WeatherViewModel>(id)) == 420 ? false : true;
+                var y = _weatherQuery.DeleteItem<WeatherViewModel>(_weatherQuery.GetItem<WeatherViewModel>(id)) == 420 ? false : true;
+                if (_weatherQuery.IsError)
+                {
+                    RaiseError(new Exception("Error deleting a weather record by id"));
+                }
+                return y;
             }
             catch (Exception ex)
             {
@@ -460,7 +488,12 @@ namespace Locations.Core.Business.DataAccess
         {
             try
             {
-                return _weatherQuery.DeleteItem<WeatherViewModel>(_weatherQuery.GetWeather(latitude, longitude)) == 420 ? false : true;
+                var y = _weatherQuery.DeleteItem<WeatherViewModel>(_weatherQuery.GetWeather(latitude, longitude)) == 420 ? false : true;
+                if (_weatherQuery.IsError)
+                {
+                    RaiseError(new Exception("Error deleting a weather record by id"));
+                }
+                return y;
             }
             catch (Exception ex)
             {

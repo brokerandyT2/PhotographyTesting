@@ -1,22 +1,19 @@
-using Android.Text;
 using Location.Core.Helpers;
-using Location.Core.Resources;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 namespace Location.Core.Views;
 
 public partial class PageTutorialModal : ContentPage
 {
     private IAlertService alertServ;
-    private ILoggerService loggerService;
+
     public PageTutorialModal()
 	{
 		InitializeComponent();
 	}
-    public PageTutorialModal(ILoggerService loggerService, IAlertService alertServ)
+    public PageTutorialModal( IAlertService alertServ)
     {
         this.alertServ = alertServ;
-        this.loggerService = loggerService;
+
         InitializeComponent();
     }
     public PageTutorialModal(PageEnums page)

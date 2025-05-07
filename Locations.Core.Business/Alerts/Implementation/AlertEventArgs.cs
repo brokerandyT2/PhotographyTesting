@@ -1,12 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Locations.Core.Shared.Customizations.Alerts.Implementation
 {
@@ -50,14 +43,14 @@ namespace Locations.Core.Shared.Customizations.Alerts.Implementation
                 OnPropertyChanged();
             }
         }
-        SqliteLoggerService logger = new SqliteLoggerService();
+
         AlertService alert;
         public AlertEventArgs()
         {
             Title = string.Empty;
             Message = string.Empty;
             IsError = false;
-            alert = new AlertService(logger);
+          
         }
         public AlertEventArgs(string title, string message) : this()
         {
@@ -71,7 +64,7 @@ namespace Locations.Core.Shared.Customizations.Alerts.Implementation
             alertType = type;
             if (_writeToLog)
             {
-                SqliteLoggerService logger = new SqliteLoggerService();
+               
                 alert.LogIt(type, message);
             }
 
@@ -94,7 +87,7 @@ namespace Locations.Core.Shared.Customizations.Alerts.Implementation
             IsError = isError;
             if (writeToLog)
             {
-                SqliteLoggerService logger = new SqliteLoggerService();
+
                 alert.LogIt(type, message);
             }
         }

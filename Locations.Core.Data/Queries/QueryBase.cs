@@ -1,8 +1,5 @@
 ﻿using EncryptedSQLite;
 using Locations.Core.Data.Queries.Interfaces;
-using Locations.Core.Shared;
-using Locations.Core.Shared.StorageSvc;
-using NormalSQLite;
 
 namespace Locations.Core.Data.Queries
 {

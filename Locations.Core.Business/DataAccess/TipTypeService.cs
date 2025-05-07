@@ -2,8 +2,6 @@
 using Locations.Core.Data.Queries;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Implementation;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
 using Microsoft.Extensions.Logging;
 
@@ -11,24 +9,19 @@ namespace Locations.Core.Business.DataAccess
 {
     public class TipTypeService : ServiceBase<TipTypeViewModel>, ITipTypeService
     {
-        TipTypesQuery<TipTypeViewModel> query = new TipTypesQuery<TipTypeViewModel>(new AlertService(), new LoggerService(new ServiceCollection().AddLogging().BuildServiceProvider().GetRequiredService<ILogger<LoggerService>>()));
+        TipTypesQuery<TipTypeViewModel> query;
         public event EventHandler<AlertEventArgs> AlertRaised;
         private IAlertService alertServ;
-        private ILoggerService loggerService;
         public TipTypeService()
         {
+            query = new TipTypesQuery<TipTypeViewModel>();
         }
-        public TipTypeService(IAlertService alertServ, ILoggerService log) : this()
+        public TipTypeService(IAlertService alertServ) : this()
         {
             this.alertServ = alertServ;
-            this.loggerService = log;
+
         }
-        public TipTypeService(IAlertService alertServ, ILoggerService log, string email) : this(alertServ, log)
-        {
-            this.alertServ = alertServ;
-            this.loggerService = log;
-            query = new TipTypesQuery<TipTypeViewModel>(alertServ, log, email);
-        }
+
         public TipTypeViewModel Save(TipTypeViewModel model)
         {
             try
@@ -36,7 +29,7 @@ namespace Locations.Core.Business.DataAccess
                 query.SaveItem(model);
                 if (model.IsError)
                 {
-                    RaiseError(new Exception("Error Saving Tip Type"));
+                    RaiseError(new Exception(model.alertEventArgs.Message));
                 }
                 return model;
             }
@@ -54,7 +47,7 @@ namespace Locations.Core.Business.DataAccess
                 var x = Save(model);
                 if (x.IsError || model.IsError)
                 {
-                    RaiseError(new Exception("Error Saving Tip Type"));
+                    RaiseError(new Exception(x.alertEventArgs.Message));
                 }
                 return returnNew ? new TipTypeViewModel() : x;
             }
@@ -69,7 +62,12 @@ namespace Locations.Core.Business.DataAccess
             try
             {
 
-                return query.GetItem<TipTypeViewModel>(id);
+                var x =  query.GetItem<TipTypeViewModel>(id);
+                if (x.IsError)
+                {
+                    RaiseError(new Exception(x.alertEventArgs.Message));
+                }
+                return x;
             }
             catch (Exception ex)
             {
@@ -86,7 +84,7 @@ namespace Locations.Core.Business.DataAccess
                 {
                     if (z.IsError)
                     {
-                        RaiseError(new Exception("Error Getting Tip Types"));
+                        RaiseError(new Exception(z.alertEventArgs.Message));
                     }
                 }
                 return x;
@@ -106,7 +104,7 @@ namespace Locations.Core.Business.DataAccess
                 var x = query.DeleteItem(model);
                 if (x == 420)
                 {
-                    RaiseError(new Exception("Error Deleting Tip Type"));
+                    RaiseError(new Exception(query.alertEventArgs.Message));
                     return false;
                 }
                 return x != 420 ? true : false;

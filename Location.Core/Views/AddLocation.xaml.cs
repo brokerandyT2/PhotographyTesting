@@ -1,11 +1,8 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using Location.Core.Helpers;
 using Location.Core.Resources;
 using Locations.Core.Business.DataAccess;
 using Locations.Core.Shared;
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.Customizations.Logging.Interfaces;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
 
@@ -16,41 +13,48 @@ public partial class AddLocation : ContentPage
     LocationsService ls = new LocationsService();
     Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
     private IAlertService alertServ;
-    private ILoggerService loggerService;
-    public AddLocation(ILoggerService loggerService, IAlertService alertServ) : this()
+
+    public AddLocation( IAlertService alertServ) : this()
     {
 
         this.alertServ = alertServ;
-        this.loggerService = loggerService;
+      
 
     }
-    public AddLocation(IAlertService alertServ, ILoggerService loggerService, ILocationViewModel viewModel) : this(viewModel)
+    public AddLocation(IAlertService alertServ,  ILocationViewModel viewModel) : this(viewModel)
     {
         this.alertServ = alertServ;
-        this.loggerService = loggerService;
+    
     }
-    public AddLocation(IAlertService alertServ, ILoggerService loggerService, ILocationViewModel viewModel, int id) : this(id)
+    public AddLocation(IAlertService alertServ,  ILocationViewModel viewModel, int id) : this(id)
     {
         this.alertServ = alertServ;
-        this.loggerService = loggerService;
+      
     }
-    public AddLocation(IAlertService alertServ, ILoggerService loggerService, ILocationViewModel viewModel, int id, bool isEditMode) : this(id, isEditMode)
+    public AddLocation(IAlertService alertServ, ILocationViewModel viewModel, int id, bool isEditMode) : this(id, isEditMode)
     {
         this.alertServ = alertServ;
-        this.loggerService = loggerService;
+    
     }
     public AddLocation()
     {
         InitializeComponent();
         CloseModal.IsVisible = CloseModal.IsEnabled = false;
         var x = (LocationViewModel)BindingContext;
-        x.RaiseAlert += OnRaiseAlert;
+        x.RaiseAlert += X_RaiseAlert; ;
     }
 
-    private void OnRaiseAlert(object? sender, Locations.Core.Shared.Customizations.Alerts.Implementation.AlertEventArgs e)
+    private void X_RaiseAlert(object? sender, Locations.Core.Shared.Alerts.Implementation.AlertEventArgs e)
     {
-        ServiceBase<LocationViewModel>.RaiseError(new Exception(e.Message));
+        var x = (LocationViewModel)BindingContext;
+        if (x.IsError)
+        {
+            ServiceBase<LocationViewModel>.RaiseError(new Exception(e.Message));
+            DisplayAlert(x.alertEventArgs.Title, x.alertEventArgs.Message, AppResources.OK);
+        }
     }
+
+    
 
     public AddLocation(ILocationViewModel viewModel) : this()
     {
@@ -74,18 +78,18 @@ public partial class AddLocation : ContentPage
 
     private void Save_Pressed(object sender, EventArgs e)
     {
-
+        LocationViewModel y = new LocationViewModel();
         var x = (LocationViewModel)BindingContext;
         try
         {
-            var y = ls.Save(x, true);
+            y = ls.Save(x, true);
         }
         catch (Exception ex)
         {
             DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
         }
 
-        if (x.IsError)
+        if (y.IsError)
         {
             DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
         }
