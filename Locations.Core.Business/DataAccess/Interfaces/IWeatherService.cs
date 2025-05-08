@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Business.DataAccess.Interfaces
 {
-    public interface IWeatherService : IBaseService<WeatherViewModel>
+    public interface IWeatherService : IBaseService<WeatherViewModel>, IBaseInterface
     {
         public WeatherViewModel GetWeather(double latitude, double longitude);
     }

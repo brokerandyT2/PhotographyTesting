@@ -1,103 +1,55 @@
 ﻿using Locations.Core.Shared.DTO.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SQLite;
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace Locations.Core.Shared.DTO
 {
     [Table("Location")]
-    public class LocationDTO : DTOBase, ILocationDTO, INotifyPropertyChanged
+    public partial class LocationDTO : DTOBase, ILocationDTO
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private string _city;
-        private string _state;
+        [ObservableProperty]
+        [property: PrimaryKey, AutoIncrement]
         private int _id;
+
+        [ObservableProperty]
+        private string _city = string.Empty;
+
+        [ObservableProperty]
+        private string _state = string.Empty;
+
+        [ObservableProperty]
         private double _lattitude;
+
+        [ObservableProperty]
         private double _longitude;
-        private string _title = "";
-        private string _description = "";
-        private string _photo = "";
+
+        [ObservableProperty]
+        private string _title = string.Empty;
+
+        [ObservableProperty]
+        private string _description = string.Empty;
+
+        [ObservableProperty]
+        private string _photo = string.Empty;
+
+        [ObservableProperty]
         private DateTime _timestamp = DateTime.Now;
+
+        [ObservableProperty]
         private bool _isDeleted = false;
-        public string DateFormat { get; set; }
-        public string TimestampFormatted { get => _timestamp.ToString(DateFormat); }
-        public string City
-        {
-            get { return _city; }
-            set
-            {
-                _city = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(City)));
-            }
-        }
-        public string State
-        {
-            get { return _state; }
-            set
-            {
-                _state = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(State)));
-            }
-        }
-            [AutoIncrement, PrimaryKey]
-        public int Id
-        {   
-            get { return _id; }
-            set { _id = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Id))); }
-        }
-        public string Photo
-        {
-            get => _photo;
-            set
-            {
-                _photo = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Photo)));
-            }
-        }
-        public double Lattitude
-        {
-            get { return _lattitude; }
-            set
-            {
-                _lattitude = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Lattitude)));
-            }
-        }
 
-        public double Longitude
-        {
-            get { return _longitude; }
-            set
-            {
-                _longitude = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Longitude)));
-            }
-        }
+        public string DateFormat { get; set; } = string.Empty;
 
-        public string Title
-        { get { return _title; } set { _title = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title))); } }
-        public string Description
-        { get { return _description; } set { _description = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Description))); } }
-        public DateTime Timestamp
-        {
-            get { return _timestamp; }
-            set
-            {
-                _timestamp = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Timestamp)));
-            }
-        }
-        public bool IsDeleted
-        {
-            get { return _isDeleted; }
-            set { _isDeleted = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDeleted))); }
-        }
-        public bool CanDelete
-        {
-            get => !(_longitude == 0.0 && _lattitude == 0.0);
-        }
+        public string TimestampFormatted => Timestamp.ToString(DateFormat);
+
+        public bool CanDelete => !(Longitude == 0.0 && Lattitude == 0.0);
+        partial void OnLongitudeChanged(double oldValue, double newValue);
+        partial void OnLattitudeChanged(double oldValue, double newValue);
+        partial void OnLattitudeChanged(double oldValue, double newValue) =>
+            OnPropertyChanged(nameof(CanDelete));
+
+        partial void OnLongitudeChanged(double oldValue, double newValue) =>
+            OnPropertyChanged(nameof(CanDelete));
     }
 }

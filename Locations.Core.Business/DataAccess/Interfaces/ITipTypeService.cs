@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Business.DataAccess.Interfaces
 {
-    public interface ITipTypeService : IBaseService<TipTypeViewModel>
+    public interface ITipTypeService : IBaseService<TipTypeViewModel>, IBaseInterface
     {
     }
 }

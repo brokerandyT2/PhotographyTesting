@@ -1,13 +1,16 @@
 ﻿using EncryptedSQLite;
+using Location.Core.Helpers.AlertService;
+using Location.Core.Helpers.LoggingService;
+using Locations.Core.Data.Models;
 using Locations.Core.Shared;
 using Locations.Core.Shared.StorageSvc;
 using Locations.Core.Shared.ViewModels;
-using NormalSQLite;
+
 namespace  Locations.Core.Data.Queries
 {
     public class TipQuery<T> : QueryBase<T> where T : TipViewModel, new()
     {
-        private bool v;
+
 
         /// <summary>
         /// Use this constructor for encrypted database.
@@ -16,7 +19,7 @@ namespace  Locations.Core.Data.Queries
         /// <param name="loggerService"></param>
         /// <param name="email"></param>
         /// <exception cref="ArgumentException"></exception>
-        public TipQuery() : base()
+        public TipQuery(IAlertService _alertserv, ILoggerService _logger) : base(_alertserv,_logger)
         {
             SettingsQuery<SettingViewModel> settings = new SettingsQuery<SettingViewModel>();
             var addy = NativeStorageService.GetSetting(MagicStrings.Email);
@@ -28,14 +31,11 @@ namespace  Locations.Core.Data.Queries
             }
             else
             {
-                dataB = DataEncrypted.GetAsyncConnection(KEY);
+                dataB = DataEncrypted.GetAsyncConnection();
             }
         }
 
-        public TipQuery(bool v)
-        {
-            dataB = DataUnEncrypted.GetConnection();
-        }
+
 
         /// <summary>
         /// Use this constructor for unencrypted database.
@@ -43,12 +43,12 @@ namespace  Locations.Core.Data.Queries
         /// <param name="alertServ"></param>
         /// <param name="loggerService"></param>
 
-        public override T GetItem<T>(int id)
+        public  T GetItem<T>(int id)
         {
             return (T)Convert.ChangeType(dataB.Table<TipViewModel>().Where(x => x.ID == id).FirstOrDefaultAsync().Result,typeof(T));
         }
 
-        public override T GetItemByString<T>(string title)
+        public  T GetItemByString<T>(string title)
         {
             return (T)Convert.ChangeType(dataB.Table<TipViewModel>().Where(x => x.Title == title).FirstOrDefaultAsync().Result, typeof(T));
         }
@@ -58,12 +58,32 @@ namespace  Locations.Core.Data.Queries
             throw new NotImplementedException();
         }
 
-        public override IList<T> GetItems<T>()
+        public  IList<T> GetItems<T>()
         {
             return (IList<T>)dataB.Table<TipViewModel>().ToListAsync().Result;
         }
 
-        public override string GetValueByString<T>(string name)
+        public  string GetValueByString<T>(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<DataOperationResult<T1>> GetItemAsync<T1>(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<DataOperationResult<string>> GetValueByStringAsync<T1>(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<DataOperationResult<IList<T1>>> GetItemsAsync<T1>()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<DataOperationResult<T1>> GetItemByStringAsync<T1>(string name)
         {
             throw new NotImplementedException();
         }

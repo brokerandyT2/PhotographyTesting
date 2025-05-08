@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Business.DataAccess.Interfaces
 {
-    public interface IBaseService<T>
+    public interface IBaseService<T>: IBaseInterface
     {
         void OnErrorOccurred(DataErrorEventArgs e);
 

@@ -1,31 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Location.Core.Helpers.AlertService;
+using Location.Core.Helpers.LoggingService;
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Business.GeoLocation;
-using Locations.Core.Business.StorageSvc;
 using Locations.Core.Business.Weather;
-using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
-using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
-
+using Locations.Core.Business.DataAccess.
 namespace Locations.Core.Business.DataAccess
 {
     /// <summary>
     /// Service for managing location data with error bubbling
     /// </summary>
-    public class LocationsService : ILocationService
+    public class LocationsService : ServiceBase<LocationViewModel>, ILocationService
     {
         private readonly LocationQuery _locationQuery;
         private readonly IAlertService _alertService;
         private readonly ILoggerService _loggerService;
 
         // Event for error bubbling to UI layer
-
+        // Events for integration with our error bubbling system
+        public event EventHandler<DataErrorEventArgs>? ErrorOccurred;
 
         /// <summary>
         /// Constructor with dependency injection
@@ -42,11 +37,9 @@ namespace Locations.Core.Business.DataAccess
 
             // Subscribe to data layer errors
             _locationQuery.ErrorOccurred += OnQueryErrorOccurred;
+           
         }
-        public virtual void OnErrorOccurred(DataErrorEventArgs e)
-        {
-            ErrorOccurred?.Invoke(this, e);
-        }
+        
         /// <summary>
         /// Handler for data layer errors
         /// </summary>
@@ -86,7 +79,7 @@ namespace Locations.Core.Business.DataAccess
                 _loggerService.LogError(message, ex);
 
                 var errorArgs = new DataErrorEventArgs(
-                    ErrorSource.Unknown,
+                Location.Core.Helpers.AlertService.ErrorSource.Unknown,
                     message,
                     ex);
 

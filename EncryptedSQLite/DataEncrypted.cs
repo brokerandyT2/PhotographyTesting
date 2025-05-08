@@ -1,15 +1,6 @@
 ﻿extern alias SQLEncrypt;
-using sql = SQLEncrypt.SQLite;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Locations.Core.Shared;
-using System.Runtime.CompilerServices;
-using Locations.Core.Shared.StorageSvc;
+using sql = SQLEncrypt.SQLite;
 
 namespace EncryptedSQLite
 {
