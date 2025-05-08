@@ -1,10 +1,10 @@
 ﻿using Locations.Core.Business.DataAccess;
 using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Enums;
 using Locations.Core.Shared.ViewModels;
-using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
+using System.Net.Mail;
 using static Locations.Core.Shared.Enums.SubscriptionType;
 
 namespace Locations.Core.Business
@@ -21,7 +21,9 @@ namespace Locations.Core.Business
             Animals
 
         }
-        public static void PopulateData()
+        public static void PopulateData(
+           string hemisphere, string tempformat, string dateformat, string timeformat, string winddirection, string email)
+           
         {
 
             SettingViewModel vm = new SettingViewModel();
@@ -39,8 +41,8 @@ namespace Locations.Core.Business
             types.Add(new TipTypeViewModel { Name = "Golden Hour", I8n = MagicStrings.English_for_i8n });
             types.Add(new TipTypeViewModel { Name = "Sunset", I8n = MagicStrings.English_for_i8n });
 
-            TipTypesQuery<TipTypeViewModel> tipTypesQuery = new TipTypesQuery<TipTypeViewModel>();
-            TipQuery<TipViewModel> tq = new TipQuery<TipViewModel>();
+            TipTypesQuery<TipTypeViewModel> tipTypesQuery = new TipTypesQuery<TipTypeViewModel>(true);
+            TipQuery<TipViewModel> tq = new TipQuery<TipViewModel>(true);
             int i = 1;
             foreach (var type in types)
             {
@@ -57,7 +59,7 @@ namespace Locations.Core.Business
             var loc3 = new LocationViewModel() { Title = "Golden Gate Bridge", Description = "The Golden Gate Bridge is a suspension bridge spanning the Golden Gate strait, the one-mile-wide (1.6 km) channel between San Francisco Bay and the Pacific Ocean. The strait is the entrance to San Francisco Bay from the Pacific Ocean. The bridge connects the city of San Francisco, California, to Marin County, carrying both U.S. Route 101 and California State Route 1 across the strait.", Lattitude = 37.8199, Longitude = -122.4783, Timestamp = DateTime.Now.AddDays(-6), Photo = "Resources/Images/ggbridge.jpg" };
 
             var loc4 = new LocationViewModel() { Title = "Gateway Arch", Description = "The Gateway Arch is a 630-foot (192 m) monument in St. Louis, Missouri, that commemorates Thomas Jefferson and the westward expansion of the United States. The arch is the centerpiece of the Gateway Arch National Park and is the tallest arch in the world.", Lattitude = 38.6247, Longitude = -90.1848, Timestamp = DateTime.Now.AddDays(-35), Photo = "Resources/Images/stlarch.jpg" };
-            LocationsService ls = new LocationsService();
+            LocationsService ls = new LocationsService(true);
 
             var a = ls.SaveSettingWithObjectReturn(loc);
             var b = ls.SaveSettingWithObjectReturn(loc2);
@@ -65,31 +67,33 @@ namespace Locations.Core.Business
             var d = ls.SaveSettingWithObjectReturn(loc4);
 
             List<SettingViewModel> list = new List<SettingViewModel>();
-            SettingsService ss = new SettingsService();
+            SettingsService ss = new SettingsService(true);
             var guid = Guid.NewGuid().ToString();
 
 
             SecureStorage.SetAsync(MagicStrings.UniqueID, guid);
-            SecureStorage.SetAsync(MagicStrings.Email, string.Empty);
+            SecureStorage.SetAsync(MagicStrings.Email, email);
 
 
 
             #region DEFAULT DATA No Matter if Debug or not
-            list.Add(new() { Name = MagicStrings.Hemisphere, Value = Hemisphere.HemisphereChoices.North.Name() });
+            list.Add(new() { Name = MagicStrings.Hemisphere, Value = hemisphere });
             list.Add(new() { Name = MagicStrings.FirstName, Value = "" });
             list.Add(new() { Name = MagicStrings.LastName, Value = "" });
             list.Add(new() { Name = MagicStrings.UniqueID, Value = guid });
             list.Add(new() { Name = MagicStrings.LastBulkWeatherUpdate, Value = DateTime.Now.AddDays(-2).ToString() });
             list.Add(new() { Name = MagicStrings.DefaultLanguage, Value = "en-US" });
-            list.Add(new() { Name = MagicStrings.WindDirection, Value = MagicStrings.TowardsWind });
+            list.Add(new() { Name = MagicStrings.WindDirection, Value = winddirection });
             list.Add(new() { Name = MagicStrings.CameraRefresh, Value = "2000" });
             list.Add(new() { Name = MagicStrings.AppOpenCounter, Value = "1" });
-            list.Add(new() { Name = MagicStrings.TimeFormat, Value = MagicStrings.USTimeformat_Pattern });
-            list.Add(new() { Name = MagicStrings.DateFormat, Value = MagicStrings.USDateFormat });
+            list.Add(new() { Name = MagicStrings.TimeFormat, Value = timeformat });
+            list.Add(new() { Name = MagicStrings.DateFormat, Value = dateformat});
             list.Add(new() { Name = MagicStrings.WeatherURL, Value = "https://api.openweathermap.org/data/3.0/onecall" });
             list.Add(new() { Name = MagicStrings.Weather_API_Key, Value = "aa24f449cced50c0491032b2f955d610" });
             list.Add(new() { Name = MagicStrings.FreePremiumAdSupported, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.TemperatureType, Value = MagicStrings.Fahrenheit });
+            list.Add(new() { Name = MagicStrings.DeviceInfo, Value = "" });
+            list.Add(new() { Name = MagicStrings.Email, Value = email });
             #endregion
 
 
@@ -97,8 +101,7 @@ namespace Locations.Core.Business
 
 #if DEBUG
 
-            list.Add(new() { Name = MagicStrings.Email, Value = "brokerandy25@gmail.com" });
-            list.Add(new() { Name = MagicStrings.Email, Value = "" });
+
             list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.True_string });
             list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.True_string });
@@ -119,7 +122,7 @@ namespace Locations.Core.Business
             list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
             list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "24" });
 #else
-            list.Add(new() { Name = MagicStrings.Email, Value = "" });
+
             list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.False_string });
             list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.False_string });
@@ -150,9 +153,8 @@ namespace Locations.Core.Business
                 var z = ss.SaveSettingWithObjectReturn(x);
             }
 
-            var zz = ss.SaveSettingWithObjectReturn(new SettingViewModel() { Name = MagicStrings.DeviceInfo, Value = "" });
-            SettingViewModel n = new() { Name = MagicStrings.TimeFormat, Value = MagicStrings.USTimeformat_Pattern };
-            ss.SaveSettingWithObjectReturn(n);
+     ;
+
         }
 
     }

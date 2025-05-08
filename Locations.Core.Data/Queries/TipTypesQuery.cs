@@ -1,10 +1,13 @@
 ﻿using EncryptedSQLite;
+using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
+using NormalSQLite;
 
 namespace Locations.Core.Data.Queries
 {
     public class TipTypesQuery<T> : QueryBase<T> where T : TipTypeViewModel, new()
     {
+        private bool v;
 
         /// <summary>
         /// 
@@ -15,8 +18,14 @@ namespace Locations.Core.Data.Queries
         {
             dataB = DataEncrypted.GetAsyncConnection(KEY);
         }
-
-        
+        /// <summary>
+        /// Used for initial setup, have to use NON encrypted DB to start
+        /// </summary>
+        /// <param name="v"></param>
+        public TipTypesQuery(bool v)
+        {
+           dataB = DataUnEncrypted.GetConnection();
+        }
 
         public override T GetItem<T>(int id)
         {

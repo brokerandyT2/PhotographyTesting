@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Location.Core.Views.Login"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
              xmlns:strings="clr-namespace:Location.Core.Resources"
              xmlns:system="clr-namespace:System;assembly=netstandard"             
@@ -9,11 +10,19 @@
     <ContentPage.BindingContext>
         <models:SettingsViewModel  />
     </ContentPage.BindingContext>
+    <ContentPage.Resources>
+        <Style x:Key="ValidEntryStyle" TargetType="Entry">
+            <Setter Property="TextColor" Value="Green" />
+        </Style>
+        <Style x:Key="InvalidEntryStyle" TargetType="Entry">
+            <Setter Property="TextColor" Value="Red" />
+        </Style>
+    </ContentPage.Resources>
     <VerticalStackLayout 
         Padding="30"
         Spacing="20"
         VerticalOptions="Center">
-  <ImageButton Source="closeoutlinecustom.png" HorizontalOptions="End" Pressed="ImageButton_Pressed"/>
+        
         <Label 
             Text="{x:Static strings:AppResources.Welcome}"
             FontSize="20"
@@ -37,20 +46,20 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-          
+
 
             <Label Text="{x:Static strings:AppResources.SwitchHemisphere}" Grid.Row="1" Grid.Column="0"></Label>
             <Label Text="{Binding Hemisphere.Value}" Grid.Row="1" Grid.Column="1"></Label>
             <Switch x:Name="HemisphereSwitch" IsToggled="{Binding HemisphereNorth}" Grid.Row="1" Grid.Column="2" Toggled="HemisphereSwitch_Toggled"></Switch>
-            
+
             <Label Text="{x:Static strings:AppResources.SwitchClockType}" Grid.Row="2" Grid.Column="0"></Label>
             <Label Text="{Binding TimeFormat.Value}" Grid.Row="2" Grid.Column="1"></Label>
             <Switch x:Name="TimeSwitch" IsToggled="{Binding TimeFormatToggle}" Grid.Row="2" Grid.Column="2" Toggled="TimeSwitch_Toggled"></Switch>
-            
+
             <Label Text="{x:Static strings:AppResources.SwitchDateFormat}" Grid.Row="3" Grid.Column="0"></Label>
             <Label Text="{Binding DateFormat.Value}" Grid.Row="3" Grid.Column="1"></Label>
             <Switch x:Name="DateFormat" IsToggled="{Binding DateFormatToggle}" Grid.Row="3" Grid.Column="2" Toggled="DateFormat_Toggled"></Switch>
-            
+
             <Label Text="{x:Static strings:AppResources.WindDirection}" Grid.Row="4" Grid.Column="0"></Label>
             <Label x:Name="WindDirection" Text="" Grid.Row="4" Grid.Column="1"></Label>
             <Switch x:Name="WindDirectionSwitch" IsToggled="{Binding WindDirectionBoolean}" Grid.Row="4" Grid.Column="2" Toggled="WindDirectionSwitch_Toggled"></Switch>
@@ -60,7 +69,14 @@
             <Switch x:Name="TempFormatSwitch" IsToggled="{Binding TemperatureFormatToggle}" Grid.Row="5" Grid.Column="2" Toggled="TempFormatSwitch_Toggled"></Switch>
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="6" Grid.ColumnSpan="3" Grid.Column="0"/>
             <Label Text="{x:Static strings:AppResources.ProvideEmail}" Grid.Row="7" Grid.ColumnSpan="3" Grid.Column="0"/>
-            <Entry x:Name="emailAddress" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3" />
+            <Entry x:Name="emailAddress" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3">
+                <Entry.Behaviors>
+                    <toolkit:EmailValidationBehavior 
+            InvalidStyle="{StaticResource InvalidEntryStyle}"
+            ValidStyle="{StaticResource ValidEntryStyle}"
+            Flags="ValidateOnValueChanged" />
+                </Entry.Behaviors>
+            </Entry>
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="9" Grid.ColumnSpan="3" Grid.Column="0"/>
             <Button x:Name="save" Text="{x:Static strings:AppResources.Save}" Grid.Row="10" Grid.ColumnSpan="3" Grid.Column="0" Pressed="save_Pressed"/>
         </Grid>

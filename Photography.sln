@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EncryptedSQLite", "Encrypte
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Location.Core.Logging", "Location.Core.Logging\Location.Core.Logging.csproj", "{869B0B2D-C1AD-4844-9ADC-372461D50D45}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NormalSQLite", "NormalSQLite\NormalSQLite.csproj", "{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Andy|Any CPU = Andy|Any CPU
@@ -152,6 +154,14 @@ Global
 		{869B0B2D-C1AD-4844-9ADC-372461D50D45}.Release|Any CPU.Build.0 = Release|Any CPU
 		{869B0B2D-C1AD-4844-9ADC-372461D50D45}.Testing|Any CPU.ActiveCfg = Debug|Any CPU
 		{869B0B2D-C1AD-4844-9ADC-372461D50D45}.Testing|Any CPU.Build.0 = Debug|Any CPU
+		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Andy|Any CPU.ActiveCfg = Debug|Any CPU
+		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Andy|Any CPU.Build.0 = Debug|Any CPU
+		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Testing|Any CPU.ActiveCfg = Debug|Any CPU
+		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Testing|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

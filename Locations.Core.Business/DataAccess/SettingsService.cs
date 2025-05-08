@@ -1,6 +1,7 @@
 ﻿using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Business.Logging.Implementation;
 using Locations.Core.Business.Logging.Interfaces;
+using Locations.Core.Business.StorageSvc;
 using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Customizations.Alerts.Implementation;
@@ -26,18 +27,21 @@ namespace Locations.Core.Business.DataAccess
 
         }
        
-        public SettingsService(IAlertService alert, ILoggerService logger, string email) :this()
+        public SettingsService(IAlertService alert, string email) :this()
         {
             var q = new SettingsQuery<SettingViewModel>();
-            var x = q.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
+            var x = NativeStorageService.GetSetting(MagicStrings.Email);
             if (string.IsNullOrEmpty(x))
             {
-                loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {x}");
                 throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
             }
             _query = new SettingsQuery<SettingViewModel>();
         }
-       
+
+        public SettingsService(bool v)
+        {
+            _query = new SettingsQuery<SettingViewModel>(true);
+        }
 
         private void SettingsService_AlertRaised(object? sender, AlertEventArgs e)
         {

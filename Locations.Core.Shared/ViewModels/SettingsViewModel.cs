@@ -30,6 +30,7 @@ namespace Locations.Core.Shared.ViewModels
             }
         }
         private SettingViewModel _hemisphere;
+
         public bool HemisphereNorth { get { return Hemisphere.Value == HemisphereChoices.North.Name() ? true : false; } }
         public SettingViewModel FirstName { get; set; }
         public SettingViewModel LastName { get; set; }

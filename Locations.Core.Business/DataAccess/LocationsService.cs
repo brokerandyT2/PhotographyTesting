@@ -9,6 +9,7 @@ using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Helpers;
 using Locations.Core.Shared.ViewModels;
+using NormalSQLite;
 
 namespace Locations.Core.Business.DataAccess
 {
@@ -40,16 +41,13 @@ namespace Locations.Core.Business.DataAccess
             RaiseError(new Exception(e.Title));
         }
 
-        public LocationsService(IAlertService alertServ, ILoggerService loggerService) : this()
-        {
-            this.alertServ = alertServ;
-        }
-        public LocationsService(IAlertService alertServ, ILoggerService loggerService, string email) : this(alertServ, loggerService)
-        {
-            var q = new SettingsQuery<SettingViewModel>();
-            var x = q.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
 
+
+        public LocationsService(bool v)
+        {
+            lq.dataB = DataUnEncrypted.GetConnection();
         }
+
         public LocationViewModel SaveSettingWithObjectReturn(LocationViewModel s)
         {
             try

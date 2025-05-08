@@ -49,7 +49,6 @@ public static class MauiProgram
         builder.Services.AddTransient<ILocationList, LocationsListViewModel>();
         builder.Services.AddTransient<ITipsViewmodel, TipsViewModel>();
         builder.Services.AddTransient<IDetailsView, DetailsViewModel>();
-        builder.Services.AddSingleton<IAlertService, AlertService>();
         builder.Services.AddSingleton<ILogger, Logger>();
         builder.Services.AddSingleton<IAmbientLightSensorService, AmbientLightSensorService>();
         builder.Services.AddTransient(typeof(Locations.Core.Data.Queries.SettingsQuery<>));

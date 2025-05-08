@@ -2,6 +2,7 @@
 using Locations.Core.Shared;
 using Locations.Core.Shared.StorageSvc;
 using Locations.Core.Shared.ViewModels;
+using NormalSQLite;
 
 namespace  Locations.Core.Data.Queries
 {
@@ -23,6 +24,11 @@ namespace  Locations.Core.Data.Queries
         public SettingsQuery() :base()
         {
             dataB = DataEncrypted.GetAsyncConnection(KEY);
+        }
+
+        public SettingsQuery(bool v)
+        {
+            dataB = DataUnEncrypted.GetConnection();
         }
 
         /// <summary>

@@ -71,7 +71,7 @@ namespace Locations.Core.Business.DataAccess
         private void OnAlertRaised(object? sender, AlertEventArgs e)
         {
             alertEventArgs = e;
-            AlertRaised?.Invoke(this, e);
+            //AlertRaised?.Invoke(this, e);
             IsError = true;
 
         }
@@ -84,7 +84,6 @@ namespace Locations.Core.Business.DataAccess
                 Message = message,
                 IsError = true
             };
-            AlertRaised?.Invoke(this, alertEventArgs);
             IsError = true;
         }
         public static void RaiseAlert(object? sender, AlertEventArgs e)

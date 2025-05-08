@@ -1,4 +1,5 @@
-﻿using Locations.Core.Business.Logging.Implementation;
+﻿using EncryptedSQLite;
+using Locations.Core.Business.Logging.Implementation;
 using Locations.Core.Business.StorageSvc;
 using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
@@ -49,7 +50,7 @@ namespace Locations.Core.Business.DataAccess
                 }
                 else
                 {
-                    return new SQLiteAsyncConnection(MagicStrings.DataBasePath, Constants.Flags);
+                    return DataEncrypted.GetAsyncConnection(NativeStorageService.GetSetting(MagicStrings.UniqueID)+NativeStorageService.GetSetting(MagicStrings.UniqueID));
                 }
             }
         }
@@ -85,7 +86,7 @@ namespace Locations.Core.Business.DataAccess
                     var e = _connection.CreateTableAsync<LocationViewModel>().Result;
                     var f = _connection.CreateTableAsync<Log>().Result;
 #if PHOTOGRAPHY
-                    DataPopulation.PopulateData();
+                    //DataPopulation.PopulateData();
 #endif
                 }
             }

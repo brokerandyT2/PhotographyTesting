@@ -1,4 +1,6 @@
 ﻿
+using Locations.Core.Business.StorageSvc;
+
 namespace Location.Core
 {
     public partial class App : Microsoft.Maui.Controls.Application
@@ -14,7 +16,8 @@ namespace Location.Core
        
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new MainPage());
+            //MainPage = new NavigationPage(new MainPage());
+            return new Window(new NavigationPage(new MainPage(new NativeStorageService())));
         }
     }
 }

@@ -1,14 +1,5 @@
-﻿using Location.Photography.Shared.ExposureCalculator;
-using Microsoft.Maui.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-
-
-namespace Location.Photography.Business.LightMeter
+﻿namespace Location.Photography.Business.LightMeter
 {
-
     public class LunaProDrawable : IDrawable
     {
         private GraphicsView meter;
@@ -459,39 +450,18 @@ namespace Location.Photography.Business.LightMeter
                 meter?.Invalidate();
             }
         }
-      
-        private float CalculateAngle(float x, float y)
-        {
-            // Calculate the angle between the center of the dial and the touch point
-            float dx = x - dialCenterX;
-            float dy = y - dialCenterY;
 
-            // Calculate the angle in radians
-            float angle = (float)Math.Atan2(dy, dx);
-
-            // Convert to degrees
-            angle = angle * 180f / (float)Math.PI;
-
-            // Adjust to standard angle measurement (0-360 degrees, clockwise from the top)
-            angle = (angle + 90) % 360;
-
-            // Ensure the angle is positive
-            if (angle < 0)
-                angle += 360;
-
-            return angle;
-        }
         // Pan gesture handling
         private void OnPanUpdated(object sender, PanUpdatedEventArgs e)
         {
             switch (e.StatusType)
             {
                 case GestureStatus.Started:
-                    // Get the touch point from the GraphicsView
+                    // Get the touch point
                     var view = sender as GraphicsView;
                     if (view != null)
                     {
-                        // Get the touch point directly from the view - this is crucial
+                        // Convert the pan gesture starting point to a point relative to the dial center
                         Point touchPoint = new Point(
                             dialCenterX + e.TotalX,
                             dialCenterY + e.TotalY);
@@ -541,7 +511,6 @@ namespace Location.Photography.Business.LightMeter
                     // Apply rotation to the appropriate dial
                     if (isDraggingOuterDial)
                     {
-                        // Convert from radians to degrees for consistency
                         outerDialAngle += angleDelta;
                         SnapOuterDialToValue();
                     }
@@ -571,41 +540,6 @@ namespace Location.Photography.Business.LightMeter
                     break;
             }
         }
-
-
-      
-
-        private Point GetCurrentTouchPosition()
-        {
-            // Calculate the touch position using the PanUpdatedEventArgs relative data
-            // and a known reference point (like the dial center)
-
-            if (lastPanEventArgs != null)
-            {
-                // If we have a fixed starting point (initialTouchPosition)
-                if (initialTouchPosition != null)
-                {
-                    // Calculate current position as initial position + total movement
-                    return new Point(
-                        initialTouchPosition.Value.X + lastPanEventArgs.TotalX,
-                        initialTouchPosition.Value.Y + lastPanEventArgs.TotalY
-                    );
-                }
-
-                // If no initial position is available, use the dial center as reference
-                return new Point(
-                    dialCenterX + lastPanEventArgs.TotalX,
-                    dialCenterY + lastPanEventArgs.TotalY
-                );
-            }
-
-            // Fallback: If no touch data is available, return dial center
-            return new Point(dialCenterX, dialCenterY);
-        }
-
-        private PanUpdatedEventArgs lastPanEventArgs;
-        private Point? initialTouchPosition;
-       
 
         private float CalculateAngleDelta(PointF point1, PointF point2)
         {
@@ -690,6 +624,5 @@ namespace Location.Photography.Business.LightMeter
                 );
             }
         }
-    }//end of class
-
+    }
 }

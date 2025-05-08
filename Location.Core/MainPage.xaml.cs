@@ -30,13 +30,18 @@ namespace Location.Core
 
         public INativeStorageService nativeService;
 
-        public MainPage(IAlertService alertService, INativeStorageService nativeService) : this(alertService)
+        public MainPage(INativeStorageService nativeService)
         {
 
 
             EmailAddress = NativeStorageService.GetSetting(MagicStrings.Email);
             IsLoggedIn = !string.IsNullOrEmpty(EmailAddress);
             AppID = NativeStorageService.GetSetting(MagicStrings.UniqueID);
+            if (!IsLoggedIn)
+            {
+                Navigation.PushAsync(new NavigationPage(new Login()));
+            }
+            
         }
 
         public MainPage()
