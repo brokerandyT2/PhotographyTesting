@@ -1,475 +1,190 @@
-﻿using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
-using Locations.Core.Business.DataAccess.Interfaces;
-using Locations.Core.Business.GeoLocation;
-using Locations.Core.Business.Weather;
-using Locations.Core.Data.Queries;
+﻿using Location.Core.Helpers.LoggingService;
+using Location.Photography.Business.DataAccess.Interfaces;
+using Location.Photography.Data.Queries;
+using Locations.Core.Business.AlertService;
+using Locations.Core.Business.DataAccess;
+using Locations.Core.Business.Logging.Interfaces;
 using Locations.Core.Shared;
+using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.ViewModels;
-using Locations.Core.Business.DataAccess.
-namespace Locations.Core.Business.DataAccess
+using SQLite;
+using System;
+using System.Threading.Tasks;
+// Import the error source from AlertService
+using AlertServiceErrorSource = Location.Core.Helpers.AlertService.ErrorSource;
+
+namespace Location.Photography.Business.DataAccess
 {
     /// <summary>
-    /// Service for managing location data with error bubbling
+    /// Service for managing photography location data
     /// </summary>
-    public class LocationsService : ServiceBase<LocationViewModel>, ILocationService
+    public class LocationService : Locations.Core.Business.DataAccess.LocationsService, ILocationService<LocationViewModel>
     {
-        private readonly LocationQuery _locationQuery;
-        private readonly IAlertService _alertService;
-        private readonly ILoggerService _loggerService;
-
-        // Event for error bubbling to UI layer
-        // Events for integration with our error bubbling system
-        public event EventHandler<DataErrorEventArgs>? ErrorOccurred;
+        // Dependencies
+        private readonly ILoggerService _logger;
+        private readonly SettingsService _settingsService;
 
         /// <summary>
-        /// Constructor with dependency injection
+        /// Creates a new LocationService with logger and email
         /// </summary>
-        public LocationsService(
-            IAlertService alertService,
-            ILoggerService loggerService)
+        /// <param name="logger">Logger service instance</param>
+        /// <param name="email">User email for encrypted storage</param>
+        public LocationService(ILoggerService logger, string email) : base(
+            new AlertService(), // Create alert service for base class
+            logger)
         {
-            _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
-            _loggerService = loggerService ?? throw new ArgumentNullException(nameof(loggerService));
+            _logger = logger;
+            _settingsService = new SettingsService();
 
-            // Create location query with the same services
-            _locationQuery = new LocationQuery(alertService, loggerService);
-
-            // Subscribe to data layer errors
-            _locationQuery.ErrorOccurred += OnQueryErrorOccurred;
-           
-        }
-        
-        /// <summary>
-        /// Handler for data layer errors
-        /// </summary>
-        private void OnQueryErrorOccurred(object sender, DataErrorEventArgs e)
-        {
-            // Log the error at business layer level
-            _loggerService.LogError($"Business layer received error: {e.Source} - {e.Message}", e.Exception);
-
-            // Forward the error to UI layer
-            OnErrorOccurred(e);
-
-            // Show user-friendly alerts for critical errors
-            if (e.Source == ErrorSource.Database)
-            {
-                _alertService.DisplayError("Database Error",
-                    "There was a problem accessing location data. Please try again.", "OK");
-            }
+            ValidateEmailSetting();
         }
 
         /// <summary>
-        /// Raises the ErrorOccurred event
+        /// Creates a new LocationService with default dependencies
         /// </summary>
+        public LocationService() : base(
+            new AlertService(),
+            new Locations.Core.Business.LoggingService.LoggerService())
+        {
+            _settingsService = new SettingsService();
 
+            ValidateEmailSetting();
+        }
 
         /// <summary>
-        /// Gets a location by ID
+        /// Validates that email setting exists
         /// </summary>
-        public async Task<DataOperationResult<LocationViewModel>> GetLocationAsync(int id)
+        private void ValidateEmailSetting()
         {
             try
             {
-                return await _locationQuery.GetItemAsync<LocationViewModel>(id);
+                var email = _settingsService.GetSettingByName(MagicStrings.Email).Value;
+                if (string.IsNullOrEmpty(email))
+                {
+                    throw new ArgumentException("Email is not set. Cannot use encrypted database.");
+                }
             }
             catch (Exception ex)
             {
-                string message = $"Unexpected error retrieving location with ID {id}";
-                _loggerService.LogError(message, ex);
+                // Use base class method with proper error source
+                base.RaiseError(AlertServiceErrorSource.Validation, ex);
 
-                var errorArgs = new DataErrorEventArgs(
-                Location.Core.Helpers.AlertService.ErrorSource.Unknown,
-                    message,
-                    ex);
-
-                OnErrorOccurred(errorArgs);
-
-                return DataOperationResult<LocationViewModel>.Failure(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
+                // Also log locally
+                _logger?.LogError("Email validation error", ex);
             }
         }
 
+        #region ILocationService Implementation
+
         /// <summary>
-        /// Gets a location by coordinates
+        /// Deletes a location
         /// </summary>
-        public async Task<DataOperationResult<LocationViewModel>> GetLocationAsync(double latitude, double longitude)
+        public bool Delete(LocationViewModel model)
         {
+            if (model == null)
+                return false;
+
             try
             {
-                return await _locationQuery.GetLocationAsync(latitude, longitude);
+                var task = DeleteLocationAsync(model);
+                task.Wait();
+                return task.Result.IsSuccess;
             }
             catch (Exception ex)
             {
-                string message = $"Unexpected error retrieving location at coordinates ({latitude}, {longitude})";
-                _loggerService.LogError(message, ex);
-
-                var errorArgs = new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
-
-                OnErrorOccurred(errorArgs);
-
-                return DataOperationResult<LocationViewModel>.Failure(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
-            }
-        }
-
-        /// <summary>
-        /// Gets all locations
-        /// </summary>
-        public async Task<DataOperationResult<List<LocationViewModel>>> GetLocationsAsync()
-        {
-            try
-            {
-                var result = await _locationQuery.GetItemsAsync<LocationViewModel>();
-
-                if (!result.IsSuccess)
-                {
-                    return DataOperationResult<List<LocationViewModel>>.Failure(
-                        result.Source,
-                        result.ErrorMessage,
-                        result.Exception);
-                }
-
-                // Filter out deleted locations
-                var filteredLocations = result.Data.Where(x => x.IsDeleted == false).ToList();
-
-                return DataOperationResult<List<LocationViewModel>>.Success(filteredLocations);
-            }
-            catch (Exception ex)
-            {
-                string message = "Unexpected error retrieving locations";
-                _loggerService.LogError(message, ex);
-
-                var errorArgs = new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
-
-                OnErrorOccurred(errorArgs);
-
-                return DataOperationResult<List<LocationViewModel>>.Failure(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
-            }
-        }
-
-        /// <summary>
-        /// Saves a location with ID return
-        /// </summary>
-        public async Task<DataOperationResult<LocationViewModel>> SaveWithIDReturnAsync(LocationViewModel location)
-        {
-            try
-            {
-                if (location == null)
-                {
-                    string message = "Cannot save null location";
-                    _loggerService.LogWarning(message);
-
-                    var errorArgs = new DataErrorEventArgs(
-                        ErrorSource.ModelValidation,
-                        message,
-                        null,
-                        location);
-
-                    OnErrorOccurred(errorArgs);
-
-                    return DataOperationResult<LocationViewModel>.Failure(
-                        ErrorSource.ModelValidation,
-                        message);
-                }
-
-                return await _locationQuery.SaveWithIDReturnAsync(location);
-            }
-            catch (Exception ex)
-            {
-                string message = "Unexpected error saving location with ID return";
-                _loggerService.LogError(message, ex);
-
-                var errorArgs = new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex,
-                    location);
-
-                OnErrorOccurred(errorArgs);
-
-                return DataOperationResult<LocationViewModel>.Failure(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
-            }
-        }
-
-        /// <summary>
-        /// Saves a location with optional weather and return options
-        /// </summary>
-        public async Task<DataOperationResult<LocationViewModel>> SaveLocationAsync(
-            LocationViewModel location,
-            bool getWeather = false,
-            bool returnNew = false)
-        {
-            try
-            {
-                if (location == null)
-                {
-                    string message = "Cannot save null location";
-                    _loggerService.LogWarning(message);
-
-                    var errorArgs = new DataErrorEventArgs(
-                        ErrorSource.ModelValidation,
-                        message,
-                        null,
-                        location);
-
-                    OnErrorOccurred(errorArgs);
-
-                    return DataOperationResult<LocationViewModel>.Failure(
-                        ErrorSource.ModelValidation,
-                        message);
-                }
-
-                // Get city and state data
-                try
-                {
-                    GeoLocationAPI geoLocationAPI = new GeoLocationAPI(ref location);
-                    geoLocationAPI.GetCityAndState(location.Lattitude, location.Longitude);
-                }
-                catch (Exception ex)
-                {
-                    // Log but continue - geo data is not critical
-                   // _loggerService.LogWarning($"Could not get geo location data: {ex.Message}", ex);
-                }
-
-                // Get weather data if requested
-                if (getWeather)
-                {
-                    try
-                    {
-                        var settingsService = new SettingsService();
-                        var apiKey = settingsService.GetSettingByName(MagicStrings.Weather_API_Key).Value;
-                        var weatherUrl = settingsService.GetSettingByName(MagicStrings.WeatherURL).Value; ;
-
-                        WeatherAPI weatherAPI = new WeatherAPI(
-                            apiKey,
-                            location.Lattitude,
-                            location.Longitude,
-                            weatherUrl);
-
-                        var weatherData = await weatherAPI.GetWeatherAsync();
-
-                        var weatherService = new WeatherService();
-                      
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log but continue - weather data is not critical
-                        //_loggerService.LogWarning($"Could not get weather data: {ex.Message}", ex);
-                    }
-                }
-
-                // Save the location
-                var saveResult = await _locationQuery.SaveItemAsync(location);
-
-                if (!saveResult.IsSuccess)
-                {
-                    return DataOperationResult<LocationViewModel>.Failure(
-                        saveResult.Source,
-                        saveResult.ErrorMessage,
-                        saveResult.Exception);
-                }
-
-                // Return new or existing location based on parameter
-                return DataOperationResult<LocationViewModel>.Success(
-                    returnNew ? new LocationViewModel() : location);
-            }
-            catch (Exception ex)
-            {
-                string message = "Unexpected error saving location";
-                _loggerService.LogError(message, ex);
-
-                var errorArgs = new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex,
-                    location);
-
-                OnErrorOccurred(errorArgs);
-
-                return DataOperationResult<LocationViewModel>.Failure(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
-            }
-        }
-
-        /// <summary>
-        /// Updates a location
-        /// </summary>
-        public async Task<DataOperationResult<bool>> UpdateLocationAsync(LocationViewModel location)
-        {
-            try
-            {
-                if (location == null)
-                {
-                    string message = "Cannot update null location";
-                    _loggerService.LogWarning(message);
-
-                    var errorArgs = new DataErrorEventArgs(
-                        ErrorSource.ModelValidation,
-                        message,
-                        null,
-                        location);
-
-                    OnErrorOccurred(errorArgs);
-
-                    return DataOperationResult<bool>.Failure(
-                        ErrorSource.ModelValidation,
-                        message);
-                }
-
-                return await _locationQuery.UpdateAsync(location);
-            }
-            catch (Exception ex)
-            {
-                string message = "Unexpected error updating location";
-                _loggerService.LogError(message, ex);
-
-                var errorArgs = new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex,
-                    location);
-
-                OnErrorOccurred(errorArgs);
-
-                return DataOperationResult<bool>.Failure(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
+                // Use base class method with proper error source
+                base.RaiseError(AlertServiceErrorSource.Unknown, ex);
+                return false;
             }
         }
 
         /// <summary>
         /// Deletes a location by ID
         /// </summary>
-        public async Task<DataOperationResult<bool>> DeleteLocationAsync(int id)
+        public bool Delete(int id)
         {
             try
             {
-                return await _locationQuery.DeleteItemAsync<LocationViewModel>(id);
+                var task = DeleteLocationAsync(id);
+                task.Wait();
+                return task.Result.IsSuccess;
             }
             catch (Exception ex)
             {
-                string message = $"Unexpected error deleting location with ID {id}";
-                _loggerService.LogError(message, ex);
-
-                var errorArgs = new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
-
-                OnErrorOccurred(errorArgs);
-
-                return DataOperationResult<bool>.Failure(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
+                // Use base class method with proper error source
+                base.RaiseError(AlertServiceErrorSource.Unknown, ex);
+                return false;
             }
         }
 
         /// <summary>
         /// Deletes a location by coordinates
         /// </summary>
-        public async Task<DataOperationResult<bool>> DeleteLocationAsync(double latitude, double longitude)
+        public bool Delete(double latitude, double longitude)
         {
             try
             {
-                // First get the location
-                var getResult = await _locationQuery.GetLocationAsync(latitude, longitude);
-
-                if (!getResult.IsSuccess)
-                {
-                    return DataOperationResult<bool>.Failure(
-                        getResult.Source,
-                        getResult.ErrorMessage,
-                        getResult.Exception);
-                }
-
-                // Then delete it by ID
-                return await DeleteLocationAsync(getResult.Data.Id);
+                var task = DeleteLocationAsync(latitude, longitude);
+                task.Wait();
+                return task.Result.IsSuccess;
             }
             catch (Exception ex)
             {
-                string message = $"Unexpected error deleting location at coordinates ({latitude}, {longitude})";
-                _loggerService.LogError(message, ex);
-
-                var errorArgs = new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
-
-                OnErrorOccurred(errorArgs);
-
-                return DataOperationResult<bool>.Failure(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
+                // Use base class method with proper error source
+                base.RaiseError(AlertServiceErrorSource.Unknown, ex);
+                return false;
             }
         }
 
         /// <summary>
-        /// Deletes a location by object
+        /// Gets a location by ID
         /// </summary>
-        public async Task<DataOperationResult<bool>> DeleteLocationAsync(LocationViewModel location)
+        public LocationViewModel Get(int id)
         {
             try
             {
-                if (location == null)
-                {
-                    string message = "Cannot delete null location";
-                    _loggerService.LogWarning(message);
-
-                    var errorArgs = new DataErrorEventArgs(
-                        ErrorSource.ModelValidation,
-                        message,
-                        null,
-                        location);
-
-                    OnErrorOccurred(errorArgs);
-
-                    return DataOperationResult<bool>.Failure(
-                        ErrorSource.ModelValidation,
-                        message);
-                }
-
-                return await DeleteLocationAsync(location.Id);
+                var task = GetLocationAsync(id);
+                task.Wait();
+                return task.Result.IsSuccess ? task.Result.Data : new LocationViewModel();
             }
             catch (Exception ex)
             {
-                string message = "Unexpected error deleting location";
-                _loggerService.LogError(message, ex);
-
-                var errorArgs = new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex,
-                    location);
-
-                OnErrorOccurred(errorArgs);
-
-                return DataOperationResult<bool>.Failure(
-                    ErrorSource.Unknown,
-                    message,
-                    ex);
+                // Use base class method with proper error source
+                base.RaiseError(AlertServiceErrorSource.Unknown, ex);
+                return new LocationViewModel();
             }
         }
+
+        /// <summary>
+        /// Saves a location
+        /// </summary>
+        public LocationViewModel Save(LocationViewModel model)
+        {
+            return Save(model, false);
+        }
+
+        /// <summary>
+        /// Saves a location with option to return a new instance
+        /// </summary>
+        public LocationViewModel Save(LocationViewModel model, bool returnNew)
+        {
+            if (model == null)
+                return new LocationViewModel();
+
+            try
+            {
+                var task = SaveLocationAsync(model, false, returnNew);
+                task.Wait();
+                return task.Result.IsSuccess ? task.Result.Data : new LocationViewModel();
+            }
+            catch (Exception ex)
+            {
+                // Use base class method with proper error source
+                base.RaiseError(AlertServiceErrorSource.Unknown, ex);
+                return new LocationViewModel();
+            }
+        }
+
+        #endregion
     }
 }

@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Locations.Core.Shared.DTO.Interfaces
+﻿namespace Locations.Core.Shared.DTO.Interfaces
 {
-    interface ITipDTO
+    public interface ITipDTO : IDTOBase
     {
+        int ID { get; set; }
+        string Fstop { get; set; }
+        string Shutterspeed { get; set; }
+        string ISO { get; set; }
+        int TipTypeID { get; set; }
+        string Title { get; set; }
+        string I8n { get; set; }
+        string Content { get; set; }
     }
 }

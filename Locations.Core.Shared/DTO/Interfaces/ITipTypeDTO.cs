@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Locations.Core.Shared.DTO.Interfaces
+﻿namespace Locations.Core.Shared.DTO.Interfaces
 {
-    interface ITipTypeDTO
+    public interface ITipTypeDTO : IDTOBase
     {
+        int Id { get; set; }
+        string Name { get; set; }
+        string I8n { get; set; }
     }
 }

@@ -1,19 +1,16 @@
 ﻿using Locations.Core.Shared.DTO.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Locations.Core.Shared.ViewModels.Interface;
 
 namespace Locations.Core.Shared.DTO
 {
-    public class TipsDisplayDTO : TipDTO, ITipDisplayDTO
+    public partial class TipsDisplayDTO : TipDTO, ITipDisplayDTO
     {
-        //public event PropertyChangedEventHandler? PropertyChanged;
-        public TipsDisplayDTO() { }
-        private List<ViewModels.Interface.ITipType> Tips { get; set; }
+        [ObservableProperty]
+        private List<ITipType> _tips = new List<ITipType>();
 
+        public TipsDisplayDTO() { }
     }
 }

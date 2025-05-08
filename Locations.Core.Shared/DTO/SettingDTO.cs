@@ -1,32 +1,37 @@
 ﻿using Locations.Core.Shared.DTO.Interfaces;
 using Locations.Core.Shared.ViewModels.Interface;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SQLite;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Newtonsoft.Json.Linq;
+using System.Xml.Linq;
+
 namespace Locations.Core.Shared.DTO
 {
     [Table("Settings")]
-    public class SettingDTO : DTOBase, ISettingDTO, INotifyPropertyChanged
+    public partial class SettingDTO : DTOBase, ISettingDTO, INotifyPropertyChanged
     {
-        
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public SettingDTO() { }
+        [ObservableProperty]
+        [property: PrimaryKey, AutoIncrement]
         private int _id;
+
+        [ObservableProperty]
         private string _name;
+
+        [ObservableProperty]
         private string _value;
+
+        [ObservableProperty]
         private DateTime _timestamp;
 
-        [AutoIncrement, PrimaryKey]
-        public int Id { get { return _id; } set { _id = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Id))); } }
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        public string Name { get { return _name; } set { _name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name))); } }
-        public string Value { get { return _value; } set { _value = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value))); } }
-        public DateTime Timestamp { get { return _timestamp; } set { _timestamp = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Timestamp))); } }
+        public SettingDTO()
+        {
+            Name = string.Empty;
+            Value = string.Empty;
+            Timestamp = DateTime.Now;
+        }
     }
 }
