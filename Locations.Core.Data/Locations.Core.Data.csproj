@@ -24,18 +24,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.3" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageReference Include="sqlite-net-sqlcipher" Version="1.9.172" />
     <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EncryptedSQLite\EncryptedSQLite.csproj" />
+    <ProjectReference Include="..\Location.Core.Helpers\Location.Core.Helpers.csproj" />
     <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
-    <ProjectReference Include="..\NormalSQLite\NormalSQLite.csproj" />
 
   </ItemGroup>
 

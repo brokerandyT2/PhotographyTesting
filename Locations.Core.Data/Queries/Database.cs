@@ -1,37 +1,114 @@
-﻿using Locations.Core.Shared;
-using Locations.Core.Shared.Alerts.Implementation;
+﻿using EncryptedSQLite;
+using Location.Core.Helpers.AlertService;
+using Location.Core.Helpers.LoggingService;
+using Locations.Core.Data.Models;
+using Locations.Core.Shared;
 using Locations.Core.Shared.StorageSvc;
 using SQLite;
+
+
 namespace Locations.Core.Data.Queries
 {
+    /// <summary>
+    /// Base class for database operations with error handling
+    /// </summary>
     public abstract class Database
-
     {
-        public event EventHandler<AlertEventArgs> RaiseAlert;
-        public AlertEventArgs alertEventArgs;
-        public bool IsError { get; set; } = false;
+        protected readonly IAlertService AlertService;
+        protected readonly ILoggerService LoggerService;
+
+        public event DataErrorEventHandler? ErrorOccurred;
+
         public static string DatabasePath => MagicStrings.DataBasePath;
 
-        public static string Email = NativeStorageService.GetSetting(MagicStrings.Email);
-        public static string Guid = NativeStorageService.GetSetting(MagicStrings.UniqueID);
-        public static string KEY { get { return Guid + Email; } }
-        public Database()
+        // The SQLite connection
+        protected SQLiteAsyncConnection dataB;
+
+        protected Database(IAlertService alertService, ILoggerService loggerService)
         {
-            this.RaiseAlert += OnAlertRaised;
-            dataB = EncryptedSQLite.DataEncrypted.GetAsyncConnection(KEY);
+            AlertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
+            LoggerService = loggerService ?? throw new ArgumentNullException(nameof(loggerService));
+
+            try
+            {
+                // Get the encryption key components from storage
+                string email = NativeStorageService.GetSetting(MagicStrings.Email);
+                string guid = NativeStorageService.GetSetting(MagicStrings.UniqueID);
+
+                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(guid))
+                {
+                    string message = "Email and UniqueID must be set for database encryption";
+                    LoggerService.LogError(message);
+                    throw new InvalidOperationException(message);
+                }
+
+                // Build the encryption key
+                string key = guid + email;
+
+                // Create an encrypted connection
+                dataB = GetAsyncEncryptedConnection();
+            }
+            catch (Exception ex)
+            {
+                string message = $"Failed to initialize database: {ex.Message}";
+                LoggerService.LogError(message, ex);
+                OnErrorOccurred(new DataErrorEventArgs(
+                    ErrorSource.Database,
+                    message,
+                    ex));
+                throw;
+            }
         }
 
-        private void OnAlertRaised(object? sender, AlertEventArgs e)
+        /// <summary>
+        /// Gets an encrypted SQLite connection
+        /// </summary>
+        protected SQLiteAsyncConnection GetAsyncEncryptedConnection()
         {
-            IsError = true;
-            RaiseAlert?.Invoke(this, e);
+            try
+            {
+                return DataEncrypted.GetAsyncConnection();
+            }
+            catch (Exception ex)
+            {
+                string message = $"Error creating encrypted database connection: {ex.Message}";
+                LoggerService.LogError(message, ex);
+                OnErrorOccurred(new DataErrorEventArgs(
+                    ErrorSource.Database,
+                    message,
+                    ex));
+                throw;
+            }
         }
 
-        public SQLiteAsyncConnection dataB;
-
-        public Database(ISQLiteAsyncConnection db)
+        /// <summary>
+        /// Gets a synchronous encrypted SQLite connection for operations that need to return the ID
+        /// </summary>
+        protected SQLiteConnection GetSyncEncryptedConnection()
         {
-            this.dataB = db as SQLiteAsyncConnection;
+            try
+            {
+                return DataEncrypted.GetSyncConnection();
+            }
+            catch (Exception ex)
+            {
+                string message = $"Error creating sync encrypted database connection: {ex.Message}";
+                LoggerService.LogError(message, ex);
+                OnErrorOccurred(new DataErrorEventArgs(
+                    ErrorSource.Database,
+                    message,
+                    ex));
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Raises the ErrorOccurred event
+        /// </summary>
+        protected virtual void OnErrorOccurred(DataErrorEventArgs e)
+        {
+            LoggerService.LogError($"Database error: {e.Source} - {e.Message}");
+            ErrorOccurred?.Invoke(this, e);
         }
     }
 }

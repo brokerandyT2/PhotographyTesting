@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using Locations.Core.Shared;
 using System.Runtime.CompilerServices;
+using Locations.Core.Shared.StorageSvc;
 
 namespace EncryptedSQLite
 {
@@ -22,53 +23,29 @@ namespace EncryptedSQLite
             get { return GUID + Email; }
         }
         /// <summary>
-        /// NO RETURN>  THROWS ERROR
+        /// Use this to use the default storage of email and guid
         /// </summary>
         /// <exception cref="NotImplementedException"></exception>
 
-        public DataEncrypted(string email)
-        {
-            throw new NotImplementedException();
-            SQLitePCL.Batteries_V2.Init();
-            var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, key: email);
-            _conn = new sql.SQLiteAsyncConnection(x);
+        public DataEncrypted() {
+           
         }
-        public static sql.SQLiteAsyncConnection GetAsyncConnection(string compositeKey)
+
+      
+        public static sql.SQLiteAsyncConnection GetAsyncConnection()
         {
-            var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, compositeKey);
+            var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, compKey);
             return new sql.SQLiteAsyncConnection(x);
         }
-        public static sql.SQLiteConnection GetConnection(string compositeKey)
+              
+        public static sql.SQLiteConnection GetSyncConnection()
         {
-            var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, compositeKey);
-            return new sql.SQLiteConnection(x);
-        }
-        public static sql.SQLiteAsyncConnection GetConnection(string email, string GUID)
-        {
-            Email = email;
-            GUID = GUID;
-            SQLitePCL.Batteries_V2.Init();
-            var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, key: compKey);
-            var conn = new sql.SQLiteAsyncConnection(x);
-            return conn;
-        }
 
-        public static sql.SQLiteConnection GetSyncConnection(string email, string GUID)
-        {
-            Email = email;
-            GUID = GUID;
             SQLitePCL.Batteries_V2.Init();
             var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, key: compKey);
             var conn = new sql.SQLiteConnection(x);
             return conn;
         }
-        public static sql.SQLiteConnection GetSyncConnection(string key)
-        {
-
-            SQLitePCL.Batteries_V2.Init();
-            var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, key);
-            var conn = new sql.SQLiteConnection(x);
-            return conn;
-        }
+       
     }
 }

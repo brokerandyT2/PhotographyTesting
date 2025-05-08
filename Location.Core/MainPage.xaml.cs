@@ -13,12 +13,11 @@ namespace Location.Core
 {
     public partial class MainPage : TabbedPage
     {
-
         private static SettingsService ss = new SettingsService();
 #if DEBUG
-        private static SubscriptionTypeEnum _subType = SubscriptionTypeEnum.Premium;
+        private static SubscriptionTypeEnum _subType = SubscriptionTypeEnum.Free;
 #else
-        private static SubscriptionTypeEnum _subType;
+    private static SubscriptionTypeEnum _subType;
 #endif
         public static bool IsLoggedIn { get; set; } = false;
 
@@ -26,45 +25,45 @@ namespace Location.Core
         internal static string AppID;
 
         public static SubscriptionTypeEnum SubscriptionType = _subType;
-        internal IAlertService alertService;
-
         public INativeStorageService nativeService;
-
-        public MainPage(INativeStorageService nativeService)
-        {
-
-
-            EmailAddress = NativeStorageService.GetSetting(MagicStrings.Email);
-            IsLoggedIn = !string.IsNullOrEmpty(EmailAddress);
-            AppID = NativeStorageService.GetSetting(MagicStrings.UniqueID);
-            if (!IsLoggedIn)
-            {
-                Navigation.PushAsync(new NavigationPage(new Login()));
-            }
-            
-        }
 
         public MainPage()
         {
-            SettingsService ss = new SettingsService();
+            InitializeComponent();
 
+            // Load email address and determine login status
+            EmailAddress = NativeStorageService.GetSetting(MagicStrings.Email);
+            IsLoggedIn = !string.IsNullOrEmpty(EmailAddress);
+            AppID = NativeStorageService.GetSetting(MagicStrings.UniqueID);
+            MainThread.BeginInvokeOnMainThread(() => {
+                RequestPermissionsAsync();
+            });
+
+            if (!IsLoggedIn)
+            {
+                // Use Device.InvokeOnMainThreadAsync for immediate execution
+                MainThread.BeginInvokeOnMainThread(async () => {
+                    await Navigation.PushAsync(new NavigationPage(new Login()));
+                });
+
+                // Return early to prevent the rest of the constructor from executing
+                return;
+            }
+            // Get subscription type
             try
             {
                 Enum.TryParse(ss.GetSettingByName(MagicStrings.SubscriptionType).Value, out _subType);
             }
             catch
             {
-
                 _subType = SubscriptionTypeEnum.Free;
             }
 
-
-            InitializeComponent();
             DataAccess da = new DataAccess();
 
-            InitAsync();
 
-            //Increment the app open counter
+
+            // Increment the app open counter
             var z = ss.GetSetting(MagicStrings.AppOpenCounter);
             var x = Convert.ToInt32(z.Value);
             z.Value = (x + 1).ToString();
@@ -76,15 +75,14 @@ namespace Location.Core
 
             var subscription = SubscriptionType;
 
-            //Make sure we have saved the systems language
+            // Make sure we have saved the systems language
             if (setting.Value != language)
             {
                 setting.Value = language;
                 var dispose = ss.Save(setting);
             }
 
-
-            //Capture the device information and save it to the settings.
+            // Capture the device information and save it to the settings
             var settingDi = ss.GetSettingByName(MagicStrings.DeviceInformation);
             var deviceInfo = new Locations.Core.Shared.ViewModels.DeviceInformation();
             var serilized = JsonConvert.SerializeObject(deviceInfo);
@@ -94,7 +92,6 @@ namespace Location.Core
                 ss.Save(settingDi);
             }
 
-            //IsLoggedIn = we have an email address (bare minimum currently)
             if (IsLoggedIn)
             {
                 AddDefault();
@@ -104,7 +101,6 @@ namespace Location.Core
 #if PHOTOGRAPHY
                     this.Children.Add(new Views.Pro.SceneEvaluation());
                     this.Children.Add(new Views.Pro.SunCalculations());
-
 #endif
                     if ((subscription == SubscriptionTypeEnum.Premium) || adSupport)
                     {
@@ -119,38 +115,45 @@ namespace Location.Core
             else
             {
                 AddDefault();
-                Navigation.PushModalAsync(new Login());
-                //Navigation.PushAsync(new NavigationPage(new Login()));
-
-
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    await Navigation.PushModalAsync(new Login());
+                });
             }
             this.Children.Add(new Location.Core.Views.Settings());
-
-
         }
 
-        public MainPage(IAlertService alertService) : this()
+        private void RequestPermissionsAsync()
         {
-            this.alertService = alertService;
-        }
+            // Make sure we're already on the main thread
+            
 
-        private async void InitAsync()
-        {
-            Dispatcher.Dispatch(async () =>
-            {
-                var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
-                var statustwo = await Permissions.RequestAsync<Permissions.Camera>();
+            // Now we're safely on the main thread
+            Task.Run(async () => {
+                try
+                {
+                    var locationStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+                    var cameraStatus = await Permissions.RequestAsync<Permissions.Camera>();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Permission request error: {ex.Message}");
+                }
             });
-
         }
+        public MainPage(INativeStorageService nativeService) : this()
+        {
+            this.nativeService = nativeService;
+        }
+
+        
 
         private void AddDefault()
         {
             this.Children.Add(new Location.Core.Views.AddLocation());
             this.Children.Add(new Location.Core.Views.ListLocations());
             this.Children.Add(new Location.Core.Views.Tips());
-
+            this.Children.Add(new Location.Core.Views.Premium.LightMeter());
         }
     }
-
 }

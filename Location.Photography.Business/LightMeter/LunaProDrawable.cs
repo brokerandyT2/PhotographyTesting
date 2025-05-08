@@ -4,6 +4,10 @@
     {
         private GraphicsView meter;
 
+        // Events for interaction state
+        public event EventHandler InteractionStarted;
+        public event EventHandler InteractionEnded;
+
         // Current angle values for each dial
         private float outerDialAngle = 0f; // ASA/ISO dial
         private float middleDialAngle = 0f; // Shutter speed dial
@@ -25,6 +29,17 @@
         private bool isDraggingInnerDial = false;
         private PointF lastDragPoint;
 
+        // Track which dial was last tapped
+        private int lastTappedDial = 1; // 0=outer, 1=middle, 2=inner (middle by default)
+
+        // Colors for normal and selected states
+        private readonly Color outerDialColor = Color.FromRgb(112, 112, 112);
+        private readonly Color outerDialSelectedColor = Color.FromRgb(90, 90, 90);
+        private readonly Color middleDialColor = Color.FromRgb(45, 90, 85);
+        private readonly Color middleDialSelectedColor = Color.FromRgb(30, 70, 65);
+        private readonly Color innerDialColor = Color.FromRgb(25, 80, 70);
+        private readonly Color innerDialSelectedColor = Color.FromRgb(15, 60, 50);
+
         // Store dial dimensions for hit testing
         private float dialCenterX;
         private float dialCenterY;
@@ -41,7 +56,7 @@
             panGesture.PanUpdated += OnPanUpdated;
             meter.GestureRecognizers.Add(panGesture);
 
-            // Add tap gesture recognizer for direct selection
+            // Add tap gesture for direct dial selection
             var tapGesture = new TapGestureRecognizer();
             tapGesture.Tapped += OnTapped;
             meter.GestureRecognizers.Add(tapGesture);
@@ -190,7 +205,8 @@
             innerDialRadius = middleDialRadius * 0.65f;
 
             // Draw outer dial (ASA/ISO) with dark background
-            canvas.FillColor = Color.FromRgb(112, 112, 112);
+            // Use the selected color if this dial was last tapped
+            canvas.FillColor = (lastTappedDial == 0) ? outerDialSelectedColor : outerDialColor;
             canvas.FillCircle(centerX, dialY, outerDialRadius);
 
             // Apply rotation to the outer dial by using save/restore
@@ -222,7 +238,29 @@
                 float textX = centerX + textRadius * (float)Math.Sin(angle);
                 float textY = dialY - textRadius * (float)Math.Cos(angle);
 
-                canvas.DrawString(asaValues[i], textX, textY, HorizontalAlignment.Center);
+                // Save canvas state to apply text rotation
+                canvas.SaveState();
+
+                // Translate to the text position
+                canvas.Translate(textX, textY);
+
+                // Rotate text to be perpendicular to the radius
+                // Subtract 90 degrees to make text perpendicular to radius (not parallel)
+                float textRotationAngle = (angle * (180f / (float)Math.PI)) - 90;
+
+                // Adjust for text orientation - keep text readable from outside the dial
+                if (textRotationAngle > 90 && textRotationAngle < 270)
+                {
+                    textRotationAngle += 180;
+                }
+
+                canvas.Rotate(textRotationAngle);
+
+                // Draw the text centered at the origin (which is now at textX, textY)
+                canvas.DrawString(asaValues[i], 0, 0, HorizontalAlignment.Center);
+
+                // Restore canvas state
+                canvas.RestoreState();
             }
 
             // Draw indicator marker for selected ASA value
@@ -240,7 +278,8 @@
             canvas.Font = null;
 
             // Middle dial (shutter speed) with teal/green color
-            canvas.FillColor = Color.FromRgb(45, 90, 85); // Teal/green color
+            // Use the selected color if this dial was last tapped
+            canvas.FillColor = (lastTappedDial == 1) ? middleDialSelectedColor : middleDialColor;
             canvas.FillCircle(centerX, dialY, middleDialRadius);
 
             // Apply rotation to the middle dial
@@ -282,7 +321,29 @@
                 float textX = centerX + textRadius * (float)Math.Sin(angle);
                 float textY = dialY - textRadius * (float)Math.Cos(angle);
 
-                canvas.DrawString(shutterSpeeds[i], textX, textY, HorizontalAlignment.Center);
+                // Save canvas state to apply text rotation
+                canvas.SaveState();
+
+                // Translate to the text position
+                canvas.Translate(textX, textY);
+
+                // Rotate text to be perpendicular to the radius
+                // Subtract 90 degrees to make text perpendicular to radius (not parallel)
+                float textRotationAngle = (angle * (180f / (float)Math.PI)) - 90;
+
+                // Adjust for text orientation - keep text readable from outside the dial
+                if (textRotationAngle > 90 && textRotationAngle < 270)
+                {
+                    textRotationAngle += 180;
+                }
+
+                canvas.Rotate(textRotationAngle);
+
+                // Draw the text centered at the origin (which is now at textX, textY)
+                canvas.DrawString(shutterSpeeds[i], 0, 0, HorizontalAlignment.Center);
+
+                // Restore canvas state
+                canvas.RestoreState();
             }
 
             // Draw indicator marker for selected shutter speed
@@ -294,7 +355,8 @@
             canvas.RestoreState();
 
             // Inner dial (F-stops) - dark center with teal ring
-            canvas.FillColor = Color.FromRgb(25, 80, 70); // Darker teal
+            // Use the selected color if this dial was last tapped
+            canvas.FillColor = (lastTappedDial == 2) ? innerDialSelectedColor : innerDialColor;
             canvas.FillCircle(centerX, dialY, innerDialRadius);
 
             // Apply rotation to the inner dial
@@ -326,7 +388,30 @@
                 // Draw f-stop value without "f/" prefix
                 float textX = centerX + textRadius * (float)Math.Sin(angle);
                 float textY = dialY - textRadius * (float)Math.Cos(angle);
-                canvas.DrawString(fStops[i], textX, textY, HorizontalAlignment.Center);
+
+                // Save canvas state to apply text rotation
+                canvas.SaveState();
+
+                // Translate to the text position
+                canvas.Translate(textX, textY);
+
+                // Rotate text to be perpendicular to the radius
+                // Subtract 90 degrees to make text perpendicular to radius (not parallel)
+                float textRotationAngle = (angle * (180f / (float)Math.PI)) - 90;
+
+                // Adjust for text orientation - keep text readable from outside the dial
+                if (textRotationAngle > 90 && textRotationAngle < 270)
+                {
+                    textRotationAngle += 180;
+                }
+
+                canvas.Rotate(textRotationAngle);
+
+                // Draw the text centered at the origin (which is now at textX, textY)
+                canvas.DrawString(fStops[i], 0, 0, HorizontalAlignment.Center);
+
+                // Restore canvas state
+                canvas.RestoreState();
             }
 
             // Draw indicator marker for selected f-stop
@@ -366,38 +451,39 @@
             canvas.FillColor = Color.FromRgb(45, 45, 45);
             canvas.FillRoundedRectangle(centerX - labelWidth / 2, labelY, labelWidth, labelHeight, 10);
 
-            // Draw the "GOSSEN LUNA-PRO" text
+            // Draw the "PixMap-PRO" text
             canvas.FontSize = 18;
             canvas.FontColor = Color.FromRgb(200, 190, 150); // Gold/cream color
             var x = new Microsoft.Maui.Graphics.Font(Microsoft.Maui.Graphics.Font.Default.ToString(), 18, FontStyleType.Normal);
             canvas.Font = x;
 
             canvas.DrawString("PixMap-PRO", centerX, labelY + labelHeight / 2 - 2, HorizontalAlignment.Center);
-
-            // Display current selected values
-            canvas.FontSize = 14;
-            string displayValues = $"{asaValues[selectedAsaIndex]} • {shutterSpeeds[selectedShutterSpeedIndex]} • f/{fStops[selectedFStopIndex]}";
-            canvas.DrawString(displayValues, centerX, labelY + labelHeight / 2 + 20, HorizontalAlignment.Center);
-
             canvas.Font = null;
         }
 
         // Tap gesture handling
         private void OnTapped(object sender, TappedEventArgs e)
         {
-            // Get the touch point
-            Point touchPoint = (Point)e.GetPosition(meter);
-            if (touchPoint == null)
+            // Get the touch point - TappedEventArgs provides GetPosition() which returns Point?
+            Point? nullablePoint = e.GetPosition((View)sender);
+            if (!nullablePoint.HasValue)
                 return;
+
+            Point touchPoint = nullablePoint.Value;
+
+            // Notify that interaction has started
+            InteractionStarted?.Invoke(this, EventArgs.Empty);
 
             // Calculate distance from touch point to dial center
             float dx = (float)touchPoint.X - dialCenterX;
             float dy = (float)touchPoint.Y - dialCenterY;
             float distance = (float)Math.Sqrt(dx * dx + dy * dy);
 
-            // Determine which dial was tapped
+            // Determine which dial was tapped and update lastTappedDial
             if (distance <= outerDialRadius && distance > middleDialRadius)
             {
+                lastTappedDial = 0; // Outer dial
+
                 // Handle tap on outer dial (ASA/ISO)
                 float angle = (float)Math.Atan2(dy, dx);
                 // Convert to positive angle (0 to 2π)
@@ -419,6 +505,8 @@
             }
             else if (distance <= middleDialRadius && distance > innerDialRadius)
             {
+                lastTappedDial = 1; // Middle dial
+
                 // Handle tap on middle dial (shutter speed)
                 float angle = (float)Math.Atan2(dy, dx);
                 if (angle < 0) angle += (float)(2 * Math.PI);
@@ -435,6 +523,8 @@
             }
             else if (distance <= innerDialRadius && distance > innerDialRadius * 0.5f)
             {
+                lastTappedDial = 2; // Inner dial
+
                 // Handle tap on inner dial (f-stop)
                 float angle = (float)Math.Atan2(dy, dx);
                 if (angle < 0) angle += (float)(2 * Math.PI);
@@ -449,6 +539,9 @@
 
                 meter?.Invalidate();
             }
+
+            // Notify that interaction has ended
+            InteractionEnded?.Invoke(this, EventArgs.Empty);
         }
 
         // Pan gesture handling
@@ -457,75 +550,43 @@
             switch (e.StatusType)
             {
                 case GestureStatus.Started:
-                    // Get the touch point
-                    var view = sender as GraphicsView;
-                    if (view != null)
-                    {
-                        // Convert the pan gesture starting point to a point relative to the dial center
-                        Point touchPoint = new Point(
-                            dialCenterX + e.TotalX,
-                            dialCenterY + e.TotalY);
+                    // Notify that interaction has started
+                    InteractionStarted?.Invoke(this, EventArgs.Empty);
 
-                        // Calculate distance from touch point to dial center
-                        float dx = (float)touchPoint.X - dialCenterX;
-                        float dy = (float)touchPoint.Y - dialCenterY;
-                        float distance = (float)Math.Sqrt(dx * dx + dy * dy);
+                    // Set the dragging state based on which dial was last tapped
+                    isDraggingOuterDial = (lastTappedDial == 0);
+                    isDraggingMiddleDial = (lastTappedDial == 1);
+                    isDraggingInnerDial = (lastTappedDial == 2);
 
-                        // Determine which dial was touched based on distance
-                        isDraggingOuterDial = false;
-                        isDraggingMiddleDial = false;
-                        isDraggingInnerDial = false;
-
-                        if (distance <= outerDialRadius && distance > middleDialRadius)
-                        {
-                            isDraggingOuterDial = true;
-                        }
-                        else if (distance <= middleDialRadius && distance > innerDialRadius)
-                        {
-                            isDraggingMiddleDial = true;
-                        }
-                        else if (distance <= innerDialRadius && distance > innerDialRadius * 0.5f)
-                        {
-                            isDraggingInnerDial = true;
-                        }
-
-                        // Save the current point for angle calculations
-                        lastDragPoint = new PointF((float)touchPoint.X, (float)touchPoint.Y);
-                    }
+                    // Store the initial position at the dial center for calculations
+                    lastDragPoint = new PointF(dialCenterX, dialCenterY);
                     break;
 
                 case GestureStatus.Running:
-                    if (!isDraggingOuterDial && !isDraggingMiddleDial && !isDraggingInnerDial)
-                        return;
-
-                    // Calculate the current touch position based on the total movement
-                    Point currentTouchPoint = new Point(
-                        dialCenterX + e.TotalX,
-                        dialCenterY + e.TotalY);
-
-                    PointF currentPoint = new PointF((float)currentTouchPoint.X, (float)currentTouchPoint.Y);
+                    // Get the current point from the pan movement (relative to where the user first touched)
+                    PointF currentPoint = new PointF(
+                        lastDragPoint.X + (float)e.TotalX,
+                        lastDragPoint.Y + (float)e.TotalY);
 
                     // Calculate angle between last point and current point relative to dial center
                     float angleDelta = CalculateAngleDelta(lastDragPoint, currentPoint);
 
                     // Apply rotation to the appropriate dial
+                    // During dragging, we move smoothly without snapping
                     if (isDraggingOuterDial)
                     {
                         outerDialAngle += angleDelta;
-                        SnapOuterDialToValue();
                     }
                     else if (isDraggingMiddleDial)
                     {
                         middleDialAngle += angleDelta;
-                        SnapMiddleDialToValue();
                     }
                     else if (isDraggingInnerDial)
                     {
                         innerDialAngle += angleDelta;
-                        SnapInnerDialToValue();
                     }
 
-                    // Update last drag point
+                    // Update last drag point for next delta calculation
                     lastDragPoint = currentPoint;
 
                     // Request redraw
@@ -534,9 +595,30 @@
 
                 case GestureStatus.Completed:
                 case GestureStatus.Canceled:
+                    // On completion, snap to nearest values
+                    if (isDraggingOuterDial)
+                    {
+                        SnapOuterDialToValue();
+                    }
+                    else if (isDraggingMiddleDial)
+                    {
+                        SnapMiddleDialToValue();
+                    }
+                    else if (isDraggingInnerDial)
+                    {
+                        SnapInnerDialToValue();
+                    }
+
+                    // Reset dragging flags
                     isDraggingOuterDial = false;
                     isDraggingMiddleDial = false;
                     isDraggingInnerDial = false;
+
+                    // Notify that interaction has ended
+                    InteractionEnded?.Invoke(this, EventArgs.Empty);
+
+                    // Request a final redraw after snapping
+                    meter?.Invalidate();
                     break;
             }
         }

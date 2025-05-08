@@ -1,4 +1,5 @@
-﻿using Locations.Core.Shared.ViewModels;
+﻿using Locations.Core.Data.Models;
+using Locations.Core.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,11 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Business.DataAccess.Interfaces
 {
-    public interface IBaseService<T> where T : class, new()
+    public interface IBaseService<T>
     {
+        void OnErrorOccurred(DataErrorEventArgs e);
+
+        event DataErrorEventHandler ErrorOccurred;
         public T Save(T model);
         public T Save(T model, bool returnNew);
         public T Get(int id);

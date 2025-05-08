@@ -29,7 +29,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GooglePlaySubscriptionCheck
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
+		azure-pipelines-1.yml = azure-pipelines-1.yml
 		build-handlebars-template.md = build-handlebars-template.md
+		ios-pipeline.yml = ios-pipeline.yml
+		TestingBuilds.yml = TestingBuilds.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EncryptedSQLite", "EncryptedSQLite\EncryptedSQLite.csproj", "{BBE0430E-8186-42EB-9683-BF2604B8911B}"
@@ -37,6 +40,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Location.Core.Logging", "Location.Core.Logging\Location.Core.Logging.csproj", "{869B0B2D-C1AD-4844-9ADC-372461D50D45}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NormalSQLite", "NormalSQLite\NormalSQLite.csproj", "{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Location.Core.Helpers", "Location.Core.Helpers\Location.Core.Helpers.csproj", "{F2023512-4A15-4A56-9546-B56FCAC721E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -162,6 +167,14 @@ Global
 		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Testing|Any CPU.ActiveCfg = Debug|Any CPU
 		{759A1CE1-02DC-845C-5A5B-28EB599ACF1F}.Testing|Any CPU.Build.0 = Debug|Any CPU
+		{F2023512-4A15-4A56-9546-B56FCAC721E8}.Andy|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2023512-4A15-4A56-9546-B56FCAC721E8}.Andy|Any CPU.Build.0 = Debug|Any CPU
+		{F2023512-4A15-4A56-9546-B56FCAC721E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2023512-4A15-4A56-9546-B56FCAC721E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2023512-4A15-4A56-9546-B56FCAC721E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2023512-4A15-4A56-9546-B56FCAC721E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2023512-4A15-4A56-9546-B56FCAC721E8}.Testing|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2023512-4A15-4A56-9546-B56FCAC721E8}.Testing|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

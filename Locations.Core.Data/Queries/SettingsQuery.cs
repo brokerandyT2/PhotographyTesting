@@ -2,7 +2,7 @@
 using Locations.Core.Shared;
 using Locations.Core.Shared.StorageSvc;
 using Locations.Core.Shared.ViewModels;
-using NormalSQLite;
+
 
 namespace  Locations.Core.Data.Queries
 {
@@ -21,14 +21,14 @@ namespace  Locations.Core.Data.Queries
         /// </summary>
         /// <param name="alertServ"></param>
         /// <param name="loggerService"></param>
-        public SettingsQuery() :base()
+        public SettingsQuery() 
         {
-            dataB = DataEncrypted.GetAsyncConnection(KEY);
+           // dataB = DataEncrypted.GetAsyncConnection();
         }
 
         public SettingsQuery(bool v)
         {
-            dataB = DataUnEncrypted.GetConnection();
+           // dataB = DataUnEncrypted.GetConnection();
         }
 
         /// <summary>

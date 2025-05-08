@@ -70,7 +70,7 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Providing your email address will allow us to backup your data to the cloud.  This is needed so that if you change devices, we can restore your data..
+        ///   Looks up a localized string similar to Providing your email address will allow us to backup your data to the cloud.  This is needed so that if you change devices, we can restore your data.  In addition, your email address is used to help encrypt your database..
         /// </summary>
         internal static string AddEmail {
             get {

@@ -40,4 +40,8 @@
     <Folder Include="Customizations\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Location.Core.Helpers\Location.Core.Helpers.csproj" />
+  </ItemGroup>
+
 </Project>

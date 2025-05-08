@@ -7,7 +7,7 @@ namespace Locations.Core.Data.Queries
     public class WeatherQuery<T> : QueryBase<T> where T : WeatherViewModel, new()
     {
         SettingsQuery<SettingViewModel> settings;
-        public WeatherQuery() : base()
+        public WeatherQuery() 
         {
             settings = new SettingsQuery<SettingViewModel>();
             

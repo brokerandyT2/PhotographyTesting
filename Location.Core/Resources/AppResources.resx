@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AddEmail" xml:space="preserve">
-    <value>Providing your email address will allow us to backup your data to the cloud.  This is needed so that if you change devices, we can restore your data.</value>
+    <value>Providing your email address will allow us to backup your data to the cloud.  This is needed so that if you change devices, we can restore your data.  In addition, your email address is used to help encrypt your database.</value>
   </data>
   <data name="AddLocationTutorial" xml:space="preserve">
     <value>Add Location Tutorial</value>

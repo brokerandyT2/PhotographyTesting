@@ -1,9 +1,12 @@
-﻿using Locations.Core.Business.DataAccess;
+﻿using EncryptedSQLite;
+using Locations.Core.Business.DataAccess;
+using Locations.Core.Business.StorageSvc;
 using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Enums;
 using Locations.Core.Shared.ViewModels;
 using Microsoft.VisualBasic;
+using System.Data.Common;
 using System.Net.Mail;
 using static Locations.Core.Shared.Enums.SubscriptionType;
 
@@ -25,6 +28,17 @@ namespace Locations.Core.Business
            string hemisphere, string tempformat, string dateformat, string timeformat, string winddirection, string email)
            
         {
+            var con = new EncryptedSQLite.DataEncrypted();
+            var _connection = DataEncrypted.GetAsyncConnection();
+            var aa = _connection.CreateTableAsync<SettingViewModel>().Result;
+            var ba = _connection.CreateTableAsync<WeatherViewModel>().Result;
+            var ca = _connection.CreateTableAsync<TipViewModel>().Result;
+            var da = _connection.CreateTableAsync<TipTypeViewModel>().Result;
+            var ea = _connection.CreateTableAsync<LocationViewModel>().Result;
+            var fa = _connection.CreateTableAsync<Log>().Result;
+
+            var guid = NativeStorageService.GetSetting(MagicStrings.UniqueID).ToString();
+
 
             SettingViewModel vm = new SettingViewModel();
             List<TipTypeViewModel> types = new List<TipTypeViewModel>();
@@ -41,8 +55,8 @@ namespace Locations.Core.Business
             types.Add(new TipTypeViewModel { Name = "Golden Hour", I8n = MagicStrings.English_for_i8n });
             types.Add(new TipTypeViewModel { Name = "Sunset", I8n = MagicStrings.English_for_i8n });
 
-            TipTypesQuery<TipTypeViewModel> tipTypesQuery = new TipTypesQuery<TipTypeViewModel>(true);
-            TipQuery<TipViewModel> tq = new TipQuery<TipViewModel>(true);
+            TipTypesQuery<TipTypeViewModel> tipTypesQuery = new TipTypesQuery<TipTypeViewModel>();
+            TipQuery<TipViewModel> tq = new TipQuery<TipViewModel>();
             int i = 1;
             foreach (var type in types)
             {
@@ -59,7 +73,7 @@ namespace Locations.Core.Business
             var loc3 = new LocationViewModel() { Title = "Golden Gate Bridge", Description = "The Golden Gate Bridge is a suspension bridge spanning the Golden Gate strait, the one-mile-wide (1.6 km) channel between San Francisco Bay and the Pacific Ocean. The strait is the entrance to San Francisco Bay from the Pacific Ocean. The bridge connects the city of San Francisco, California, to Marin County, carrying both U.S. Route 101 and California State Route 1 across the strait.", Lattitude = 37.8199, Longitude = -122.4783, Timestamp = DateTime.Now.AddDays(-6), Photo = "Resources/Images/ggbridge.jpg" };
 
             var loc4 = new LocationViewModel() { Title = "Gateway Arch", Description = "The Gateway Arch is a 630-foot (192 m) monument in St. Louis, Missouri, that commemorates Thomas Jefferson and the westward expansion of the United States. The arch is the centerpiece of the Gateway Arch National Park and is the tallest arch in the world.", Lattitude = 38.6247, Longitude = -90.1848, Timestamp = DateTime.Now.AddDays(-35), Photo = "Resources/Images/stlarch.jpg" };
-            LocationsService ls = new LocationsService(true);
+            LocationsService ls = new LocationsService();
 
             var a = ls.SaveSettingWithObjectReturn(loc);
             var b = ls.SaveSettingWithObjectReturn(loc2);
@@ -67,12 +81,11 @@ namespace Locations.Core.Business
             var d = ls.SaveSettingWithObjectReturn(loc4);
 
             List<SettingViewModel> list = new List<SettingViewModel>();
-            SettingsService ss = new SettingsService(true);
-            var guid = Guid.NewGuid().ToString();
+            SettingsService ss = new SettingsService();
 
 
-            SecureStorage.SetAsync(MagicStrings.UniqueID, guid);
-            SecureStorage.SetAsync(MagicStrings.Email, email);
+
+
 
 
 
@@ -153,8 +166,7 @@ namespace Locations.Core.Business
                 var z = ss.SaveSettingWithObjectReturn(x);
             }
 
-     ;
-
+     
         }
 
     }

@@ -1,5 +1,6 @@
 ﻿using EncryptedSQLite;
 using Locations.Core.Shared;
+using Locations.Core.Shared.StorageSvc;
 using Locations.Core.Shared.ViewModels;
 using NormalSQLite;
 namespace  Locations.Core.Data.Queries
@@ -18,14 +19,17 @@ namespace  Locations.Core.Data.Queries
         public TipQuery() : base()
         {
             SettingsQuery<SettingViewModel> settings = new SettingsQuery<SettingViewModel>();
-            var addy = settings.GetItemByString<SettingViewModel>(MagicStrings.Email).Value;
+            var addy = NativeStorageService.GetSetting(MagicStrings.Email);
 
             if (string.IsNullOrEmpty(addy))
             {
                 //loggerService.LogWarning($"Email is not set.  Cannot use encrypted database. Email Address {addy}");
                 throw new ArgumentException("Email is not set.  Cannot use encrypted database.");
             }
-            dataB = DataEncrypted.GetAsyncConnection(KEY);
+            else
+            {
+                dataB = DataEncrypted.GetAsyncConnection(KEY);
+            }
         }
 
         public TipQuery(bool v)

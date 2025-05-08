@@ -33,14 +33,12 @@ public partial class Login : ContentPage
         alertServ = alert;
 
         InitializeComponent();
+        GetSetting();
     }
-
-
 
     private void HemisphereSwitch_Toggled(object sender, ToggledEventArgs e)
     {
         ((SettingsViewModel)BindingContext).Hemisphere.Value = e.Value ? MagicStrings.North : MagicStrings.South;
-
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
@@ -49,6 +47,7 @@ public partial class Login : ContentPage
 
         GetSetting();
     }
+
     private void TimeSwitch_Toggled(object sender, ToggledEventArgs e)
     {
         ((SettingsViewModel)BindingContext).TimeFormat.Value = e.Value ? MagicStrings.USTimeformat_Pattern : MagicStrings.InternationalTimeFormat_Pattern;
@@ -61,6 +60,10 @@ public partial class Login : ContentPage
 
     private void GetSetting()
     {
+        if (emailAddress != null)
+        {
+            emailAddress.TextChanged += EmailAddress_TextChanged;
+        }
 
         SettingsViewModel svm = new SettingsViewModel();
         svm.Hemisphere = new SettingViewModel();
@@ -84,44 +87,107 @@ public partial class Login : ContentPage
         {
             WindDirection.Text = AppResources.WithWind.FirstCharToUpper();
         }
-        var x = new Style(Content.GetType());
+    }
 
+    private void EmailAddress_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        // Update validation message visibility when text changes
+        UpdateValidationMessageVisibility();
+    }
 
+    private void UpdateValidationMessageVisibility()
+    {
+        var validationBehavior = emailAddress.Behaviors.OfType<CommunityToolkit.Maui.Behaviors.TextValidationBehavior>().FirstOrDefault();
+        bool isValid = validationBehavior?.IsValid ?? false;
+        bool hasText = !string.IsNullOrWhiteSpace(emailAddress.Text);
 
-        var entry = new Entry();
+        // Show validation message only if there's text AND it's invalid
+        // OR if save button was pressed (tracked by a separate flag)
+        emailValidationMessage.IsVisible = (hasText && !isValid) || _saveAttempted;
 
-        var validStyle = new Style(typeof(Entry));
-        validStyle.Setters.Add(new Setter
+        // You could customize the message based on the error
+        if (string.IsNullOrWhiteSpace(emailAddress.Text) && _saveAttempted)
         {
-            Property = Entry.TextColorProperty,
-            Value = Colors.Green
-        });
-
-        var invalidStyle = new Style(typeof(Entry));
-        invalidStyle.Setters.Add(new Setter
+            emailValidationMessage.Text = "Email is required";
+        }
+        else if (!isValid)
         {
-            Property = Entry.TextColorProperty,
-            Value = Colors.Red
-        });
+            emailValidationMessage.Text = "Please enter a valid email address";
+        }
+    }
 
-        var textValidationBehavior = new TextValidationBehavior
+    // Add a field to track if save was attempted
+    private bool _saveAttempted = false;
+
+    private async void save_Pressed(object sender, EventArgs e)
+    {
+        _saveAttempted = true;
+
+        var validationBehavior = emailAddress.Behaviors.OfType<CommunityToolkit.Maui.Behaviors.TextValidationBehavior>().FirstOrDefault();
+        bool isValid = validationBehavior?.IsValid ?? false;
+        bool hasText = !string.IsNullOrWhiteSpace(emailAddress.Text);
+
+        UpdateValidationMessageVisibility();
+
+        if (isValid && hasText)
         {
-            InvalidStyle = invalidStyle,
-            ValidStyle = validStyle,
-            Flags = ValidationFlags.ValidateOnValueChanged,
-            MinimumLength = 1,
-            MaximumLength = 10,
-            RegexPattern = MagicStrings.RegEx_Email
-        };
+            // Reset the save attempted flag
+            _saveAttempted = false;
 
-        entry.Behaviors.Add(textValidationBehavior);
+            // Extract settings values for clarity
+            string hemisphere = HemisphereSwitch.IsToggled ? MagicStrings.North : MagicStrings.South;
+            string temperatureFormat = TempFormatSwitch.IsToggled ? MagicStrings.Fahrenheit : MagicStrings.Celsius;
+            string dateFormat = DateFormat.IsToggled ? MagicStrings.USDateFormat : MagicStrings.InternationalFormat;
+            string timeFormat = TimeSwitch.IsToggled ? MagicStrings.USTimeformat_Pattern : MagicStrings.InternationalTimeFormat_Pattern;
+            string windDirection = WindDirectionSwitch.IsToggled ? MagicStrings.TowardsWind : MagicStrings.WithWind;
+            string email = emailAddress.Text;
 
-        Content = entry;
+            // Show processing indicator
+            processingOverlay.IsVisible = true;
+          await  NativeStorageService.SaveSetting(MagicStrings.Email, email);
+          await  NativeStorageService.SaveSetting(MagicStrings.UniqueID, Guid.NewGuid().ToString());
+
+            try
+            {
+                // Run DataPopulation on a background thread
+                await Task.Run(() => {
+                    DataPopulation.PopulateData(
+                        hemisphere,
+                        temperatureFormat,
+                        dateFormat,
+                        timeFormat,
+                        windDirection,
+                        email
+                    ); 
+                    Task.Delay(3000).Wait();
+                });
+
+                // Navigate to the main page on the UI thread
+                await Navigation.PushAsync(new NavigationPage(new MainPage()));
+            }
+            catch (Exception ex)
+            {
+                // Handle any errors
+                string errorMessage = "Error processing data";
+                if (AppResources.ResourceManager.GetString("ErrorProcessingData") != null)
+                {
+                    errorMessage = AppResources.ResourceManager.GetString("ErrorProcessingData");
+                }
+
+                await DisplayAlert(AppResources.Error,
+                                  $"{errorMessage}: {ex.Message}",
+                                  AppResources.OK);
+            }
+            finally
+            {
+                // Hide processing indicator
+                processingOverlay.IsVisible = false;
+            }
+        }
     }
 
     private void WindDirectionSwitch_Toggled(object sender, ToggledEventArgs e)
     {
-
         ((SettingsViewModel)BindingContext).WindDirection.Value = e.Value ? MagicStrings.TowardsWind : MagicStrings.WithWind;
         if (((SettingsViewModel)BindingContext).WindDirection.Value == MagicStrings.TowardsWind)
         {
@@ -131,71 +197,10 @@ public partial class Login : ContentPage
         {
             WindDirection.Text = AppResources.WithWind.FirstCharToUpper();
         }
-
     }
 
     private void TempFormatSwitch_Toggled(object sender, ToggledEventArgs e)
     {
         ((SettingsViewModel)BindingContext).TemperatureFormat.Value = e.Value ? MagicStrings.Fahrenheit : MagicStrings.Celsius;
-
-    }
-
-    private void save_Pressed(object sender, EventArgs e)
-    {
-        /* Validation i
-         * 
-         * 
-         * is 
-         * 
-         * 
-         * not 
-         * 
-         * 
-         * working */
-        var validationBehavior = emailAddress.Behaviors.OfType<TextValidationBehavior>().FirstOrDefault();
-        bool isValid = validationBehavior?.IsValid ?? false;
-
-        if (isValid)
-        {
-            //  DataPopulation.PopulateData(HemisphereSwitch.IsToggled ? MagicStrings.North : MagicStrings.South,                TempFormatSwitch.IsToggled ? MagicStrings.Fahrenheit : MagicStrings.Celsius,           DateFormat.IsToggled ? MagicStrings.USTimeformat_Pattern : MagicStrings.InternationalFormat,TimeSwitch.IsToggled ? MagicStrings.USTimeformat_Pattern : MagicStrings.InternationalTimeFormat_Pattern, WindDirectionSwitch.IsToggled ? MagicStrings.TowardsWind : MagicStrings.WithWind, emailAddress.Text);
-            //  Navigation.PushAsync(new NavigationPage(new MainPage()));
-        }
-
-
-
-
-
-        if (!string.IsNullOrEmpty(emailAddress.Text))
-        {
-            UpdateEmail();
-           
-        }
-    }
-
-
-
-    private void UpdateEmail()
-    {
-
-        var x = ss.GetSettingByName(MagicStrings.Email);
-        x.Value = emailAddress.Text;
-        SecureStorage.SetAsync(MagicStrings.Email, x.Value);
-        try
-        {
-            ss.UpdateSetting(x);
-            if (x.IsError)
-            {
-                DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
-            }
-        }
-        catch (Exception ex)
-        {
-            DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
-
-        }
-        if (x.IsError)
-        {
-            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
-        }
     }
 }

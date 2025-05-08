@@ -13,72 +13,106 @@
     <ContentPage.Resources>
         <Style x:Key="ValidEntryStyle" TargetType="Entry">
             <Setter Property="TextColor" Value="Green" />
+            <Setter Property="BackgroundColor" Value="#E8F5E9" />
+            <!-- Light green background -->
         </Style>
         <Style x:Key="InvalidEntryStyle" TargetType="Entry">
             <Setter Property="TextColor" Value="Red" />
+            <Setter Property="BackgroundColor" Value="#FFEBEE" />
+            <!-- Light red background -->
         </Style>
     </ContentPage.Resources>
-    <VerticalStackLayout 
-        Padding="30"
-        Spacing="20"
-        VerticalOptions="Center">
-        
-        <Label 
-            Text="{x:Static strings:AppResources.Welcome}"
-            FontSize="20"
-            HorizontalOptions="Center" />
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+
+    <Grid>
+        <VerticalStackLayout 
+            Padding="30"
+            Spacing="20"
+            VerticalOptions="Center">
+
+            <Label 
+                Text="{x:Static strings:AppResources.Welcome}"
+                FontSize="20"
+                HorizontalOptions="Center" />
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
 
-            <Label Text="{x:Static strings:AppResources.SwitchHemisphere}" Grid.Row="1" Grid.Column="0"></Label>
-            <Label Text="{Binding Hemisphere.Value}" Grid.Row="1" Grid.Column="1"></Label>
-            <Switch x:Name="HemisphereSwitch" IsToggled="{Binding HemisphereNorth}" Grid.Row="1" Grid.Column="2" Toggled="HemisphereSwitch_Toggled"></Switch>
+                <Label Text="{x:Static strings:AppResources.SwitchHemisphere}" Grid.Row="1" Grid.Column="0"></Label>
+                <Label Text="{Binding Hemisphere.Value}" Grid.Row="1" Grid.Column="1"></Label>
+                <Switch x:Name="HemisphereSwitch" IsToggled="{Binding HemisphereNorth}" Grid.Row="1" Grid.Column="2" Toggled="HemisphereSwitch_Toggled"></Switch>
 
-            <Label Text="{x:Static strings:AppResources.SwitchClockType}" Grid.Row="2" Grid.Column="0"></Label>
-            <Label Text="{Binding TimeFormat.Value}" Grid.Row="2" Grid.Column="1"></Label>
-            <Switch x:Name="TimeSwitch" IsToggled="{Binding TimeFormatToggle}" Grid.Row="2" Grid.Column="2" Toggled="TimeSwitch_Toggled"></Switch>
+                <Label Text="{x:Static strings:AppResources.SwitchClockType}" Grid.Row="2" Grid.Column="0"></Label>
+                <Label Text="{Binding TimeFormat.Value}" Grid.Row="2" Grid.Column="1"></Label>
+                <Switch x:Name="TimeSwitch" IsToggled="{Binding TimeFormatToggle}" Grid.Row="2" Grid.Column="2" Toggled="TimeSwitch_Toggled"></Switch>
 
-            <Label Text="{x:Static strings:AppResources.SwitchDateFormat}" Grid.Row="3" Grid.Column="0"></Label>
-            <Label Text="{Binding DateFormat.Value}" Grid.Row="3" Grid.Column="1"></Label>
-            <Switch x:Name="DateFormat" IsToggled="{Binding DateFormatToggle}" Grid.Row="3" Grid.Column="2" Toggled="DateFormat_Toggled"></Switch>
+                <Label Text="{x:Static strings:AppResources.SwitchDateFormat}" Grid.Row="3" Grid.Column="0"></Label>
+                <Label Text="{Binding DateFormat.Value}" Grid.Row="3" Grid.Column="1"></Label>
+                <Switch x:Name="DateFormat" IsToggled="{Binding DateFormatToggle}" Grid.Row="3" Grid.Column="2" Toggled="DateFormat_Toggled"></Switch>
 
-            <Label Text="{x:Static strings:AppResources.WindDirection}" Grid.Row="4" Grid.Column="0"></Label>
-            <Label x:Name="WindDirection" Text="" Grid.Row="4" Grid.Column="1"></Label>
-            <Switch x:Name="WindDirectionSwitch" IsToggled="{Binding WindDirectionBoolean}" Grid.Row="4" Grid.Column="2" Toggled="WindDirectionSwitch_Toggled"></Switch>
+                <Label Text="{x:Static strings:AppResources.WindDirection}" Grid.Row="4" Grid.Column="0"></Label>
+                <Label x:Name="WindDirection" Text="" Grid.Row="4" Grid.Column="1"></Label>
+                <Switch x:Name="WindDirectionSwitch" IsToggled="{Binding WindDirectionBoolean}" Grid.Row="4" Grid.Column="2" Toggled="WindDirectionSwitch_Toggled"></Switch>
 
-            <Label Text="{x:Static strings:AppResources.TemperatureFormat}" Grid.Row="5" Grid.Column="0"></Label>
-            <Label  Text="{Binding TemperatureFormat.Value}" Grid.Row="5" Grid.Column="1"></Label>
-            <Switch x:Name="TempFormatSwitch" IsToggled="{Binding TemperatureFormatToggle}" Grid.Row="5" Grid.Column="2" Toggled="TempFormatSwitch_Toggled"></Switch>
-            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="6" Grid.ColumnSpan="3" Grid.Column="0"/>
-            <Label Text="{x:Static strings:AppResources.ProvideEmail}" Grid.Row="7" Grid.ColumnSpan="3" Grid.Column="0"/>
-            <Entry x:Name="emailAddress" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3">
-                <Entry.Behaviors>
-                    <toolkit:EmailValidationBehavior 
-            InvalidStyle="{StaticResource InvalidEntryStyle}"
-            ValidStyle="{StaticResource ValidEntryStyle}"
-            Flags="ValidateOnValueChanged" />
-                </Entry.Behaviors>
-            </Entry>
-            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="9" Grid.ColumnSpan="3" Grid.Column="0"/>
-            <Button x:Name="save" Text="{x:Static strings:AppResources.Save}" Grid.Row="10" Grid.ColumnSpan="3" Grid.Column="0" Pressed="save_Pressed"/>
+                <Label Text="{x:Static strings:AppResources.TemperatureFormat}" Grid.Row="5" Grid.Column="0"></Label>
+                <Label  Text="{Binding TemperatureFormat.Value}" Grid.Row="5" Grid.Column="1"></Label>
+                <Switch x:Name="TempFormatSwitch" IsToggled="{Binding TemperatureFormatToggle}" Grid.Row="5" Grid.Column="2" Toggled="TempFormatSwitch_Toggled"></Switch>
+                <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="6" Grid.ColumnSpan="3" Grid.Column="0"/>
+                <Label Text="{x:Static strings:AppResources.ProvideEmail}" Grid.Row="7" Grid.ColumnSpan="3" Grid.Column="0"/>
+                <Entry x:Name="emailAddress" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3">
+                    <Entry.Behaviors>
+                        <toolkit:TextValidationBehavior 
+                InvalidStyle="{StaticResource InvalidEntryStyle}"
+                ValidStyle="{StaticResource ValidEntryStyle}"
+                MinimumLength="1"
+                RegexPattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                Flags="ValidateOnValueChanged" />
+                    </Entry.Behaviors>
+                </Entry>
+                <Label x:Name="emailValidationMessage" 
+           Text="Please enter a valid email address" 
+           TextColor="Red"
+           IsVisible="false"
+           Grid.Row="9" 
+           Grid.Column="0" 
+           Grid.ColumnSpan="3" />
+                <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="10" Grid.ColumnSpan="3" Grid.Column="0"/>
+                <Button x:Name="save" Text="{x:Static strings:AppResources.Save}" Grid.Row="11" Grid.ColumnSpan="3" Grid.Column="0" Pressed="save_Pressed"/>
+            </Grid>
+        </VerticalStackLayout>
+
+        <!-- Processing overlay -->
+        <Grid x:Name="processingOverlay" 
+              IsVisible="false"
+              BackgroundColor="#80000000">
+            <VerticalStackLayout VerticalOptions="Center" 
+                                 HorizontalOptions="Center">
+                <ActivityIndicator x:Name="loadingIndicator"
+                                  IsRunning="True" 
+                                  Color="White" 
+                                  HeightRequest="50" 
+                                  WidthRequest="50"/>
+                <Label Text="Processing data, please wait..." 
+                       TextColor="White" 
+                       Margin="0,10,0,0"/>
+            </VerticalStackLayout>
         </Grid>
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>

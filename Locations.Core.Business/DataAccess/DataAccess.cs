@@ -30,7 +30,7 @@ namespace Locations.Core.Business.DataAccess
             _connection = EncryptedSQLite.DataEncrypted.GetAsyncConnection(KEY);
                 
            
-                CheckForDB();
+               
             
         }
 

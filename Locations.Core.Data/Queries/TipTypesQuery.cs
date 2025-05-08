@@ -1,7 +1,8 @@
 ﻿using EncryptedSQLite;
 using Locations.Core.Shared;
+using Locations.Core.Shared.StorageSvc;
 using Locations.Core.Shared.ViewModels;
-using NormalSQLite;
+
 
 namespace Locations.Core.Data.Queries
 {
@@ -14,18 +15,13 @@ namespace Locations.Core.Data.Queries
         /// </summary>
         /// <param name="alertServ"></param>
         /// <param name="loggerService"></param>
-        public TipTypesQuery() : base()
+        public TipTypesQuery() 
         {
-            dataB = DataEncrypted.GetAsyncConnection(KEY);
+            
+
+            dataB = DataEncrypted.GetAsyncConnection();
         }
-        /// <summary>
-        /// Used for initial setup, have to use NON encrypted DB to start
-        /// </summary>
-        /// <param name="v"></param>
-        public TipTypesQuery(bool v)
-        {
-           dataB = DataUnEncrypted.GetConnection();
-        }
+        
 
         public override T GetItem<T>(int id)
         {

@@ -29,7 +29,8 @@ namespace Location.Photography.Data.Queries
 
         public DatabaseBase():base()
         {
-
+            email = NativeStorageService.GetSetting(MagicStrings.Email);
+             guid = NativeStorageService.GetSetting(MagicStrings.UniqueID);
             AlertRaised += OnAlertRaised;
             getKey();
             dataSync = EncryptedSQLite.DataEncrypted.GetSyncConnection(KEY);
