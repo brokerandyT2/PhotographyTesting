@@ -104,11 +104,20 @@ namespace Locations.Core.Shared.ViewModels
             _geolocationService = geolocationService;
 
             // Subscribe to service events for error handling
+            // Cast the event handlers to match the expected delegate type
             if (_geolocationService != null)
-                _geolocationService.ErrorOccurred += OnServiceErrorOccurred;
+                _geolocationService.ErrorOccurred += (sender, e) => OnServiceErrorOccurred(sender,
+                    new OperationErrorEventArgs(
+                        Locations.Core.Shared.ViewModels.OperationErrorSource.GeolocationService,
+                        e.Message,
+                        e.Exception));
 
             if (_mediaService != null)
-                _mediaService.ErrorOccurred += OnServiceErrorOccurred;
+                _mediaService.ErrorOccurred += (sender, e) => OnServiceErrorOccurred(sender,
+                    new OperationErrorEventArgs(
+                        Locations.Core.Shared.ViewModels.OperationErrorSource.MediaService,
+                        e.Message,
+                        e.Exception));
         }
 
         /// <summary>
@@ -178,7 +187,7 @@ namespace Locations.Core.Shared.ViewModels
                 {
                     VmErrorMessage = result.ErrorMessage ?? "Failed to save location";
                     OnErrorOccurred(new OperationErrorEventArgs(
-                        result.Source,
+                        Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
                         VmErrorMessage,
                         result.Exception));
                 }
@@ -187,7 +196,7 @@ namespace Locations.Core.Shared.ViewModels
             {
                 VmErrorMessage = $"Error saving location: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
-                    OperationErrorSource.Unknown,
+                    Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
                     VmErrorMessage,
                     ex));
             }
@@ -218,7 +227,7 @@ namespace Locations.Core.Shared.ViewModels
                 {
                     VmErrorMessage = "Failed to delete location";
                     OnErrorOccurred(new OperationErrorEventArgs(
-                        OperationErrorSource.Unknown,
+                        Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
                         VmErrorMessage));
                 }
                 else
@@ -231,7 +240,7 @@ namespace Locations.Core.Shared.ViewModels
             {
                 VmErrorMessage = $"Error deleting location: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
-                    OperationErrorSource.Unknown,
+                    Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
                     VmErrorMessage,
                     ex));
             }
@@ -264,7 +273,7 @@ namespace Locations.Core.Shared.ViewModels
                 {
                     VmErrorMessage = result.ErrorMessage ?? "Failed to capture photo";
                     OnErrorOccurred(new OperationErrorEventArgs(
-                        result.Source,
+                        Locations.Core.Shared.ViewModels.OperationErrorSource.MediaService,
                         VmErrorMessage));
                 }
             }
@@ -272,7 +281,7 @@ namespace Locations.Core.Shared.ViewModels
             {
                 VmErrorMessage = $"Error taking photo: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
-                    OperationErrorSource.Unknown,
+                    Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
                     VmErrorMessage,
                     ex));
             }
@@ -305,7 +314,7 @@ namespace Locations.Core.Shared.ViewModels
                 {
                     VmErrorMessage = result.ErrorMessage ?? "Failed to pick photo";
                     OnErrorOccurred(new OperationErrorEventArgs(
-                        result.Source,
+                        Locations.Core.Shared.ViewModels.OperationErrorSource.MediaService,
                         VmErrorMessage));
                 }
             }
@@ -313,7 +322,7 @@ namespace Locations.Core.Shared.ViewModels
             {
                 VmErrorMessage = $"Error picking photo: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
-                    OperationErrorSource.Unknown,
+                    Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
                     VmErrorMessage,
                     ex));
             }
@@ -341,13 +350,14 @@ namespace Locations.Core.Shared.ViewModels
                 if (result.IsSuccess)
                 {
                     VmIsLocationTracking = true;
-                    _geolocationService.LocationChanged += OnLocationChanged;
+                    // Use lambda to adapt the event handler
+                    _geolocationService.LocationChanged += LocationChangedHandler;
                 }
                 else
                 {
                     VmErrorMessage = result.ErrorMessage ?? "Failed to start location tracking";
                     OnErrorOccurred(new OperationErrorEventArgs(
-                        result.Source,
+                        Locations.Core.Shared.ViewModels.OperationErrorSource.GeolocationService,
                         VmErrorMessage));
                 }
             }
@@ -355,7 +365,7 @@ namespace Locations.Core.Shared.ViewModels
             {
                 VmErrorMessage = $"Error starting location tracking: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
-                    OperationErrorSource.Unknown,
+                    Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
                     VmErrorMessage,
                     ex));
             }
@@ -380,14 +390,14 @@ namespace Locations.Core.Shared.ViewModels
 
                 await _geolocationService.StopTrackingAsync();
 
-                _geolocationService.LocationChanged -= OnLocationChanged;
+                _geolocationService.LocationChanged -= LocationChangedHandler;
                 VmIsLocationTracking = false;
             }
             catch (Exception ex)
             {
                 VmErrorMessage = $"Error stopping location tracking: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
-                    OperationErrorSource.Unknown,
+                    Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
                     VmErrorMessage,
                     ex));
             }
@@ -398,9 +408,23 @@ namespace Locations.Core.Shared.ViewModels
         }
 
         /// <summary>
+        /// Handler for location changes that adapts to expected delegate type
+        /// </summary>
+        private void LocationChangedHandler(object sender, Locations.Core.Shared.ViewModelServices.LocationChangedEventArgs e)
+        {
+            // Convert the service event args to our local type
+            // Only passing the properties that exist in both versions
+            OnLocationChanged(sender, new Locations.Core.Shared.ViewModels.LocationChangedEventArgs(
+                e.Latitude,
+                e.Longitude
+            // Skip other properties that don't exist in the target class
+            ));
+        }
+
+        /// <summary>
         /// Handle location changes from the geolocation service
         /// </summary>
-        private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+        private void OnLocationChanged(object? sender, Locations.Core.Shared.ViewModels.LocationChangedEventArgs e)
         {
             Lattitude = Math.Round(e.Latitude, 6);
             Longitude = Math.Round(e.Longitude, 6);

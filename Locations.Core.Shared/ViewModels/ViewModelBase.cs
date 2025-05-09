@@ -1,29 +1,46 @@
-﻿using Locations.Core.Shared.ViewModels.Interface;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Locations.Core.Shared.ViewModels.Interface;
+using Locations.Core.Shared.ViewModelServices;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Locations.Core.Shared.ViewModels
 {
-    public abstract class ViewModelBase : IDTOBase
+    public abstract class ViewModelBase : ObservableObject, IDTOBase
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public ICommand RefreshCommand { get; private set; }
-
-        public ViewModelBase()
+        // UI state properties
+        private bool _vmIsBusy;
+        public bool VmIsBusy
         {
-            RefreshCommand = new Command(async () => {
-                IsRefreshing = true;
-                // Add your refresh logic here
-                await LoadDataAsync(); // Example: Load updated data
-                IsRefreshing = false;
-            });
+            get => _vmIsBusy;
+            set
+            {
+                _vmIsBusy = value;
+                OnPropertyChanged(nameof(VmIsBusy));
+            }
         }
+
+        private string _vmErrorMessage = string.Empty;
+        public string VmErrorMessage
+        {
+            get => _vmErrorMessage;
+            set
+            {
+                _vmErrorMessage = value;
+                OnPropertyChanged(nameof(VmErrorMessage));
+            }
+        }
+
+        // Event for error handling
+        public event EventHandler<OperationErrorEventArgs>? ErrorOccurred;
+
+        // Commands
+        public ICommand RefreshCommand { get; }
 
         private bool _isRefreshing;
         public bool IsRefreshing
@@ -32,19 +49,45 @@ namespace Locations.Core.Shared.ViewModels
             set
             {
                 _isRefreshing = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsRefreshing));
             }
         }
 
-        private async Task LoadDataAsync()
+        protected ViewModelBase()
         {
-            // Simulate loading data
-            await Task.Delay(2000);
+            RefreshCommand = new AsyncRelayCommand(LoadDataAsync, () => !VmIsBusy);
         }
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual async Task LoadDataAsync()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            try
+            {
+                VmIsBusy = true;
+                VmErrorMessage = string.Empty;
+                IsRefreshing = true;
+
+                // Actual data loading should be implemented in derived classes
+                await Task.Delay(100);
+            }
+            catch (Exception ex)
+            {
+                VmErrorMessage = $"Error loading data: {ex.Message}";
+                OnErrorOccurred(new OperationErrorEventArgs(
+                    OperationErrorSource.Unknown,
+                    VmErrorMessage,
+                    ex));
+            }
+            finally
+            {
+                VmIsBusy = false;
+                IsRefreshing = false;
+            }
+        }
+
+        // Method to handle error bubbling
+        protected virtual void OnErrorOccurred(OperationErrorEventArgs e)
+        {
+            ErrorOccurred?.Invoke(this, e);
         }
     }
 }

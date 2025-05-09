@@ -1,37 +1,50 @@
-﻿using Locations.Core.Shared.DTO.Interfaces;
-using Locations.Core.Shared.ViewModels.Interface;
-using System;
-using System.ComponentModel;
-using SQLite;
-using CommunityToolkit.Mvvm.ComponentModel;
-using Newtonsoft.Json.Linq;
-using System.Xml.Linq;
+﻿using System;
 
 namespace Locations.Core.Shared.DTO
 {
-    [Table("Settings")]
-    public partial class SettingDTO : DTOBase, ISettingDTO, INotifyPropertyChanged
+    /// <summary>
+    /// Data Transfer Object for settings
+    /// </summary>
+    public class SettingDTO
     {
-        [ObservableProperty]
-        [property: PrimaryKey, AutoIncrement]
-        private int _id;
+        /// <summary>
+        /// Gets or sets the ID
+        /// </summary>
+        public int Id { get; set; }
 
-        [ObservableProperty]
-        private string _name;
+        /// <summary>
+        /// Gets or sets the setting key
+        /// </summary>
+        public string Key { get; set; }
 
-        [ObservableProperty]
-        private string _value;
+        /// <summary>
+        /// Gets or sets the setting value
+        /// </summary>
+        public string Value { get; set; }
 
-        [ObservableProperty]
-        private DateTime _timestamp;
+        /// <summary>
+        /// Gets or sets the setting description
+        /// </summary>
+        public string Description { get; set; }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
+        /// <summary>
+        /// Initializes a new instance of the SettingDTO class
+        /// </summary>
         public SettingDTO()
         {
-            Name = string.Empty;
+            Key = string.Empty;
             Value = string.Empty;
-            Timestamp = DateTime.Now;
+            Description = string.Empty;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the SettingDTO class with values
+        /// </summary>
+        public SettingDTO(string key, string value, string description = "")
+        {
+            Key = key;
+            Value = value;
+            Description = description;
         }
     }
 }

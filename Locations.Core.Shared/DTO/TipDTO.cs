@@ -36,7 +36,9 @@ namespace Locations.Core.Shared.DTO
         [ObservableProperty]
         private string _content = string.Empty;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+
+
+
 
         public TipDTO() { }
     }

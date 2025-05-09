@@ -2,10 +2,11 @@
 {
     public interface ITipDTO : IDTOBase
     {
-        int ID { get; set; }
+
+        int Id { get; set; }
         string Fstop { get; set; }
         string Shutterspeed { get; set; }
-        string ISO { get; set; }
+        string ISO { get; set; }  // Note: This is in uppercase
         int TipTypeID { get; set; }
         string Title { get; set; }
         string I8n { get; set; }

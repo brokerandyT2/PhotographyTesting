@@ -38,6 +38,8 @@ namespace Locations.Core.Shared.DTO
             }
         }
 
+        AlertEventArgs IDTOBase.alertEventArgs => throw new NotImplementedException();
+
         private async Task LoadDataAsync()
         {
             // Simulate loading data

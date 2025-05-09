@@ -19,9 +19,11 @@ namespace Locations.Core.Shared.DTO
         private string _state = string.Empty;
 
         [ObservableProperty]
+        [property: NotifyPropertyChangedFor(nameof(CanDelete))]
         private double _lattitude;
 
         [ObservableProperty]
+        [property: NotifyPropertyChangedFor(nameof(CanDelete))]
         private double _longitude;
 
         [ObservableProperty]
@@ -44,12 +46,9 @@ namespace Locations.Core.Shared.DTO
         public string TimestampFormatted => Timestamp.ToString(DateFormat);
 
         public bool CanDelete => !(Longitude == 0.0 && Lattitude == 0.0);
-        partial void OnLongitudeChanged(double oldValue, double newValue);
-        partial void OnLattitudeChanged(double oldValue, double newValue);
-        partial void OnLattitudeChanged(double oldValue, double newValue) =>
-            OnPropertyChanged(nameof(CanDelete));
 
-        partial void OnLongitudeChanged(double oldValue, double newValue) =>
-            OnPropertyChanged(nameof(CanDelete));
+        // Remove duplicate implementations - the source generator will handle these
+        // partial void OnLattitudeChanged(double oldValue, double newValue) => OnPropertyChanged(nameof(CanDelete));
+        // partial void OnLongitudeChanged(double oldValue, double newValue) => OnPropertyChanged(nameof(CanDelete));
     }
 }

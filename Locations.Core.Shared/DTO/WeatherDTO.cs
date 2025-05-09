@@ -15,19 +15,7 @@ namespace Locations.Core.Shared.DTO
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         #region Private Backing Fields
-        private int _id;
-        private double _latitude;
-        private double _longitude;
-        private DateTime _sunrise_day_one;
-        private DateTime _sunrise_day_two;
-        private DateTime _sunrise_day_three;
-        private DateTime _sunrise_day_four;
-        private DateTime _sunrise_day_five;
-        private DateTime _sunset_day_one;
-        private DateTime _sunset_day_two;
-        private DateTime _sunset_day_three;
-        private DateTime _sunset_day_four;
-        private DateTime _sunset_day_five;
+        
         private DateTime moonRise_Day_One;
         private DateTime moonSet_Day_One;
         private double moonPhaseAs_Number_DayOne;
@@ -40,7 +28,7 @@ namespace Locations.Core.Shared.DTO
         private double day_One_Dew_Point;
         private int day_One_Humidity;
         private int day_One_Pressure;
-        private string? weather_Day_One_Icon;
+;
         private string? weather_Day_One_Description;
         private double temperature_Day_One_Low_Feels_Like;
         private double temperature_Day_One_Night_Feels_Like;
@@ -149,7 +137,7 @@ namespace Locations.Core.Shared.DTO
         private string? summary_Day_Seven;
         private DateTime moonSet_Day_Seven;
         private DateTime moonRise_Day_Seven;
-        private DateTime _sunset_day_seven;
+
         private DateTime sunrise_Day_Seven;
         private double uV_Index_DaySix;
         private double temperature_Day_Six_Low;
@@ -174,41 +162,8 @@ namespace Locations.Core.Shared.DTO
         private double temperature_Day_Six_Min;
         private string? summary_Day_Six;
         private DateTime moonRise_Day_Six;
-        private DateTime _sunset_day_six;
         private DateTime moonSet_Day_Six;
-        private string _timezone;
-        private int _timezoneOffset;
-        private double _temperature_day_one;
-        private double _temperature_day_two;
-        private double _temperature_day_three;
-        private double _temperature_day_four;
-        private double _temperature_day_five;
-        private double _temperature_day_one_low;
-        private double _temperature_day_two_low;
-        private double _temperature_day_three_low;
-        private double _temperature_day_four_low;
-        private double _temperature_day_five_low;
-        private string _forecast_day_one;
-        private string _forecast_day_two;
-        private string _forecast_day_three;
-        private string _forecast_day_four;
-        private string _forecast_day_five;
-        private double _windSpeedDay_One;
-        private double _windDirectionDay_One;
-        private double _windGustDay_one;
-        private double _windSpeedDay_Two;
-        private double _windDirectionDay_Two;
-        private double _windGustDay_Two;
-        private double _windSpeedDay_Three;
-        private double _windDirectionDay_Three;
-        private double _windGustDay_Three;
-        private double _windSpeedDay_Four;
-        private double _windDirectionDay_Four;
-        private double _windGustDay_Four;
-        private double _windSpeedDay_Five;
-        private double _windDirectionDay_Five;
-        private double _windGustDay_Five;
-        private DateTime _lastUpdate;
+
 
         private int clouds_day_one;
         private int clouds_day_two;
@@ -968,7 +923,7 @@ namespace Locations.Core.Shared.DTO
         public double Day_One_Dew_Point { get => day_One_Dew_Point; set { day_One_Dew_Point = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_One_Dew_Point))); } }
         public int Day_One_Humidity { get => day_One_Humidity; set { day_One_Humidity = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_One_Humidity))); } }
         public int Day_One_Pressure { get => day_One_Pressure; set { day_One_Pressure = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Day_One_Pressure))); } }
-        public string? Weather_Day_One_Icon { get => "a" + weather_Day_One_Icon + ".png"; set { weather_Day_One_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_One_Icon))); } }
+        public string? Weather_Day_One_Icon { get =>  + weather_Day_One_Icon; set { weather_Day_One_Icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_One_Icon))); } }
         public string? Weather_Day_One_Description { get => weather_Day_One_Description; set { weather_Day_One_Description = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Weather_Day_One_Description))); } }
         public double Temperature_Day_One_Low_Feels_Like { get => temperature_Day_One_Low_Feels_Like; set { temperature_Day_One_Low_Feels_Like = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Temperature_Day_One_Low_Feels_Like))); } }
         public double Temperature_Day_One_Night_Feels_Like { get => temperature_Day_One_Night_Feels_Like; set { temperature_Day_One_Night_Feels_Like = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Temperature_Day_One_Night_Feels_Like))); } }
