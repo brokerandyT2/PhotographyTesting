@@ -4,6 +4,7 @@
              x:Class="Location.Photography.Premium.ExposureCalculator"
              xmlns:models="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
              xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:strings="clr-namespace:Location.Photography.Resources"
              Title="ExposureCalculator"
              x:DataType="models:ExposureCalculator">
     <ContentPage.BindingContext>
@@ -43,11 +44,11 @@
                 </Grid.ColumnDefinitions>
 
             <Label Text="{x:Static strings:AppResources.exposureincrements}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="1" Grid.ColumnSpan="3"/>
-            <ImageButton Pressed="closeButton_Pressed" Source="closeoutlinecustom.png" x:Name="closebtn" IsVisible="False" Grid.Row="0" Grid.Column="4" />
+            <ImageButton Pressed="closebtn_Pressed" Source="closeoutlinecustom.png" x:Name="closebtn" IsVisible="False" Grid.Row="0" Grid.Column="4" />
 
             <StackLayout RadioButtonGroup.GroupName="Exposure" Grid.Row="2" Grid.ColumnSpan="4" Padding="2,0,2,0" Orientation="Horizontal" >
 
-                    <RadioButton x:Name="exposurefull" Value="1" Content="{x:Static strings:AppResources.full}" Padding="2,0,10,0" CheckedChanged="exposuresteps_CheckedChanged" />
+                <RadioButton x:Name="exposurefull" Value="1" Content="{x:Static strings:AppResources.full}" Padding="2,0,10,0" CheckedChanged="exposuresteps_CheckedChanged" />
 
                     <RadioButton x:Name="exposurehalfstop" CheckedChanged="exposuresteps_CheckedChanged" Value=".5" Content="{x:Static strings:AppResources.half}" Padding="2,0,2,0"  />
                     <RadioButton x:Name="exposurethirdstop" CheckedChanged="exposuresteps_CheckedChanged" Value=".3" Content="{x:Static strings:AppResources.thirds}" Padding="2,0,2,0"   />
@@ -55,7 +56,7 @@
 
                 <Label Text="{x:Static strings:AppResources.calculate}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="3" Grid.ColumnSpan="4"/>
                 <StackLayout RadioButtonGroup.GroupName="Calculate" Grid.Row="4" Grid.ColumnSpan="4" Orientation="Horizontal">
-                    <RadioButton x:Name="shutter" Content="{x:Static strings:AppResources.shutterspeednocolon}" Padding="2,0,10,0" CheckedChanged="calculate_CheckedChanged" Value="0" />
+                <RadioButton x:Name="shutter" Content="{x:Static strings:AppResources.shutterspeednocolon}" Padding="2,0,10,0" CheckedChanged="calculate_CheckedChanged" Value="0" />
 
                     <RadioButton x:Name="apeature" Content="{x:Static strings:AppResources.aperturenocolon}"  Padding="2,0,2,0" CheckedChanged="calculate_CheckedChanged" Value="1"  />
                     <RadioButton x:Name="iso" Content="{x:Static strings:AppResources.isonocolon}"  Padding="2,0,2,0" CheckedChanged="calculate_CheckedChanged" Value="2"/>

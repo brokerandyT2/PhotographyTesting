@@ -1,8 +1,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="Location.Core.Views.Premium.LightMeter"
+             x:Class="Location.Photography.Premium.LightMeter"
              xmlns:local="clr-namespace:Location.Photography.Business.LightMeter;assembly=Location.Photography.Business"
-                          xmlns:strings="clr-namespace:Location.Core.Resources" 
+             xmlns:strings="clr-namespace:Location.Photography.Resources" 
              xmlns:system="clr-namespace:System;assembly=netstandard"
 
              Title="Light Meter">

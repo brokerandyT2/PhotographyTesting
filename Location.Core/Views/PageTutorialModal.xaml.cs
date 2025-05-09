@@ -1,21 +1,15 @@
 using Location.Core.Helpers;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 namespace Location.Core.Views;
 
 public partial class PageTutorialModal : ContentPage
 {
-    private IAlertService alertServ;
+  
 
     public PageTutorialModal()
 	{
 		InitializeComponent();
 	}
-    public PageTutorialModal( IAlertService alertServ)
-    {
-        this.alertServ = alertServ;
-
-        InitializeComponent();
-    }
+   
     public PageTutorialModal(PageEnums page)
     {
         InitializeComponent();

@@ -164,7 +164,7 @@ namespace Location.Core
             this.Children.Add(new Location.Core.Views.AddLocation());
             this.Children.Add(new Location.Core.Views.ListLocations());
             this.Children.Add(new Location.Core.Views.Tips());
-            this.Children.Add(new Location.Core.Views.Premium.LightMeter());
+            this.Children.Add(new Location.Photography.Premium.LightMeter());
         }
     }
 }

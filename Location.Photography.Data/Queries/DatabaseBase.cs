@@ -33,8 +33,8 @@ namespace Location.Photography.Data.Queries
              guid = NativeStorageService.GetSetting(MagicStrings.UniqueID);
             AlertRaised += OnAlertRaised;
             getKey();
-            dataSync = EncryptedSQLite.DataEncrypted.GetSyncConnection(KEY);
-            dataAsync = EncryptedSQLite.DataEncrypted.GetAsyncConnection(KEY);
+            dataSync = EncryptedSQLite.DataEncrypted.GetSyncConnection();
+            dataAsync = EncryptedSQLite.DataEncrypted.GetAsyncConnection();
         }
 
         private void getKey()
@@ -42,8 +42,8 @@ namespace Location.Photography.Data.Queries
 
             var email = NativeStorageService.GetSetting(MagicStrings.Email);
             var guid = NativeStorageService.GetSetting(MagicStrings.UniqueID);
-            dataSync = EncryptedSQLite.DataEncrypted.GetSyncConnection(KEY);
-            dataAsync = EncryptedSQLite.DataEncrypted.GetAsyncConnection(KEY);
+            dataSync = EncryptedSQLite.DataEncrypted.GetSyncConnection();
+            dataAsync = EncryptedSQLite.DataEncrypted.GetAsyncConnection();
         }
 
 

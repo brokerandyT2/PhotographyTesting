@@ -1,40 +1,23 @@
-﻿using AndroidX.Camera.View.Internal.Compat.Quirk;
-using CommunityToolkit.Maui.Behaviors;
-using Location.Core.Resources;
+﻿using Location.Core.Resources;
 using Locations.Core.Business;
 using Locations.Core.Business.StorageSvc;
 using Locations.Core.Shared;
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Locations.Core.Shared.Enums;
 using Locations.Core.Shared.ViewModels;
 namespace Location.Core.Views;
 
 public partial class Login : ContentPage
 {
-    Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
-    private IAlertService alertServ;
+
 
     public Login()
     {
         InitializeComponent();
-        ss.AlertRaised += Ss_AlertRaised;
-        // BindingContext = new SettingsViewModel();
-        GetSetting();
     }
 
-    private void Ss_AlertRaised(object? sender, AlertEventArgs e)
-    {
-        DisplayAlert(e.Title, e.Message, AppResources.OK);
-    }
+  
 
-    public Login(IAlertService alert) : this()
-    {
-        alertServ = alert;
-
-        InitializeComponent();
-        GetSetting();
-    }
+   
 
     private void HemisphereSwitch_Toggled(object sender, ToggledEventArgs e)
     {

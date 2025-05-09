@@ -1,9 +1,3 @@
-using Location.Core.Helpers;
-using Locations.Core.Shared;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.ViewModels;
-using vm = Location.Photography.Shared.ViewModels;
-
 namespace Location.Photography.Premium;
 
 public partial class SunLocation : ContentPage
@@ -15,5 +9,18 @@ public partial class SunLocation : ContentPage
        
     }
 
-   
+    private void locationPicker_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void date_DateSelected(object sender, DateChangedEventArgs e)
+    {
+
+    }
+
+    private void time_TimeSelected(object sender, TimeChangedEventArgs e)
+    {
+
+    }
 }

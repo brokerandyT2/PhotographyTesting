@@ -10,5 +10,14 @@ public partial class SunCalculations : ContentPage
         InitializeComponent();
 
     }
-  
+
+    private void locationPicker_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void datePicker_DateSelected(object sender, DateChangedEventArgs e)
+    {
+
+    }
 }

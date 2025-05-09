@@ -44,7 +44,7 @@ public partial class Tips : ContentPageBase
         IAlertService alertService) : base(settingsService, alertService, PageEnums.Tips, false)
     {
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
-        _tipService = new TipService<TipViewModel>(new Locations.Core.Data.Queries.TipRepository(_alertService, Location.Core.Helpers.LoggingService.ILoggerService), alertService, new Locations.Core.Business.Services.LoggerService());
+        _tipService = new TipService<TipViewModel>(new Locations.Core.Data.Queries.TipRepository(_alertService, null), alertService, new Locations.Core.Business.Services.LoggerService());
 
         InitializeComponent();
 
@@ -77,7 +77,7 @@ public partial class Tips : ContentPageBase
         var button = (Microsoft.Maui.Controls.Button)sender;
         var tipId = (int)button.CommandParameter;
 
-        Navigation.PushModalAsync(new Views.Premium.ExposureCalculator(tipId, true));
+        Navigation.PushModalAsync(new Location.Photography.Premium.ExposureCalculator());
     }
 
     #endregion

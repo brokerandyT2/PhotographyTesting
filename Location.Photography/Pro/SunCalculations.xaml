@@ -48,9 +48,9 @@
             <Image x:Name="locationPhoto" Grid.Row="1" Grid.ColumnSpan="4"/>
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="2" Grid.ColumnSpan="4"/>
             <Label Text="" Grid.Row="3" Grid.ColumnSpan="4"/>
-            <Picker x:Name="locationPicker" Grid.Row="4" Grid.ColumnSpan="4" ItemsSource="{Binding Locations}" ItemDisplayBinding="{Binding Title}" SelectedIndexChanged="" />
+            <Picker x:Name="locationPicker" Grid.Row="4" Grid.ColumnSpan="4" ItemsSource="{Binding Locations}" ItemDisplayBinding="{Binding Title}" SelectedIndexChanged="locationPicker_SelectedIndexChanged" />
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="5" Grid.ColumnSpan="4"/>
-            <DatePicker x:Name="datePicker" DateSelected="" Format="{Binding DateFormat}" Grid.Row="6" Grid.ColumnSpan="4"/>
+            <DatePicker x:Name="datePicker" DateSelected="datePicker_DateSelected"  Format="{Binding DateFormat}" Grid.Row="6" Grid.ColumnSpan="4"/>
 
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="7" Grid.ColumnSpan="4"/>
             <Image Source="weathersunsetupcustom.png" Grid.Row="8" Grid.Column="0" />

@@ -11,7 +11,7 @@
 
     
         <VerticalStackLayout>
-            <Picker x:Name="locationPicker" SelectedIndexChanged=""  ItemDisplayBinding="{Binding Title}" />
+            <Picker x:Name="locationPicker" SelectedIndexChanged="locationPicker_SelectedIndexChanged"  ItemDisplayBinding="{Binding Title}" />
             <DatePicker x:Name="date" DateSelected="date_DateSelected"  Date="{Binding SelectedDateTime}"  />
             <TimePicker x:Name="time" TimeSelected="time_TimeSelected"  Time="{Binding SelectedDateTime}" />
 

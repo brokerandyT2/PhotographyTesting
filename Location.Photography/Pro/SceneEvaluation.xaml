@@ -36,13 +36,13 @@
             <Image x:Name="histogramBlue" Source="{Binding BlueHistogramImage}" IsVisible="False" Grid.Row="3" Grid.ColumnSpan="6"/>
             <Image x:Name="histogramGreen" Source="{Binding GreenHistogramImage}" IsVisible="False" Grid.Row="4"  Grid.ColumnSpan="6"/>
             <Image x:Name="histogramContrast" Source="{Binding ContrastHistogramImage}" Grid.Row="5" Grid.ColumnSpan="6"/>
-            
+
             <RadioButton Content="" GroupName="chart" Value="R" Grid.Row="6" Grid.Column="0" CheckedChanged="CheckedChanged" IsVisible="True"/>
             <RadioButton Content="" GroupName="chart" Value="B" Grid.Row="6" Grid.Column="1" CheckedChanged="CheckedChanged" IsVisible="True"/>
             <RadioButton Content="" GroupName="chart" Value="G" Grid.Row="6" Grid.Column="2" CheckedChanged="CheckedChanged" IsVisible="True"/>
             <RadioButton Content="" GroupName="chart" Value="C" Grid.Row="6" Grid.Column="3" CheckedChanged="CheckedChanged" IsVisible="True" IsChecked="False"/>
             <RadioButton Content="" GroupName="chart" Value="A" Grid.Row="7" Grid.ColumnSpan="6" x:Name="Default" CheckedChanged="CheckedChanged" IsVisible="True" />
-            <Button x:Name="EvaluateSceneBtn" Text="" HeightRequest="50" Clicked="" Grid.Row="8" Grid.ColumnSpan="6"/>
+            <Button x:Name="EvaluateSceneBtn" Text="" HeightRequest="50" Clicked="EvaluateSceneBtn_Clicked"  Grid.Row="8" Grid.ColumnSpan="6"/>
             <ActivityIndicator x:Name="processing" IsRunning="False" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Center" />
         </Grid>
 

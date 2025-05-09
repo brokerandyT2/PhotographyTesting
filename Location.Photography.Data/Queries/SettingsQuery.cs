@@ -30,12 +30,12 @@ namespace Location.Photography.Data.Queries
 
         public string GetValueBy<T>(string name)
         {
-            return dataAsync.Table<SettingViewModel>().Where(x => x.Name == name).FirstOrDefaultAsync().Result.Value;
+            return dataAsync.Table<SettingViewModel>().Where(x => x.Key == name).FirstOrDefaultAsync().Result.Value;
 
         }
         public override string GetValueByString<T>(string name)
         {
-            return dataAsync.Table<SettingViewModel>().Where(x => x.Name == name).FirstOrDefaultAsync().Result.Value;
+            return dataAsync.Table<SettingViewModel>().Where(x => x.Key == name).FirstOrDefaultAsync().Result.Value;
         }
         public override IList<T> GetItems<T>()
         {

@@ -214,5 +214,33 @@ public partial class ExposureCalculator : ContentPage
         x.Calculate(); */
     }
 
+    private void closebtn_Pressed(object sender, EventArgs e)
+    {
 
+    }
+
+    private void exposuresteps_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+
+    }
+
+    private void calculate_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+
+    }
+
+    private void ShutterSpeed_Picker_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void fstop_Picker_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void ISO_Picker_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
 }
