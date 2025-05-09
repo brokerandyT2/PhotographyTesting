@@ -1,17 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Locations.Core.Data.Models;
 
-namespace Locations.Core.Data.Queries.Interfaces
+namespace Locations.Core.Business.DataAccess.Base
 {
     /// <summary>
-    /// Generic interface for repository operations
+    /// Generic base interface for all service operations
     /// </summary>
-    /// <typeparam name="T">The entity type for this repository</typeparam>
-    public interface IRepository<T> where T : class
+    /// <typeparam name="T">The entity type for this service</typeparam>
+    public interface IServiceBase<T> where T : class
     {
         /// <summary>
-        /// Event triggered when an error occurs in the repository
+        /// Event triggered when an error occurs in the service
         /// </summary>
         event DataErrorEventHandler ErrorOccurred;
 
@@ -26,7 +27,7 @@ namespace Locations.Core.Data.Queries.Interfaces
         /// Gets all entities
         /// </summary>
         /// <returns>Operation result containing a list of entities</returns>
-        Task<DataOperationResult<IList<T>>> GetAllAsync();
+        Task<DataOperationResult<List<T>>> GetAllAsync();
 
         /// <summary>
         /// Saves an entity
@@ -55,5 +56,11 @@ namespace Locations.Core.Data.Queries.Interfaces
         /// <param name="entity">The entity to delete</param>
         /// <returns>Operation result indicating success or failure</returns>
         Task<DataOperationResult<bool>> DeleteAsync(T entity);
+
+        /// <summary>
+        /// Handles raising error events
+        /// </summary>
+        /// <param name="e">Error event arguments</param>
+        void OnErrorOccurred(DataErrorEventArgs e);
     }
 }

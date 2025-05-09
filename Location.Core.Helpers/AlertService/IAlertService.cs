@@ -1,56 +1,62 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace Location.Core.Helpers.AlertService
 {
     /// <summary>
-    /// Interface for displaying alerts and user notifications
+    /// Service interface for displaying alerts to users
     /// </summary>
     public interface IAlertService
     {
         /// <summary>
-        /// Displays an informational alert to the user
+        /// Shows an information alert to the user
         /// </summary>
-        /// <param name="title">The alert title</param>
-        /// <param name="message">The alert message</param>
-        /// <param name="buttonText">The text for the action button (e.g., "OK")</param>
-        /// <returns>Task representing the asynchronous operation</returns>
-        Task DisplayAlert(string title, string message, string buttonText);
+        /// <param name="message">The message to display</param>
+        void ShowInfo(string message);
 
         /// <summary>
-        /// Displays a confirmation alert with accept and cancel options
+        /// Shows a warning alert to the user
         /// </summary>
-        /// <param name="title">The alert title</param>
-        /// <param name="message">The alert message</param>
-        /// <param name="acceptButtonText">The text for the accept button (e.g., "Yes")</param>
-        /// <param name="cancelButtonText">The text for the cancel button (e.g., "No")</param>
-        /// <returns>True if user accepted, false if canceled</returns>
-        Task<bool> DisplayConfirmation(string title, string message, string acceptButtonText, string cancelButtonText);
+        /// <param name="message">The message to display</param>
+        void ShowWarning(string message);
 
         /// <summary>
-        /// Displays an error alert to the user
+        /// Shows an error alert to the user
         /// </summary>
-        /// <param name="title">The error title</param>
-        /// <param name="message">The error message</param>
-        /// <param name="buttonText">The text for the action button (e.g., "OK")</param>
-        /// <returns>Task representing the asynchronous operation</returns>
-        Task DisplayError(string title, string message, string buttonText);
+        /// <param name="message">The message to display</param>
+        void ShowError(string message);
+    }
+}
+
+namespace Location.Core.Helpers.LoggingService
+{
+    /// <summary>
+    /// Service interface for logging messages
+    /// </summary>
+    public interface ILoggerService
+    {
+        /// <summary>
+        /// Logs an information message
+        /// </summary>
+        /// <param name="message">The message to log</param>
+        void LogInfo(string message);
 
         /// <summary>
-        /// Displays a warning alert to the user
+        /// Logs a warning message
         /// </summary>
-        /// <param name="title">The warning title</param>
-        /// <param name="message">The warning message</param>
-        /// <param name="buttonText">The text for the action button (e.g., "OK")</param>
-        /// <returns>Task representing the asynchronous operation</returns>
-        Task DisplayWarning(string title, string message, string buttonText);
+        /// <param name="message">The message to log</param>
+        void LogWarning(string message);
 
         /// <summary>
-        /// Shows a toast notification that automatically disappears after a set time
+        /// Logs an error message
         /// </summary>
-        /// <param name="message">The toast message</param>
-        /// <param name="durationMilliseconds">Duration in milliseconds to display the toast</param>
-        /// <returns>Task representing the asynchronous operation</returns>
-        Task DisplayToast(string message, int durationMilliseconds = 3000);
+        /// <param name="message">The message to log</param>
+        /// <param name="exception">The exception to log, if any</param>
+        void LogError(string message, Exception exception = null);
+
+        /// <summary>
+        /// Logs a debug message
+        /// </summary>
+        /// <param name="message">The message to log</param>
+        void LogDebug(string message);
     }
 }

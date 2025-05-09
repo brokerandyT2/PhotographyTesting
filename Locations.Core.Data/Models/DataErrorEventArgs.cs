@@ -15,7 +15,16 @@ namespace Locations.Core.Data.Models
         Database,
         ModelValidation,
         NotSupported,
-        Unknown
+        Unknown,
+        Permission,
+        Camera,
+        AmbientLightSensor,
+        LocalStorage,
+        SecureStorage,
+        Gps,
+        FileSystem,
+        Network,
+        Serialization
     }
 
     /// <summary>
@@ -24,34 +33,38 @@ namespace Locations.Core.Data.Models
     public class DataErrorEventArgs : EventArgs
     {
         /// <summary>
-        /// Source of the error
+        /// Gets the source of the error
         /// </summary>
         public ErrorSource Source { get; }
 
         /// <summary>
-        /// Error message
+        /// Gets the error message
         /// </summary>
         public string Message { get; }
 
         /// <summary>
-        /// Original exception, if any
+        /// Gets the exception that caused the error, if any
         /// </summary>
-        public Exception? Exception { get; }
+        public Exception Exception { get; }
 
         /// <summary>
-        /// Related data object, if any
+        /// Creates a new data error event
         /// </summary>
-        public object? Data { get; }
-
-        /// <summary>
-        /// Creates a new instance of the DataErrorEventArgs class
-        /// </summary>
-        public DataErrorEventArgs(ErrorSource source, string message, Exception? exception = null, object? data = null)
+        /// <param name="source">The source of the error</param>
+        /// <param name="message">The error message</param>
+        /// <param name="exception">The exception that caused the error, if any</param>
+        public DataErrorEventArgs(ErrorSource source, string message, Exception exception = null)
         {
             Source = source;
-            Message = message;
+            Message = message ?? "An unknown error occurred";
             Exception = exception;
-            Data = data;
         }
     }
+
+    /// <summary>
+    /// Delegate for data error events
+    /// </summary>
+    /// <param name="sender">The sender of the event</param>
+    /// <param name="e">The event arguments</param>
+   // public delegate void DataErrorEventHandler(object sender, DataErrorEventArgs e);
 }

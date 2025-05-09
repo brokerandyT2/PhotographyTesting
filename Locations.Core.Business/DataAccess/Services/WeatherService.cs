@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Location.Core.Helpers.AlertService
+namespace Locations.Core.Business.DataAccess.Services
 {
-    
-
+    internal class WeatherService
+    {
+    }
 }

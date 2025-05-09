@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Locations.Core.Business.DataAccess.Interfaces
+namespace Locations.Core.Business.DataAccess.Services
 {
-    interface IDeviceInfo
+    internal class TipTypeService
     {
-      
     }
 }

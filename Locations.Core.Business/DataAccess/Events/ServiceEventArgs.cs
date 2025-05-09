@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Locations.Core.Business.DataAccess.Interfaces
+namespace Locations.Core.Business.DataAccess.Events
 {
-    public interface IBaseInterface
+    internal class ServiceEventArgs
     {
     }
 }
