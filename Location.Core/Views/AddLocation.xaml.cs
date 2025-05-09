@@ -1,161 +1,359 @@
 using Location.Core.Helpers;
+using Location.Core.Helpers.AlertService;
 using Location.Core.Resources;
-using Locations.Core.Business.DataAccess;
-using Locations.Core.Shared;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
+using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using Locations.Core.Shared.ViewModels.Interface;
+using Locations.Core.Shared.ViewModelServices;
+using System;
+using System.Threading.Tasks;
 
 namespace Location.Core.Views;
 
-public partial class AddLocation : ContentPage
+public partial class AddLocation : ContentPageBase
 {
-    LocationsService ls = new LocationsService();
-    Locations.Core.Business.DataAccess.SettingsService ss = new Locations.Core.Business.DataAccess.SettingsService();
-    private IAlertService alertServ;
+    #region Services
 
-    public AddLocation( IAlertService alertServ) : this()
-    {
+    private readonly ILocationService _locationService;
+    private readonly IMediaService _mediaService;
+    private readonly IGeolocationService _geolocationService;
+    private readonly int _locationId;
+    private readonly bool _isEditMode;
 
-        this.alertServ = alertServ;
-      
+    #endregion
 
-    }
-    public AddLocation(IAlertService alertServ,  ILocationViewModel viewModel) : this(viewModel)
-    {
-        this.alertServ = alertServ;
-    
-    }
-    public AddLocation(IAlertService alertServ,  ILocationViewModel viewModel, int id) : this(id)
-    {
-        this.alertServ = alertServ;
-      
-    }
-    public AddLocation(IAlertService alertServ, ILocationViewModel viewModel, int id, bool isEditMode) : this(id, isEditMode)
-    {
-        this.alertServ = alertServ;
-    
-    }
-    public AddLocation()
+    #region Constructors
+
+    /// <summary>
+    /// Default constructor for design-time and XAML preview
+    /// </summary>
+    public AddLocation() : base()
     {
         InitializeComponent();
-        CloseModal.IsVisible = CloseModal.IsEnabled = false;
-        var x = (LocationViewModel)BindingContext;
-        x.RaiseAlert += X_RaiseAlert; ;
-    }
 
-    private void X_RaiseAlert(object? sender, Locations.Core.Shared.Alerts.Implementation.AlertEventArgs e)
-    {
-        var x = (LocationViewModel)BindingContext;
-        if (x.IsError)
-        {
-            ServiceBase<LocationViewModel>.RaiseError(new Exception(e.Message));
-            DisplayAlert(x.alertEventArgs.Title, x.alertEventArgs.Message, AppResources.OK);
-        }
-    }
+        _locationId = 0;
+        _isEditMode = false;
 
-    
-
-    public AddLocation(ILocationViewModel viewModel) : this()
-    {
-        InitializeComponent();
-        BindingContext = (LocationViewModel)viewModel;
-        CloseModal.IsVisible = CloseModal.IsEnabled = false;
-    }
-    public AddLocation(int id) : this()
-    {
-        InitializeComponent();
-        BindingContext = ls.Get(id);
-        CloseModal.IsVisible = CloseModal.IsEnabled = true;
-    }
-    public AddLocation(int id, bool isEditMode) : this(id)
-    {
-        InitializeComponent();
-        CloseModal.IsVisible = isEditMode;
-        BindingContext = ls.Get(id);
-
-    }
-
-    private void Save_Pressed(object sender, EventArgs e)
-    {
-        LocationViewModel y = new LocationViewModel();
-        var x = (LocationViewModel)BindingContext;
-        try
-        {
-            y = ls.Save(x, true);
-        }
-        catch (Exception ex)
-        {
-            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
-        }
-
-        if (y.IsError)
-        {
-            DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
-        }
+        // Set an empty view model for design-time
         BindingContext = new LocationViewModel();
 
+        // Configure UI based on mode
+        CloseModal.IsVisible = _isEditMode;
     }
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+
+    /// <summary>
+    /// Main constructor with DI
+    /// </summary>
+    public AddLocation(
+        ISettingService<SettingViewModel> settingsService,
+        IAlertService alertService,
+        ILocationService locationService,
+        IMediaService mediaService,
+        IGeolocationService geolocationService,
+        int locationId = 0,
+        bool isEditMode = false) : base(settingsService, alertService, PageEnums.AddLocation, false)
     {
-        base.OnNavigatedTo(args);
-        PageHelpers.CheckVisit(MagicStrings.AddLocationViewed, PageEnums.AddLocation, ss, Navigation);
+        _locationService = locationService ?? throw new ArgumentNullException(nameof(locationService));
+        _mediaService = mediaService ?? throw new ArgumentNullException(nameof(mediaService));
+        _geolocationService = geolocationService ?? throw new ArgumentNullException(nameof(geolocationService));
+        _locationId = locationId;
+        _isEditMode = isEditMode;
 
+        InitializeComponent();
 
+        // Load data and setup UI
+        InitializeViewModel();
     }
-    private async void AddPhoto_Pressed(object sender, EventArgs e)
+
+    #endregion
+
+    #region Setup and Initialization
+
+    /// <summary>
+    /// Initializes the ViewModel with proper services and data
+    /// </summary>
+    private void InitializeViewModel()
     {
-        var x = (LocationViewModel)BindingContext;
+        if (_locationId > 0)
+        {
+            // When editing an existing location, load it
+            LoadLocationAsync(_locationId);
+        }
+        else
+        {
+            // Create new location ViewModel with services
+            var viewModel = new LocationViewModel(
+                _locationService,
+                _mediaService,
+                _geolocationService);
+
+            // Subscribe to error events
+            viewModel.ErrorOccurred += ViewModel_ErrorOccurred;
+
+            // Set as binding context
+            BindingContext = viewModel;
+
+            // We'll start location tracking when the page appears
+        }
+
+        // Configure UI based on mode
+        CloseModal.IsVisible = _isEditMode;
+    }
+
+    /// <summary>
+    /// Loads a location by ID
+    /// </summary>
+    private async void LoadLocationAsync(int id)
+    {
         try
         {
-            
-            if (MediaPicker.Default.IsCaptureSupported)
+            // Show loading indicator
+            var loadingViewModel = new LocationViewModel
             {
-                FileResult photo = await MediaPicker.Default.CapturePhotoAsync();
+                VmIsBusy = true
+            };
+            BindingContext = loadingViewModel;
 
-                if (photo != null)
+            // Load the location
+            var result = await _locationService.GetLocationAsync(id);
+
+            if (result.IsSuccess && result.Data != null)
+            {
+                // Create a fully initialized view model with the loaded data
+                var loadedViewModel = new LocationViewModel(
+                    _locationService,
+                    _mediaService,
+                    _geolocationService);
+
+                // Copy properties from the result to the new view model
+                loadedViewModel.Id = result.Data.Id;
+                loadedViewModel.Title = result.Data.Title;
+                loadedViewModel.Description = result.Data.Description;
+                loadedViewModel.Lattitude = result.Data.Lattitude;
+                loadedViewModel.Longitude = result.Data.Longitude;
+                loadedViewModel.City = result.Data.City;
+                loadedViewModel.State = result.Data.State;
+                loadedViewModel.Photo = result.Data.Photo;
+                loadedViewModel.Timestamp = result.Data.Timestamp;
+                loadedViewModel.DateFormat = result.Data.DateFormat;
+
+                // Mark as existing location
+                loadedViewModel.VmIsNewLocation = false;
+
+                // Subscribe to error events
+                loadedViewModel.ErrorOccurred += ViewModel_ErrorOccurred;
+
+                // Set as binding context
+                BindingContext = loadedViewModel;
+            }
+            else
+            {
+                // Create a new view model with error
+                var errorViewModel = new LocationViewModel(
+                    _locationService,
+                    _mediaService,
+                    _geolocationService)
                 {
-                    // save the file into local storage
-                    string localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, photo.FileName);
+                    VmErrorMessage = result.ErrorMessage ?? "Failed to load location"
+                };
+                BindingContext = errorViewModel;
 
-                    using Stream sourceStream = await photo.OpenReadAsync();
-                    using FileStream localFileStream = File.OpenWrite(localFilePath);
-                    await sourceStream.CopyToAsync(localFileStream);
-                    x.Photo = localFilePath;
-                    AddPhoto.ImageSource = localFilePath;
-                }
+                // Display error to user
+                await DisplayAlert(
+                    AppResources.Error,
+                    result.ErrorMessage ?? "Failed to load location",
+                    AppResources.OK);
             }
         }
         catch (Exception ex)
         {
-           await DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
-        }
+            // Handle error loading location
+            await DisplayAlert(
+                AppResources.Error,
+                $"Error loading location: {ex.Message}",
+                AppResources.OK);
 
-        if (x.IsError)
+            // Create a new view model with error
+            var errorViewModel = new LocationViewModel(
+                _locationService,
+                _mediaService,
+                _geolocationService)
+            {
+                VmErrorMessage = $"Error loading location: {ex.Message}"
+            };
+            BindingContext = errorViewModel;
+        }
+        finally
         {
-           await DisplayAlert(AppResources.Error, x.alertEventArgs.Message, AppResources.OK);
+            // Ensure busy indicator is hidden
+            if (BindingContext is LocationViewModel vm)
+            {
+                vm.VmIsBusy = false;
+            }
         }
     }
-    /*using SkiaSharp;
 
-// Resize to 800x600 for example
-const int newWidth = 800;
-const int newHeight = 600;
+    #endregion
 
-using var original = SKBitmap.Decode(stream);
-using var resized = original.Resize(new SKImageInfo(newWidth, newHeight), SKFilterQuality.Medium);
+    #region Event Handlers
 
-using var image = SKImage.FromBitmap(resized);
-using var data = image.Encode(SKEncodedImageFormat.Jpeg, 80); // 80 = quality
+    /// <summary>
+    /// Handle save button press
+    /// </summary>
+    private async void Save_Pressed(object sender, EventArgs e)
+    {
+        if (BindingContext is LocationViewModel viewModel)
+        {
+            // Execute the save command
+            viewModel.SaveCommand.Execute(null);
 
-// Save to file or use it
-var resizedStream = data.AsStream();*/
+            // If save was successful (no error message), reset view or close modal
+            if (string.IsNullOrEmpty(viewModel.VmErrorMessage))
+            {
+                if (_isEditMode)
+                {
+                    await Navigation.PopModalAsync();
+                }
+                else
+                {
+                    // Create a new view model with services for a new location
+                    var newViewModel = new LocationViewModel(
+                        _locationService,
+                        _mediaService,
+                        _geolocationService);
+
+                    // Subscribe to error events
+                    newViewModel.ErrorOccurred += ViewModel_ErrorOccurred;
+
+                    // Set as binding context
+                    BindingContext = newViewModel;
+
+                    // Start getting location for the new entry
+                    await GetCurrentLocationAsync();
+
+                    // Show success message
+                    await DisplayAlert(
+                        "Success",
+                        "Location saved successfully",
+                        AppResources.OK);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handle add photo button press
+    /// </summary>
+    private void AddPhoto_Pressed(object sender, EventArgs e)
+    {
+        if (BindingContext is LocationViewModel viewModel)
+        {
+            viewModel.TakePhotoCommand.Execute(null);
+        }
+    }
+
+    /// <summary>
+    /// Handle close modal button press
+    /// </summary>
     private void CloseModal_Pressed(object sender, EventArgs e)
     {
         Navigation.PopModalAsync();
-        var x = (LocationViewModel)BindingContext;
-
     }
 
+    /// <summary>
+    /// Handle errors from the view model
+    /// </summary>
+    private void ViewModel_ErrorOccurred(object sender, Locations.Core.Shared.ViewModels.OperationErrorEventArgs e)
+    {
+        // Display error to user if it's not already displayed in the UI
+        MainThread.BeginInvokeOnMainThread(async () => {
+            await DisplayAlert(
+                AppResources.Error,
+                e.Message,
+                AppResources.OK);
+        });
+    }
 
+    #endregion
+
+    #region Location Handling
+
+    /// <summary>
+    /// Get the current location
+    /// </summary>
+    private async Task GetCurrentLocationAsync()
+    {
+        if (BindingContext is LocationViewModel viewModel && !_isEditMode)
+        {
+            try
+            {
+                // Start location tracking on the view model
+                viewModel.StartLocationTrackingCommand.Execute(null);
+
+                // For a more immediate response, also try to get the current location directly
+                if (_geolocationService != null)
+                {
+                    var result = await _geolocationService.GetCurrentLocationAsync();
+                    if (result.IsSuccess && result.Data != null)
+                    {
+                        // Update the view model with the current location
+                        viewModel.Lattitude = Math.Round(result.Data.Latitude, 6);
+                        viewModel.Longitude = Math.Round(result.Data.Longitude, 6);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't show it to the user, as it's not critical
+                System.Diagnostics.Debug.WriteLine($"Error getting current location: {ex.Message}");
+            }
+        }
+    }
+
+    #endregion
+
+    #region Lifecycle Methods
+
+    /// <summary>
+    /// Called when the page appears
+    /// </summary>
+    protected override async void OnPageAppearing(object sender, EventArgs e)
+    {
+        base.OnPageAppearing(sender, e);
+
+        // Re-subscribe to ViewModel events in case the binding context changed
+        if (BindingContext is LocationViewModel viewModel)
+        {
+            // Make sure we only subscribe once
+            viewModel.ErrorOccurred -= ViewModel_ErrorOccurred;
+            viewModel.ErrorOccurred += ViewModel_ErrorOccurred;
+
+            // If this is a new location (not edit mode), get the current location immediately
+            if (!_isEditMode && viewModel.VmIsNewLocation && viewModel.Lattitude == 0 && viewModel.Longitude == 0)
+            {
+                await GetCurrentLocationAsync();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Called when the page disappears
+    /// </summary>
+    protected override void OnPageDisappearing(object sender, EventArgs e)
+    {
+        base.OnPageDisappearing(sender, e);
+
+        // Unsubscribe from ViewModel events
+        if (BindingContext is LocationViewModel viewModel)
+        {
+            viewModel.ErrorOccurred -= ViewModel_ErrorOccurred;
+
+            // Ensure location tracking is stopped when leaving the page
+            if (viewModel.VmIsLocationTracking)
+            {
+                viewModel.StopLocationTrackingCommand.Execute(null);
+            }
+        }
+    }
+
+    #endregion
 }

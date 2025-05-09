@@ -1,12 +1,13 @@
-﻿using Location.Core.Helpers.LoggingService;
+﻿using Location.Core.Helpers.AlertService;
+using Location.Core.Helpers.LoggingService;
 using Location.Photography.Business.DataAccess.Interfaces;
 using Location.Photography.Data.Queries;
 using Locations.Core.Shared;
-using Locations.Core.Shared.Customizations.Alerts.Implementation;
 using Locations.Core.Shared.ViewModels;
-using AlertServiceErrorSource = Location.Core.Helpers.AlertService.ErrorSource;
+using ILoggerService = Locations.Core.Business.DataAccess.Interfaces.ILoggerService;
 namespace Location.Photography.Business.DataAccess
 {
+    /*
     /// <summary>
     /// Service for managing photography location data
     /// </summary>
@@ -21,7 +22,7 @@ namespace Location.Photography.Business.DataAccess
         /// Creates a new LocationService with logger and email
         /// </summary>
         public LocationService(ILoggerService logger, string email) : base(
-            new AlertService(),
+            
             logger)
         {
             _logger = logger;
@@ -80,7 +81,7 @@ namespace Location.Photography.Business.DataAccess
             {
                 // Implement using LocationsQuery directly
                 var result = _locationsQuery.DeleteItem(model);
-                return result;
+                return result == 1 ? true:false ;
             }
             catch (Exception ex)
             {
@@ -115,7 +116,7 @@ namespace Location.Photography.Business.DataAccess
             try
             {
                 // First, find the location by coordinates
-                var location = _locationsQuery.GetLocationByCoordinates(latitude, longitude);
+                var location = _locationsQuery.G(latitude, longitude);
                 if (location != null && !location.IsError)
                 {
                     // Then delete by ID
@@ -182,5 +183,5 @@ namespace Location.Photography.Business.DataAccess
         }
 
         #endregion
-    }
+    }*/
 }

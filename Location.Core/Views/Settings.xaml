@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<local:ContentPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Location.Core.Views"
              x:Class="Location.Core.Views.Settings"
              xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
              Title="" IconImageSource="cogbox.png"
-                          xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:strings="clr-namespace:Location.Core.Resources"
              x:DataType="models:SettingsViewModel">
-    <ContentPage.BindingContext>
-        <models:SettingsViewModel></models:SettingsViewModel>
-    </ContentPage.BindingContext>
+   
     <ScrollView>
         <Grid>
             <Grid.RowDefinitions>
@@ -51,55 +50,46 @@
             <Label Text="{x:Static strings:AppResources.WindDirection}" Grid.Row="3" Grid.Column="0"></Label>
             <Label x:Name="WindDirection" Text="" Grid.Row="3" Grid.Column="1"></Label>
             <Switch x:Name="WindDirectionSwitch" IsToggled="{Binding WindDirectionBoolean}" Grid.Row="3" Grid.Column="2" Toggled="WindDirectionSwitch_Toggled"></Switch>
-            
+
             <Label Text="{x:Static strings:AppResources.TemperatureFormat}" Grid.Row="4" Grid.Column="0"></Label>
             <Label  Text="{Binding TemperatureFormat.Value}" Grid.Row="4" Grid.Column="1"></Label>
             <Switch x:Name="TempFormatSwitch" IsToggled="{Binding TemperatureFormatToggle}" Grid.Row="4" Grid.Column="2" Toggled="TempFormatSwitch_Toggled"></Switch>
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
             <Label Text="{x:Static strings:AppResources.AccessIsFreeByWatchingAds}" Grid.Row="5" Grid.Column="0"></Label>
             <Switch x:Name="adsupport" IsToggled="{Binding AdSupportboolean}" Grid.Row="5" Grid.Column="2" Toggled="adsupport_Toggled"></Switch>
-            
+
             <Label Text="{x:Static strings:AppResources.SubscriptionType}" Grid.Row="6" Grid.Column="0"></Label>
             <Label Text="{Binding SubscriptionType.Value}" Grid.Row="6" Grid.Column="2" />
-            
+
             <Label Text="{x:Static strings:AppResources.SubscriptionExpiration}" Grid.Row="7" Grid.Column="0"></Label>
             <Label Text="{Binding SubscriptionExpiration.Value}" Grid.Row="7" Grid.Column="2" />
             <!-- Page Views -->
             <!-- Free -->
             <Label Text="{x:Static strings:AppResources.AddLocationTutorial}" Grid.Row="8" Grid.Column="0"></Label>
             <Switch IsEnabled="False" IsToggled="{Binding HomePageViewedBool}" Grid.Row="8" Grid.Column="2"/>
-            
+
             <Label Text="{x:Static strings:AppResources.ListLocationsTutorial}" Grid.Row="9" Grid.Column="0"></Label>
             <Switch IsEnabled="False" IsToggled="{Binding ListLocationsViewedBool}" Grid.Row="9" Grid.Column="2"/>
 
             <Label Text="{x:Static strings:AppResources.TipViewed}" Grid.Row="10" Grid.Column="0"></Label>
             <Switch IsEnabled="False" IsToggled="{Binding TipsViewedBool}" Grid.Row="10" Grid.Column="2"/>
- <!-- Pro -->
+            <!-- Pro -->
             <Label Text="{x:Static strings:AppResources.SunCalculationsTutorial}" Grid.Row="11" Grid.Column="0"></Label>
             <Switch IsEnabled="False" IsToggled="{Binding SunCalculationViewedBool}" Grid.Row="11" Grid.Column="2"/>
-       
+
             <Label Text="{x:Static strings:AppResources.SceneEvaluationTutorial}" Grid.Row="12" Grid.Column="0"></Label>
             <Switch IsEnabled="False" IsToggled="{Binding SceneEvaluationViewedBool}" Grid.Row="12" Grid.Column="2"/>
-  
+
             <!-- Premium -->
             <Label Text="{x:Static strings:AppResources.LightMeterTutorial}" Grid.Row="13" Grid.Column="0"></Label>
             <Switch IsEnabled="False" IsToggled="{Binding LightMeterViewedBool}" Grid.Row="13" Grid.Column="2"/>
-            
+
             <Label Text="{x:Static strings:AppResources.SunLocationTutorial}" Grid.Row="14" Grid.Column="0"></Label>
             <Switch IsEnabled="False" IsToggled="{Binding SunCalculationViewedBool}" Grid.Row="14" Grid.Column="2"/>
-           
+
             <Label Text="{x:Static strings:AppResources.ExposureCalculatorTutorial}" Grid.Row="15" Grid.Column="0"></Label>
             <Switch IsEnabled="False" IsToggled="{Binding ExposureCalcViewedBool}" Grid.Row="15" Grid.Column="2"/>
 
         </Grid>
     </ScrollView>
-
-</ContentPage>
+</local:ContentPageBase>

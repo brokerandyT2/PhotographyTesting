@@ -1,4 +1,6 @@
-﻿using Location.Core.Helpers.LoggingService;
+﻿
+using Locations.Core.Business.DataAccess.Interfaces;
+using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
 using SQLite;
 using System;
@@ -17,11 +19,13 @@ namespace Locations.Core.Business.Services
         private readonly object _lockObject = new object();
         private readonly string _loggerDbPath;
 
+        public event EventHandler<OperationErrorEventArgs> ErrorOccurred;
+
         /// <summary>
         /// Initializes a new instance of the LoggerService class with the default database path
         /// </summary>
         public LoggerService()
-            : this(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "logger.db"))
+            : this(MagicStrings.DataBasePathEncrypted)
         {
         }
 
@@ -332,6 +336,26 @@ namespace Locations.Core.Business.Services
                 // In a production environment, we might want a fallback mechanism
                 Console.WriteLine($"Error writing to log: {ex.Message}");
             }
+        }
+
+        IEnumerable<Log> ILoggerService.GetLogsByLevel(string level, int pageSize, int pageNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<Log> ILoggerService.GetLogsByDateRange(DateTime startDate, DateTime endDate, int pageSize, int pageNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<Log> ILoggerService.SearchLogs(string searchText, int pageSize, int pageNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<Log> ILoggerService.GetLogs(int pageSize, int pageNumber)
+        {
+            throw new NotImplementedException();
         }
     }
 }
