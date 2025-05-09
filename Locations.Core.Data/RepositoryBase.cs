@@ -1,292 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SQLite;
-using EncryptedSQLite;
-using Locations.Core.Data.Helpers;
-using Locations.Core.Data.Interfaces;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
-using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
-using DataErrorEventArgs = Locations.Core.Data.Models.DataErrorEventArgs;
-using ErrorSource = Locations.Core.Data.Models.ErrorSource;
 
-namespace Locations.Core.Data.Queries
+namespace Locations.Core.Data.Queries.Base
 {
     /// <summary>
-    /// Base generic repository implementation with common CRUD operations
+    /// Base implementation for repositories
     /// </summary>
-    /// <typeparam name="TEntity">The entity type this repository handles</typeparam>
-    public class RepositoryBase<TEntity> : Database, IRepository<TEntity> where TEntity : class, new()
+    /// <typeparam name="TEntity">The entity type for this repository</typeparam>
+    public abstract class RepositoryBase<TEntity> : IRepository<TEntity>
+        where TEntity : class, new()
     {
-        public RepositoryBase(IAlertService alertService, ILoggerService loggerService)
-            : base(alertService, loggerService)
+        /// <summary>
+        /// Event triggered when an error occurs in the repository
+        /// </summary>
+        public event EventHandler<DataErrorEventArgs> ErrorOccurred;
+
+        /// <summary>
+        /// Raises the error event
+        /// </summary>
+        protected virtual void OnErrorOccurred(DataErrorEventArgs e)
         {
+            ErrorOccurred?.Invoke(this, e);
         }
 
         /// <summary>
         /// Gets an entity by ID
         /// </summary>
-        public virtual async Task<DataOperationResult<TEntity>> GetByIdAsync(int id)
-        {
-            try
-            {
-                // Assumption: Entity has a property named "Id" or "ID"
-                // This would need to be adapted based on your actual entity property names
-                // Use Expression<Func<T, bool>> for FirstOrDefaultAsync
-                var idProperty = typeof(TEntity).GetProperty("Id") ?? typeof(TEntity).GetProperty("ID");
-                if (idProperty == null)
-                {
-                    throw new InvalidOperationException($"Entity {typeof(TEntity).Name} does not have an Id or ID property");
-                }
-
-                // Create a parameter expression for the lambda
-                var parameter = System.Linq.Expressions.Expression.Parameter(typeof(TEntity), "e");
-
-                // Create the property access expression: e.Id or e.ID
-                var property = System.Linq.Expressions.Expression.Property(parameter, idProperty);
-
-                // Create the constant expression for the id value
-                var constant = System.Linq.Expressions.Expression.Constant(id);
-
-                // Create the equality expression: e.Id == id
-                var equality = System.Linq.Expressions.Expression.Equal(property, constant);
-
-                // Create the lambda expression: e => e.Id == id
-                var lambda = System.Linq.Expressions.Expression.Lambda<Func<TEntity, bool>>(equality, parameter);
-
-                var result = await dataB.Table<TEntity>().FirstOrDefaultAsync(lambda);
-
-                if (result == null)
-                {
-                    return DataOperationResult<TEntity>.Failure(
-                        ErrorSource.Database,
-                        $"Entity with ID {id} not found");
-                }
-
-                return DataOperationResult<TEntity>.Success(result);
-            }
-            catch (SQLiteException ex)
-            {
-                string message = $"Database error retrieving entity ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
-                OnErrorOccurred(new DataErrorEventArgs(
-                    ErrorSource.Database,
-                    message,
-                    ex));
-                return DataOperationResult<TEntity>.Failure(ErrorSource.Database, message, ex);
-            }
-            catch (Exception ex)
-            {
-                string message = $"Error retrieving entity ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
-                OnErrorOccurred(new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex));
-                return DataOperationResult<TEntity>.Failure(ErrorSource.Unknown, message, ex);
-            }
-        }
+        public abstract Task<DataOperationResult<TEntity>> GetByIdAsync(int id);
 
         /// <summary>
-        /// Gets all entities of type TEntity
+        /// Gets all entities
         /// </summary>
-        public virtual async Task<DataOperationResult<IList<TEntity>>> GetAllAsync()
-        {
-            try
-            {
-                var results = await dataB.Table<TEntity>().ToListAsync();
-                return DataOperationResult<IList<TEntity>>.Success(results);
-            }
-            catch (SQLiteException ex)
-            {
-                string message = $"Database error retrieving entities: {ex.Message}";
-                LoggerService.LogError(message, ex);
-                OnErrorOccurred(new DataErrorEventArgs(
-                    ErrorSource.Database,
-                    message,
-                    ex));
-                return DataOperationResult<IList<TEntity>>.Failure(ErrorSource.Database, message, ex);
-            }
-            catch (Exception ex)
-            {
-                string message = $"Error retrieving entities: {ex.Message}";
-                LoggerService.LogError(message, ex);
-                OnErrorOccurred(new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex));
-                return DataOperationResult<IList<TEntity>>.Failure(ErrorSource.Unknown, message, ex);
-            }
-        }
+        public abstract Task<DataOperationResult<IList<TEntity>>> GetAllAsync();
+
+        /// <summary>
+        /// Saves an entity - updated to match IRepository return type
+        /// </summary>
+        public abstract Task<DataOperationResult<TEntity>> SaveAsync(TEntity entity);
+
+        /// <summary>
+        /// Updates an existing entity
+        /// </summary>
+        public abstract Task<DataOperationResult<bool>> UpdateAsync(TEntity entity);
 
         /// <summary>
         /// Deletes an entity by ID
         /// </summary>
-        public virtual async Task<DataOperationResult<bool>> DeleteAsync(int id)
-        {
-            try
-            {
-                var itemResult = await GetByIdAsync(id);
-                if (!itemResult.IsSuccess)
-                {
-                    return DataOperationResult<bool>.Failure(
-                        ErrorSource.Database,
-                        $"Failed to find entity with ID {id} for deletion");
-                }
-
-                var result = await dataB.DeleteAsync(itemResult.Data);
-                return result > 0
-                    ? DataOperationResult<bool>.Success(true)
-                    : DataOperationResult<bool>.Failure(ErrorSource.Database, "Entity was not deleted");
-            }
-            catch (SQLiteException ex)
-            {
-                string message = $"Database error while deleting entity ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
-                OnErrorOccurred(new DataErrorEventArgs(
-                    ErrorSource.Database,
-                    message,
-                    ex));
-                return DataOperationResult<bool>.Failure(ErrorSource.Database, message, ex);
-            }
-            catch (Exception ex)
-            {
-                string message = $"Error deleting entity ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
-                OnErrorOccurred(new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex));
-                return DataOperationResult<bool>.Failure(ErrorSource.Unknown, message, ex);
-            }
-        }
+        public abstract Task<DataOperationResult<bool>> DeleteAsync(int id);
 
         /// <summary>
-        /// Saves an entity to the database
+        /// Deletes an entity
         /// </summary>
-        public virtual async Task<DataOperationResult<bool>> SaveAsync(TEntity entity)
-        {
-            try
-            {
-                // Check if entity implements IValidatable
-                if (entity is IValidatable validatable)
-                {
-                    if (!validatable.Validate(out List<string> errors))
-                    {
-                        string validationErrors = string.Join(", ", errors);
-                        string message = $"Validation failed: {validationErrors}";
-
-                        LoggerService.LogWarning(message);
-                        OnErrorOccurred(new DataErrorEventArgs(
-                            ErrorSource.ModelValidation,
-                            message,
-                            null,
-                            entity));
-
-                        return DataOperationResult<bool>.Failure(
-                            ErrorSource.ModelValidation,
-                            message);
-                    }
-                }
-
-                var result = await dataB.InsertOrReplaceAsync(entity);
-                return result > 0
-                    ? DataOperationResult<bool>.Success(true)
-                    : DataOperationResult<bool>.Failure(ErrorSource.Database, "Entity was not saved");
-            }
-            catch (SQLiteException ex)
-            {
-                string message = $"Database error while saving entity: {ex.Message}";
-                LoggerService.LogError(message, ex);
-                OnErrorOccurred(new DataErrorEventArgs(
-                    ErrorSource.Database,
-                    message,
-                    ex,
-                    entity));
-                return DataOperationResult<bool>.Failure(ErrorSource.Database, message, ex);
-            }
-            catch (Exception ex)
-            {
-                string message = $"Error saving entity: {ex.Message}";
-                LoggerService.LogError(message, ex);
-                OnErrorOccurred(new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex,
-                    entity));
-                return DataOperationResult<bool>.Failure(ErrorSource.Unknown, message, ex);
-            }
-        }
+        public abstract Task<DataOperationResult<bool>> DeleteAsync(TEntity entity);
 
         /// <summary>
-        /// Updates an entity in the database
+        /// Creates an error result
         /// </summary>
-        public virtual Task<DataOperationResult<bool>> UpdateAsync(TEntity entity)
+        protected DataOperationResult<T> CreateErrorResult<T>(ErrorSource source, string message, Exception ex)
         {
-            // Update is the same as save in this implementation
-            return SaveAsync(entity);
+            return DataOperationResult<T>.Failure(source, message, ex);
         }
-
-        /// <summary>
-        /// Saves an entity and returns it with ID populated
-        /// </summary>
-        public virtual async Task<DataOperationResult<TEntity>> SaveWithIdReturnAsync(TEntity entity)
-        {
-            try
-            {
-                // Check if entity implements IValidatable
-                if (entity is IValidatable validatable)
-                {
-                    if (!validatable.Validate(out List<string> errors))
-                    {
-                        string validationErrors = string.Join(", ", errors);
-                        string message = $"Validation failed: {validationErrors}";
-
-                        LoggerService.LogWarning(message);
-                        OnErrorOccurred(new DataErrorEventArgs(
-                            ErrorSource.ModelValidation,
-                            message,
-                            null,
-                            entity));
-
-                        return DataOperationResult<TEntity>.Failure(
-                            ErrorSource.ModelValidation,
-                            message);
-                    }
-                }
-
-                // Get a synchronous connection for this operation
-                SQLiteConnection conn = GetSyncEncryptedConnection();
-                conn.Insert(entity);
-
-                return DataOperationResult<TEntity>.Success(entity);
-            }
-            catch (SQLiteException ex)
-            {
-                string message = $"Database error while saving entity with ID return: {ex.Message}";
-                LoggerService.LogError(message, ex);
-                OnErrorOccurred(new DataErrorEventArgs(
-                    ErrorSource.Database,
-                    message,
-                    ex,
-                    entity));
-                return DataOperationResult<TEntity>.Failure(ErrorSource.Database, message, ex);
-            }
-            catch (Exception ex)
-            {
-                string message = $"Error saving entity with ID return: {ex.Message}";
-                LoggerService.LogError(message, ex);
-                OnErrorOccurred(new DataErrorEventArgs(
-                    ErrorSource.Unknown,
-                    message,
-                    ex,
-                    entity));
-                return DataOperationResult<TEntity>.Failure(ErrorSource.Unknown, message, ex);
-            }
-        }
-
-        // Removed GetIdPredicate method as we're creating expressions inline
     }
 }

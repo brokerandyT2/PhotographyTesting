@@ -20,5 +20,6 @@ namespace Location.Core.Helpers.AlertService
             ButtonText = buttonText;
             AlertType = alertType;
         }
+        public AlertEventArgs(string message) { Message = message; }
     }
 }

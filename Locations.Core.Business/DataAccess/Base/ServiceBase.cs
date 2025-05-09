@@ -6,7 +6,8 @@ using Location.Core.Helpers.LoggingService;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using System.Reflection;
-
+using DataErrorEventArgsModel = Locations.Core.Data.Models.DataErrorEventArgs;
+using ErrorSourceModel = Locations.Core.Data.Models.ErrorSource;
 namespace Locations.Core.Business.DataAccess.Base
 {
     /// <summary>
@@ -60,7 +61,7 @@ namespace Locations.Core.Business.DataAccess.Base
         /// <summary>
         /// Handles errors from the repository
         /// </summary>
-        private void RepositoryOnErrorOccurred(object sender, DataErrorEventArgs e)
+        private void RepositoryOnErrorOccurred(object sender, DataErrorEventArgsModel e)
         {
             // Log the error
             LoggerService.LogError(e.Message, e.Exception);
@@ -72,7 +73,7 @@ namespace Locations.Core.Business.DataAccess.Base
         /// <summary>
         /// Raises the error event
         /// </summary>
-        public virtual void OnErrorOccurred(DataErrorEventArgs e)
+        public virtual void OnErrorOccurred(DataErrorEventArgsModel e)
         {
             // Log the error
             LoggerService.LogError(e.Message, e.Exception);
@@ -98,9 +99,9 @@ namespace Locations.Core.Business.DataAccess.Base
         /// <summary>
         /// Creates a new error event
         /// </summary>
-        protected virtual DataErrorEventArgs CreateErrorEventArgs(ErrorSource source, string message, Exception ex = null)
+        protected virtual DataErrorEventArgsModel CreateErrorEventArgs(ErrorSource source, string message, Exception ex = null)
         {
-            return new DataErrorEventArgs(source, message, ex);
+            return new DataErrorEventArgsModel(source, message, ex);
         }
 
         /// <summary>
@@ -114,10 +115,10 @@ namespace Locations.Core.Business.DataAccess.Base
             }
             catch (Exception ex)
             {
-                var errorArgs = CreateErrorEventArgs(ErrorSource.Unknown,
+                var errorArgs = CreateErrorEventArgs(ErrorSourceModel.Unknown,
                     $"Error retrieving entity with ID {id}: {ex.Message}", ex);
                 OnErrorOccurred(errorArgs);
-                return DataOperationResult<T>.Failure(ErrorSource.Unknown, errorArgs.Message, ex);
+                return DataOperationResult<T>.Failure(ErrorSourceModel.Unknown, errorArgs.Message, ex);
             }
         }
 
@@ -138,16 +139,16 @@ namespace Locations.Core.Business.DataAccess.Base
 
                 // Create a new failure result with the same error information
                 return DataOperationResult<List<T>>.Failure(
-                    ErrorSource.Unknown,
+                    ErrorSourceModel.Unknown,
                     "Failed to retrieve all entities",
                     null);
             }
             catch (Exception ex)
             {
-                var errorArgs = CreateErrorEventArgs(ErrorSource.Unknown,
+                var errorArgs = CreateErrorEventArgs(ErrorSourceModel.Unknown,
                     $"Error retrieving all entities: {ex.Message}", ex);
                 OnErrorOccurred(errorArgs);
-                return DataOperationResult<List<T>>.Failure(ErrorSource.Unknown, errorArgs.Message, ex);
+                return DataOperationResult<List<T>>.Failure(ErrorSourceModel.Unknown, errorArgs.Message, ex);
             }
         }
 
@@ -162,10 +163,10 @@ namespace Locations.Core.Business.DataAccess.Base
             }
             catch (Exception ex)
             {
-                var errorArgs = CreateErrorEventArgs(ErrorSource.Unknown,
+                var errorArgs = CreateErrorEventArgs(ErrorSourceModel.Unknown,
                     $"Error saving entity: {ex.Message}", ex);
                 OnErrorOccurred(errorArgs);
-                return DataOperationResult<T>.Failure(ErrorSource.Unknown, errorArgs.Message, ex);
+                return DataOperationResult<T>.Failure(ErrorSourceModel.Unknown, errorArgs.Message, ex);
             }
         }
 
@@ -180,10 +181,10 @@ namespace Locations.Core.Business.DataAccess.Base
             }
             catch (Exception ex)
             {
-                var errorArgs = CreateErrorEventArgs(ErrorSource.Unknown,
+                var errorArgs = CreateErrorEventArgs(ErrorSourceModel.Unknown,
                     $"Error updating entity: {ex.Message}", ex);
                 OnErrorOccurred(errorArgs);
-                return DataOperationResult<bool>.Failure(ErrorSource.Unknown, errorArgs.Message, ex);
+                return DataOperationResult<bool>.Failure(ErrorSourceModel.Unknown, errorArgs.Message, ex);
             }
         }
 
@@ -198,10 +199,10 @@ namespace Locations.Core.Business.DataAccess.Base
             }
             catch (Exception ex)
             {
-                var errorArgs = CreateErrorEventArgs(ErrorSource.Unknown,
+                var errorArgs = CreateErrorEventArgs(ErrorSourceModel.Unknown,
                     $"Error deleting entity with ID {id}: {ex.Message}", ex);
                 OnErrorOccurred(errorArgs);
-                return DataOperationResult<bool>.Failure(ErrorSource.Unknown, errorArgs.Message, ex);
+                return DataOperationResult<bool>.Failure(ErrorSourceModel.Unknown, errorArgs.Message, ex);
             }
         }
 
@@ -247,17 +248,17 @@ namespace Locations.Core.Business.DataAccess.Base
                     // Log the error and create a failure result
                     LoggerService.LogError("Failed to delete entity", innerEx);
                     return DataOperationResult<bool>.Failure(
-                        ErrorSource.Unknown,
+                        ErrorSourceModel.Unknown,
                         $"Failed to delete entity: {innerEx.Message}",
                         innerEx);
                 }
             }
             catch (Exception ex)
             {
-                var errorArgs = CreateErrorEventArgs(ErrorSource.Unknown,
+                var errorArgs = CreateErrorEventArgs(ErrorSourceModel.Unknown,
                     $"Error deleting entity: {ex.Message}", ex);
                 OnErrorOccurred(errorArgs);
-                return DataOperationResult<bool>.Failure(ErrorSource.Unknown, errorArgs.Message, ex);
+                return DataOperationResult<bool>.Failure(ErrorSourceModel.Unknown, errorArgs.Message, ex);
             }
         }
     }
