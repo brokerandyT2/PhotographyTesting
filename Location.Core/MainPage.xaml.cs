@@ -1,11 +1,10 @@
 ﻿using Location.Core.Views;
-using Locations.Core.Business.DataAccess;
 using Locations.Core.Business.StorageSvc;
 using Locations.Core.Shared;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
 using Newtonsoft.Json;
 using System.Globalization;
 using static Locations.Core.Shared.Enums.SubscriptionType;
+
 #if PHOTOGRAPHY
 
 #endif
@@ -101,10 +100,15 @@ namespace Location.Core
 #if PHOTOGRAPHY
                     this.Children.Add(new Views.Pro.SceneEvaluation());
                     this.Children.Add(new Views.Pro.SunCalculations());
+                /*    this.Children.Add(new Location.Photography.Pro.SceneEvaluation());
+                    this.Children.Add(new Photography.Pro.SunCalculations()); */
 #endif
                     if ((subscription == SubscriptionTypeEnum.Premium) || adSupport)
                     {
 #if PHOTOGRAPHY
+                    /*    this.Children.Add(new Photography.Premium.ExposureCalculator());
+                        this.Children.Add(new Photography.Premium.LightMeter());
+                        this.Children.Add(new Photography.Premium.SunLocation()); */
                         this.Children.Add(new Views.Premium.ExposureCalculator());
                         this.Children.Add(new Views.Premium.LightMeter());
                         this.Children.Add(new Views.Premium.SunLocation());

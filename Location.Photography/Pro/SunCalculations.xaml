@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Location.Photography.Pro.SunCalculations"
+             Title="SunCalculations"
+
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+          >
+
+    <ScrollView>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="0" Grid.ColumnSpan="4"/>
+            <Image x:Name="locationPhoto" Grid.Row="1" Grid.ColumnSpan="4"/>
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="2" Grid.ColumnSpan="4"/>
+            <Label Text="" Grid.Row="3" Grid.ColumnSpan="4"/>
+            <Picker x:Name="locationPicker" Grid.Row="4" Grid.ColumnSpan="4" ItemsSource="{Binding Locations}" ItemDisplayBinding="{Binding Title}" SelectedIndexChanged="" />
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="5" Grid.ColumnSpan="4"/>
+            <DatePicker x:Name="datePicker" DateSelected="" Format="{Binding DateFormat}" Grid.Row="6" Grid.ColumnSpan="4"/>
+
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="7" Grid.ColumnSpan="4"/>
+            <Image Source="weathersunsetupcustom.png" Grid.Row="8" Grid.Column="0" />
+            <Label Text="" TextColor="#CC0000" FontSize="Small" HorizontalOptions="Start" Grid.Row="8" Grid.Column="1" />
+            <Label Text="{Binding AstronomicalDawnFormatted}" HorizontalOptions="End" Grid.Row="8" Grid.Column="3" />
+
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="9" Grid.ColumnSpan="4"/>
+            <Image Source="weathersunsetupcustom.png" Grid.Row="9" Grid.Column="0" />
+            <Label Text="" TextColor="#CC0000" FontSize="Small" HorizontalOptions="Start" Grid.Row="9" Grid.Column="1" />
+            <Label x:Name="sunrisedisplay" Text="{Binding SunRiseFormatted}" HorizontalOptions="End" Grid.Row="9" Grid.Column="3" />
+
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="10" Grid.ColumnSpan="4"/>
+            <Image Source="sunclockoutlinecustom.png" Grid.Row="11" Grid.Column="0" />
+            <Label Text="" TextColor="#CC0000" FontSize="Small" HorizontalOptions="Start" Grid.Row="11" Grid.Column="1" />
+            <Label x:Name="goldenhourmorningdisplay" Text="{Binding GoldenHourMorningFormatted}" HorizontalOptions="End" Grid.Row="11" Grid.Column="3" />
+
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="12" Grid.ColumnSpan="4"/>
+            <Image Source="sunclockoutlinecustom.png" Grid.Row="13" Grid.Column="0" />
+            <Label Text="" TextColor="#CC0000" FontSize="Small" HorizontalOptions="Start" Grid.Row="13" Grid.Column="1" />
+            <Label x:Name="solarnoondisplay" Text="{Binding SolarNoonFormatted}" HorizontalOptions="End" Grid.Row="13" Grid.Column="3" />
+
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="14" Grid.ColumnSpan="4"/>
+            <Image Source="weathersunsetdowncustom.png" Grid.Row="15" Grid.Column="0" />
+            <Label Text="" TextColor="#CC0000" FontSize="Small" HorizontalOptions="Start" Grid.Row="15" Grid.Column="1" />
+            <Label x:Name="goldenhoureveningdisplay" Text="{Binding GoldenHourEveningFormatted}" HorizontalOptions="End" Grid.Row="15" Grid.Column="3" />
+
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="16" Grid.ColumnSpan="4"/>
+            <Image Source="weathersunsetdowncustom.png" Grid.Row="17" Grid.Column="0" />
+            <Label Text="" TextColor="#CC0000" FontSize="Small" HorizontalOptions="Start" Grid.Row="17" Grid.Column="1" />
+            <Label x:Name="sunsetdisplay" Text="{Binding SunSetFormatted}" HorizontalOptions="End" Grid.Row="17" Grid.Column="3" />
+            
+            <Label Text="{x:Static system:Environment.NewLine}" Grid.Row="18" Grid.ColumnSpan="4"/>
+            <Image Source="weathersunsetdowncustom.png" Grid.Row="19" Grid.Column="0" />
+            <Label Text="" TextColor="#CC0000" FontSize="Small" HorizontalOptions="Start" Grid.Row="19" Grid.Column="1" />
+            <Label FormattedText="{Binding AstronomicalDuskFormatted}" HorizontalOptions="End" Grid.Row="19" Grid.Column="3" />
+
+        </Grid>
+
+    </ScrollView>
+</ContentPage>
