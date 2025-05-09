@@ -4,165 +4,115 @@ using Location.Core.Resources;
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
-using System.Collections.ObjectModel;
 
-namespace Location.Core.Views;
-
-public partial class ListLocations : ContentPageBase
+namespace Location.Core.Views
 {
-    #region Services
-
-    private readonly ILocationService _locationService;
-    private ObservableCollection<LocationViewModel> _items = [];
-    public ObservableCollection<LocationViewModel> Items { get { return _items; } set { _items = value; } }
-
-    #endregion
-
-    #region Constructors
-
-    /// <summary>
-    /// Default constructor for design-time and XAML preview
-    /// </summary>
-    public ListLocations() : base()
+    public partial class ListLocations : ContentPageBase
     {
-        InitializeComponent();
-        BindingContext = this;
-    }
+        private LocationsListViewModel _viewModel;
 
-    /// <summary>
-    /// Main constructor with DI
-    /// </summary>
-    public ListLocations(
-        ISettingService<SettingViewModel> settingsService,
-        IAlertService alertService,
-        ILocationService locationService) : base(settingsService, alertService, PageEnums.ListLocations, false)
-    {
-        _locationService = locationService ?? throw new ArgumentNullException(nameof(locationService));
-
-        InitializeComponent();
-        BindingContext = this;
-    }
-
-    #endregion
-
-    #region Data Loading
-
-    /// <summary>
-    /// Populates location data from the service
-    /// </summary>
-    private async void PopulateData()
-    {
-        try
+        /// <summary>
+        /// Default constructor for design-time and XAML preview
+        /// </summary>
+        public ListLocations() : base()
         {
-            if (_locationService == null)
-            {
-                await DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
-                return;
-            }
+            InitializeComponent();
+        }
 
-            var result = await _locationService.GetLocationsAsync();
+        /// <summary>
+        /// Main constructor with DI
+        /// </summary>
+        public ListLocations(
+            ISettingService<SettingViewModel> settingsService,
+            IAlertService alertService,
+            ILocationService locationService) : base(settingsService, alertService, PageEnums.ListLocations, false)
+        {
+           
+            InitializeComponent();
 
-            Items.Clear();
+            // Create ViewModel and set as BindingContext
+            _viewModel = new LocationsListViewModel(locationService);
+            BindingContext = _viewModel;
 
-            if (result.IsSuccess && result.Data != null)
-            {
-                foreach (var location in result.Data)
+            // Subscribe to ViewModel events
+            _viewModel.ErrorOccurred += ViewModel_ErrorOccurred;
+
+            // Subscribe to navigation messages
+            MessagingCenter.Subscribe<LocationsListViewModel, int>(this, "NavigateToLocation", OnNavigateToLocation);
+            MessagingCenter.Subscribe<LocationsListViewModel, LocationViewModel>(this, "OpenMap", OnOpenMap);
+        }
+
+        /// <summary>
+        /// Handle ViewModel error events
+        /// </summary>
+        private void ViewModel_ErrorOccurred(object sender, Locations.Core.Shared.ViewModels.OperationErrorEventArgs e)
+        {
+            MainThread.BeginInvokeOnMainThread(async () => {
+                await DisplayAlert(AppResources.Error, e.Message, AppResources.OK);
+            });
+        }
+
+        /// <summary>
+        /// Handle navigation to location details
+        /// </summary>
+        private void OnNavigateToLocation(LocationsListViewModel sender, int locationId)
+        {
+            MainThread.BeginInvokeOnMainThread(async () => {
+                await Navigation.PushModalAsync(new NavigationPage(new Views.EditLocation(locationId)));
+            });
+        }
+
+        /// <summary>
+        /// Handle opening map for location
+        /// </summary>
+        private void OnOpenMap(LocationsListViewModel sender, LocationViewModel location)
+        {
+            MainThread.BeginInvokeOnMainThread(async () => {
+                try
                 {
-                    _items.Add(location);
+                    var mapLocation = new Microsoft.Maui.Devices.Sensors.Location(location.Lattitude, location.Longitude);
+                    var options = new MapLaunchOptions { Name = location.Title };
+
+                    await Map.Default.OpenAsync(mapLocation, options);
                 }
-            }
-            else
-            {
-                // Handle error
-                await DisplayAlert(AppResources.Error,
-                    result.ErrorMessage ?? AppResources.ErrorUpdatingSetting,
-                    AppResources.OK);
-            }
-
-            BindingContext = this;
-            cv.ItemsSource = Items;
+                catch (Exception ex)
+                {
+                    await DisplayAlert(AppResources.Error, "No Map Application", AppResources.OK);
+                    HandleError(ex, "Error opening map");
+                }
+            });
         }
-        catch (Exception ex)
+
+        /// <summary>
+        /// Load data when navigated to
+        /// </summary>
+        protected override void OnNavigatedTo(NavigatedToEventArgs args)
         {
-            await DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
-            HandleError(ex, "Error loading locations");
+            base.OnNavigatedTo(args);
+
+            // Load data through the ViewModel
+            if (_viewModel != null)
+            {
+                _viewModel.LoadLocationsCommand.Execute(null);
+            }
         }
-    }
 
-    #endregion
-
-    #region Event Handlers
-
-    /// <summary>
-    /// Opens the map for the selected location
-    /// </summary>
-    private async void ImageButton_Pressed(object sender, EventArgs e)
-    {
-        if (_locationService == null)
-            return;
-
-        try
+        /// <summary>
+        /// Clean up resources when page disappears
+        /// </summary>
+        protected override void OnDisappearing()
         {
-            var button = (Microsoft.Maui.Controls.ImageButton)sender;
-            var id = (int)button.CommandParameter;
+            base.OnDisappearing();
 
-            var result = await _locationService.GetLocationAsync(id);
-
-            if (!result.IsSuccess || result.Data == null)
+            // Unsubscribe from ViewModel events
+            if (_viewModel != null)
             {
-                await DisplayAlert(AppResources.Error,
-                    result.ErrorMessage ?? AppResources.ErrorUpdatingSetting,
-                    AppResources.OK);
-                return;
+                _viewModel.ErrorOccurred -= ViewModel_ErrorOccurred;
             }
 
-            var locationData = result.Data;
-            var location = new Microsoft.Maui.Devices.Sensors.Location(locationData.Lattitude, locationData.Longitude);
-            var options = new MapLaunchOptions { Name = locationData.Title };
-
-            try
-            {
-                await Map.Default.OpenAsync(location, options);
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert(AppResources.Error, "No Map Application", AppResources.OK);
-                HandleError(ex, "Error opening map");
-            }
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert(AppResources.Error, AppResources.ErrorUpdatingSetting, AppResources.OK);
-            HandleError(ex, "Error handling map button");
+            // Unsubscribe from messaging center
+            MessagingCenter.Unsubscribe<LocationsListViewModel, int>(this, "NavigateToLocation");
+            MessagingCenter.Unsubscribe<LocationsListViewModel, LocationViewModel>(this, "OpenMap");
         }
     }
-
-    /// <summary>
-    /// Navigate to location details when an item is selected
-    /// </summary>
-    private void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (e.CurrentSelection.FirstOrDefault() is not LocationViewModel item)
-            return;
-
-        var id = item.Id;
-        Navigation.PushModalAsync(new NavigationPage(new Views.EditLocation(id)));
-    }
-
-    #endregion
-
-    #region Lifecycle Methods
-
-    /// <summary>
-    /// Load data when navigated to
-    /// </summary>
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
-    {
-        base.OnNavigatedTo(args);
-
-        // Populate data whenever we navigate to this page
-        PopulateData();
-    }
-
-    #endregion
 }

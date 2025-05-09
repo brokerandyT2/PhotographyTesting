@@ -38,7 +38,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EncryptedSQLite\EncryptedSQLite.csproj" />
-    <ProjectReference Include="..\Location.Core.Weather\OpenWeatherAPI.csproj" />
     <ProjectReference Include="..\Locations.Core.Data\Locations.Core.Data.csproj" />
     <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
 

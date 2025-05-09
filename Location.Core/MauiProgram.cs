@@ -41,7 +41,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ITip, TipViewModel>();
         builder.Services.AddTransient<ITipType, TipTypeViewModel>();
         builder.Services.AddTransient<ISettingsViewModel, SettingsViewModel>();
-        builder.Services.AddTransient<ILocationList, LocationsListViewModel>();
+        //builder.Services.AddTransient<ILocationList, LocationsListViewModel>();
         builder.Services.AddTransient<ITipsViewmodel, TipsViewModel>();
         builder.Services.AddTransient<IDetailsView, DetailsViewModel>();
 

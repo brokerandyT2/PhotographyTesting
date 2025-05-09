@@ -1,200 +1,141 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using Locations.Core.Shared.ViewModels.Interface;
-using Locations.Core.Shared.ViewModelServices;
-using System;
-using System.Collections.Generic;
+﻿using Locations.Core.Shared.ViewModelServices;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Locations.Core.Shared.ViewModels
 {
-    public class LocationsListViewModel : ViewModelBase, ILocationList
+    public class LocationsListViewModel : ViewModelBase
     {
-        // Private fields
-        private ObservableCollection<LocationViewModel> _locationsCollection;
-        private readonly ILocationService? _locationService;
+        private readonly ILocationService _locationService;
+        private ObservableCollection<LocationViewModel> _items = new ObservableCollection<LocationViewModel>();
+        private bool _isLoading;
+        private string _errorMessage;
 
-        // Custom refresh command - instead of trying to override the base one
-        private ICommand _refreshLocationsCommand;
-
-        // Properties
-        public ObservableCollection<LocationViewModel> LocationsCollection
+        public ObservableCollection<LocationViewModel> Items
         {
-            get => _locationsCollection;
-            set
-            {
-                _locationsCollection = value;
-                OnPropertyChanged(nameof(LocationsCollection));
-            }
+            get => _items;
+            set => SetProperty(ref _items, value);
         }
 
-        // ILocationList implementation
-        public List<LocationViewModel> locations => LocationsCollection.ToList();
-
-        // Commands
-        public ICommand AddLocationCommand { get; }
-        public ICommand DeleteLocationCommand { get; }
-        public ICommand RefreshLocationsCommand => _refreshLocationsCommand;
-
-        // Default constructor
-        public LocationsListViewModel()
+        public bool IsLoading
         {
-            LocationsCollection = new ObservableCollection<LocationViewModel>();
-
-            // Initialize commands
-            AddLocationCommand = new AsyncRelayCommand(AddLocationAsync, () => !VmIsBusy);
-            DeleteLocationCommand = new AsyncRelayCommand<LocationViewModel>(DeleteLocationAsync, (location) => location != null && !VmIsBusy);
-
-            // Create our own refresh command instead of trying to override the base one
-            _refreshLocationsCommand = new AsyncRelayCommand(LoadDataAsync, () => !VmIsBusy);
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
         }
 
-        // Constructor with DI
-        public LocationsListViewModel(ILocationService locationService) : this()
+        public string ErrorMessage
         {
-            _locationService = locationService;
+            get => _errorMessage;
+            set => SetProperty(ref _errorMessage, value);
         }
 
-        // Load data method
-        protected override async Task LoadDataAsync()
+        public ICommand LoadLocationsCommand { get; }
+        public ICommand OpenMapCommand { get; }
+        public ICommand SelectLocationCommand { get; }
+
+        // Define the error event using the correct type
+        public event EventHandler<Locations.Core.Shared.ViewModels.OperationErrorEventArgs> ErrorOccurred;
+
+        public LocationsListViewModel(ILocationService locationService)
+        {
+            _locationService = locationService ?? throw new ArgumentNullException(nameof(locationService));
+
+            LoadLocationsCommand = new Command(async () => await LoadLocationsAsync());
+            OpenMapCommand = new Command<int>(async (id) => await OpenMapAsync(id));
+            SelectLocationCommand = new Command<LocationViewModel>(SelectLocation);
+        }
+
+        private async Task LoadLocationsAsync()
         {
             try
             {
-                await base.LoadDataAsync();
+                IsLoading = true;
+                ErrorMessage = string.Empty;
 
-                if (_locationService == null) return;
-
-                // Load locations from service
                 var result = await _locationService.GetLocationsAsync();
+
+                Items.Clear();
 
                 if (result.IsSuccess && result.Data != null)
                 {
-                    LocationsCollection.Clear();
                     foreach (var location in result.Data)
                     {
-                        // Assuming the service returns LocationViewModel or a compatible type
-                        LocationsCollection.Add(location);
-
-                        // Subscribe to each location's error events
-                        location.ErrorOccurred += OnLocationErrorOccurred;
+                        Items.Add(location);
                     }
                 }
                 else
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to load locations";
-                    OnErrorOccurred(new OperationErrorEventArgs(
-                        Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                        VmErrorMessage,
-                        result.Exception));
+                    ErrorMessage = result.ErrorMessage ?? "Failed to load locations";
+                    OnErrorOccurred(new Locations.Core.Shared.ViewModels.OperationErrorEventArgs(
+                        Locations.Core.Shared.ViewModels.OperationErrorSource.Service,
+                        ErrorMessage
+                        ));
                 }
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error loading locations: {ex.Message}";
-                OnErrorOccurred(new OperationErrorEventArgs(
-                    Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
-                    ex));
-            }
-        }
-
-        // Add a new location
-        private async Task AddLocationAsync()
-        {
-            try
-            {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
-
-                if (_locationService == null) return;
-
-                // Create a new location
-                var newLocation = new LocationViewModel();
-
-                // Add to collection first for immediate UI feedback
-                LocationsCollection.Add(newLocation);
-
-                // Subscribe to error events
-                newLocation.ErrorOccurred += OnLocationErrorOccurred;
-
-                // In a real app, you might navigate to an edit screen here
-            }
-            catch (Exception ex)
-            {
-                VmErrorMessage = $"Error adding location: {ex.Message}";
-                OnErrorOccurred(new OperationErrorEventArgs(
-                    Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
-                    ex));
+                ErrorMessage = $"Error loading locations: {ex.Message}";
+                OnErrorOccurred(new Locations.Core.Shared.ViewModels.OperationErrorEventArgs(
+                    Locations.Core.Shared.ViewModels.OperationErrorSource.Service,
+                        ErrorMessage
+                        ));
             }
             finally
             {
-                VmIsBusy = false;
+                IsLoading = false;
             }
         }
 
-        // Delete a location
-        private async Task DeleteLocationAsync(LocationViewModel location)
+        private async Task OpenMapAsync(int locationId)
         {
             try
             {
-                if (location == null || _locationService == null) return;
+                ErrorMessage = string.Empty;
+                IsLoading = true;
 
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                var result = await _locationService.GetLocationAsync(locationId);
 
-                // Call the service to delete the location
-                var result = await _locationService.DeleteLocationAsync(location.Id);
-
-                if (result.IsSuccess)
+                if (!result.IsSuccess || result.Data == null)
                 {
-                    // Remove from our collection
-                    LocationsCollection.Remove(location);
+                    ErrorMessage = result.ErrorMessage ?? "Failed to retrieve location";
+                    OnErrorOccurred(new Locations.Core.Shared.ViewModels.OperationErrorEventArgs(
+                       Locations.Core.Shared.ViewModels.OperationErrorSource.Service,
+                        ErrorMessage
+                        ));
+                    return;
+                }
 
-                    // Unsubscribe from error events
-                    location.ErrorOccurred -= OnLocationErrorOccurred;
-                }
-                else
-                {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to delete location";
-                    OnErrorOccurred(new OperationErrorEventArgs(
-                        Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                        VmErrorMessage,
-                        result.Exception));
-                }
+                var locationData = result.Data;
+
+                // We'll use messaging to communicate with the view
+                MessagingCenter.Send(this, "OpenMap", locationData);
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error deleting location: {ex.Message}";
-                OnErrorOccurred(new OperationErrorEventArgs(
-                    Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
-                    ex));
+                ErrorMessage = $"Error opening map: {ex.Message}";
+                OnErrorOccurred(new Locations.Core.Shared.ViewModels.OperationErrorEventArgs(
+ Locations.Core.Shared.ViewModels.OperationErrorSource.Service,
+                        ErrorMessage
+                        ));
             }
             finally
             {
-                VmIsBusy = false;
+                IsLoading = false;
             }
         }
 
-        // Handle errors from locations
-        private void OnLocationErrorOccurred(object sender, OperationErrorEventArgs e)
+        private void SelectLocation(LocationViewModel location)
         {
-            // Bubble up errors from locations
-            VmErrorMessage = e.Message;
-            OnErrorOccurred(e);
+            if (location == null) return;
+
+            // Use messaging to handle navigation
+            MessagingCenter.Send(this, "NavigateToLocation", location.Id);
         }
 
-        // Cleanup method
-        public void Cleanup()
+        // Use the correct event args type
+        protected virtual void OnErrorOccurred(Locations.Core.Shared.ViewModels.OperationErrorEventArgs args)
         {
-            // Unsubscribe from all location error events
-            foreach (var location in LocationsCollection)
-            {
-                location.ErrorOccurred -= OnLocationErrorOccurred;
-            }
+            ErrorOccurred?.Invoke(this, args);
         }
     }
 }

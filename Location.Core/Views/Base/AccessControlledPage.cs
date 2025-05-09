@@ -25,7 +25,7 @@ namespace Location.Core.Views
         protected readonly IAlertService _alertService;
 
         // Page configuration
-        public bool RequiresSubscription { get; set; } = true;
+        public bool RequiresSubscription { get; set; } = false;
         protected PageEnums CurrentPageType { get; set; }
         protected string PageViewedMagicString { get; set; }
 

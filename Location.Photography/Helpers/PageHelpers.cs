@@ -1,17 +1,7 @@
-﻿using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
-using Location.Core.Views;
-using Locations.Core.Business.DataAccess.Interfaces;
-using Locations.Core.Business.DataAccess.Services;
-using Locations.Core.Business.Services;
-using Locations.Core.Data.Models;
+﻿using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Enums;
 using Locations.Core.Shared.ViewModels;
-using Microsoft.Maui.Controls;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using static Locations.Core.Shared.Enums.SubscriptionType;
 
 namespace Location.Core.Helpers
@@ -28,7 +18,7 @@ namespace Location.Core.Helpers
             bool.TryParse(page.Value, out _result);
             if (_result == false)
             {
-                navigation.PushModalAsync(new PageTutorialModal(pageEnum));
+                //navigation.PushModalAsync(new PageTutorialModal(pageEnum));
                 page.Value = MagicStrings.True_string;
 
                 // Save the setting back to the database
@@ -62,7 +52,7 @@ namespace Location.Core.Helpers
                     {
                         if (lastAd < DateTime.Now.AddHours(Convert.ToInt16(hours)))
                         {
-                            navigation.PushModalAsync(new SubscriptionOrAdFeature(pageEnums));
+                           // navigation.PushModalAsync(new SubscriptionOrAdFeature(pageEnums));
                         }
                     }
                 }
@@ -72,7 +62,7 @@ namespace Location.Core.Helpers
                     {
                         if (lastAd < DateTime.Now.AddHours(Convert.ToInt16(hours)))
                         {
-                            navigation.PushModalAsync(new SubscriptionOrAdFeature(pageEnums));
+                          //  navigation.PushModalAsync(new SubscriptionOrAdFeature(pageEnums));
                         }
                     }
                 }
