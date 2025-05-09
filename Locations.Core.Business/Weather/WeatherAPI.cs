@@ -45,7 +45,7 @@ namespace Locations.Core.Business.Weather
         public async Task<WeatherViewModel> GetWeatherAsync()
         {
             WeatherViewModel weather = new WeatherViewModel();
-            WeatherDataService weatherDataService = new WeatherDataService(this._url, this.lattitude, this.longituded, this.API_KEY);
+         /*   WeatherDataService weatherDataService = new WeatherDataService(this._url, this.lattitude, this.longituded, this.API_KEY);
 
 
             var returned =  weatherDataService.GetDaysAsync().Result;
@@ -79,7 +79,7 @@ namespace Locations.Core.Business.Weather
             weather.Sunset_Day_Four = new DateTime(returned[3].Sunset);
             weather.Sunset_Day_Five = new DateTime(returned[4].Sunset);
             weather.LastUpdate = DateTime.Now;
-
+         */
 
 
 

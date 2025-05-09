@@ -18,7 +18,7 @@ namespace Locations.Core.Business.Weather
         {
 
         }
-
+/*
         private DailyWeatherWithDetailsDTO MapDayOne(WeatherViewModel weather)
         {
             var mapper = configDayOne.CreateMapper();
@@ -91,5 +91,6 @@ namespace Locations.Core.Business.Weather
                     throw new ArgumentOutOfRangeException(nameof(day), "Day must be between 1 and 7.");
             }
         }
+*/
     }
 }

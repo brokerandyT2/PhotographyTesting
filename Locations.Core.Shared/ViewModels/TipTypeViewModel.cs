@@ -19,6 +19,8 @@ namespace Locations.Core.Shared.ViewModels
         public event EventHandler<OperationErrorEventArgs>? ErrorOccurred;
 
         // Properties with notification
+        public string I8n { get => _i8n; set { _i8n = value; OnPropertyChanged(nameof(I8n)); } }
+        private string _i8n;
         public int Id
         {
             get => _id;

@@ -28,7 +28,7 @@ namespace Locations.Core.Business
            string hemisphere, string tempformat, string dateformat, string timeformat, string winddirection, string email)
            
         {
-            var con = new EncryptedSQLite.DataEncrypted();
+     /*       var con = new EncryptedSQLite.DataEncrypted();
             var _connection = DataEncrypted.GetAsyncConnection();
             var aa = _connection.CreateTableAsync<SettingViewModel>().Result;
             var ba = _connection.CreateTableAsync<WeatherViewModel>().Result;
@@ -90,23 +90,23 @@ namespace Locations.Core.Business
 
 
             #region DEFAULT DATA No Matter if Debug or not
-            list.Add(new() { Name = MagicStrings.Hemisphere, Value = hemisphere });
-            list.Add(new() { Name = MagicStrings.FirstName, Value = "" });
-            list.Add(new() { Name = MagicStrings.LastName, Value = "" });
-            list.Add(new() { Name = MagicStrings.UniqueID, Value = guid });
-            list.Add(new() { Name = MagicStrings.LastBulkWeatherUpdate, Value = DateTime.Now.AddDays(-2).ToString() });
-            list.Add(new() { Name = MagicStrings.DefaultLanguage, Value = "en-US" });
-            list.Add(new() { Name = MagicStrings.WindDirection, Value = winddirection });
-            list.Add(new() { Name = MagicStrings.CameraRefresh, Value = "2000" });
-            list.Add(new() { Name = MagicStrings.AppOpenCounter, Value = "1" });
-            list.Add(new() { Name = MagicStrings.TimeFormat, Value = timeformat });
-            list.Add(new() { Name = MagicStrings.DateFormat, Value = dateformat});
-            list.Add(new() { Name = MagicStrings.WeatherURL, Value = "https://api.openweathermap.org/data/3.0/onecall" });
-            list.Add(new() { Name = MagicStrings.Weather_API_Key, Value = "aa24f449cced50c0491032b2f955d610" });
-            list.Add(new() { Name = MagicStrings.FreePremiumAdSupported, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.TemperatureType, Value = MagicStrings.Fahrenheit });
-            list.Add(new() { Name = MagicStrings.DeviceInfo, Value = "" });
-            list.Add(new() { Name = MagicStrings.Email, Value = email });
+            list.Add(new() { Key = MagicStrings.Hemisphere, Value = hemisphere });
+            list.Add(new() { Key = MagicStrings.FirstName, Value = "" });
+            list.Add(new() { Key = MagicStrings.LastName, Value = "" });
+            list.Add(new() { Key = MagicStrings.UniqueID, Value = guid });
+            list.Add(new() { Key = MagicStrings.LastBulkWeatherUpdate, Value = DateTime.Now.AddDays(-2).ToString() });
+            list.Add(new() { Key = MagicStrings.DefaultLanguage, Value = "en-US" });
+            list.Add(new() { Key = MagicStrings.WindDirection, Value = winddirection });
+            list.Add(new() { Key = MagicStrings.CameraRefresh, Value = "2000" });
+            list.Add(new() { Key = MagicStrings.AppOpenCounter, Value = "1" });
+            list.Add(new() { Key = MagicStrings.TimeFormat, Value = timeformat });
+            list.Add(new() { Key = MagicStrings.DateFormat, Value = dateformat});
+            list.Add(new() { Key = MagicStrings.WeatherURL, Value = "https://api.openweathermap.org/data/3.0/onecall" });
+            list.Add(new() { Key = MagicStrings.Weather_API_Key, Value = "aa24f449cced50c0491032b2f955d610" });
+            list.Add(new() { Key = MagicStrings.FreePremiumAdSupported, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.TemperatureType, Value = MagicStrings.Fahrenheit });
+            list.Add(new() { Key = MagicStrings.DeviceInfo, Value = "" });
+            list.Add(new() { Key = MagicStrings.Email, Value = email });
             #endregion
 
 
@@ -115,47 +115,47 @@ namespace Locations.Core.Business
 #if DEBUG
 
 
-            list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.TipsViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.ExposureCalcViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.LightMeterViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.SceneEvaluationViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.AddLocationViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.WeatherDisplayViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.True_string });
-            list.Add(new() { Name = MagicStrings.ExposureCalcAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
-            list.Add(new() { Name = MagicStrings.LightMeterAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
-            list.Add(new() { Name = MagicStrings.SceneEvaluationAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
-            list.Add(new() { Name = MagicStrings.SunCalculatorViewed_TimeStamp, Value = DateTime.Now.ToString() });
-            list.Add(new() { Name = MagicStrings.SunLocationAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
-            list.Add(new() { Name = MagicStrings.WeatherDisplayAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
-            list.Add(new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
-            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
-            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "24" });
+            list.Add(new() { Key = MagicStrings.SettingsViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Key = MagicStrings.HomePageViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Key = MagicStrings.LocationListViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Key = MagicStrings.TipsViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Key = MagicStrings.ExposureCalcViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Key = MagicStrings.LightMeterViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Key = MagicStrings.SceneEvaluationViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Key = MagicStrings.AddLocationViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Key = MagicStrings.WeatherDisplayViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Key = MagicStrings.SunCalculatorViewed, Value = MagicStrings.True_string });
+            list.Add(new() { Key = MagicStrings.ExposureCalcAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Key = MagicStrings.LightMeterAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Key = MagicStrings.SceneEvaluationAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Key = MagicStrings.SunCalculatorViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Key = MagicStrings.SunLocationAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Key = MagicStrings.WeatherDisplayAdViewed_TimeStamp, Value = DateTime.Now.ToString() });
+            list.Add(new() { Key = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Premium.Name() });
+            list.Add(new() { Key = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(100).ToString() });
+            list.Add(new SettingViewModel() { Key = MagicStrings.AdGivesHours, Value = "24" });
 #else
 
-            list.Add(new() { Name = MagicStrings.SettingsViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.HomePageViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.LocationListViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.TipsViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.ExposureCalcViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.LightMeterViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.SceneEvaluationViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.AddLocationViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.WeatherDisplayViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.SunCalculatorViewed, Value = MagicStrings.False_string });
-            list.Add(new() { Name = MagicStrings.Email, Value = "" });    
-            list.Add(new() { Name = MagicStrings.ExposureCalcAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
-            list.Add(new() { Name = MagicStrings.LightMeterAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
-            list.Add(new() { Name = MagicStrings.SceneEvaluationAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
-            list.Add(new() { Name = MagicStrings.SunCalculatorViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
-            list.Add(new() { Name = MagicStrings.SunLocationAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
-            list.Add(new() { Name = MagicStrings.WeatherDisplayAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
-            list.Add( new() { Name = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
-            list.Add(new() { Name = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(-1).ToString() });
-            list.Add(new SettingViewModel() { Name = MagicStrings.AdGivesHours, Value = "12" });
+            list.Add(new() { Key = MagicStrings.SettingsViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.HomePageViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.LocationListViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.TipsViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.ExposureCalcViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.LightMeterViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.SceneEvaluationViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.AddLocationViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.WeatherDisplayViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.SunCalculatorViewed, Value = MagicStrings.False_string });
+            list.Add(new() { Key = MagicStrings.Email, Value = "" });    
+            list.Add(new() { Key = MagicStrings.ExposureCalcAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Key = MagicStrings.LightMeterAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Key = MagicStrings.SceneEvaluationAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Key = MagicStrings.SunCalculatorViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Key = MagicStrings.SunLocationAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new() { Key = MagicStrings.WeatherDisplayAdViewed_TimeStamp, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add( new() { Key = MagicStrings.SubscriptionType, Value = SubscriptionType.SubscriptionTypeEnum.Free.Name() });
+            list.Add(new() { Key = MagicStrings.SubscriptionExpiration, Value = DateTime.Now.AddDays(-1).ToString() });
+            list.Add(new SettingViewModel() { Key = MagicStrings.AdGivesHours, Value = "12" });
 #endif
 
 
@@ -165,7 +165,7 @@ namespace Locations.Core.Business
             {
                 var z = ss.SaveSettingWithObjectReturn(x);
             }
-
+     */
      
         }
 
