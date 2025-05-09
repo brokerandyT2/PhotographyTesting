@@ -65,13 +65,13 @@
     <PackageReference Include="Duende.IdentityModel.OidcClient.Extensions" Version="6.0.1" />
     <PackageReference Include="epj.Expander.Maui" Version="1.0.3" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.50" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.51" />
     <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.60" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="SkiaSharp" Version="3.116.1" />
-    <PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.116.1" />
+    <PackageReference Include="SkiaSharp" Version="3.119.0" />
+    <PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.119.0" />
     <PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.4" />
     <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" />
   </ItemGroup>
@@ -136,7 +136,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.Maui.Controls" Version="9.0.50" />
+    <PackageReference Update="Microsoft.Maui.Controls" Version="9.0.60" />
   </ItemGroup>
 
   <ItemGroup>

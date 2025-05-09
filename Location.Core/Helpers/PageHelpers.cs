@@ -1,28 +1,42 @@
-﻿using Location.Core.Views;
-using Locations.Core.Business.DataAccess;
+﻿using Location.Core.Helpers.AlertService;
+using Location.Core.Helpers.LoggingService;
+using Location.Core.Views;
+using Locations.Core.Business.DataAccess.Interfaces;
+using Locations.Core.Business.DataAccess.Services;
+using Locations.Core.Business.Services;
+using Locations.Core.Data.Models;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Enums;
 using Locations.Core.Shared.ViewModels;
 using Microsoft.Maui.Controls;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using static Locations.Core.Shared.Enums.SubscriptionType;
 
 namespace Location.Core.Helpers
 {
     public class PageHelpers
     {
-        public static void CheckVisit(string pageName, PageEnums pageEnum, SettingsService settingsService, INavigation navigation)
+        public static void CheckVisit(string pageName, PageEnums pageEnum, ISettingService<SettingViewModel> settingsService, INavigation navigation)
         {
             //CheckSubscription(pageEnum, settingsService, navigation);
+
+            // Get setting by name instead of trying to convert to an ID
             var page = settingsService.GetSettingByName(pageName);
-            if (page.ToBoolean() == false)
+            bool _result;
+            bool.TryParse(page.Value, out _result);
+            if (_result == false)
             {
                 navigation.PushModalAsync(new PageTutorialModal(pageEnum));
                 page.Value = MagicStrings.True_string;
-                settingsService.Save(page);
+
+                // Save the setting back to the database
+                Task.Run(async () => await settingsService.UpdateAsync(page)).Wait();
             }
         }
 
-        public static void CheckSubscription(PageEnums pageEnums, SettingsService settingService, INavigation navigation)
+        public static void CheckSubscription(PageEnums pageEnums, ISettingService<SettingViewModel> settingService, INavigation navigation)
         {
             var sub = settingService.GetSettingByName(MagicStrings.SubscriptionType);
             var exp = settingService.GetSettingByName(MagicStrings.SubscriptionExpiration);
@@ -36,108 +50,108 @@ namespace Location.Core.Helpers
 
             pro.AddRange(free);
 
-            //DateTime lastAd = GetAdTime(pageEnums);
-            var lastAd = DateTime.Now;
+            var lastAd = GetAdTime(pageEnums, settingService);
             var hours = settingService.GetSettingByName(MagicStrings.AdGivesHours).Value;
             var isAdSupported = settingService.GetSettingByName(MagicStrings.FreePremiumAdSupported).Value;
 
             if (!Convert.ToBoolean(isAdSupported))
             {
-
                 if (sub.Value == SubscriptionType.SubscriptionTypeEnum.Premium.Name())
                 {
                     if (!premium.Contains(pageEnums))
                     {
-
                         if (lastAd < DateTime.Now.AddHours(Convert.ToInt16(hours)))
                         {
                             navigation.PushModalAsync(new SubscriptionOrAdFeature(pageEnums));
                         }
                     }
-
                 }
                 else if (sub.Value == SubscriptionTypeEnum.Free.Name())
                 {
                     if (!free.Contains(pageEnums))
                     {
-
                         if (lastAd < DateTime.Now.AddHours(Convert.ToInt16(hours)))
                         {
                             navigation.PushModalAsync(new SubscriptionOrAdFeature(pageEnums));
                         }
                     }
-
                 }
             }
             else
             {
-                ShowAD(pageEnums, navigation);
+                ShowAD(pageEnums, navigation, settingService);
             }
-
         }
 
-        private static DateTime GetAdTime(PageEnums page)
+        private static DateTime GetAdTime(PageEnums page, ISettingService<SettingViewModel> settingService)
         {
-            SettingsService ss = new SettingsService();
-            SettingViewModel value = new SettingViewModel(); 
+            SettingViewModel value = new SettingViewModel();
+
             switch (page)
             {
                 case PageEnums.WeatherDisplay:
-                    value = ss.GetSettingByName(MagicStrings.WeatherDisplayAdViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.WeatherDisplayAdViewed_TimeStamp);
                     break;
                 case PageEnums.ExposureCalculator:
-                    value = ss.GetSettingByName(MagicStrings.ExposureCalcAdViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.ExposureCalcAdViewed_TimeStamp);
                     break;
                 case PageEnums.LightMeter:
-                    value = ss.GetSettingByName(MagicStrings.LightMeterAdViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.LightMeterAdViewed_TimeStamp);
                     break;
                 case PageEnums.SunLocation:
-                    value = ss.GetSettingByName(MagicStrings.SunLocationAdViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.SunLocationAdViewed_TimeStamp);
                     break;
                 case PageEnums.SceneEvaluation:
-                    value = ss.GetSettingByName(MagicStrings.SceneEvaluationAdViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.SceneEvaluationAdViewed_TimeStamp);
                     break;
                 case PageEnums.SunCalculations:
-                    value = ss.GetSettingByName(MagicStrings.SunCalculatorViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.SunCalculatorViewed_TimeStamp);
                     break;
-
                 default:
                     value.Value = DateTime.Now.ToString();
                     break;
             }
-            // return DateTime.Parse(value.Value);
-            return DateTime.Now;
+
+            if (string.IsNullOrEmpty(value.Value))
+                return DateTime.MinValue;
+
+            return DateTime.Parse(value.Value);
         }
 
-        internal static void ShowAD(PageEnums page, INavigation navigation)
+        internal static void ShowAD(PageEnums page, INavigation navigation, ISettingService<SettingViewModel> settingService)
         {
-            SettingsService ss = new SettingsService();
             SettingViewModel value = new SettingViewModel();
+
             switch (page)
             {
                 case PageEnums.WeatherDisplay:
-                    value = ss.GetSettingByName(MagicStrings.WeatherDisplayAdViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.WeatherDisplayAdViewed_TimeStamp);
                     break;
                 case PageEnums.ExposureCalculator:
-                    value = ss.GetSettingByName(MagicStrings.ExposureCalcAdViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.ExposureCalcAdViewed_TimeStamp);
                     break;
                 case PageEnums.LightMeter:
-                    value = ss.GetSettingByName(MagicStrings.LightMeterAdViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.LightMeterAdViewed_TimeStamp);
                     break;
                 case PageEnums.SunLocation:
-                    value = ss.GetSettingByName(MagicStrings.SunLocationAdViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.SunLocationAdViewed_TimeStamp);
                     break;
                 case PageEnums.SceneEvaluation:
-                    value = ss.GetSettingByName(MagicStrings.SceneEvaluationAdViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.SceneEvaluationAdViewed_TimeStamp);
                     break;
                 case PageEnums.SunCalculations:
-                    value = ss.GetSettingByName(MagicStrings.SunCalculatorViewed_TimeStamp);
+                    value = settingService.GetSettingByName(MagicStrings.SunCalculatorViewed_TimeStamp);
                     break;
-
                 default:
-
                     break;
             }
+
+            // Set current timestamp and save it back
+            value.Value = DateTime.Now.ToString();
+            Task.Run(async () => await settingService.UpdateAsync(value)).Wait();
+
+            // Code to actually show the ad would go here
+            // This might involve showing an AdMob interstitial or banner ad
         }
     }
 }

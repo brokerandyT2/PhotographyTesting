@@ -709,6 +709,15 @@ namespace Location.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Subscription is Required for this Feature.
+        /// </summary>
+        internal static string SubscriptionRequired {
+            get {
+                return ResourceManager.GetString("SubscriptionRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type of Subscription:.
         /// </summary>
         internal static string SubscriptionType {
@@ -912,6 +921,15 @@ namespace Location.Core.Resources {
         internal static string VolumeUpDown {
             get {
                 return ResourceManager.GetString("VolumeUpDown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Would you like to watch a short Advertisement to gain {0} hours of access to this feature?.
+        /// </summary>
+        internal static string WatchAdForAccess {
+            get {
+                return ResourceManager.GetString("WatchAdForAccess", resourceCulture);
             }
         }
         

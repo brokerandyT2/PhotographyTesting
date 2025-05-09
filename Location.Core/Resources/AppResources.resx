@@ -423,4 +423,10 @@
   <data name="ErrorUpdatingSetting" xml:space="preserve">
     <value>There was an error saving your preference.  Please try again.</value>
   </data>
+  <data name="SubscriptionRequired" xml:space="preserve">
+    <value>Subscription is Required for this Feature</value>
+  </data>
+  <data name="WatchAdForAccess" xml:space="preserve">
+    <value>Would you like to watch a short Advertisement to gain {0} hours of access to this feature?</value>
+  </data>
 </root>
