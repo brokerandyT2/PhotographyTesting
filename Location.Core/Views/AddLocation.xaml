@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <local:ContentPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:Location.Core.Views"
+             xmlns:local="clr-namespace:Location.Photography.Base;assembly=Location.Photography"
              x:Class="Location.Core.Views.AddLocation"
              xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
              xmlns:strings="clr-namespace:Location.Core.Resources"

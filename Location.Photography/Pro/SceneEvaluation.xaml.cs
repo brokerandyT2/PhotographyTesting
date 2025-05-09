@@ -189,6 +189,10 @@ public partial class SceneEvaluation : ContentPageBase
     {
         base.OnPageAppearing(sender, e);
 
+        //TODO:  Implement Page Helpers across this project.
+
+     //   PageHelpers.CheckSubscription(PageEnums.SceneEvaluation, )
+
         // Re-subscribe to ViewModel events in case the binding context changed
         if (BindingContext is SceneEvaluationViewModel viewModel)
         {

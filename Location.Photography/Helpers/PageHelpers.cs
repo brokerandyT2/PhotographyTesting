@@ -16,10 +16,8 @@ using static Locations.Core.Shared.Enums.SubscriptionType;
 
 namespace Location.Core.Helpers
 {
-    [Obsolete("This class really isn't obsolete.  This is just here so you can remember that there is a Base.ContentPageBase in every UI project.")]
     public class PageHelpers
     {
-        [Obsolete("This class really isn't obsolete.  This is just here so you can remember that there is a Base.ContentPageBase in every UI project.")]
         public static void CheckVisit(string pageName, PageEnums pageEnum, ISettingService<SettingViewModel> settingsService, INavigation navigation)
         {
             //CheckSubscription(pageEnum, settingsService, navigation);

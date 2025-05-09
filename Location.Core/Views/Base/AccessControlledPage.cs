@@ -1,21 +1,21 @@
-﻿using Location.Core.Helpers;
+﻿
+using Location.Core.Helpers;
 using Location.Core.Helpers.AlertService;
 using Location.Core.Resources;
 using Locations.Core.Business.DataAccess.Interfaces;
-using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
-using Locations.Core.Shared.ViewModelServices;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 
 namespace Location.Core.Views
 {
     /// <summary>
     /// Base class for all content pages in the application.
     /// Handles subscription checking, ad-supported access, and page visit tracking.
+    /// 
+    /// THIS FILE IS DUPLICATED IN every other UI project. 
     /// </summary>
+    [Obsolete("This class really isn't obsolete.  This is just here so you can remember that there is a Base.ContentPageBase in every UI project.")]
     public abstract class ContentPageBase : ContentPage
     {
         #region Services and Properties

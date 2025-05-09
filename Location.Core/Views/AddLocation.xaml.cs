@@ -4,8 +4,7 @@ using Location.Core.Resources;
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
-using System;
-using System.Threading.Tasks;
+
 
 namespace Location.Core.Views;
 
