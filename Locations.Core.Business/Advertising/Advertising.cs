@@ -1,5 +1,6 @@
-﻿using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-//using Plugin.MauiMTAdmob.Interfaces;
+﻿//using Plugin.MauiMTAdmob.Interfaces;
+using Location.Core.Helpers.AlertService;
+
 namespace Locations.Core.Business.Advertising
 {
     public class Advertising

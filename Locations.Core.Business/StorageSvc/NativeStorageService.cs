@@ -1,11 +1,6 @@
-﻿using Locations.Core.Business.DataAccess;
-using Locations.Core.Business.Logging.Interfaces;
-using Locations.Core.Shared.Customizations.Alerts.Interfraces;
-using Locations.Core.Shared.ViewModels;
-
-namespace Locations.Core.Business.StorageSvc
+﻿namespace Locations.Core.Business.StorageSvc
 {
-    public class NativeStorageService : ServiceBase<DummyViewModel>, INativeStorageService
+    public class NativeStorageService :  INativeStorageService
     {
 
 
@@ -24,7 +19,7 @@ namespace Locations.Core.Business.StorageSvc
             }
             catch (Exception ex)
             {
-                RaiseError(ex);
+                //RaiseError(ex);
                
 
                 return false;
@@ -39,7 +34,7 @@ namespace Locations.Core.Business.StorageSvc
             }
             catch (Exception ex)
             {
-                RaiseError(ex);
+                //RaiseError(ex);
                 return string.Empty;
             }
             return SecureStorage.GetAsync(key).Result;
@@ -54,7 +49,7 @@ namespace Locations.Core.Business.StorageSvc
             }
             catch (Exception ex)
             {
-                RaiseError(ex);
+                //RaiseError(ex);
             }
         }
         public static async Task SaveSetting(string key, object value)
@@ -66,7 +61,7 @@ namespace Locations.Core.Business.StorageSvc
             }
             catch (Exception ex)
             {
-                RaiseError(ex);
+               // RaiseError(ex);
             }
         }
         public static Task UpdateSetting(string key, string oldValue, string newValue)
@@ -86,7 +81,7 @@ namespace Locations.Core.Business.StorageSvc
                 }
             }catch(Exception ex)
             {
-                RaiseError(ex);
+              //  RaiseError(ex);
                 return Task.FromResult(false);
             }
         }
@@ -107,7 +102,7 @@ namespace Locations.Core.Business.StorageSvc
                 }
             }catch (Exception ex)
             {
-                RaiseError(ex);
+              //  RaiseError(ex);
                 return Task.FromResult(false);
             }
         }

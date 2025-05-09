@@ -6,7 +6,5 @@ using System.Threading.Tasks;
 
 namespace Locations.Core.Business.DataAccess.Events
 {
-    internal class ServiceEventHandler
-    {
-    }
+    public delegate void ServiceEventHandler(object sender, ServiceEventArgs e);
 }

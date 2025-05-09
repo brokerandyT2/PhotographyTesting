@@ -343,5 +343,10 @@ namespace Locations.Core.Data.Queries
                 return DataOperationResult<WeatherViewModel>.Failure(ErrorSource.Unknown, message, ex);
             }
         }
+
+        public Task<DataOperationResult<WeatherViewModel>> GetByLocationIdAsync(int locationId)
+        {
+            return GetByIdAsync(locationId);
+        }
     }
 }

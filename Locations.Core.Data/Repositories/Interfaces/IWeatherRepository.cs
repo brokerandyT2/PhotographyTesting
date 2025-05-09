@@ -19,5 +19,6 @@ namespace Locations.Core.Data.Queries.Interfaces
         /// Gets weather data by coordinates or returns a new instance if not found
         /// </summary>
         Task<DataOperationResult<WeatherViewModel>> GetByCoordinatesOrDefaultAsync(double latitude, double longitude);
+        Task<DataOperationResult<WeatherViewModel>> GetByLocationIdAsync(int locationId);
     }
 }
