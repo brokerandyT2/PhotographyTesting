@@ -85,15 +85,15 @@ namespace Locations.Core.Shared.ViewModels
             {
                 Id = dto.Id;
                 Title = dto.Title;
-                Description = dto.Description;
+                Description = dto.Content;
 
                 Displays.Clear();
-                if (dto.Displays != null)
+                if (dto.Tips != null)
                 {
-                    foreach (var typeDto in dto.Displays)
+                    foreach (var typeDto in dto.Tips)
                     {
                         var typeViewModel = new TipTypeViewModel();
-                        typeViewModel.InitializeFromDTO(typeDto);
+                        //typeViewModel.InitializeFromDTO(typeDto);
                         typeViewModel.ErrorOccurred += OnTipTypeErrorOccurred;
                         Displays.Add(typeViewModel);
                     }

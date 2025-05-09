@@ -1,11 +1,13 @@
 ﻿using EncryptedSQLite;
 using Location.Core.Helpers.AlertService;
 using Location.Core.Helpers.LoggingService;
+using Locations.Core.Data.Helpers;
 using Locations.Core.Data.Models;
 using Locations.Core.Shared;
-using Locations.Core.Shared.StorageSvc;
 using SQLite;
-
+using System;
+using DataErrorEventArgs = Locations.Core.Data.Models.DataErrorEventArgs;
+using ErrorSource = Locations.Core.Data.Models.ErrorSource;
 
 namespace Locations.Core.Data.Queries
 {
@@ -31,21 +33,7 @@ namespace Locations.Core.Data.Queries
 
             try
             {
-                // Get the encryption key components from storage
-                string email = NativeStorageService.GetSetting(MagicStrings.Email);
-                string guid = NativeStorageService.GetSetting(MagicStrings.UniqueID);
-
-                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(guid))
-                {
-                    string message = "Email and UniqueID must be set for database encryption";
-                    LoggerService.LogError(message);
-                    throw new InvalidOperationException(message);
-                }
-
-                // Build the encryption key
-                string key = guid + email;
-
-                // Create an encrypted connection
+                // Create an encrypted connection using centralized key management
                 dataB = GetAsyncEncryptedConnection();
             }
             catch (Exception ex)

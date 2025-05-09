@@ -11,6 +11,10 @@ namespace Locations.Core.Shared.DTO
         [ObservableProperty]
         private List<ITipType> _tips = new List<ITipType>();
 
-        public TipsDisplayDTO() { }
+        public TipsDisplayDTO() {
+
+            Tips = new List<ITipType>();
+
+        }
     }
 }

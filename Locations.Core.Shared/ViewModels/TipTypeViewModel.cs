@@ -95,9 +95,7 @@ namespace Locations.Core.Shared.ViewModels
             {
                 Id = dto.Id;
                 Name = dto.Name;
-                Description = dto.Description;
-                DisplayOrder = dto.DisplayOrder;
-                Icon = dto.Icon;
+                Description = dto.Name;
             }
             catch (Exception ex)
             {

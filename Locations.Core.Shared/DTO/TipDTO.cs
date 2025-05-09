@@ -41,5 +41,7 @@ namespace Locations.Core.Shared.DTO
 
 
         public TipDTO() { }
+
+        public string ISO { get => _iso; set { _iso = value; OnPropertyChanged(nameof(ISO)); } }
     }
 }

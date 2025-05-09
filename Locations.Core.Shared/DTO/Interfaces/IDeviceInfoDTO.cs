@@ -2,25 +2,33 @@
 
 namespace Locations.Core.Shared.DTO.Interfaces
 {
-    public interface IDeviceInfoDTO : IDTOBase
+    public interface IDeviceInfoDTO
     {
-        string DeviceModel { get; }
-        string DeviceManufacturer { get; }
-        string DeviceName { get; }
-        string DeviceVersion { get; }
-        string DevicePlatform { get; }
-        DateTime CurrentDateTime { get; }
-        string DeviceType { get; }
-        string DeviceIdiom { get; }
-        bool IsAndroid { get; }
-        bool IsiOS { get; }
-        string BatteryChargeLevel { get; }
-        string BatteryState { get; }
-        string BatteryPowerSource { get; }
-        string BatteryEnergySaverStatus { get; }
-        bool HasFlashlight { get; }
-        bool IsVibrationSupported { get; }
-        bool IsHapticFeedbackSupported { get; }
-        bool IsGeolocationListeningForeground { get; }
+        // Original properties from DeviceInfoDTO
+        string DeviceModel { get; set; }
+        string DeviceManufacturer { get; set; }
+        string DeviceName { get; set; }
+        string DeviceVersion { get; set; }
+        string DevicePlatform { get; set; }
+        DateTime CurrentDateTime { get; set; }
+        string DeviceType { get; set; }
+        string DeviceIdiom { get; set; }
+        bool IsAndroid { get; set; }
+        bool IsiOS { get; set; }
+        string BatteryChargeLevel { get; set; }
+        string BatteryState { get; set; }
+        string BatteryPowerSource { get; set; }
+        string BatteryEnergySaverStatus { get; set; }
+        bool HasFlashlight { get; set; }
+        bool IsVibrationSupported { get; set; }
+        bool IsHapticFeedbackSupported { get; set; }
+        bool IsGeolocationListeningForeground { get; set; }
+
+        // Properties that appear to be expected elsewhere in the codebase
+        string DeviceId { get; set; }
+        string Manufacturer { get; set; }
+        string Model { get; set; }
+        string OSVersion { get; set; }
+        string AppVersion { get; set; }
     }
 }

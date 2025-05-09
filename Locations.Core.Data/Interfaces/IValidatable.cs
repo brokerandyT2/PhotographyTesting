@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Locations.Core.Data.Interfaces
 {
@@ -12,10 +8,10 @@ namespace Locations.Core.Data.Interfaces
     public interface IValidatable
     {
         /// <summary>
-        /// Validates the entity and returns whether it's valid
+        /// Validates the entity
         /// </summary>
-        /// <param name="errors">List of validation errors if invalid</param>
-        /// <returns>True if valid, false if invalid</returns>
+        /// <param name="errors">List of validation errors, if any</param>
+        /// <returns>True if validation passed, false otherwise</returns>
         bool Validate(out List<string> errors);
     }
 }

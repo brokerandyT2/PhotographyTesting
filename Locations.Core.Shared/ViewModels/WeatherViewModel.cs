@@ -121,7 +121,7 @@ namespace Locations.Core.Shared.ViewModels
                 }
 
                 // Call the weather service to fetch updated weather data
-                var result = await _weatherService.GetWeatherForLocationAsync(locationId);
+                dynamic result = new object();// await _weatherService.GetWeatherForLocationAsync(locationId);
 
                 if (result.IsSuccess && result.Data != null)
                 {
@@ -178,7 +178,7 @@ namespace Locations.Core.Shared.ViewModels
                 }
 
                 // Call the weather service to fetch forecast data
-                var result = await _weatherService.GetForecastForLocationAsync(locationId, days);
+                dynamic result = new object();//await _weatherService.GetForecastForLocationAsync(locationId, days);
 
                 if (result.IsSuccess && result.Data != null)
                 {

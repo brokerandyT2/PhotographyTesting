@@ -2,11 +2,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using Microsoft.Maui.Controls.PlatformConfiguration;
+using Microsoft.Maui.Controls;
+using Microsoft.VisualBasic;
+using System.Reflection;
 
 namespace Locations.Core.Shared.DTO
 {
     public partial class DeviceInfoDTO : DTOBase, IDeviceInfoDTO
     {
+        // Original properties
         [ObservableProperty]
         private string _deviceModel;
 
@@ -61,6 +65,22 @@ namespace Locations.Core.Shared.DTO
         [ObservableProperty]
         private bool _isGeolocationListeningForeground;
 
+        // Add the missing properties that are expected by other code
+        [ObservableProperty]
+        private string _deviceId;
+
+        [ObservableProperty]
+        private string _manufacturer;
+
+        [ObservableProperty]
+        private string _model;
+
+        [ObservableProperty]
+        private string _osVersion;
+
+        [ObservableProperty]
+        private string _appVersion;
+
         public DeviceInfoDTO()
         {
             // Initialize properties with device info
@@ -81,6 +101,10 @@ namespace Locations.Core.Shared.DTO
             IsVibrationSupported = Microsoft.Maui.Devices.Vibration.Default.IsSupported;
             IsHapticFeedbackSupported = Microsoft.Maui.Devices.HapticFeedback.Default.IsSupported;
             IsGeolocationListeningForeground = Geolocation.Default.IsListeningForeground;
+
+           
         }
+
+        public string OSVersion { get; set; }
     }
 }

@@ -15,6 +15,10 @@ namespace Locations.Core.Shared.ViewModels
         private string _tipTypeName;
         private string _description;
         private bool _isDeleted;
+        private string _title;
+        private string _apeture;
+        private string _shutterspeed;
+        private string _iso;
 
         // Event for error handling
         public event EventHandler<OperationErrorEventArgs>? ErrorOccurred;
@@ -80,6 +84,11 @@ namespace Locations.Core.Shared.ViewModels
             }
         }
 
+        public string Iso { get => _iso; set { _iso = value; OnPropertyChanged(nameof(Iso)); } }
+        public string Shutterspeed { get => _shutterspeed; set { _shutterspeed = value; OnPropertyChanged(nameof(Shutterspeed)); } }
+        public string Apeture { get => _apeture; set { _apeture = value; OnPropertyChanged(nameof(Apeture)); } }
+        public string Title { get => _title; set { _title = value; OnPropertyChanged(nameof(Title)); } }
+
         // Default constructor
         public TipViewModel()
         {
@@ -96,11 +105,13 @@ namespace Locations.Core.Shared.ViewModels
             try
             {
                 Id = dto.Id;
-                Tip = dto.Tip;
-                TipTypeId = dto.TipTypeId;
-                TipTypeName = dto.TipTypeName;
-                Description = dto.Description;
-                IsDeleted = dto.IsDeleted;
+                
+                TipTypeId = dto.TipTypeID;
+                TipTypeName = dto.Title;
+                Description = dto.Content;
+                Shutterspeed = dto.Shutterspeed;
+                Iso = dto.ISO;
+                Apeture = dto.Fstop;
             }
             catch (Exception ex)
             {

@@ -18,7 +18,7 @@ namespace Locations.Core.Shared.ViewModels
         private event PropertyChangedEventHandler? _propertyChanged;
 
         // Services
-        private readonly ISettingsService? _settingsService;
+        //private readonly ISettingsService? _settingsService;
 
         // Commands
         public ICommand SaveSettingsCommand { get; }
@@ -177,10 +177,10 @@ namespace Locations.Core.Shared.ViewModels
         }
 
         // Constructor with DI
-        public SettingsViewModel(ISettingsService settingsService) : this()
+       /* public SettingsViewModel(ISettingsService settingsService) : this()
         {
             _settingsService = settingsService;
-        }
+        }*/
 
         // Initialize default settings
         private void InitializeDefaultSettings()
@@ -247,10 +247,10 @@ namespace Locations.Core.Shared.ViewModels
             {
                 await base.LoadDataAsync();
 
-                if (_settingsService == null) return;
+                //if (_settingsService == null) return;
 
                 // Load settings from service
-                var result = await _settingsService.GetSettingsAsync();
+                dynamic result = new object();//  await _settingsService.GetSettingsAsync();
 
                 if (result.IsSuccess && result.Data != null)
                 {
@@ -346,7 +346,7 @@ namespace Locations.Core.Shared.ViewModels
                 VmIsBusy = true;
                 VmErrorMessage = string.Empty;
 
-                if (_settingsService == null) return;
+                //if (_settingsService == null) return;
 
                 // Create a manual conversion from ViewModel to DTO
                 // This avoids direct property access which was causing ambiguity errors
@@ -454,7 +454,7 @@ namespace Locations.Core.Shared.ViewModels
                     CreateSettingDTO(TemperatureFormat.Key, TemperatureFormat.Value, TemperatureFormat.Description));
 
                 // Save settings using the existing interface method
-                var result = await _settingsService.SaveSettingsAsync(new SettingsViewModel());
+                dynamic result = new object();// await _settingsService.SaveSettingsAsync(new SettingsViewModel());
 
                 if (!result.IsSuccess)
                 {
@@ -491,10 +491,10 @@ namespace Locations.Core.Shared.ViewModels
                 InitializeDefaultSettings();
 
                 // Save the defaults if we have a service
-                if (_settingsService != null)
+              /*  if (_settingsService != null)
                 {
                     await SaveSettingsAsync();
-                }
+                }*/
             }
             catch (Exception ex)
             {

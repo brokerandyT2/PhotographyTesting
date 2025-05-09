@@ -10,6 +10,16 @@ namespace Location.Core.Helpers.AlertService
     {
         Permission,
         Unknown,
-        ModelValidation
+        ModelValidation,
+        Database,
+        Camera,
+        AmbientLightSensor,
+        LocalStorage,
+        SecureStorage,
+        Gps,
+        FileSystem,
+        Network,
+        Serialization
     }
+
 }
