@@ -25,6 +25,8 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Location.Core.Helpers\Location.Core.Helpers.csproj" />
 	  <ProjectReference Include="..\Location.Photography.Business\Location.Photography.Business.csproj" />
+	  <ProjectReference Include="..\Location.Photography.Shared\Location.Photography.Shared.csproj" />
+	  <ProjectReference Include="..\Locations.Core.Business\Locations.Core.Business.csproj" />
 	  <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
 	</ItemGroup>
 
@@ -47,7 +49,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Resources\" />
+	  <Compile Update="Resources\AppResources.Designer.cs">
+	    <DependentUpon>AppResources.resx</DependentUpon>
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\AppResources.resx">
+	    <LastGenOutput>AppResources.Designer.cs</LastGenOutput>
+	    <Generator>ResXFileCodeGenerator</Generator>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 </Project>

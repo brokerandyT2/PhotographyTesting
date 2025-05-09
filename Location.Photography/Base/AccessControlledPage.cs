@@ -1,14 +1,9 @@
 ﻿using Location.Core.Helpers;
 using Location.Core.Helpers.AlertService;
-
+using Location.Photography.Resources;
 using Locations.Core.Business.DataAccess.Interfaces;
-using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
-using Locations.Core.Shared.ViewModelServices;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Location.Photography.Base
 {
@@ -336,13 +331,13 @@ namespace Location.Photography.Base
             {
                 // Get hours per ad for display
                 var hoursPerAd = _settingsService.GetSettingWithMagicString(MagicStrings.AdGivesHours);
-                throw new NotImplementedException();
+                //throw new NotImplementedException();
                 // Show dialog asking user if they want to watch an ad
-                bool userWatchesAd = false;// await DisplayAlert(
-               //     AppResources.SubscriptionRequired,
-               //     AppResources.WatchAdForAccess.Replace("{0}", hoursPerAd),
-               //     AppResources.OK,
-              //      AppResources.Cancel);
+                bool userWatchesAd = await DisplayAlert(
+                   AppResources.SubscriptionRequired,
+                    AppResources.WatchAdForAccess.Replace("{0}", hoursPerAd),
+                    AppResources.OK,
+                    AppResources.Cancel);
 
                 if (userWatchesAd)
                 {

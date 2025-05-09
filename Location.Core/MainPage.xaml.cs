@@ -1,6 +1,11 @@
-﻿using Location.Core.Views;
+﻿using Location.Core.Helpers.AlertService;
+using Location.Core.Views;
+using Locations.Core.Business.DataAccess.Services;
+using Locations.Core.Business.Services;
 using Locations.Core.Business.StorageSvc;
+using Locations.Core.Data.Queries;
 using Locations.Core.Shared;
+using Locations.Core.Shared.ViewModels;
 using Newtonsoft.Json;
 using System.Globalization;
 using static Locations.Core.Shared.Enums.SubscriptionType;
@@ -12,7 +17,9 @@ namespace Location.Core
 {
     public partial class MainPage : TabbedPage
     {
-        private static SettingsService ss = new SettingsService();
+        private static SettingsService<SettingViewModel> ss = new SettingsService<SettingViewModel>(
+            new SettingsRepository(
+                new EventAlertService(), null),new EventAlertService(), null);
 #if DEBUG
         private static SubscriptionTypeEnum _subType = SubscriptionTypeEnum.Free;
 #else
@@ -58,15 +65,15 @@ namespace Location.Core
                 _subType = SubscriptionTypeEnum.Free;
             }
 
-            DataAccess da = new DataAccess();
+          //  DataAccess da = new DataAccess();
 
 
 
             // Increment the app open counter
-            var z = ss.GetSetting(MagicStrings.AppOpenCounter);
+            var z = ss.GetSettingByName(MagicStrings.AppOpenCounter);
             var x = Convert.ToInt32(z.Value);
             z.Value = (x + 1).ToString();
-            var q = ss.Save(z);
+            var q = ss.SaveAsync(z);
 
             var language = CultureInfo.CurrentCulture.Name;
             var setting = ss.GetSettingByName(MagicStrings.DefaultLanguage);
@@ -78,7 +85,7 @@ namespace Location.Core
             if (setting.Value != language)
             {
                 setting.Value = language;
-                var dispose = ss.Save(setting);
+                var dispose = ss.SaveAsync(setting);
             }
 
             // Capture the device information and save it to the settings
@@ -88,7 +95,7 @@ namespace Location.Core
             if (settingDi.Value != serilized)
             {
                 settingDi.Value = serilized;
-                ss.Save(settingDi);
+                ss.SaveAsync(settingDi);
             }
 
             if (IsLoggedIn)
@@ -98,20 +105,20 @@ namespace Location.Core
                 if ((subscription == SubscriptionTypeEnum.Professional || subscription == SubscriptionTypeEnum.Premium) || adSupport)
                 {
 #if PHOTOGRAPHY
-                    this.Children.Add(new Views.Pro.SceneEvaluation());
-                    this.Children.Add(new Views.Pro.SunCalculations());
-                /*    this.Children.Add(new Location.Photography.Pro.SceneEvaluation());
-                    this.Children.Add(new Photography.Pro.SunCalculations()); */
+                  /*  this.Children.Add(new Views.Pro.SceneEvaluation());
+                    this.Children.Add(new Views.Pro.SunCalculations());*/
+                    this.Children.Add(new Location.Photography.Pro.SceneEvaluation());
+                    this.Children.Add(new Photography.Pro.SunCalculations()); 
 #endif
                     if ((subscription == SubscriptionTypeEnum.Premium) || adSupport)
                     {
 #if PHOTOGRAPHY
-                    /*    this.Children.Add(new Photography.Premium.ExposureCalculator());
+                        this.Children.Add(new Photography.Premium.ExposureCalculator());
                         this.Children.Add(new Photography.Premium.LightMeter());
-                        this.Children.Add(new Photography.Premium.SunLocation()); */
-                        this.Children.Add(new Views.Premium.ExposureCalculator());
+                        this.Children.Add(new Photography.Premium.SunLocation()); 
+                     /*   this.Children.Add(new Views.Premium.ExposureCalculator());
                         this.Children.Add(new Views.Premium.LightMeter());
-                        this.Children.Add(new Views.Premium.SunLocation());
+                        this.Children.Add(new Views.Premium.SunLocation());*/
 #endif
                     }
                 }
