@@ -1,12 +1,12 @@
-﻿using GalaSoft.MvvmLight;
+﻿using CommunityToolkit.Mvvm.Input;
 using Location.Photography.Shared.ViewModels.Interfaces;
+using Locations.Core.Shared.ViewModels;
 using Microsoft.Maui.Graphics;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -14,9 +14,7 @@ namespace Location.Photography.Shared.ViewModels
 {
     public class SceneEvaluationViewModel : ViewModelBase, ISceneEvaluation
     {
-        public override event PropertyChangedEventHandler? PropertyChanged;
-
-        public ICommand Evaluate { get; }
+        #region Fields
         private byte[] RedComponents;
         private byte[] GreenComponents;
         private byte[] BlueComponents;
@@ -30,27 +28,122 @@ namespace Location.Photography.Shared.ViewModels
         private string _greenHistogram = string.Empty;
         private string _blueHistogram = string.Empty;
         private string _contrastHistogram = string.Empty;
+        private bool _vmIsBusy;
+        private string _vmErrorMessage = string.Empty;
+        private bool _isProcessing;
+        #endregion
 
+        #region Events
+        public override event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Event for error handling
+        /// </summary>
+        public event EventHandler<OperationErrorEventArgs>? ErrorOccurred;
+        #endregion
+
+        #region Properties
         public string RedHistogramImage
         {
-            get { return _redHistogram; }
+            get => _redHistogram;
             set
             {
                 if (_redHistogram != value)
                 {
                     _redHistogram = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RedHistogramImage)));
+                    OnPropertyChanged();
                 }
             }
         }
 
-        public string BlueHistogramImage { get { return _blueHistogram; } set { _blueHistogram = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BlueHistogramImage))); } }
-        public string GreenHistogramImage { get { return _greenHistogram; } set { _greenHistogram = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GreenHistogramImage))); } }
-        public string ContrastHistogramImage { get { return _contrastHistogram; } set { _contrastHistogram = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContrastHistogramImage))); } }
+        public string BlueHistogramImage
+        {
+            get => _blueHistogram;
+            set
+            {
+                if (_blueHistogram != value)
+                {
+                    _blueHistogram = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
+        public string GreenHistogramImage
+        {
+            get => _greenHistogram;
+            set
+            {
+                if (_greenHistogram != value)
+                {
+                    _greenHistogram = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
+        public string ContrastHistogramImage
+        {
+            get => _contrastHistogram;
+            set
+            {
+                if (_contrastHistogram != value)
+                {
+                    _contrastHistogram = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool VmIsBusy
+        {
+            get => _vmIsBusy;
+            set
+            {
+                if (_vmIsBusy != value)
+                {
+                    _vmIsBusy = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string VmErrorMessage
+        {
+            get => _vmErrorMessage;
+            set
+            {
+                if (_vmErrorMessage != value)
+                {
+                    _vmErrorMessage = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool IsProcessing
+        {
+            get => _isProcessing;
+            set
+            {
+                if (_isProcessing != value)
+                {
+                    _isProcessing = value;
+                    OnPropertyChanged();
+                    ((AsyncRelayCommand)EvaluateCommand).NotifyCanExecuteChanged();
+                }
+            }
+        }
+        #endregion
+
+        #region Commands
+        public ICommand EvaluateCommand { get; }
+        #endregion
+
+        #region Constructors
         public SceneEvaluationViewModel()
         {
+            // Initialize histograms
             RedComponents = new byte[256];
             GreenComponents = new byte[256];
             BlueComponents = new byte[256];
@@ -59,102 +152,169 @@ namespace Location.Photography.Shared.ViewModels
             GreenHistogram = new int[256];
             BlueHistogram = new int[256];
             ContrastHistogram = new int[256];
-            // Evaluate = new Command(EvaluateScene);
-        }
 
-        public Task<int> EvaluateScene(object obj)
+            // Initialize commands
+            EvaluateCommand = new AsyncRelayCommand(EvaluateSceneAsync, () => !IsProcessing);
+        }
+        #endregion
+
+        #region Methods
+        /// <summary>
+        /// Evaluates the scene by capturing a photo and generating histograms
+        /// </summary>
+        private async Task EvaluateSceneAsync()
         {
-            return GetImage();
+            try
+            {
+                VmIsBusy = true;
+                IsProcessing = true;
+                VmErrorMessage = string.Empty;
+
+                await GetImage();
+            }
+            catch (Exception ex)
+            {
+                VmErrorMessage = $"Error evaluating scene: {ex.Message}";
+                OnErrorOccurred(new OperationErrorEventArgs(
+                    OperationErrorSource.Unknown,
+                    VmErrorMessage,
+                    ex));
+            }
+            finally
+            {
+                VmIsBusy = false;
+                IsProcessing = false;
+            }
         }
 
-
-
+        /// <summary>
+        /// Captures an image and processes it to generate histograms
+        /// </summary>
         private async Task<int> GetImage()
         {
             string path = string.Empty;
             if (MediaPicker.Default.IsCaptureSupported)
             {
-                FileResult photo = await MediaPicker.Default.CapturePhotoAsync();
+                FileResult photo = null;
 
+                try
+                {
+                    photo = await MediaPicker.Default.CapturePhotoAsync();
+                }
+                catch (Exception ex)
+                {
+                    VmErrorMessage = $"Error capturing photo: {ex.Message}";
+                    OnErrorOccurred(new OperationErrorEventArgs(
+                        OperationErrorSource.MediaService,
+                        VmErrorMessage,
+                        ex));
+                    return -1;
+                }
 
                 if (photo != null)
                 {
                     await Task.Run(async () =>
                     {
-
-                        // save the file into local storage
-                        string localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, photo.FileName);
-                        DirectoryInfo di = new DirectoryInfo(Microsoft.Maui.Storage.FileSystem.AppDataDirectory);
-                        var files = di.GetFiles();
-
-                        foreach (var file in files)
+                        try
                         {
-                            if (file.Extension == ".jpg")
+                            // Save the file into local storage
+                            string localFilePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, photo.FileName);
+                            DirectoryInfo di = new DirectoryInfo(Microsoft.Maui.Storage.FileSystem.AppDataDirectory);
+                            var files = di.GetFiles();
+
+                            foreach (var file in files)
                             {
-                                file.Delete();
-                            }
-                        }
-
-
-                        using Stream sourceStream = await photo.OpenReadAsync();
-                        using FileStream localFileStream = File.OpenWrite(localFilePath);
-                        path = localFilePath;
-                        await sourceStream.CopyToAsync(localFileStream);
-
-
-
-                        double[] redHistogram = new double[256];
-                        double[] greenHistogram = new double[256];
-                        double[] blueHistogram = new double[256];
-                        double[] contrastHistogram = new double[256];
-
-                        using (var bitmap = SKBitmap.Decode(path))
-                        {
-                            int totalPixels = bitmap.Width * bitmap.Height;
-
-                            for (int y = 0; y < bitmap.Height; y++)
-                            {
-                                for (int x = 0; x < bitmap.Width; x++)
+                                if (file.Extension == ".jpg")
                                 {
-                                    SKColor color = bitmap.GetPixel(x, y);
-                                    redHistogram[color.Red]++;
-                                    greenHistogram[color.Green]++;
-                                    blueHistogram[color.Blue]++;
-
-                                    // Contrast calculation (Luminance Approximation)
-                                    int contrast = (int)(0.299 * color.Red + 0.587 * color.Green + 0.114 * color.Blue);
-                                    contrastHistogram[contrast]++;
+                                    file.Delete();
                                 }
                             }
 
-                            // Normalize histograms to percentage values (0-1 range)
-                            NormalizeHistogram(redHistogram, totalPixels);
-                            NormalizeHistogram(greenHistogram, totalPixels);
-                            NormalizeHistogram(blueHistogram, totalPixels);
-                            NormalizeHistogram(contrastHistogram, totalPixels);
+                            using Stream sourceStream = await photo.OpenReadAsync();
+                            using FileStream localFileStream = File.OpenWrite(localFilePath);
+                            path = localFilePath;
+                            await sourceStream.CopyToAsync(localFileStream);
+
+                            double[] redHistogram = new double[256];
+                            double[] greenHistogram = new double[256];
+                            double[] blueHistogram = new double[256];
+                            double[] contrastHistogram = new double[256];
+
+                            using (var bitmap = SKBitmap.Decode(path))
+                            {
+                                int totalPixels = bitmap.Width * bitmap.Height;
+
+                                for (int y = 0; y < bitmap.Height; y++)
+                                {
+                                    for (int x = 0; x < bitmap.Width; x++)
+                                    {
+                                        SKColor color = bitmap.GetPixel(x, y);
+                                        redHistogram[color.Red]++;
+                                        greenHistogram[color.Green]++;
+                                        blueHistogram[color.Blue]++;
+
+                                        // Contrast calculation (Luminance Approximation)
+                                        int contrast = (int)(0.299 * color.Red + 0.587 * color.Green + 0.114 * color.Blue);
+                                        contrastHistogram[contrast]++;
+                                    }
+                                }
+
+                                // Normalize histograms to percentage values (0-1 range)
+                                NormalizeHistogram(redHistogram, totalPixels);
+                                NormalizeHistogram(greenHistogram, totalPixels);
+                                NormalizeHistogram(blueHistogram, totalPixels);
+                                NormalizeHistogram(contrastHistogram, totalPixels);
+                            }
+
+                            string redPath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "red.png");
+                            string bluePath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "blue.png");
+                            string greenPath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "green.png");
+                            string contrastPath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "contrast.png");
+
+                            // Generate histogram images
+                            string redResult = GenerateHistogramImage(redPath, redHistogram, SKColors.Red);
+                            string greenResult = GenerateHistogramImage(greenPath, greenHistogram, SKColors.Green);
+                            string blueResult = GenerateHistogramImage(bluePath, blueHistogram, SKColors.Blue);
+                            string contrastResult = GenerateHistogramImage(contrastPath, contrastHistogram, SKColors.Black);
+
+                            // Update the UI properties on the main thread
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                RedHistogramImage = redResult;
+                                GreenHistogramImage = greenResult;
+                                BlueHistogramImage = blueResult;
+                                ContrastHistogramImage = contrastResult;
+                            });
                         }
-                        string outputPath = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "histogram_output.png");
-
-                        _redHistogram = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "red.png");
-                        _blueHistogram = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "blue.png");
-                        _greenHistogram = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "green.png");
-                        _contrastHistogram = Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "contrast.png");
-
-                        RedHistogramImage = GenerateHistogramImage(_redHistogram, redHistogram, SKColors.Red);
-                        GreenHistogramImage = GenerateHistogramImage(_greenHistogram, greenHistogram, SKColors.Green);
-                        BlueHistogramImage = GenerateHistogramImage(_blueHistogram, blueHistogram, SKColors.Blue);
-                        ContrastHistogramImage = GenerateHistogramImage(_contrastHistogram, contrastHistogram, SKColors.Black);
-
-                        // GenerateHistogramImage(Path.Combine(Microsoft.Maui.Storage.FileSystem.AppDataDirectory, "path.png"), redHistogram, greenHistogram, blueHistogram, contrastHistogram);
-
-
+                        catch (Exception ex)
+                        {
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                VmErrorMessage = $"Error processing image: {ex.Message}";
+                                OnErrorOccurred(new OperationErrorEventArgs(
+                                    OperationErrorSource.Unknown,
+                                    VmErrorMessage,
+                                    ex));
+                            });
+                        }
                     });
                 }
-
             }
-            return 69;
+            else
+            {
+                VmErrorMessage = "Camera capture is not supported on this device.";
+                OnErrorOccurred(new OperationErrorEventArgs(
+                    OperationErrorSource.MediaService,
+                    VmErrorMessage));
+            }
+
+            return 0;
         }
-        static void NormalizeHistogram(double[] histogram, int totalPixels)
+
+        /// <summary>
+        /// Normalizes histogram data to the range [0,1]
+        /// </summary>
+        private static void NormalizeHistogram(double[] histogram, int totalPixels)
         {
             double maxValue = 0;
             for (int i = 0; i < histogram.Length; i++)
@@ -173,12 +333,15 @@ namespace Location.Photography.Shared.ViewModels
                 }
             }
         }
-        static string GenerateHistogramImage(string filePath, double[] histodata, SkiaSharp.SKColor color)
+
+        /// <summary>
+        /// Generates a histogram image and saves it to the specified file path
+        /// </summary>
+        private static string GenerateHistogramImage(string filePath, double[] histodata, SKColor color)
         {
             int width = 512;  // Histogram image width
             int height = 256; // Histogram image height
             int margin = 10;  // Margin for better visibility
-            string localFilePath = filePath;
 
             using (var surface = SKSurface.Create(new SKImageInfo(width, height)))
             {
@@ -192,12 +355,8 @@ namespace Location.Photography.Shared.ViewModels
                     canvas.DrawLine(margin, height - margin, margin, margin, axisPaint); // Y-axis
                 }
 
-                // Draw Histograms
-                SKColor r = color;
-
-
-                DrawHistogramLine(canvas, histodata, r, width, height, margin);
-
+                // Draw Histogram
+                DrawHistogramLine(canvas, histodata, color, width, height, margin);
 
                 // Save Image
                 using (var image = surface.Snapshot())
@@ -210,12 +369,13 @@ namespace Location.Photography.Shared.ViewModels
             }
         }
 
-        static void DrawHistogramLine(SKCanvas canvas, double[] histogram, SKColor color, int width, int height, int margin)
+        /// <summary>
+        /// Draws a histogram line on the canvas
+        /// </summary>
+        private static void DrawHistogramLine(SKCanvas canvas, double[] histogram, SKColor color, int width, int height, int margin)
         {
             int graphWidth = width - (2 * margin);
             int graphHeight = height - (2 * margin);
-
-
 
             using (var paint = new SKPaint
             {
@@ -236,8 +396,17 @@ namespace Location.Photography.Shared.ViewModels
                 }
             }
         }
+
+        /// <summary>
+        /// Raise the error event
+        /// </summary>
+        protected virtual void OnErrorOccurred(OperationErrorEventArgs e)
+        {
+            ErrorOccurred?.Invoke(this, e);
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        #endregion
     }
 }
-
-
-

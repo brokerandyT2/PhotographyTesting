@@ -4,14 +4,17 @@ using Locations.Core.Shared.ViewModels;
 using Microsoft.Maui.Devices.Sensors;
 using Microsoft.Maui.ApplicationModel;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using CommunityToolkit.Mvvm.Input;
+using System.Windows.Input;
 
 namespace Location.Photography.Shared.ViewModels
 {
     public class SunLocation : ViewModelBase, ISunLocation
     {
-        public override event PropertyChangedEventHandler? PropertyChanged;
+        #region Fields
         private DateTime _selectedDateTime = DateTime.Now;
         private double _latitude;
         private double _longitude;
@@ -20,12 +23,27 @@ namespace Location.Photography.Shared.ViewModels
         private double _sunElevation;
         private double _deviceTilt;
         private bool _elevationMatched;
+        private DateTime _selectedDate = DateTime.Now;
+        private TimeSpan _selectedTime = DateTime.Now.TimeOfDay;
+        private ObservableCollection<LocationViewModel> _locations;
+        private string _vmErrorMessage = string.Empty;
+        private bool _vmIsBusy;
+        private bool _beginMonitoring;
 
         private const double SunSmoothingFactor = 0.1;
         private const double NorthSmoothingFactor = 0.1;
-        private DateTime _selectedDate;
-        private DateTime _seletedTime;
+        #endregion
 
+        #region Events
+        public override event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Event for error handling
+        /// </summary>
+        public event EventHandler<OperationErrorEventArgs>? ErrorOccurred;
+        #endregion
+
+        #region Properties
         public DateTime SelectedDate
         {
             get => _selectedDate;
@@ -35,35 +53,86 @@ namespace Location.Photography.Shared.ViewModels
                 {
                     _selectedDate = value;
                     OnPropertyChanged();
-                    SelectedDateTime = new DateTime(_selectedDate.Year, _selectedDate.Month, _selectedDate.Day, SelectedDateTime.Hour, SelectedDateTime.Minute, SelectedDateTime.Second);
+                    SelectedDateTime = new DateTime(_selectedDate.Year, _selectedDate.Month, _selectedDate.Day,
+                        _selectedTime.Hours, _selectedTime.Minutes, _selectedTime.Seconds);
                 }
             }
         }
-        public DateTime SelectedTime
+
+        public TimeSpan SelectedTime
         {
-            get => _seletedTime;
+            get => _selectedTime;
             set
             {
-                if (_seletedTime != value)
+                if (_selectedTime != value)
                 {
-                    _seletedTime = value;
+                    _selectedTime = value;
                     OnPropertyChanged();
-                    SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, SelectedDateTime.Day, _seletedTime.Hour, _seletedTime.Minute, _seletedTime.Second);
+                    SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, SelectedDateTime.Day,
+                        _selectedTime.Hours, _selectedTime.Minutes, _selectedTime.Seconds);
                 }
             }
         }
 
-        public bool BeginMonitoring = false;
-        public SunLocation()
+        public bool BeginMonitoring
         {
-            if (Compass.Default.IsSupported)
+            get => _beginMonitoring;
+            set
             {
-                Compass.Default.ReadingChanged += Compass_ReadingChanged;
-                if (!Compass.Default.IsMonitoring)
-                    Compass.Default.Start(SensorSpeed.UI);
-            }
+                if (_beginMonitoring != value)
+                {
+                    _beginMonitoring = value;
+                    OnPropertyChanged();
 
-            StartSensors();
+                    if (_beginMonitoring)
+                    {
+                        StartSensors();
+                    }
+                    else
+                    {
+                        StopSensors();
+                    }
+                }
+            }
+        }
+
+        public ObservableCollection<LocationViewModel> Locations
+        {
+            get => _locations;
+            set
+            {
+                if (_locations != value)
+                {
+                    _locations = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string VmErrorMessage
+        {
+            get => _vmErrorMessage;
+            set
+            {
+                if (_vmErrorMessage != value)
+                {
+                    _vmErrorMessage = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool VmIsBusy
+        {
+            get => _vmIsBusy;
+            set
+            {
+                if (_vmIsBusy != value)
+                {
+                    _vmIsBusy = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public DateTime SelectedDateTime
@@ -173,7 +242,29 @@ namespace Location.Photography.Shared.ViewModels
                 }
             }
         }
-       
+
+        // Commands
+        public ICommand StartMonitoringCommand { get; }
+        public ICommand StopMonitoringCommand { get; }
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// Default constructor for design-time and when created by SQLite
+        /// </summary>
+        public SunLocation()
+        {
+            _locations = new ObservableCollection<LocationViewModel>();
+            _selectedDate = DateTime.Now;
+            _selectedTime = DateTime.Now.TimeOfDay;
+
+            // Initialize commands
+            StartMonitoringCommand = new RelayCommand(() => BeginMonitoring = true, () => !_beginMonitoring && !VmIsBusy);
+            StopMonitoringCommand = new RelayCommand(() => BeginMonitoring = false, () => _beginMonitoring && !VmIsBusy);
+        }
+        #endregion
+
+        #region Methods
         private void Compass_ReadingChanged(object sender, CompassChangedEventArgs e)
         {
             if (BeginMonitoring)
@@ -191,34 +282,90 @@ namespace Location.Photography.Shared.ViewModels
 
         private void CalculateSunDirection(double heading)
         {
-            var dt = SelectedDateTime;
-            var solarTimes = new SolarTimes(dt, Latitude, Longitude);
-            double solarAzimuth = Math.Round((double)solarTimes.SolarAzimuth, 0);
-            SunElevation = solarTimes.SolarElevation;
+            try
+            {
+                var dt = SelectedDateTime;
+                var solarTimes = new SolarTimes(dt, Latitude, Longitude);
+                double solarAzimuth = Math.Round((double)solarTimes.SolarAzimuth, 0);
+                SunElevation = solarTimes.SolarElevation;
 
-            double angleDiff = NormalizeAngle(solarAzimuth - heading);
-            SunDirection = SmoothAngle(SunDirection, angleDiff, SunSmoothingFactor);
+                double angleDiff = NormalizeAngle(solarAzimuth - heading);
+                SunDirection = SmoothAngle(SunDirection, angleDiff, SunSmoothingFactor);
+            }
+            catch (Exception ex)
+            {
+                VmErrorMessage = $"Error calculating sun direction: {ex.Message}";
+                OnErrorOccurred(new OperationErrorEventArgs(
+                    OperationErrorSource.Unknown,
+                    VmErrorMessage,
+                    ex));
+            }
         }
 
         public void StartSensors()
         {
-            if (Accelerometer.Default.IsSupported && !Accelerometer.Default.IsMonitoring)
+            try
             {
-                Accelerometer.Default.ReadingChanged += Accelerometer_ReadingChanged;
-                Accelerometer.Default.Start(SensorSpeed.UI);
+                if (Compass.Default.IsSupported && !Compass.Default.IsMonitoring)
+                {
+                    Compass.Default.ReadingChanged += Compass_ReadingChanged;
+                    Compass.Default.Start(SensorSpeed.UI);
+                }
+
+                if (Accelerometer.Default.IsSupported && !Accelerometer.Default.IsMonitoring)
+                {
+                    Accelerometer.Default.ReadingChanged += Accelerometer_ReadingChanged;
+                    Accelerometer.Default.Start(SensorSpeed.UI);
+                }
+            }
+            catch (Exception ex)
+            {
+                VmErrorMessage = $"Error starting sensors: {ex.Message}";
+                OnErrorOccurred(new OperationErrorEventArgs(
+                    OperationErrorSource.Unknown,
+                    VmErrorMessage,
+                    ex));
+            }
+        }
+
+        public void StopSensors()
+        {
+            try
+            {
+                if (Compass.Default.IsSupported && Compass.Default.IsMonitoring)
+                {
+                    Compass.Default.Stop();
+                    Compass.Default.ReadingChanged -= Compass_ReadingChanged;
+                }
+
+                if (Accelerometer.Default.IsSupported && Accelerometer.Default.IsMonitoring)
+                {
+                    Accelerometer.Default.Stop();
+                    Accelerometer.Default.ReadingChanged -= Accelerometer_ReadingChanged;
+                }
+            }
+            catch (Exception ex)
+            {
+                VmErrorMessage = $"Error stopping sensors: {ex.Message}";
+                OnErrorOccurred(new OperationErrorEventArgs(
+                    OperationErrorSource.Unknown,
+                    VmErrorMessage,
+                    ex));
             }
         }
 
         private void Accelerometer_ReadingChanged(object sender, AccelerometerChangedEventArgs e)
         {
-            var z = e.Reading.Acceleration.Z;
-            var tilt = Math.Acos(z) * 180 / Math.PI;
-            DeviceTilt = tilt;
+            if (BeginMonitoring)
+            {
+                var z = e.Reading.Acceleration.Z;
+                var tilt = Math.Acos(z) * 180 / Math.PI;
+                DeviceTilt = tilt;
+            }
         }
 
         private async void CheckElevationMatch()
         {
-
             if (BeginMonitoring)
             {
                 if (Math.Abs(DeviceTilt - SunElevation) <= 3)
@@ -227,12 +374,19 @@ namespace Location.Photography.Shared.ViewModels
                     {
                         try
                         {
-                            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
-                            await Task.Delay(100);
-                            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
+                            if (Vibration.Default.IsSupported)
+                            {
+                                Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
+                                await Task.Delay(100);
+                                Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100));
+                            }
                             ElevationMatched = true;
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            // Swallow vibration errors as they're not critical
+                            System.Diagnostics.Debug.WriteLine($"Vibration error: {ex.Message}");
+                        }
                     });
                 }
                 else
@@ -255,7 +409,16 @@ namespace Location.Photography.Shared.ViewModels
             return angle;
         }
 
+        /// <summary>
+        /// Raise the error event
+        /// </summary>
+        protected virtual void OnErrorOccurred(OperationErrorEventArgs e)
+        {
+            ErrorOccurred?.Invoke(this, e);
+        }
+
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        #endregion
     }
 }

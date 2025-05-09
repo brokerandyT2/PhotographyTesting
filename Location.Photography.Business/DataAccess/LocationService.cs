@@ -1,187 +1,165 @@
 ﻿using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
-using Location.Photography.Business.DataAccess.Interfaces;
-using Location.Photography.Data.Queries;
-using Locations.Core.Shared;
+using Locations.Core.Business.DataAccess.Interfaces;
+using Locations.Core.Data.Models;
+using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared.ViewModels;
+using DataErrorEventArgs = Locations.Core.Data.Models.DataErrorEventArgs;
 using ILoggerService = Locations.Core.Business.DataAccess.Interfaces.ILoggerService;
+
 namespace Location.Photography.Business.DataAccess
 {
-    /*
     /// <summary>
-    /// Service for managing photography location data
+    /// Implementation of ILocationService for photography locations
     /// </summary>
-    public class LocationService : Locations.Core.Business.DataAccess.LocationsService, ILocationService<LocationViewModel>
+    public class LocationService : ILocationService<LocationViewModel>
     {
-        // Dependencies
+        private readonly Locations.Core.Business.DataAccess.Services.LocationService<LocationViewModel> _coreLocationService;
         private readonly ILoggerService _logger;
-        private readonly SettingsService _settingsService;
-        private readonly LocationsQuery<LocationViewModel> _locationsQuery;
+        private readonly IAlertService _alertService;
 
         /// <summary>
-        /// Creates a new LocationService with logger and email
+        /// Initializes a new instance of the LocationService class
         /// </summary>
-        public LocationService(ILoggerService logger, string email) : base(
-            
-            logger)
+        /// <param name="locationRepository">Repository for location data</param>
+        /// <param name="alertService">Service for user alerts</param>
+        /// <param name="loggerService">Service for logging</param>
+        public LocationService(
+            ILocationRepository locationRepository,
+            IAlertService alertService,
+            ILoggerService loggerService)
         {
-            _logger = logger;
-            _settingsService = new SettingsService();
-            _locationsQuery = new LocationsQuery<LocationViewModel>();
+            _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
+            _logger = loggerService ?? throw new ArgumentNullException(nameof(loggerService));
+            _coreLocationService = new Locations.Core.Business.DataAccess.Services.LocationService<LocationViewModel>(
+                locationRepository,
+                alertService,
+                loggerService);
 
-            ValidateEmailSetting();
+            // Forward events from the core service
+            _coreLocationService.ErrorOccurred += CoreService_ErrorOccurred;
         }
 
         /// <summary>
-        /// Creates a new LocationService with default dependencies
+        /// Event triggered when an error occurs in the service
         /// </summary>
-        public LocationService() : base(
-            new AlertService(),
-            new Locations.Core.Business.LoggingService.LoggerService())
-        {
-            _logger = new Locations.Core.Business.LoggingService.LoggerService();
-            _settingsService = new SettingsService();
-            _locationsQuery = new LocationsQuery<LocationViewModel>();
+        public event DataErrorEventHandler ErrorOccurred;
 
-            ValidateEmailSetting();
+        /// <summary>
+        /// Handles errors from the core service and forwards them
+        /// </summary>
+        private void CoreService_ErrorOccurred(object sender, DataErrorEventArgs e)
+        {
+            OnErrorOccurred(e);
         }
 
         /// <summary>
-        /// Validates that email setting exists
+        /// Raises the error event
         /// </summary>
-        private void ValidateEmailSetting()
+        public void OnErrorOccurred(DataErrorEventArgs e)
+        {
+            ErrorOccurred?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// Gets a location by its coordinates
+        /// </summary>
+        public LocationViewModel GetLocationByCoordinates(double latitude, double longitude)
         {
             try
             {
-                var email = _settingsService.GetSettingByName(MagicStrings.Email)?.Value;
-                if (string.IsNullOrEmpty(email))
-                {
-                    throw new ArgumentException("Email is not set. Cannot use encrypted database.");
-                }
+                return _coreLocationService.GetLocationByCoordinates(latitude, longitude);
             }
             catch (Exception ex)
             {
-                // Handle the error directly instead of using base class methods
-                _logger?.LogError("Email validation error", ex);
-                Console.WriteLine($"Error validating email setting: {ex.Message}");
-            }
-        }
-
-        #region ILocationService Implementation
-
-        /// <summary>
-        /// Deletes a location
-        /// </summary>
-        public bool Delete(LocationViewModel model)
-        {
-            if (model == null)
-                return false;
-
-            try
-            {
-                // Implement using LocationsQuery directly
-                var result = _locationsQuery.DeleteItem(model);
-                return result == 1 ? true:false ;
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError($"Error deleting location: {ex.Message}", ex);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Deletes a location by ID
-        /// </summary>
-        public bool Delete(int id)
-        {
-            try
-            {
-                // Implement using LocationsQuery directly
-                var result = _locationsQuery.DeleteItem(id);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError($"Error deleting location with ID {id}: {ex.Message}", ex);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Deletes a location by coordinates
-        /// </summary>
-        public bool Delete(double latitude, double longitude)
-        {
-            try
-            {
-                // First, find the location by coordinates
-                var location = _locationsQuery.G(latitude, longitude);
-                if (location != null && !location.IsError)
-                {
-                    // Then delete by ID
-                    return Delete(location.Id);
-                }
-                return false;
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError($"Error deleting location at ({latitude}, {longitude}): {ex.Message}", ex);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Gets a location by ID
-        /// </summary>
-        public LocationViewModel Get(int id)
-        {
-            try
-            {
-                // Implement using LocationsQuery directly
-                var result = _locationsQuery.GetItem<LocationViewModel>(id);
-                return result.IsError ? new LocationViewModel() : result;
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError($"Error getting location with ID {id}: {ex.Message}", ex);
+                var error = new DataErrorEventArgs(ErrorSource.Unknown,
+                    $"Error retrieving location at coordinates ({latitude}, {longitude}): {ex.Message}", ex);
+                OnErrorOccurred(error);
                 return new LocationViewModel();
             }
         }
 
         /// <summary>
-        /// Saves a location
+        /// Gets all locations with full details including weather
         /// </summary>
-        public LocationViewModel Save(LocationViewModel model)
+        public async Task<List<LocationViewModel>> GetLocationsWithDetailsAsync()
         {
-            return Save(model, false);
-        }
-
-        /// <summary>
-        /// Saves a location with option to return a new instance
-        /// </summary>
-        public LocationViewModel Save(LocationViewModel model, bool returnNew)
-        {
-            if (model == null)
-                return new LocationViewModel();
-
             try
             {
-                // Implement using LocationsQuery directly
-                var result = _locationsQuery.SaveItem(model);
-
-                if (returnNew)
-                    return new LocationViewModel();
-
-                return result.IsError ? new LocationViewModel() : result;
+                return await _coreLocationService.GetLocationsWithDetailsAsync();
             }
             catch (Exception ex)
             {
-                _logger?.LogError($"Error saving location: {ex.Message}", ex);
-                return new LocationViewModel();
+                var error = new DataErrorEventArgs(ErrorSource.Unknown,
+                    $"Error retrieving locations with details: {ex.Message}", ex);
+                OnErrorOccurred(error);
+                return new List<LocationViewModel>();
             }
         }
 
-        #endregion
-    }*/
+        /// <summary>
+        /// Gets nearby locations within a radius
+        /// </summary>
+        public async Task<List<LocationViewModel>> GetNearbyLocationsAsync(double latitude, double longitude, double radiusKm = 10)
+        {
+            try
+            {
+                return await _coreLocationService.GetNearbyLocationsAsync(latitude, longitude, radiusKm);
+            }
+            catch (Exception ex)
+            {
+                var error = new DataErrorEventArgs(ErrorSource.Unknown,
+                    $"Error retrieving nearby locations: {ex.Message}", ex);
+                OnErrorOccurred(error);
+                return new List<LocationViewModel>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an entity by ID
+        /// </summary>
+        public async Task<DataOperationResult<LocationViewModel>> GetByIdAsync(int id)
+        {
+            return await _coreLocationService.GetByIdAsync(id);
+        }
+
+        /// <summary>
+        /// Gets all entities
+        /// </summary>
+        public async Task<DataOperationResult<List<LocationViewModel>>> GetAllAsync()
+        {
+            return await _coreLocationService.GetAllAsync();
+        }
+
+        /// <summary>
+        /// Saves an entity
+        /// </summary>
+        public async Task<DataOperationResult<LocationViewModel>> SaveAsync(LocationViewModel entity)
+        {
+            return await _coreLocationService.SaveAsync(entity);
+        }
+
+        /// <summary>
+        /// Updates an existing entity
+        /// </summary>
+        public async Task<DataOperationResult<bool>> UpdateAsync(LocationViewModel entity)
+        {
+            return await _coreLocationService.UpdateAsync(entity);
+        }
+
+        /// <summary>
+        /// Deletes an entity by ID
+        /// </summary>
+        public async Task<DataOperationResult<bool>> DeleteAsync(int id)
+        {
+            return await _coreLocationService.DeleteAsync(id);
+        }
+
+        /// <summary>
+        /// Deletes an entity
+        /// </summary>
+        public async Task<DataOperationResult<bool>> DeleteAsync(LocationViewModel entity)
+        {
+            return await _coreLocationService.DeleteAsync(entity);
+        }
+    }
 }

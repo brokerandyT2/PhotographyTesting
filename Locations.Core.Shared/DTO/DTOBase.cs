@@ -1,14 +1,19 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Locations.Core.Shared.Alerts.Implementation;
 using Locations.Core.Shared.DTO.Interfaces;
+using System.Collections;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
 namespace Locations.Core.Shared.DTO
 {
-    public partial class DTOBase : ObservableObject, IDTOBase
+    public partial class DTOBase : ObservableObject, IDTOBase, INotifyDataErrorInfo
     {
+
+        
+   
         public event EventHandler<AlertEventArgs> RaiseAlert;
         public bool IsError { get; set; } = false;
         public AlertEventArgs alertEventArgs;
@@ -40,6 +45,8 @@ namespace Locations.Core.Shared.DTO
 
         AlertEventArgs IDTOBase.alertEventArgs => throw new NotImplementedException();
 
+
+
         private async Task LoadDataAsync()
         {
             // Simulate loading data
@@ -47,6 +54,8 @@ namespace Locations.Core.Shared.DTO
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -71,5 +80,25 @@ namespace Locations.Core.Shared.DTO
             RaiseAlert?.Invoke(this, alertEventArgs);
             IsError = true;
         }
+
+        public IEnumerable GetErrors(string? propertyName)
+        {
+            throw new NotImplementedException();
+        }
+        public ObservableValidator _validator;
+
+        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged
+        {
+            add => _validator.ErrorsChanged += value;
+            remove => _validator.ErrorsChanged -= value;
+        }
+
+        public bool HasErrors => (IsError || _validator.HasErrors);
+
+
+
+       //TODO: POTENTIALLY IMPLEMENT FIELD LEVEL VALIDATION.
+       // public void ValidateAllProperties() { Validator.ValidateObject(this, new ValidationContext(this)); }
+        //public void ValidateProperty(object? value, [CallerMemberName] string propertyName = "") => ValidateProperty(this, propertyName);
     }
 }

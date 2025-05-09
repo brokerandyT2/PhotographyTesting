@@ -1,85 +1,242 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<base:ContentPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Location.Photography.Premium.ExposureCalculator"
-             xmlns:models="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
-             xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:base="clr-namespace:Location.Photography.Base"
              xmlns:strings="clr-namespace:Location.Photography.Resources"
-             Title="ExposureCalculator"
-             x:DataType="models:ExposureCalculator">
-    <ContentPage.BindingContext>
-        <models:ExposureCalculator/>
-    </ContentPage.BindingContext>
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:viewmodels="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
+             xmlns:converters="clr-namespace:Location.Photography.Converters;assembly=Location.Photography"
+             x:Class="Location.Photography.Premium.ExposureCalculator"
+             x:DataType="viewmodels:ExposureCalculator"
+             Title="Exposure Calculator">
 
-        <VerticalStackLayout>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50"  />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50"  />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="50" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
-            <Label Text="{x:Static strings:AppResources.exposureincrements}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="1" Grid.ColumnSpan="3"/>
-            <ImageButton Pressed="closebtn_Pressed" Source="closeoutlinecustom.png" x:Name="closebtn" IsVisible="False" Grid.Row="0" Grid.Column="4" />
+    <ScrollView>
+        <Grid Padding="15,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <StackLayout RadioButtonGroup.GroupName="Exposure" Grid.Row="2" Grid.ColumnSpan="4" Padding="2,0,2,0" Orientation="Horizontal" >
+            <!-- Header and close button -->
+            <Label Text="Exposure Calculator" FontSize="Large" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
+            <ImageButton Grid.Row="0" Grid.Column="3" 
+                         Source="closeoutlinecustom.png" 
+                         HorizontalOptions="End" 
+                         x:Name="CloseButton" 
+                         Pressed="CloseButton_Pressed"
+                         IsVisible="False"/>
 
-                <RadioButton x:Name="exposurefull" Value="1" Content="{x:Static strings:AppResources.full}" Padding="2,0,10,0" CheckedChanged="exposuresteps_CheckedChanged" />
+            <!-- Exposure Increments -->
+            <Label Text="{x:Static strings:AppResources.exposureincrements}" 
+                   FontSize="Medium" 
+                   FontAttributes="Bold" 
+                   Grid.Row="1" 
+                   Grid.ColumnSpan="4"/>
 
-                    <RadioButton x:Name="exposurehalfstop" CheckedChanged="exposuresteps_CheckedChanged" Value=".5" Content="{x:Static strings:AppResources.half}" Padding="2,0,2,0"  />
-                    <RadioButton x:Name="exposurethirdstop" CheckedChanged="exposuresteps_CheckedChanged" Value=".3" Content="{x:Static strings:AppResources.thirds}" Padding="2,0,2,0"   />
-                </StackLayout>
+            <RadioButton x:Name="exposurefull" 
+                         Content="{x:Static strings:AppResources.full}" 
+                         GroupName="Exposure" 
+                         Value="0" 
+                         Grid.Row="2" 
+                         Grid.Column="0" 
+                         CheckedChanged="exposuresteps_CheckedChanged"
+                         IsChecked="True"/>
+            <RadioButton x:Name="exposurehalfstop" 
+                         Content="{x:Static strings:AppResources.half}" 
+                         GroupName="Exposure" 
+                         Value="1" 
+                         Grid.Row="2" 
+                         Grid.Column="1" 
+                         CheckedChanged="exposuresteps_CheckedChanged"/>
+            <RadioButton x:Name="exposurethirdstop" 
+                         Content="{x:Static strings:AppResources.thirds}" 
+                         GroupName="Exposure" 
+                         Value="2" 
+                         Grid.Row="2" 
+                         Grid.Column="2" 
+                         CheckedChanged="exposuresteps_CheckedChanged"/>
 
-                <Label Text="{x:Static strings:AppResources.calculate}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="3" Grid.ColumnSpan="4"/>
-                <StackLayout RadioButtonGroup.GroupName="Calculate" Grid.Row="4" Grid.ColumnSpan="4" Orientation="Horizontal">
-                <RadioButton x:Name="shutter" Content="{x:Static strings:AppResources.shutterspeednocolon}" Padding="2,0,10,0" CheckedChanged="calculate_CheckedChanged" Value="0" />
+            <!-- Calculate -->
+            <Label Text="{x:Static strings:AppResources.calculate}" 
+                   FontSize="Medium" 
+                   FontAttributes="Bold" 
+                   Grid.Row="3" 
+                   Grid.ColumnSpan="4"
+                   Margin="0,15,0,5"/>
 
-                    <RadioButton x:Name="apeature" Content="{x:Static strings:AppResources.aperturenocolon}"  Padding="2,0,2,0" CheckedChanged="calculate_CheckedChanged" Value="1"  />
-                    <RadioButton x:Name="iso" Content="{x:Static strings:AppResources.isonocolon}"  Padding="2,0,2,0" CheckedChanged="calculate_CheckedChanged" Value="2"/>
-                </StackLayout>
+            <RadioButton x:Name="shutter" 
+                         Content="{x:Static strings:AppResources.shutterspeednocolon}" 
+                         GroupName="Calculate" 
+                         Value="0" 
+                         Grid.Row="4" 
+                         Grid.Column="0" 
+                         CheckedChanged="calculate_CheckedChanged"
+                         IsChecked="True"/>
+            <RadioButton x:Name="aperture" 
+                         Content="{x:Static strings:AppResources.aperturenocolon}" 
+                         GroupName="Calculate" 
+                         Value="3" 
+                         Grid.Row="4" 
+                         Grid.Column="1" 
+                         CheckedChanged="calculate_CheckedChanged"/>
+            <RadioButton x:Name="iso" 
+                         Content="{x:Static strings:AppResources.isonocolon}" 
+                         GroupName="Calculate" 
+                         Value="1" 
+                         Grid.Row="4" 
+                         Grid.Column="2" 
+                         CheckedChanged="calculate_CheckedChanged"/>
 
-                <Label Text="{x:Static strings:AppResources.baseexposure}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="5" Grid.ColumnSpan="4"></Label>
-                <Label Text="{x:Static strings:AppResources.shutterspeed}" TextColor="#CC0000" FontSize="Medium" FontAttributes="Bold" Grid.Row="6" Grid.Column="1"/>
-                <Label Text="{x:Static strings:AppResources.fStop}" TextColor="#CC0000" FontSize="Medium" FontAttributes="Bold" Grid.Row="6" Grid.Column="2"/>
-                <Label Text="{x:Static strings:AppResources.iso}" TextColor="#CC0000" FontSize="Medium" FontAttributes="Bold" Grid.Row="6" Grid.Column="3" />
+            <!-- Base Exposure -->
+            <Label Text="{x:Static strings:AppResources.baseexposure}" 
+                   FontSize="Medium" 
+                   FontAttributes="Bold" 
+                   Grid.Row="5" 
+                   Grid.ColumnSpan="4"
+                   Margin="0,15,0,5"/>
 
-                <Picker ItemsSource="{Binding ShutterSpeedsForPicker}"  Grid.Row="7" Grid.Column="1" SelectedIndexChanged="ShutterSpeed_Picker_SelectedIndexChanged" x:Name="ShutterSpeed_Picker"/>
-            <Picker ItemsSource="{Binding ApeaturesForPicker}" SelectedIndexChanged="fstop_Picker_SelectedIndexChanged" Grid.Row="7" Grid.Column="2" x:Name="fstop_Picker"/>
-            <Picker ItemsSource="{Binding ISOsForPicker}" SelectedIndexChanged="ISO_Picker_SelectedIndexChanged" Grid.Row="7" Grid.Column="8" x:Name="ISO_Picker"/>
+            <Label Text="{x:Static strings:AppResources.shutterspeed}" 
+                   TextColor="#CC0000" 
+                   FontSize="Medium" 
+                   FontAttributes="Bold" 
+                   Grid.Row="6" 
+                   Grid.Column="0"
+                   HorizontalOptions="Center"/>
+            <Label Text="{x:Static strings:AppResources.fStop}" 
+                   TextColor="#CC0000" 
+                   FontSize="Medium" 
+                   FontAttributes="Bold" 
+                   Grid.Row="6" 
+                   Grid.Column="1"
+                   HorizontalOptions="Center"/>
+            <Label Text="{x:Static strings:AppResources.iso}" 
+                   TextColor="#CC0000" 
+                   FontSize="Medium" 
+                   FontAttributes="Bold" 
+                   Grid.Row="6" 
+                   Grid.Column="2"
+                   HorizontalOptions="Center"/>
 
-                <Label Grid.Row="8" Text="{x:Static strings:AppResources.results}" FontSize="Medium" FontAttributes="Bold" Grid.ColumnSpan="4"/>
-                <Label Text="{x:Static strings:AppResources.shutterspeed}" TextColor="#CC0000" FontSize="Medium" FontAttributes="Bold" Grid.Row="9" Grid.Column="1"/>
-                <Label Text="{x:Static strings:AppResources.fStop}" TextColor="#CC0000" FontSize="Medium" FontAttributes="Bold" Grid.Row="9" Grid.Column="2"/>
-                <Label Text="{x:Static strings:AppResources.iso}" TextColor="#CC0000" FontSize="Medium" FontAttributes="Bold" Grid.Row="9" Grid.Column="3" />
-                <Label Text="{Binding ShutterSpeedResult}" x:Name="shutterspeedresult"  Grid.Row="10" Grid.Column="1"/>
-                <Label Text="{Binding FStopResult}" x:Name="fstopresult" Grid.Row="10" Grid.Column="2"/>
-                <Label Text="{Binding ISOResult}" x:Name="isoresult" Grid.Row="10" Grid.Column="3" />
-            <Label Text="{Binding ErrorMessage}"  FontSize="Medium" FontAttributes="Bold" Grid.Row="11" Grid.ColumnSpan="4" x:Name="error" IsVisible="False"/>
-           
+            <Picker x:Name="ShutterSpeed_Picker" 
+                    Grid.Row="7" 
+                    Grid.Column="0" 
+                    ItemsSource="{Binding ShutterSpeedsForPicker}" 
+                    SelectedItem="{Binding ShutterSpeedSelected}"
+                    SelectedIndexChanged="ShutterSpeed_Picker_SelectedIndexChanged"
+                    IsEnabled="False"/>
+            <Picker x:Name="fstop_Picker" 
+                    Grid.Row="7" 
+                    Grid.Column="1" 
+                    ItemsSource="{Binding ApeaturesForPicker}" 
+                    SelectedItem="{Binding FStopSelected}"
+                    SelectedIndexChanged="fstop_Picker_SelectedIndexChanged"/>
+            <Picker x:Name="ISO_Picker" 
+                    Grid.Row="7" 
+                    Grid.Column="2" 
+                    ItemsSource="{Binding ISOsForPicker}" 
+                    SelectedItem="{Binding ISOSelected}"
+                    SelectedIndexChanged="ISO_Picker_SelectedIndexChanged"/>
+
+            <!-- Results -->
+            <Label Text="{x:Static strings:AppResources.results}" 
+                   FontSize="Medium" 
+                   FontAttributes="Bold" 
+                   Grid.Row="8" 
+                   Grid.ColumnSpan="4"
+                   Margin="0,15,0,5"/>
+
+            <Label Text="{x:Static strings:AppResources.shutterspeed}" 
+                   TextColor="#CC0000" 
+                   FontSize="Medium" 
+                   FontAttributes="Bold" 
+                   Grid.Row="9" 
+                   Grid.Column="0"
+                   HorizontalOptions="Center"/>
+            <Label Text="{x:Static strings:AppResources.fStop}" 
+                   TextColor="#CC0000" 
+                   FontSize="Medium" 
+                   FontAttributes="Bold" 
+                   Grid.Row="9" 
+                   Grid.Column="1"
+                   HorizontalOptions="Center"/>
+            <Label Text="{x:Static strings:AppResources.iso}" 
+                   TextColor="#CC0000" 
+                   FontSize="Medium" 
+                   FontAttributes="Bold" 
+                   Grid.Row="9" 
+                   Grid.Column="2"
+                   HorizontalOptions="Center"/>
+
+            <Label Text="{Binding ShutterSpeedResult}" 
+                   x:Name="shutterspeedresult" 
+                   Grid.Row="10" 
+                   Grid.Column="0"
+                   HorizontalOptions="Center"
+                   FontSize="Medium"/>
+            <Label Text="{Binding FStopResult}" 
+                   x:Name="fstopresult" 
+                   Grid.Row="10" 
+                   Grid.Column="1"
+                   HorizontalOptions="Center"
+                   FontSize="Medium"/>
+            <Label Text="{Binding ISOResult}" 
+                   x:Name="isoresult" 
+                   Grid.Row="10" 
+                   Grid.Column="2"
+                   HorizontalOptions="Center"
+                   FontSize="Medium"/>
+
+            <!-- Error message -->
+            <Frame IsVisible="{Binding ShowError}" 
+                   Grid.Row="11" 
+                   Grid.ColumnSpan="4" 
+                   BackgroundColor="#FFCCCC" 
+                   Padding="10" 
+                   Margin="0,15,0,0" 
+                   BorderColor="#FF0000">
+                <Label x:Name="errorLabel" 
+                       Text="{Binding ErrorMessage}" 
+                       TextColor="#CC0000"/>
+            </Frame>
+
+            <!-- Busy indicator overlay -->
+            <Grid IsVisible="{Binding VmIsBusy}" 
+                  BackgroundColor="#80000000"
+                  Grid.RowSpan="12"
+                  Grid.ColumnSpan="4">
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                    <ActivityIndicator IsRunning="{Binding VmIsBusy}" 
+                                       HeightRequest="50" 
+                                       WidthRequest="50" 
+                                       Color="White" />
+                    <Label Text="Processing, please wait..." 
+                           TextColor="White" 
+                           Margin="0,10,0,0"/>
+                </VerticalStackLayout>
             </Grid>
-        </VerticalStackLayout>
-</ContentPage>
+        </Grid>
+    </ScrollView>
+</base:ContentPageBase>

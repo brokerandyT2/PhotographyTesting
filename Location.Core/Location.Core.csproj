@@ -59,22 +59,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Views\Premium\ExposureCalculator.xaml.cs" />
-    <Compile Remove="Views\Premium\LightMeter.xaml.cs" />
-    <Compile Remove="Views\Premium\SunLocation.xaml.cs" />
-    <Compile Remove="Views\Pro\SceneEvaluation.xaml.cs" />
-    <Compile Remove="Views\Pro\SunCalculations.xaml.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <MauiXaml Remove="Views\Premium\ExposureCalculator.xaml" />
-    <MauiXaml Remove="Views\Premium\LightMeter.xaml" />
-    <MauiXaml Remove="Views\Premium\SunLocation.xaml" />
-    <MauiXaml Remove="Views\Pro\SceneEvaluation.xaml" />
-    <MauiXaml Remove="Views\Pro\SunCalculations.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Camera.MAUI" Version="1.5.1" />
     <PackageReference Include="CommunityToolkit.Maui" Version="11.2.0" />
     <PackageReference Include="Duende.IdentityModel.OidcClient" Version="6.0.1" />
@@ -162,8 +146,6 @@
 
   <ItemGroup>
     <Folder Include="Helpers\" />
-    <Folder Include="Views\Premium\" />
-    <Folder Include="Views\Pro\" />
   </ItemGroup>
 
 </Project>

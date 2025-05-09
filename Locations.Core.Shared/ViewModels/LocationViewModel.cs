@@ -12,6 +12,9 @@ namespace Locations.Core.Shared.ViewModels
 {
     public partial class LocationViewModel : LocationDTO, ILocationViewModel, IValidatable
     {
+
+
+
         // Services injected via DI
         private readonly ILocationService? _locationService;
         private readonly IMediaService? _mediaService;

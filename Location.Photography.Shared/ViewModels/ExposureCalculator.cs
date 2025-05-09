@@ -16,6 +16,9 @@ namespace Location.Photography.Shared.ViewModels
     {
         public override event PropertyChangedEventHandler? PropertyChanged;
         private bool _showError;
+        private string _errorMessage;
+        private bool _vmIsBusy;
+
         public bool ShowError
         {
             get => _showError;
@@ -25,6 +28,29 @@ namespace Location.Photography.Shared.ViewModels
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowError)));
             }
         }
+
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                _errorMessage = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ErrorMessage)));
+                // Update ShowError based on whether there's an error message
+                ShowError = !string.IsNullOrEmpty(value);
+            }
+        }
+
+        public bool VmIsBusy
+        {
+            get => _vmIsBusy;
+            set
+            {
+                _vmIsBusy = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(VmIsBusy)));
+            }
+        }
+
         private string[] _fullStopApeature = Apetures.Full;
         private string[] _halfStopApeature = Apetures.Halves;
         private string[] _thirdStopApeature = Apetures.Thirds;
@@ -226,29 +252,46 @@ namespace Location.Photography.Shared.ViewModels
                 steps = ExposureIncrements.Thirds;
             }
             Calculator c = new Calculator(steps);
-            switch (ToCalculate)
+            try
             {
+                // Clear any previous error
+                ErrorMessage = string.Empty;
 
-                case FixedValue.Apeature:
-                    ISOResult = ISOSelected;
-                    ShutterSpeedResult = ShutterSpeedSelected;
-                    FStopResult = c.CalculateNewApertureFromBaseExposure(etv, ShutterSpeedSelected, ISOSelected);
-                    break;
+                switch (ToCalculate)
+                {
 
-                case FixedValue.ShutterSpeeds:
-                    ISOResult = ISOSelected;
-                    FStopResult = FStopSelected;
-                    ShutterSpeedResult = c.CalculateNewShutterFromBaseExposure(etv, FStopSelected, ISOSelected);
-                    break;
+                    case FixedValue.Apeature:
+                        ISOResult = ISOSelected;
+                        ShutterSpeedResult = ShutterSpeedSelected;
+                        FStopResult = c.CalculateNewApertureFromBaseExposure(etv, ShutterSpeedSelected, ISOSelected);
+                        break;
 
-                case FixedValue.ISOs:
-                    ISOResult = c.CalculateNewIsoFromBaseExposure(etv, FStopSelected, ShutterSpeedSelected);
-                    FStopResult = FStopSelected;
-                    ShutterSpeedResult = ShutterSpeedSelected;
+                    case FixedValue.ShutterSpeeds:
+                        ISOResult = ISOSelected;
+                        FStopResult = FStopSelected;
+                        ShutterSpeedResult = c.CalculateNewShutterFromBaseExposure(etv, FStopSelected, ISOSelected);
+                        break;
 
-                    break;
-                default:
-                    break;
+                    case FixedValue.ISOs:
+                        ISOResult = c.CalculateNewIsoFromBaseExposure(etv, FStopSelected, ShutterSpeedSelected);
+                        FStopResult = FStopSelected;
+                        ShutterSpeedResult = ShutterSpeedSelected;
+
+                        break;
+                    default:
+                        break;
+                }
+
+                // Check if there was an error from the calculator
+                if (!string.IsNullOrEmpty(c.ErrorMessage))
+                {
+                    ErrorMessage = c.ErrorMessage;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions during calculation
+                ErrorMessage = ex.Message;
             }
         }
         public enum ExposureIncrements
@@ -381,13 +424,13 @@ namespace Location.Photography.Shared.ViewModels
                 if (idx > values.Count - 1)
                 {
 
-                    ErrorMessage =  new OverexposedError(idx, values, _increments).Message;
+                    ErrorMessage = new OverexposedError(idx, values, _increments).Message;
                 }
 
                 if (idx < 0)
                 {
 
-                    ErrorMessage =  new UnderexposedError(idx, baseIdx, values, _increments).Message;
+                    ErrorMessage = new UnderexposedError(idx, baseIdx, values, _increments).Message;
                 }
 
                 return values[idx];
@@ -465,7 +508,7 @@ namespace Location.Photography.Shared.ViewModels
                     var parts = shutter.Split('/');
                     return double.Parse(parts[0]) / double.Parse(parts[1]);
                 }
-                if(shutter == null) { shutter = "1"; }
+                if (shutter == null) { shutter = "1"; }
                 // Example: 3.2
                 return double.Parse(shutter);
             }

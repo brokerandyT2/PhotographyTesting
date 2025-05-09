@@ -1,25 +1,131 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<base:ContentPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Location.Photography.Premium.SunLocation"
+             xmlns:base="clr-namespace:Location.Photography.Base"
+             xmlns:strings="clr-namespace:Location.Photography.Resources"
              xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:viewmodels="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
+             xmlns:converters="clr-namespace:Location.Photography.Converters;assembly=Location.Photography"
+             x:Class="Location.Photography.Premium.SunLocation"
+             x:DataType="viewmodels:SunLocation"
+             Title="Sun Location">
 
-             Title="SunLocation"
->
-   
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+            <converters:BoolToTextConverter x:Key="BoolToTextConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
+    <ScrollView>
+        <Grid Padding="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-    
-        <VerticalStackLayout>
-            <Picker x:Name="locationPicker" SelectedIndexChanged="locationPicker_SelectedIndexChanged"  ItemDisplayBinding="{Binding Title}" />
-            <DatePicker x:Name="date" DateSelected="date_DateSelected"  Date="{Binding SelectedDateTime}"  />
-            <TimePicker x:Name="time" TimeSelected="time_TimeSelected"  Time="{Binding SelectedDateTime}" />
+            <!-- Location Picker -->
+            <Label Text="Select Location:" 
+                   Grid.Row="0" 
+                   FontSize="Medium" 
+                   Margin="0,0,0,5"/>
+            <Picker x:Name="locationPicker" 
+                    Grid.Row="1" 
+                    ItemsSource="{Binding Locations}" 
+                    ItemDisplayBinding="{Binding Title}"
+                    SelectedIndexChanged="locationPicker_SelectedIndexChanged" 
+                    Margin="0,0,0,15"/>
 
-            <Image x:Name="north" Source="north.png" Rotation="{Binding NorthRotationAngle}"/>
-            <Label Text="{x:Static system:Environment.NewLine}"/>
-            <Label Text="{x:Static system:Environment.NewLine}"/>
-            <Label Text="{x:Static system:Environment.NewLine}"/>
-            <Image x:Name="arrow" Source="arrowup.png" WidthRequest="150" Rotation="{Binding SunDirection}"/>
-        </VerticalStackLayout>
-    
-</ContentPage>
+            <!-- Date and Time Pickers -->
+            <Label Text="Select Date and Time:" 
+                   Grid.Row="2" 
+                   FontSize="Medium" 
+                   Margin="0,0,0,5"/>
+            <HorizontalStackLayout Grid.Row="3" Spacing="10" Margin="0,0,0,15">
+                <DatePicker x:Name="date" 
+                            Date="{Binding SelectedDate}" 
+                            DateSelected="date_DateSelected" />
+                <TimePicker x:Name="time" 
+                            Time="{Binding SelectedTime}" 
+                            TimeSelected="time_TimeSelected" />
+            </HorizontalStackLayout>
+
+            <!-- North Indicator -->
+            <Label Text="North Direction:" 
+                   Grid.Row="4" 
+                   FontSize="Medium" 
+                   Margin="0,0,0,5"/>
+            <Image x:Name="north" 
+                   Source="north.png" 
+                   Grid.Row="5" 
+                   HeightRequest="100" 
+                   WidthRequest="100" 
+                   HorizontalOptions="Center"
+                   Rotation="{Binding NorthRotationAngle}" 
+                   Margin="0,0,0,30"/>
+
+            <!-- Sun Direction Arrow -->
+            <Label Text="Sun Direction:" 
+                   Grid.Row="6" 
+                   FontSize="Medium" 
+                   Margin="0,0,0,5"/>
+            <Image x:Name="arrow" 
+                   Source="arrowup.png" 
+                   Grid.Row="7" 
+                   HeightRequest="150" 
+                   WidthRequest="150" 
+                   HorizontalOptions="Center"
+                   Rotation="{Binding SunDirection}" />
+
+            <!-- Tilt and Elevation Match indicator -->
+            <VerticalStackLayout Grid.Row="8" Margin="0,20,0,0" Spacing="10">
+                <Label Text="{Binding DeviceTilt, StringFormat='Device Tilt: {0:F1}°'}" 
+                       FontSize="Medium"/>
+                <Label Text="{Binding SunElevation, StringFormat='Sun Elevation: {0:F1}°'}" 
+                       FontSize="Medium"/>
+                <Frame BackgroundColor="{Binding ElevationMatched, Converter={StaticResource BoolToColorConverter}}"
+                       Padding="10"
+                       CornerRadius="5"
+                       IsVisible="True"
+                       HorizontalOptions="Center">
+                    <Label Text="{Binding ElevationMatched, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Aligned with Sun!|Point at Sun'}"/>
+                </Frame>
+            </VerticalStackLayout>
+
+            <!-- Error message display -->
+            <Grid IsVisible="{Binding VmErrorMessage, Converter={StaticResource StringToBoolConverter}}"
+                  BackgroundColor="#80FFEBEE"
+                  VerticalOptions="End"
+                  Margin="10"
+                  Padding="10"
+                  Grid.Row="9">
+                <Label Text="{Binding VmErrorMessage}"
+                       TextColor="Red"
+                       FontSize="14" />
+            </Grid>
+
+            <!-- Busy indicator overlay -->
+            <Grid IsVisible="{Binding VmIsBusy}" 
+                  BackgroundColor="#80000000"
+                  Grid.RowSpan="10">
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                    <ActivityIndicator IsRunning="{Binding VmIsBusy}" 
+                                       HeightRequest="50" 
+                                       WidthRequest="50" 
+                                       Color="White" />
+                    <Label Text="Processing, please wait..." 
+                           TextColor="White" 
+                           Margin="0,10,0,0"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Grid>
+    </ScrollView>
+</base:ContentPageBase>
