@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+  <!-- Platform to test on: Windows, Android, iOS -->
+  <Platform>Android</Platform>
+
+  <!-- Timeout values in seconds -->
+  <DefaultTimeout>10</DefaultTimeout>
+  <LongOperationTimeout>30</LongOperationTimeout>
+
+  <!-- App configuration -->
+  <AppPackage>com.x3squaredcircles.locations</AppPackage>
+  <AppActivity>com.x3squaredcircles.locations.MainActivity</AppActivity>
+
+  <!-- Test data -->
+  <TestData>
+    <ValidEmail>test@example.com</ValidEmail>
+    <InvalidEmail>invalid-email</InvalidEmail>
+    <DefaultLocationTitle>Test Location</DefaultLocationTitle>
+    <DefaultLocationDescription>This is a test location created by automated UI tests.</DefaultLocationDescription>
+  </TestData>
+
+  <!-- Domain configurations -->
+  <DomainConfiguration>
+    <Authentication enabled="true" />
+    <Configuration enabled="true" />
+    <Locations enabled="true" />
+    <Weather enabled="true" />
+    <Tips enabled="true" />
+    <Tutorial enabled="false" />
+    <FeatureNotSupported enabled="false" />
+    <Subscription enabled="false" />
+  </DomainConfiguration>
+
+  <!-- Screenshot configuration -->
+  <Screenshots>
+    <OnFailure>true</OnFailure>
+    <OnSuccess>false</OnSuccess>
+    <Path>Screenshots</Path>
+  </Screenshots>
+
+  <!-- App-specific identifiers that may change with future updates -->
+  <ElementIdentifiers>
+    <Login>
+      <EmailField>emailAddress</EmailField>
+      <SaveButton>save</SaveButton>
+    </Login>
+    <MainMenu>
+      <SettingsTab>cogbox.png</SettingsTab>
+      <TipsTab>Tips</TipsTab>
+    </MainMenu>
+  </ElementIdentifiers>
+</Configuration>

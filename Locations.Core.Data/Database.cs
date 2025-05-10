@@ -1,6 +1,6 @@
 ﻿using EncryptedSQLite;
 using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
+//using Location.Core.Helpers.LoggingService;
 using Locations.Core.Data.Helpers;
 using Locations.Core.Data.Models;
 using Locations.Core.Shared;
@@ -17,7 +17,7 @@ namespace Locations.Core.Data.Queries
     public abstract class Database
     {
         protected readonly IAlertService AlertService;
-        protected readonly ILoggerService LoggerService;
+       // protected readonly ILoggerService LoggerService;
 
         public event DataErrorEventHandler? ErrorOccurred;
 
@@ -26,7 +26,7 @@ namespace Locations.Core.Data.Queries
         // The SQLite connection
         protected SQLiteAsyncConnection dataB;
 
-        protected Database(IAlertService alertService, ILoggerService loggerService)
+       /* protected Database(IAlertService alertService, ILoggerService loggerService)
         {
             AlertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
             LoggerService = loggerService ?? throw new ArgumentNullException(nameof(loggerService));
@@ -46,7 +46,7 @@ namespace Locations.Core.Data.Queries
                     ex));
                 throw;
             }
-        }
+        }*/
 
         /// <summary>
         /// Gets an encrypted SQLite connection
@@ -60,7 +60,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error creating encrypted database connection: {ex.Message}";
-                LoggerService.LogError(message, ex);
+          //      LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -81,7 +81,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error creating sync encrypted database connection: {ex.Message}";
-                LoggerService.LogError(message, ex);
+          //      LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -95,7 +95,7 @@ namespace Locations.Core.Data.Queries
         /// </summary>
         protected virtual void OnErrorOccurred(DataErrorEventArgs e)
         {
-            LoggerService.LogError($"Database error: {e.Source} - {e.Message}");
+          //  LoggerService.LogError($"Database error: {e.Source} - {e.Message}");
             ErrorOccurred?.Invoke(this, e);
         }
     }

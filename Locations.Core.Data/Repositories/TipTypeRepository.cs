@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using SQLite;
 using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
+//using Location.Core.Helpers.LoggingService;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Data.Queries.Base;
@@ -27,7 +27,7 @@ namespace Locations.Core.Data.Queries
         /// <summary>
         /// Logger service
         /// </summary>
-        protected readonly ILoggerService LoggerService;
+       // protected readonly ILoggerService LoggerService;
 
         /// <summary>
         /// Alert service
@@ -37,7 +37,7 @@ namespace Locations.Core.Data.Queries
         /// <summary>
         /// Creates a new tip type repository
         /// </summary>
-        public TipTypeRepository(IAlertService alertService, ILoggerService loggerService)
+      /*  public TipTypeRepository(IAlertService alertService, ILoggerService loggerService)
             : base()
         {
             AlertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
@@ -45,7 +45,7 @@ namespace Locations.Core.Data.Queries
 
             // Initialize database connection
             dataB = DataEncrypted.GetAsyncConnection();
-        }
+        }*/
 
         /// <summary>
         /// Gets a tip type by its ID
@@ -70,7 +70,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error retrieving tip type with ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
+             //   LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -80,7 +80,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error retrieving tip type with ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
+            //    LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -102,7 +102,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error retrieving all tip types: {ex.Message}";
-                LoggerService.LogError(message, ex);
+            //    LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -112,7 +112,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error retrieving all tip types: {ex.Message}";
-                LoggerService.LogError(message, ex);
+            //    LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -149,7 +149,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error saving tip type: {ex.Message}";
-                LoggerService.LogError(message, ex);
+             //   LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -159,7 +159,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error saving tip type: {ex.Message}";
-                LoggerService.LogError(message, ex);
+            //    LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -196,7 +196,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error updating tip type: {ex.Message}";
-                LoggerService.LogError(message, ex);
+            //    LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -206,7 +206,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error updating tip type: {ex.Message}";
-                LoggerService.LogError(message, ex);
+            //    LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -237,7 +237,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error deleting tip type with ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
+            //    LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -247,7 +247,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error deleting tip type with ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
+            //    LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,

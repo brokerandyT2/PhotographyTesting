@@ -1,0 +1,45 @@
+{
+"defaultTimeoutSeconds": 10,
+"longTimeoutSeconds": 30,
+
+"appiumServer": {
+"host": "127.0.0.1",
+"port": 4723,
+"autoStart": false,
+"executablePath": "appium"
+},
+
+"android": {
+"deviceName": "Android Emulator",
+"automationName": "UiAutomator2",
+"platformVersion": "34.0",
+"appPath": "",
+"appPackage": "com.x3squaredcircles.locations",
+"appActivity": "com.x3squaredcircles.locations.MainActivity",
+"noReset": true,
+"fullReset": false,
+"additionalCapabilities": {
+"unlockType": "pin",
+"unlockKey": "1234",
+"newCommandTimeout": 300
+}
+},
+
+"iOS": {
+"deviceName": "iPhone Simulator",
+"automationName": "XCUITest",
+"platformVersion": "15.0",
+"appPath": "",
+"bundleId": "com.x3squaredcircles.locations",
+"noReset": true,
+"fullReset": false,
+"additionalCapabilities": {
+"newCommandTimeout": 300
+}
+},
+
+"windows": {
+"deviceName": "WindowsPC",
+"appPath": ""
+}
+}

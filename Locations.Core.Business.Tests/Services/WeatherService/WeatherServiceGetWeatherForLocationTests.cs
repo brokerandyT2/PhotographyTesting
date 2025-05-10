@@ -1,17 +1,11 @@
 ﻿// WeatherServiceGetWeatherForLocationTests.cs
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Business.DataAccess.Interfaces;
+using Locations.Core.Business.DataAccess.Services;
+using Locations.Core.Business.Tests.Base;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
-using Locations.Core.Business.Tests.Base;
+using Moq;
 using MockFactory = Locations.Core.Business.Tests.TestHelpers.MockFactory;
 using TestDataFactory = Locations.Core.Business.Tests.TestHelpers.TestDataFactory;
 

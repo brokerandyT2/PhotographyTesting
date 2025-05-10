@@ -52,7 +52,7 @@ namespace Locations.Core.Business.Tests.Services.GeoLocationTests
             double latitude = 40.7128;
             double longitude = -74.0060;
 
-            var address = new Address
+         /*   var address = new Address
             {
                 City = "New York City",
                 State = "New York"
@@ -61,7 +61,7 @@ namespace Locations.Core.Business.Tests.Services.GeoLocationTests
             var geocodeResponse = new GeocodeResponse
             {
                 Address = address
-            };
+            };*/
 
             // Note: Since we can't easily inject the mocked ReverseGeocoder into GeoLocationAPI,
             // this test is limited in what it can verify

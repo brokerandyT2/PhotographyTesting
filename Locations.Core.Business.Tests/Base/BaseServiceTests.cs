@@ -1,10 +1,6 @@
 ﻿// BaseServiceTests.cs
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
-using Locations.Core.Business.DataAccess.Interfaces;
-using System;
+using Moq;
 using ILoggerService = Locations.Core.Business.DataAccess.Interfaces.ILoggerService;
 
 namespace Locations.Core.Business.Tests.Base

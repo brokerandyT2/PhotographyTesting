@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
+//using Location.Core.Helpers.LoggingService;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using System.Reflection;
@@ -37,7 +37,7 @@ namespace Locations.Core.Business.DataAccess.Base
         /// <summary>
         /// Logger service for logging errors and info
         /// </summary>
-        protected readonly ILoggerService LoggerService;
+   //     protected readonly ILoggerService LoggerService;
 
         /// <summary>
         /// Creates a new service with dependencies
@@ -45,7 +45,7 @@ namespace Locations.Core.Business.DataAccess.Base
         /// <param name="repository">The repository to use</param>
         /// <param name="alertService">The alert service to use</param>
         /// <param name="loggerService">The logger service to use</param>
-        protected ServiceBase(TRepository repository, IAlertService alertService, ILoggerService loggerService)
+    /*    protected ServiceBase(TRepository repository, IAlertService alertService, ILoggerService loggerService)
         {
             Repository = repository ?? throw new ArgumentNullException(nameof(repository));
             AlertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
@@ -56,7 +56,7 @@ namespace Locations.Core.Business.DataAccess.Base
             {
                 repoWithEvents.ErrorOccurred += RepositoryOnErrorOccurred;
             }
-        }
+        }*/
 
         /// <summary>
         /// Handles errors from the repository
@@ -64,7 +64,7 @@ namespace Locations.Core.Business.DataAccess.Base
         private void RepositoryOnErrorOccurred(object sender, DataErrorEventArgsModel e)
         {
             // Log the error
-            LoggerService.LogError(e.Message, e.Exception);
+         //   LoggerService.LogError(e.Message, e.Exception);
 
             // Forward the error event
             OnErrorOccurred(e);
@@ -76,7 +76,7 @@ namespace Locations.Core.Business.DataAccess.Base
         public virtual void OnErrorOccurred(DataErrorEventArgsModel e)
         {
             // Log the error
-            LoggerService.LogError(e.Message, e.Exception);
+        //    LoggerService.LogError(e.Message, e.Exception);
 
             // Show alert for UI - using the standard methods from IAlertService
             if (AlertService != null)
@@ -84,11 +84,11 @@ namespace Locations.Core.Business.DataAccess.Base
                 if (e.Exception != null)
                 {
                     // Use logging since IAlertService doesn't have ShowAlert
-                    LoggerService.LogError($"{e.Source}: {e.Message}", e.Exception);
+         //           LoggerService.LogError($"{e.Source}: {e.Message}", e.Exception);
                 }
                 else
                 {
-                    LoggerService.LogWarning($"{e.Source}: {e.Message}");
+         //           LoggerService.LogWarning($"{e.Source}: {e.Message}");
                 }
             }
 
@@ -246,7 +246,7 @@ namespace Locations.Core.Business.DataAccess.Base
                 catch (Exception innerEx)
                 {
                     // Log the error and create a failure result
-                    LoggerService.LogError("Failed to delete entity", innerEx);
+        //            LoggerService.LogError("Failed to delete entity", innerEx);
                     return DataOperationResult<bool>.Failure(
                         ErrorSourceModel.Unknown,
                         $"Failed to delete entity: {innerEx.Message}",

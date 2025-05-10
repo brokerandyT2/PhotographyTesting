@@ -1,14 +1,9 @@
 ﻿using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared.DTO;
 using Locations.Core.Shared.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using DataErrorEventArgs = Locations.Core.Data.Models.DataErrorEventArgs;
 using ILoggerService = Locations.Core.Business.DataAccess.Interfaces.ILoggerService;
 

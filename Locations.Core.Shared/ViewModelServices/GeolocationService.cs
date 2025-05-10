@@ -1,7 +1,7 @@
 ﻿using Microsoft.Maui.Devices.Sensors;
 using System;
 using System.Threading.Tasks;
-using Location.Core.Helpers.LoggingService;
+//using Location.Core.Helpers.LoggingService;
 
 namespace Locations.Core.Shared.ViewModelServices
 {
@@ -10,7 +10,7 @@ namespace Locations.Core.Shared.ViewModelServices
     /// </summary>
     public class GeolocationService : IGeolocationService
     {
-        private readonly ILoggerService? _loggerService;
+      //  private readonly ILoggerService? _loggerService;
         private GeolocationAccuracy _currentAccuracy = GeolocationAccuracy.Medium;
         private bool _isListening = false;
         private CancellationTokenSource? _cts;
@@ -28,13 +28,13 @@ namespace Locations.Core.Shared.ViewModelServices
         /// <summary>
         /// Constructor with optional logger
         /// </summary>
-        public GeolocationService(ILoggerService? loggerService = null)
+      /*  public GeolocationService(ILoggerService? loggerService = null)
         {
             _loggerService = loggerService;
 
             // Subscribe to platform's location changes when the service is created
             Microsoft.Maui.Devices.Sensors.Geolocation.LocationChanged += OnPlatformLocationChanged;
-        }
+        } */
 
         /// <summary>
         /// Starts tracking the device location
@@ -45,7 +45,7 @@ namespace Locations.Core.Shared.ViewModelServices
             {
                 if (_isListening)
                 {
-                    _loggerService?.LogInformation("Location tracking is already active");
+               //     _loggerService?.LogInformation("Location tracking is already active");
                     return OperationResult<bool>.Success(true);
                 }
 
@@ -57,7 +57,7 @@ namespace Locations.Core.Shared.ViewModelServices
                     if (!permissionStatus)
                     {
                         string message = "Location permission was denied";
-                        _loggerService?.LogWarning(message);
+              //          _loggerService?.LogWarning(message);
                         OnErrorOccurred(new OperationErrorEventArgs(
                             OperationErrorSource.Permission,
                             message));
@@ -72,7 +72,7 @@ namespace Locations.Core.Shared.ViewModelServices
                 if (!locationEnabled)
                 {
                     string message = "Location services are disabled on the device";
-                    _loggerService?.LogWarning(message);
+              //      _loggerService?.LogWarning(message);
                     OnErrorOccurred(new OperationErrorEventArgs(
                         OperationErrorSource.Permission,
                         message));
@@ -90,7 +90,7 @@ namespace Locations.Core.Shared.ViewModelServices
 
                 // Start polling for location updates
                 _isListening = true;
-                _loggerService?.LogInformation($"Starting location tracking with accuracy: {accuracy}");
+             //   _loggerService?.LogInformation($"Starting location tracking with accuracy: {accuracy}");
 
                 // Start a background task to poll for location updates
                 _ = Task.Run(async () =>
@@ -119,7 +119,7 @@ namespace Locations.Core.Shared.ViewModelServices
                     }
                     catch (Exception ex)
                     {
-                        _loggerService?.LogError($"Error in location polling: {ex.Message}", ex);
+             //           _loggerService?.LogError($"Error in location polling: {ex.Message}", ex);
                     }
                 });
 
@@ -128,7 +128,7 @@ namespace Locations.Core.Shared.ViewModelServices
             catch (FeatureNotSupportedException ex)
             {
                 string message = "Geolocation is not supported on this device";
-                _loggerService?.LogError(message, ex);
+            //    _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     message,
@@ -141,7 +141,7 @@ namespace Locations.Core.Shared.ViewModelServices
             catch (FeatureNotEnabledException ex)
             {
                 string message = "Location services are not enabled on this device";
-                _loggerService?.LogError(message, ex);
+            //    _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Permission,
                     message,
@@ -154,7 +154,7 @@ namespace Locations.Core.Shared.ViewModelServices
             catch (PermissionException ex)
             {
                 string message = "Location permission was denied";
-                _loggerService?.LogError(message, ex);
+            //    _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Permission,
                     message,
@@ -167,7 +167,7 @@ namespace Locations.Core.Shared.ViewModelServices
             catch (Exception ex)
             {
                 string message = $"Failed to start location tracking: {ex.Message}";
-                _loggerService?.LogError(message, ex);
+            //    _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     message,
@@ -188,11 +188,11 @@ namespace Locations.Core.Shared.ViewModelServices
             {
                 if (!_isListening)
                 {
-                    _loggerService?.LogInformation("Location tracking is not active");
+            //        _loggerService?.LogInformation("Location tracking is not active");
                     return;
                 }
 
-                _loggerService?.LogInformation("Stopping location tracking");
+            //    _loggerService?.LogInformation("Stopping location tracking");
 
                 // Cancel the polling task
                 if (_cts != null && !_cts.IsCancellationRequested)
@@ -203,14 +203,14 @@ namespace Locations.Core.Shared.ViewModelServices
                 }
 
                 _isListening = false;
-                _loggerService?.LogInformation("Location tracking stopped successfully");
+          //      _loggerService?.LogInformation("Location tracking stopped successfully");
 
                 await Task.CompletedTask; // To keep the method async
             }
             catch (Exception ex)
             {
                 string message = $"Failed to stop location tracking: {ex.Message}";
-                _loggerService?.LogError(message, ex);
+         //       _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     message,
@@ -233,7 +233,7 @@ namespace Locations.Core.Shared.ViewModelServices
                     if (!permissionStatus)
                     {
                         string message = "Location permission was denied";
-                        _loggerService?.LogWarning(message);
+         //               _loggerService?.LogWarning(message);
                         OnErrorOccurred(new OperationErrorEventArgs(
                             OperationErrorSource.Permission,
                             message));
@@ -251,7 +251,7 @@ namespace Locations.Core.Shared.ViewModelServices
                 if (location == null)
                 {
                     string message = "Could not get current location";
-                    _loggerService?.LogWarning(message);
+             //       _loggerService?.LogWarning(message);
                     OnErrorOccurred(new OperationErrorEventArgs(
                         OperationErrorSource.Unknown,
                         message));
@@ -267,13 +267,13 @@ namespace Locations.Core.Shared.ViewModelServices
                     location.Accuracy,
                     location.Timestamp);
 
-                _loggerService?.LogInformation($"Got current location: {location.Latitude}, {location.Longitude}");
+           //     _loggerService?.LogInformation($"Got current location: {location.Latitude}, {location.Longitude}");
                 return OperationResult<LocationData>.Success(locationData);
             }
             catch (FeatureNotSupportedException ex)
             {
                 string message = "Geolocation is not supported on this device";
-                _loggerService?.LogError(message, ex);
+           //     _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     message,
@@ -286,7 +286,7 @@ namespace Locations.Core.Shared.ViewModelServices
             catch (FeatureNotEnabledException ex)
             {
                 string message = "Location services are not enabled on this device";
-                _loggerService?.LogError(message, ex);
+          //      _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Permission,
                     message,
@@ -299,7 +299,7 @@ namespace Locations.Core.Shared.ViewModelServices
             catch (PermissionException ex)
             {
                 string message = "Location permission was denied";
-                _loggerService?.LogError(message, ex);
+           //     _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Permission,
                     message,
@@ -312,7 +312,7 @@ namespace Locations.Core.Shared.ViewModelServices
             catch (Exception ex)
             {
                 string message = $"Failed to get current location: {ex.Message}";
-                _loggerService?.LogError(message, ex);
+           //     _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     message,
@@ -366,7 +366,7 @@ namespace Locations.Core.Shared.ViewModelServices
             catch (Exception ex)
             {
                 string message = $"Error checking location services: {ex.Message}";
-                _loggerService?.LogError(message, ex);
+           //     _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     message,
@@ -388,7 +388,7 @@ namespace Locations.Core.Shared.ViewModelServices
             catch (Exception ex)
             {
                 string message = $"Error checking location permissions: {ex.Message}";
-                _loggerService?.LogError(message, ex);
+            //    _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     message,
@@ -410,7 +410,7 @@ namespace Locations.Core.Shared.ViewModelServices
             catch (Exception ex)
             {
                 string message = $"Error requesting location permissions: {ex.Message}";
-                _loggerService?.LogError(message, ex);
+           //     _loggerService?.LogError(message, ex);
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     message,
@@ -447,7 +447,7 @@ namespace Locations.Core.Shared.ViewModelServices
                 location.Accuracy,
                 location.Timestamp);
 
-            _loggerService?.LogDebug($"Location changed: {location.Latitude}, {location.Longitude}");
+         //   _loggerService?.LogDebug($"Location changed: {location.Latitude}, {location.Longitude}");
 
             // Forward the event with our custom event args
             OnLocationChanged(locationEventArgs);

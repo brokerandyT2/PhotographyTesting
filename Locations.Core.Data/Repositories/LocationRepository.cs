@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using SQLite;
 using Location.Core.Helpers.AlertService;
-using Location.Core.Helpers.LoggingService;
+//using Location.Core.Helpers.LoggingService;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Data.Queries.Base;
@@ -27,7 +27,7 @@ namespace Locations.Core.Data.Queries
         /// <summary>
         /// Logger service
         /// </summary>
-        protected readonly ILoggerService LoggerService;
+     //   protected readonly ILoggerService LoggerService;
 
         /// <summary>
         /// Alert service
@@ -37,7 +37,7 @@ namespace Locations.Core.Data.Queries
         /// <summary>
         /// Creates a new location repository
         /// </summary>
-        public LocationRepository(IAlertService alertService, ILoggerService loggerService)
+     /*   public LocationRepository(IAlertService alertService, ILoggerService loggerService)
             : base()
         {
             AlertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
@@ -45,7 +45,7 @@ namespace Locations.Core.Data.Queries
 
             // Initialize database connection - assuming this is set up somewhere
             dataB = DataEncrypted.GetAsyncConnection();
-        }
+        }*/
 
         /// <summary>
         /// Gets a location by its ID
@@ -70,7 +70,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error retrieving location with ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
+          //      LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -80,7 +80,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error retrieving location with ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
+         //       LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -102,7 +102,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error retrieving all locations: {ex.Message}";
-                LoggerService.LogError(message, ex);
+          //      LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -112,7 +112,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error retrieving all locations: {ex.Message}";
-                LoggerService.LogError(message, ex);
+          //      LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -149,7 +149,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error saving location: {ex.Message}";
-                LoggerService.LogError(message, ex);
+           //     LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -159,7 +159,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error saving location: {ex.Message}";
-                LoggerService.LogError(message, ex);
+          //      LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -195,7 +195,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error updating location: {ex.Message}";
-                LoggerService.LogError(message, ex);
+          //      LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -205,7 +205,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error updating location: {ex.Message}";
-                LoggerService.LogError(message, ex);
+           //     LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -236,7 +236,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error deleting location with ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
+           //     LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -246,7 +246,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error deleting location with ID {id}: {ex.Message}";
-                LoggerService.LogError(message, ex);
+          //      LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -291,7 +291,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error retrieving location at coordinates ({latitude}, {longitude}): {ex.Message}";
-                LoggerService.LogError(message, ex);
+         //       LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -301,7 +301,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error retrieving location at coordinates ({latitude}, {longitude}): {ex.Message}";
-                LoggerService.LogError(message, ex);
+          //      LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,

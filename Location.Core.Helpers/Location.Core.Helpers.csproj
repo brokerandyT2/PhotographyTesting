@@ -8,7 +8,10 @@
 
   <ItemGroup>
     <Folder Include="ExtensionMethods\" />
-    <Folder Include="LoggingService\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="sqlite-net-sqlcipher" Version="1.9.172" />
   </ItemGroup>
 
 </Project>

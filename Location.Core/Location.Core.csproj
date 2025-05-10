@@ -59,6 +59,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Appium.WebDriver" Version="7.2.0" />
     <PackageReference Include="Camera.MAUI" Version="1.5.1" />
     <PackageReference Include="CommunityToolkit.Maui" Version="11.2.0" />
     <PackageReference Include="Duende.IdentityModel.OidcClient" Version="6.0.1" />
@@ -67,6 +68,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.3" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.51" />
     <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.60" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.32.0" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />

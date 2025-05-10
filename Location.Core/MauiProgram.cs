@@ -1,7 +1,9 @@
 ﻿
 using Camera.MAUI;
 using CommunityToolkit.Maui;
+using EncryptedSQLite;
 using epj.Expander.Maui;
+using Location.Core.Helpers.LoggingService;
 using Location.Core.Platforms.Android.Implementation;
 using Location.Core.Platforms.Android.Interface;
 using Locations.Core.Shared.StorageSvc;
@@ -10,6 +12,7 @@ using Locations.Core.Shared.ViewModels.Interface;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using SQLite;
 using ZXing.Net.Maui.Controls;
 
 #if ANDROID
@@ -36,6 +39,8 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
+        builder.Services.AddSingleton<ISQLiteAsyncConnection>(sp => DataEncrypted.GetAsyncConnection());
+        builder.Services.AddSingleton<ILoggerService, LoggerService>();
         builder.Services.AddTransient<ILocationViewModel, LocationViewModel>();
         builder.Services.AddTransient<IWeatherViewModel, WeatherViewModel>();
         builder.Services.AddTransient<ITip, TipViewModel>();
