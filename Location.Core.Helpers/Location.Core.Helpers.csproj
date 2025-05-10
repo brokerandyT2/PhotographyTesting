@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Folder Include="ExtensionMethods\" />
+    <Folder Include="LoggingService\" />
   </ItemGroup>
 
 </Project>

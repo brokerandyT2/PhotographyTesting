@@ -23,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locations.Photography.Busin
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackendAPI", "BackendAPI", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GooglePlaySubscriptionChecker", "GooglePlaySubscriptionChecker\GooglePlaySubscriptionChecker\GooglePlaySubscriptionChecker.csproj", "{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		azure-pipelines-1.yml = azure-pipelines-1.yml
@@ -123,14 +121,6 @@ Global
 		{67376FA6-DB38-4267-8253-085275829C56}.Release|Any CPU.Build.0 = Release|Any CPU
 		{67376FA6-DB38-4267-8253-085275829C56}.Testing|Any CPU.ActiveCfg = Debug|Any CPU
 		{67376FA6-DB38-4267-8253-085275829C56}.Testing|Any CPU.Build.0 = Debug|Any CPU
-		{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A}.Andy|Any CPU.ActiveCfg = Debug|Any CPU
-		{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A}.Andy|Any CPU.Build.0 = Debug|Any CPU
-		{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A}.Testing|Any CPU.ActiveCfg = Debug|Any CPU
-		{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A}.Testing|Any CPU.Build.0 = Debug|Any CPU
 		{BBE0430E-8186-42EB-9683-BF2604B8911B}.Andy|Any CPU.ActiveCfg = Debug|Any CPU
 		{BBE0430E-8186-42EB-9683-BF2604B8911B}.Andy|Any CPU.Build.0 = Debug|Any CPU
 		{BBE0430E-8186-42EB-9683-BF2604B8911B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -158,9 +148,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{5302AE1C-0E26-FA0C-C6B8-37B28FE3D06A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4CC858B3-E275-4DD2-97FE-4D55104588A0}
