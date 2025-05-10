@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using OpenQA.Selenium.Appium.Android;
 using OpenQA.Selenium.Appium.iOS;
 using OpenQA.Selenium.Appium.Windows;
-
+using AppiumDriver = OpenQA.Selenium.Appium.AppiumDriver;
 namespace Locations.Core.Business.Tests.UITests
 {
     public class AppiumSetup

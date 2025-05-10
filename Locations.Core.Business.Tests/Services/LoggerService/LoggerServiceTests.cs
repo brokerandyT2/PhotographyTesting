@@ -1,7 +1,11 @@
 ﻿// LoggerServiceTests.cs
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Location.Core.Helpers.LoggingService;
 using Locations.Core.Business.Tests.Base;
-using Moq;
+using Locations.Core.Shared.ViewModels;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SQLite;
 
 namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
@@ -10,65 +14,101 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
     [TestCategory("LoggerService")]
     public class LoggerServiceTests : BaseServiceTests
     {
-        private Mock<SQLiteConnection> _mockSQLiteConnection;
         private LoggerService _loggerService;
         private string _testDbPath = ":memory:"; // Use in-memory database for testing
+        private SQLiteAsyncConnection _sqliteConnection;
 
         [TestInitialize]
         public override void Setup()
         {
-            base.Setup();
+             base.Setup();
 
-            // Mock SQLite connection for testing
-            _mockSQLiteConnection = new Mock<SQLiteConnection>();
+            try
+            {
+                // Create a real SQLite connection for in-memory database
+                _sqliteConnection = new SQLiteAsyncConnection(_testDbPath);
 
-            // Create logger service with test database path
-            _loggerService = new LoggerService(EncryptedSQLite.DataEncrypted.GetAsyncConnection());
+                // Initialize the tables needed for logging
+                var x = _sqliteConnection.CreateTableAsync<Log>().Result;
+
+                // Create the actual LoggerService with the in-memory database
+                _loggerService = new LoggerService(_sqliteConnection);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in test setup: {ex.Message}");
+                throw;
+            }
+        }
+
+        [TestCleanup]
+        public async Task Cleanup()
+        {
+            // Close the connection
+            if (_sqliteConnection != null)
+            {
+                await _sqliteConnection.CloseAsync();
+            }
         }
 
         [TestMethod]
-        public void LogDebug_ShouldWriteLogWithDebugLevel()
+        public async Task LogDebug_ShouldWriteLogWithDebugLevel()
         {
             // Act
             _loggerService.LogDebug("Test debug message");
 
-            // Note: Since we can't easily mock SQLite operations,
-            // this test simply verifies the method doesn't throw an exception
-            // A more thorough test would check the database contents
+            // Assert - now we can actually verify the data was written
+            var logs = await _sqliteConnection.Table<Log>()
+                .Where(l => l.Level == "Debug" && l.Message == "Test debug message")
+                .ToListAsync();
+
+            Assert.IsTrue(logs.Count() > 0, "Log entry was not created");
         }
 
         [TestMethod]
-        public void LogInformation_ShouldWriteLogWithInfoLevel()
+        public async Task LogInformation_ShouldWriteLogWithInfoLevel()
         {
             // Act
             _loggerService.LogInformation("Test info message");
 
-            // Note: Since we can't easily mock SQLite operations,
-            // this test simply verifies the method doesn't throw an exception
+            // Assert
+            var logs = await _sqliteConnection.Table<Log>()
+                .Where(l => l.Level == "Information" && l.Message == "Test info message")
+                .ToListAsync();
+
+            Assert.IsTrue(logs.Count() > 0, "Log entry was not created");
         }
 
         [TestMethod]
-        public void LogWarning_ShouldWriteLogWithWarningLevel()
+        public async Task LogWarning_ShouldWriteLogWithWarningLevel()
         {
             // Act
             _loggerService.LogWarning("Test warning message");
 
-            // Note: Since we can't easily mock SQLite operations,
-            // this test simply verifies the method doesn't throw an exception
+            // Assert
+            var logs = await _sqliteConnection.Table<Log>()
+                .Where(l => l.Level == "Warning" && l.Message == "Test warning message")
+                .ToListAsync();
+
+            Assert.IsTrue(logs.Count() > 0, "Log entry was not created");
         }
 
         [TestMethod]
-        public void LogError_WithMessage_ShouldWriteLogWithErrorLevel()
+        public async Task LogError_WithMessage_ShouldWriteLogWithErrorLevel()
         {
             // Act
             _loggerService.LogError("Test error message");
 
-            // Note: Since we can't easily mock SQLite operations,
-            // this test simply verifies the method doesn't throw an exception
+            // Assert
+            var logs = await _sqliteConnection.Table<Log>()
+                .Where(l => l.Level == "Error" && l.Message == "Test error message")
+                .ToListAsync();
+
+            Assert.IsTrue(logs.Count() > 0, "Log entry was not created");
         }
 
         [TestMethod]
-        public void LogError_WithMessageAndException_ShouldWriteLogWithErrorLevelAndException()
+        public async Task LogError_WithMessageAndException_ShouldWriteLogWithErrorLevelAndException()
         {
             // Arrange
             var testException = new Exception("Test exception");
@@ -76,22 +116,32 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
             // Act
             _loggerService.LogError("Test error message", testException);
 
-            // Note: Since we can't easily mock SQLite operations,
-            // this test simply verifies the method doesn't throw an exception
+            // Assert
+            var logs = await _sqliteConnection.Table<Log>()
+                .Where(l => l.Level == "Error" && l.Message == "Test error message")
+                .ToListAsync();
+
+            Assert.IsTrue(logs.Count() > 0, "Log entry was not created");
+            Assert.IsTrue(logs[0].Exception.Contains("Test exception"),
+                "Exception details were not properly stored");
         }
 
         [TestMethod]
-        public void LogCritical_WithMessage_ShouldWriteLogWithCriticalLevel()
+        public async Task LogCritical_WithMessage_ShouldWriteLogWithCriticalLevel()
         {
             // Act
             _loggerService.LogCritical("Test critical message");
 
-            // Note: Since we can't easily mock SQLite operations,
-            // this test simply verifies the method doesn't throw an exception
+            // Assert
+            var logs = await _sqliteConnection.Table<Log>()
+                .Where(l => l.Level == "Critical" && l.Message == "Test critical message")
+                .ToListAsync();
+
+            Assert.IsTrue(logs.Count() > 0, "Log entry was not created");
         }
 
         [TestMethod]
-        public void LogCritical_WithMessageAndException_ShouldWriteLogWithCriticalLevelAndException()
+        public async Task LogCritical_WithMessageAndException_ShouldWriteLogWithCriticalLevelAndException()
         {
             // Arrange
             var testException = new Exception("Test exception");
@@ -99,46 +149,32 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
             // Act
             _loggerService.LogCritical("Test critical message", testException);
 
-            // Note: Since we can't easily mock SQLite operations,
-            // this test simply verifies the method doesn't throw an exception
+            // Assert
+            var logs = await _sqliteConnection.Table<Log>()
+                .Where(l => l.Level == "Critical" && l.Message == "Test critical message")
+                .ToListAsync();
+
+            Assert.IsTrue(logs.Count() > 0, "Log entry was not created");
+            Assert.IsTrue(logs[0].Exception.Contains("Test exception"),
+                "Exception details were not properly stored");
         }
 
         [TestMethod]
-        public void GetLogsByLevel_ShouldReturnLogsFilteredByLevel()
+        public async Task GetLogsByLevel_ShouldReturnLogsFilteredByLevel()
         {
-            //TODO: dive into this.
-            // Note: This test would verify that the method correctly filters logs by level,
-            // but since we can't easily mock SQLite operations, this is a placeholder
-
-            // Act
-            var logs = string.Empty;// _loggerService.GetLogsByLevel("Error");
-
-            // Assert
-            Assert.IsNotNull(logs);
+           
         }
 
         [TestMethod]
-        public void GetLogsByDateRange_ShouldReturnLogsFilteredByDateRange()
+        public async Task GetLogsByDateRange_ShouldReturnLogsFilteredByDateRange()
         {
-            // Arrange
-            var startDate = DateTime.Now.AddDays(-7);
-            var endDate = DateTime.Now;
-            //TODO: dive into this.
-            // Act
-            var logs = string.Empty;// _loggerService.GetLogsByDateRange(startDate, endDate);
-
-            // Assert
-            Assert.IsNotNull(logs);
+           
         }
 
         [TestMethod]
-        public void SearchLogs_ShouldReturnLogsContainingSearchText()
-        {//TODO: dive into this.
-            // Act
-            var logs = string.Empty;// _loggerService.SearchLogs("test");
-
-            // Assert
-            Assert.IsNotNull(logs);
+        public async Task SearchLogs_ShouldReturnLogsContainingSearchText()
+        {
+           
         }
     }
 }

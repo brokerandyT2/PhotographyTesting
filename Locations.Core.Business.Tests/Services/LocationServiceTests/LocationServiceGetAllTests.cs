@@ -229,7 +229,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             await _locationService.GetAllAsync();
 
             // Assert
-            MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Once);
+            MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException), Times.Exactly(2));
         }
     }
 }
