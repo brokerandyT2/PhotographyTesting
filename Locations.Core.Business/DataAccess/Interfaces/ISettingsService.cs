@@ -29,5 +29,7 @@ namespace Locations.Core.Business.DataAccess.Interfaces
         /// <param name="key">The setting key</param>
         /// <returns>The setting value</returns>
         string GetSettingWithMagicString(string key);
+
+        bool SaveSetting(string name, string value);
     }
 }
