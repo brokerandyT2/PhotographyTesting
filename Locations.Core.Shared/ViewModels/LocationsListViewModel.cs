@@ -1,10 +1,11 @@
-﻿using Locations.Core.Shared.ViewModelServices;
+﻿using Locations.Core.Shared.ViewModels.Interface;
+using Locations.Core.Shared.ViewModelServices;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace Locations.Core.Shared.ViewModels
 {
-    public class LocationsListViewModel : ViewModelBase
+    public class LocationsListViewModel : ViewModelBase, ILocationList
     {
         private readonly ILocationService _locationService;
         private ObservableCollection<LocationViewModel> _items = new ObservableCollection<LocationViewModel>();
@@ -32,6 +33,8 @@ namespace Locations.Core.Shared.ViewModels
         public ICommand LoadLocationsCommand { get; }
         public ICommand OpenMapCommand { get; }
         public ICommand SelectLocationCommand { get; }
+
+        public List<LocationViewModel> locations => throw new NotImplementedException();
 
         // Define the error event using the correct type
         public event EventHandler<Locations.Core.Shared.ViewModels.OperationErrorEventArgs> ErrorOccurred;

@@ -1,10 +1,9 @@
 ﻿// Locations.Core.Business.Tests.UITests/PageObjects/Tips/TipsPage.cs
 using OpenQA.Selenium;
-using OpenQA.Selenium.Appium.Windows;
-using OpenQA.Selenium.Appium.Android;
-using OpenQA.Selenium.Appium.iOS;
-using System;
 using OpenQA.Selenium.Appium;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Locations.Core.Business.Tests.UITests.PageObjects.Tips
 {
@@ -23,7 +22,7 @@ namespace Locations.Core.Business.Tests.UITests.PageObjects.Tips
 
         public TipsPage(AppiumDriver driver = null,
                     AppiumSetup.Platform platform = AppiumSetup.Platform.Android)
-    : base(driver, platform)
+            : base(driver, platform)
         {
         }
 
@@ -52,7 +51,7 @@ namespace Locations.Core.Business.Tests.UITests.PageObjects.Tips
                         System.Threading.Thread.Sleep(1000); // Wait for dropdown to open
 
                         // Find dropdown items and click the one at the specified index
-                        var items = AndroidDriver.FindElementsByXPath("//android.widget.ListView/android.widget.CheckedTextView");
+                        var items = Driver.FindElements(By.XPath("//android.widget.ListView/android.widget.CheckedTextView")).ToList();
                         if (index < items.Count)
                         {
                             items[index].Click();
@@ -71,7 +70,7 @@ namespace Locations.Core.Business.Tests.UITests.PageObjects.Tips
                         System.Threading.Thread.Sleep(1000); // Wait for dropdown to open
 
                         // Find dropdown items and click the one at the specified index
-                        var winItems = WindowsDriver.FindElementsByXPath("//ListItem");
+                        var winItems = Driver.FindElements(By.XPath("//ListItem")).ToList();
                         if (index < winItems.Count)
                         {
                             winItems[index].Click();

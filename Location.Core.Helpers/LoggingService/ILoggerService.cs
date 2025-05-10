@@ -13,8 +13,8 @@ namespace Location.Core.Helpers.LoggingService
         /// Logs an information message
         /// </summary>
         /// <param name="message">The message to log</param>
-        void LogInfo(string message);
-
+        void LogInformation(string message);
+        void LogCritical(string message, Exception? exception = null);
         /// <summary>
         /// Logs a warning message
         /// </summary>
@@ -54,5 +54,6 @@ namespace Location.Core.Helpers.LoggingService
         /// Clears all logs from the database
         /// </summary>
         Task ClearLogsAsync();
+        Task<int> PurgeOldErrorLogsAsync();
     }
 }

@@ -1,5 +1,7 @@
 ﻿// Locations.Core.Business.Tests.UITests/Tests/Locations/EditLocationTests.cs
 using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium;
 using System;
 using System.Threading;
 using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
@@ -23,7 +25,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             base.SetUp();
 
             // First login if needed
-            var loginPage = new LoginPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var loginPage = new LoginPage(Driver, CurrentPlatform);
             if (loginPage.IsCurrentPage())
             {
                 loginPage.Login();
@@ -33,10 +35,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Thread.Sleep(2000); // Wait for main page to load
 
             // Initialize list locations page
-            _listLocationsPage = new ListLocationsPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _listLocationsPage = new ListLocationsPage(Driver, CurrentPlatform);
 
             // Wait for locations to load
-            Assert.IsTrue(_listLocationsPage.WaitForLocationsToLoad(), "Locations failed to load");
+            Assert.That(_listLocationsPage.WaitForLocationsToLoad(), Is.True, "Locations failed to load");
 
             // Check if there are locations available, if not create one
             if (!_listLocationsPage.HasLocations())
@@ -48,13 +50,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
                     switch (CurrentPlatform)
                     {
                         case AppiumSetup.Platform.Android:
-                            AndroidDriver.FindElementByXPath("//android.widget.Button[contains(@content-desc, 'Add') or contains(@text, 'Add')]").Click();
+                            Driver.FindElement(By.XPath("//android.widget.Button[contains(@content-desc, 'Add') or contains(@text, 'Add')]")).Click();
                             break;
                         case AppiumSetup.Platform.iOS:
-                            iOSDriver.FindElementByXPath("//XCUIElementTypeButton[contains(@name, 'Add')]").Click();
+                            Driver.FindElement(By.XPath("//XCUIElementTypeButton[contains(@name, 'Add')]")).Click();
                             break;
                         case AppiumSetup.Platform.Windows:
-                            WindowsDriver.FindElementByXPath("//Button[contains(@Name, 'Add')]").Click();
+                            Driver.FindElement(By.XPath("//Button[contains(@Name, 'Add')]")).Click();
                             break;
                     }
 
@@ -67,14 +69,14 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
                 }
 
                 // Create a test location
-                var addLocationPage = new AddLocationPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+                var addLocationPage = new AddLocationPage(Driver, CurrentPlatform);
                 addLocationPage.CreateLocation("Test Location " + DateTime.Now.ToString("yyyyMMddHHmmss"));
 
                 // Wait for navigation back to list
                 Thread.Sleep(2000);
 
                 // Reinitialize list locations page
-                _listLocationsPage = new ListLocationsPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+                _listLocationsPage = new ListLocationsPage(Driver, CurrentPlatform);
                 _listLocationsPage.WaitForLocationsToLoad();
             }
 
@@ -85,10 +87,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Thread.Sleep(2000);
 
             // Initialize edit location page
-            _editLocationPage = new EditLocationPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _editLocationPage = new EditLocationPage(Driver, CurrentPlatform);
 
             // Verify we're on the edit location page
-            Assert.IsTrue(_editLocationPage.IsCurrentPage(), "Not on the edit location page");
+            Assert.That(_editLocationPage.IsCurrentPage(), Is.True, "Not on the edit location page");
         }
 
         [Test]
@@ -116,7 +118,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
 
             // Verify title has been updated
             string updatedTitle = _editLocationPage.GetTitle();
-            Assert.AreEqual(newTitle, updatedTitle, "Location title was not updated");
+            Assert.That(updatedTitle, Is.EqualTo(newTitle), "Location title was not updated");
         }
 
         [Test]
@@ -131,7 +133,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
 
             // Verify description has been updated
             string updatedDescription = _editLocationPage.GetDescription();
-            Assert.AreEqual(newDescription, updatedDescription, "Location description was not updated");
+            Assert.That(updatedDescription, Is.EqualTo(newDescription), "Location description was not updated");
         }
 
         [Test]
@@ -145,16 +147,19 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             string longitude = _editLocationPage.GetLongitude();
 
             // Verify coordinates are populated (not empty or zero)
-            Assert.IsFalse(string.IsNullOrEmpty(latitude), "Latitude was not populated");
-            Assert.IsFalse(string.IsNullOrEmpty(longitude), "Longitude was not populated");
+            Assert.That(string.IsNullOrEmpty(latitude), Is.False, "Latitude was not populated");
+            Assert.That(string.IsNullOrEmpty(longitude), Is.False, "Longitude was not populated");
 
             // Verify coordinates are valid numbers
-            Assert.IsTrue(double.TryParse(latitude, out double lat), "Latitude is not a valid number");
-            Assert.IsTrue(double.TryParse(longitude, out double lon), "Longitude is not a valid number");
+            bool isLatValid = double.TryParse(latitude, out double lat);
+            Assert.That(isLatValid, Is.True, "Latitude is not a valid number");
+
+            bool isLonValid = double.TryParse(longitude, out double lon);
+            Assert.That(isLonValid, Is.True, "Longitude is not a valid number");
 
             // Verify coordinates are within reasonable range
-            Assert.IsTrue(lat >= -90 && lat <= 90, "Latitude out of valid range");
-            Assert.IsTrue(lon >= -180 && lon <= 180, "Longitude out of valid range");
+            Assert.That(lat >= -90 && lat <= 90, Is.True, "Latitude out of valid range");
+            Assert.That(lon >= -180 && lon <= 180, Is.True, "Longitude out of valid range");
         }
 
         [Test]
@@ -170,13 +175,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Thread.Sleep(2000);
 
             // Initialize weather display page
-            _weatherDisplayPage = new WeatherDisplayPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _weatherDisplayPage = new WeatherDisplayPage(Driver, CurrentPlatform);
 
             // Verify we're on the weather display page
-            Assert.IsTrue(_weatherDisplayPage.IsCurrentPage(), "Not on the weather display page");
+            Assert.That(_weatherDisplayPage.IsCurrentPage(), Is.True, "Not on the weather display page");
 
             // Verify weather data is displayed
-            Assert.IsTrue(_weatherDisplayPage.HasWeatherData(), "Weather data not displayed");
+            Assert.That(_weatherDisplayPage.HasWeatherData(), Is.True, "Weather data not displayed");
 
             // Close weather display
             _weatherDisplayPage.ClickClose();
@@ -185,7 +190,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Thread.Sleep(2000);
 
             // Verify we're back on the edit location page
-            Assert.IsTrue(_editLocationPage.IsCurrentPage(), "Not returned to edit location page");
+            Assert.That(_editLocationPage.IsCurrentPage(), Is.True, "Not returned to edit location page");
         }
 
         [Test]
@@ -202,7 +207,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
 
             // For this test, we're just verifying that we've navigated away from the edit location page
             // Ideally, we would initialize a SunCalculationsPage object and verify we're on that page
-            Assert.IsFalse(_editLocationPage.IsCurrentPage(), "Still on edit location page after clicking sun events");
+            Assert.That(_editLocationPage.IsCurrentPage(), Is.False, "Still on edit location page after clicking sun events");
 
             // Navigate back
             GoBack();
@@ -211,7 +216,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Thread.Sleep(2000);
 
             // Verify we're back on the edit location page
-            Assert.IsTrue(_editLocationPage.IsCurrentPage(), "Not returned to edit location page");
+            Assert.That(_editLocationPage.IsCurrentPage(), Is.True, "Not returned to edit location page");
         }
 
         [Test]
@@ -227,7 +232,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Thread.Sleep(2000);
 
             // Verify we're back on the list locations page
-            Assert.IsTrue(_listLocationsPage.IsCurrentPage(), "Not returned to list locations page");
+            Assert.That(_listLocationsPage.IsCurrentPage(), Is.True, "Not returned to list locations page");
         }
     }
 }

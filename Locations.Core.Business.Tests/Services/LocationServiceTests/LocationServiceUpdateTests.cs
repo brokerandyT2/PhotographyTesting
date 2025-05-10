@@ -218,9 +218,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             await _locationService.UpdateAsync(testLocation);
 
             // Assert
-            //TODO: Fix once we have logger service back
-            Assert.IsTrue(true); 
-            //MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Once);
+            MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Once);
         }
 
         [TestMethod]

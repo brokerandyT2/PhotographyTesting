@@ -10,6 +10,7 @@ using Locations.Core.Shared.StorageSvc;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModels.Interface;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Hosting;
 using Serilog;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using SQLite;
@@ -26,6 +27,7 @@ public static class MauiProgram
     {
 
         var builder = MauiApp.CreateBuilder();
+   
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
@@ -39,20 +41,23 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
-        builder.Services.AddSingleton<ISQLiteAsyncConnection>(sp => DataEncrypted.GetAsyncConnection());
-        builder.Services.AddSingleton<ILoggerService, LoggerService>();
+
         builder.Services.AddTransient<ILocationViewModel, LocationViewModel>();
         builder.Services.AddTransient<IWeatherViewModel, WeatherViewModel>();
         builder.Services.AddTransient<ITip, TipViewModel>();
         builder.Services.AddTransient<ITipType, TipTypeViewModel>();
         builder.Services.AddTransient<ISettingsViewModel, SettingsViewModel>();
-        //builder.Services.AddTransient<ILocationList, LocationsListViewModel>();
+        builder.Services.AddTransient<ILocationList, LocationsListViewModel>();
+        builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<ITipsViewmodel, TipsViewModel>();
         builder.Services.AddTransient<IDetailsView, DetailsViewModel>();
 
         builder.Services.AddSingleton<IAmbientLightSensorService, AmbientLightSensorService>();
         builder.Services.AddSingleton<INativeStorageService, NativeStorageService>();
-
+        builder.Services.AddSingleton<LoggerService>();
+        builder.Services.AddSingleton<ISQLiteAsyncConnection>(sp => DataEncrypted.GetAsyncConnection());
+        builder.Services.AddSingleton<ILoggerService, LoggerService>();
+        builder.Services.AddSingleton<ILoggerService, LoggerService>();
 #if ANDROID
         //builder.Services.AddSingleton<Platforms.Android.IGoogleAuthService, Platforms.Android.GoogleAuthService>();
 #endif
@@ -62,6 +67,7 @@ public static class MauiProgram
             logging.AddSerilog();       // Add Serilog as the logging provider
         });
         Expander.EnableAnimations();
+
         return builder.Build();
     }
 }

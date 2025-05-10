@@ -11,6 +11,7 @@ using Locations.Core.Shared.ViewModels;
 using DataErrorEventArgs = Locations.Core.Data.Models.DataErrorEventArgs;
 using ErrorSource = Locations.Core.Data.Models.ErrorSource;
 using EncryptedSQLite;
+using Location.Core.Helpers.LoggingService;
 
 namespace Locations.Core.Data.Queries
 {
@@ -27,7 +28,7 @@ namespace Locations.Core.Data.Queries
         /// <summary>
         /// Logger service
         /// </summary>
-        //protected readonly ILoggerService LoggerService;
+        protected readonly ILoggerService LoggerService;
 
         /// <summary>
         /// Alert service
@@ -37,7 +38,7 @@ namespace Locations.Core.Data.Queries
         /// <summary>
         /// Creates a new settings repository
         /// </summary>
-      /*  public SettingsRepository(IAlertService alertService, ILoggerService loggerService)
+       public SettingsRepository(IAlertService alertService, ILoggerService loggerService)
             : base()
         {
             AlertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
@@ -45,7 +46,7 @@ namespace Locations.Core.Data.Queries
 
             // Initialize database connection
             dataB = DataEncrypted.GetAsyncConnection();
-        }*/
+        }
 
         /// <summary>
         /// Gets a setting by its ID
@@ -70,7 +71,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error retrieving setting with ID {id}: {ex.Message}";
-             //   LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -80,7 +81,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error retrieving setting with ID {id}: {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -102,7 +103,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error retrieving all settings: {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -112,7 +113,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error retrieving all settings: {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -149,7 +150,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error saving setting: {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -159,7 +160,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error saving setting: {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -195,7 +196,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error updating setting: {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -205,7 +206,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error updating setting: {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -236,7 +237,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error deleting setting with ID {id}: {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -246,7 +247,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error deleting setting with ID {id}: {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -298,7 +299,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error retrieving setting '{name}': {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -308,7 +309,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error retrieving setting '{name}': {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -347,7 +348,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error retrieving setting value '{name}': {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -357,7 +358,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error retrieving setting value '{name}': {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,
@@ -407,7 +408,7 @@ namespace Locations.Core.Data.Queries
             catch (SQLiteException ex)
             {
                 string message = $"Database error saving setting '{name}': {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Database,
                     message,
@@ -417,7 +418,7 @@ namespace Locations.Core.Data.Queries
             catch (Exception ex)
             {
                 string message = $"Error saving setting '{name}': {ex.Message}";
-            //    LoggerService.LogError(message, ex);
+                LoggerService.LogError(message, ex);
                 OnErrorOccurred(new DataErrorEventArgs(
                     ErrorSource.Unknown,
                     message,

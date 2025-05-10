@@ -1,5 +1,7 @@
 ﻿// Locations.Core.Business.Tests.UITests/Tests/Shared/PageTutorialModalTests.cs
 using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium;
 using System;
 using System.Threading;
 using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
@@ -24,7 +26,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             // For demonstration purposes, we'll show how it would be structured
 
             // First login if needed
-            var loginPage = new LoginPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var loginPage = new LoginPage(Driver, CurrentPlatform);
             if (loginPage.IsCurrentPage())
             {
                 loginPage.Login();
@@ -34,11 +36,11 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             // This depends on your app's navigation and which pages show tutorials
 
             // Check if tutorial modal appears
-            _tutorialPage = new PageTutorialModalPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
-            Assert.IsTrue(_tutorialPage.IsCurrentPage(), "Tutorial modal did not appear on first visit");
+            _tutorialPage = new PageTutorialModalPage(Driver, CurrentPlatform);
+            Assert.That(_tutorialPage.IsCurrentPage(), Is.True, "Tutorial modal did not appear on first visit");
 
             // Verify tutorial has web view content
-            Assert.IsTrue(_tutorialPage.HasWebViewContent(), "Tutorial modal does not have web view content");
+            Assert.That(_tutorialPage.HasWebViewContent(), Is.True, "Tutorial modal does not have web view content");
         }
 
         [Test]
@@ -51,14 +53,14 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             // For a real implementation, we might need a way to force a tutorial to appear
 
             // First login if needed
-            var loginPage = new LoginPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var loginPage = new LoginPage(Driver, CurrentPlatform);
             if (loginPage.IsCurrentPage())
             {
                 loginPage.Login();
             }
 
             // Check if we're already on a tutorial page
-            _tutorialPage = new PageTutorialModalPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _tutorialPage = new PageTutorialModalPage(Driver, CurrentPlatform);
             if (!_tutorialPage.IsCurrentPage())
             {
                 // If not on a tutorial page, try to navigate to one
@@ -73,7 +75,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             Thread.Sleep(2000);
 
             // Verify tutorial modal is no longer visible
-            Assert.IsFalse(_tutorialPage.IsCurrentPage(), "Tutorial modal still visible after dismissal");
+            Assert.That(_tutorialPage.IsCurrentPage(), Is.False, "Tutorial modal still visible after dismissal");
         }
 
         [Test]
@@ -86,7 +88,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             // This test assumes we've already visited a page and dismissed its tutorial
 
             // First login if needed
-            var loginPage = new LoginPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var loginPage = new LoginPage(Driver, CurrentPlatform);
             if (loginPage.IsCurrentPage())
             {
                 loginPage.Login();
@@ -96,8 +98,8 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             // For example, navigate between tabs or screens
 
             // Check if tutorial modal appears
-            _tutorialPage = new PageTutorialModalPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
-            Assert.IsFalse(_tutorialPage.IsCurrentPage(), "Tutorial modal appeared on subsequent visit");
+            _tutorialPage = new PageTutorialModalPage(Driver, CurrentPlatform);
+            Assert.That(_tutorialPage.IsCurrentPage(), Is.False, "Tutorial modal appeared on subsequent visit");
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿// Locations.Core.Business.Tests.UITests/Tests/Configuration/SettingsTests.cs
 using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium;
 using System;
 using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
 using Locations.Core.Business.Tests.UITests.PageObjects.Configuration;
@@ -21,7 +23,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Configuration
             base.SetUp();
 
             // First login if needed
-            var loginPage = new LoginPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var loginPage = new LoginPage(Driver, CurrentPlatform);
             if (loginPage.IsCurrentPage())
             {
                 loginPage.Login();
@@ -34,13 +36,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Configuration
                 switch (CurrentPlatform)
                 {
                     case AppiumSetup.Platform.Android:
-                        AndroidDriver.FindElementByXPath("//android.widget.Button[@content-desc='cogbox.png']").Click();
+                        Driver.FindElement(By.XPath("//android.widget.Button[@content-desc='cogbox.png']")).Click();
                         break;
                     case AppiumSetup.Platform.iOS:
-                        iOSDriver.FindElementByXPath("//XCUIElementTypeButton[@name='cogbox.png']").Click();
+                        Driver.FindElement(By.XPath("//XCUIElementTypeButton[@name='cogbox.png']")).Click();
                         break;
                     case AppiumSetup.Platform.Windows:
-                        WindowsDriver.FindElementByXPath("//Button[@AutomationId='cogbox.png']").Click();
+                        Driver.FindElement(By.XPath("//Button[@AutomationId='cogbox.png']")).Click();
                         break;
                 }
 
@@ -54,17 +56,17 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Configuration
             }
 
             // Initialize settings page object
-            _settingsPage = new SettingsPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _settingsPage = new SettingsPage(Driver, CurrentPlatform);
 
             // Check if we're on a tutorial page first
-            _tutorialPage = new PageTutorialModalPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _tutorialPage = new PageTutorialModalPage(Driver, CurrentPlatform);
             if (_tutorialPage.IsCurrentPage())
             {
                 _tutorialPage.WaitForDismissal();
             }
 
             // Verify we're on the settings page
-            Assert.IsTrue(_settingsPage.IsCurrentPage(), "Not on the settings page");
+            Assert.That(_settingsPage.IsCurrentPage(), Is.True, "Not on the settings page");
         }
 
         [Test]
@@ -97,7 +99,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Configuration
             string updatedHemisphereText = _settingsPage.GetHemisphereText();
 
             // Verify text changed
-            Assert.AreNotEqual(initialHemisphereText, updatedHemisphereText,
+            Assert.That(updatedHemisphereText, Is.Not.EqualTo(initialHemisphereText),
                 "Hemisphere text did not change after toggle");
 
             // Toggle back to original state
@@ -124,7 +126,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Configuration
             string updatedWindDirection = _settingsPage.GetWindDirectionText();
 
             // Verify text changed
-            Assert.AreNotEqual(initialWindDirection, updatedWindDirection,
+            Assert.That(updatedWindDirection, Is.Not.EqualTo(initialWindDirection),
                 "Wind direction text did not change after toggle");
 
             // Toggle back to original state
@@ -177,13 +179,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Configuration
                 switch (CurrentPlatform)
                 {
                     case AppiumSetup.Platform.Android:
-                        AndroidDriver.FindElementByXPath("//android.widget.Button[@content-desc='cogbox.png']").Click();
+                        Driver.FindElement(By.XPath("//android.widget.Button[@content-desc='cogbox.png']")).Click();
                         break;
                     case AppiumSetup.Platform.iOS:
-                        iOSDriver.FindElementByXPath("//XCUIElementTypeButton[@name='cogbox.png']").Click();
+                        Driver.FindElement(By.XPath("//XCUIElementTypeButton[@name='cogbox.png']")).Click();
                         break;
                     case AppiumSetup.Platform.Windows:
-                        WindowsDriver.FindElementByXPath("//Button[@AutomationId='cogbox.png']").Click();
+                        Driver.FindElement(By.XPath("//Button[@AutomationId='cogbox.png']")).Click();
                         break;
                 }
 
@@ -196,14 +198,14 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Configuration
             }
 
             // Verify settings were saved
-            Assert.IsTrue(_settingsPage.VerifySettingsApplied(
+            Assert.That(_settingsPage.VerifySettingsApplied(
                 north: true,
                 useUSTimeFormat: true,
                 useUSDateFormat: true,
                 towardsWind: true,
                 useFahrenheit: true,
                 adSupport: false
-            ), "Settings were not saved correctly");
+            ), Is.True, "Settings were not saved correctly");
         }
     }
 }

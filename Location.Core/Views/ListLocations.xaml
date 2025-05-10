@@ -6,8 +6,7 @@
              xmlns:models="clr-namespace:Locations.Core.Shared.ViewModels;assembly=Locations.Core.Shared"
              
              xmlns:system="clr-namespace:System;assembly=netstandard"             
-             x:DataType="models:LocationViewModel">
-
+             x:DataType="models:LocationsListViewModel">
     <Grid>
         <CollectionView x:Name="cv"
                         ItemsSource="{Binding Items}"
@@ -18,18 +17,16 @@
                 <DataTemplate x:DataType="models:LocationViewModel">
                     <!-- ... -->
                     <ImageButton Source="map.svg" 
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:LocationsListViewModel}}, Path=OpenMapCommand}"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type models:LocationsListViewModel}}, Path=OpenMapCommand}"
                                 CommandParameter="{Binding Id}" />
                     <!-- ... -->
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-
         <ActivityIndicator IsRunning="{Binding IsLoading}" 
                           IsVisible="{Binding IsLoading}"
                           VerticalOptions="Center" 
                           HorizontalOptions="Center" />
-
         <Label Text="{Binding ErrorMessage}"
                IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}"
                TextColor="Red"

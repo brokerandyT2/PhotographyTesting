@@ -157,7 +157,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
 
             // Assert
             MockBusinessLoggerService.Verify(
-                logger => logger.LogWarning(It.IsAny<string>()),
+                logger => logger.LogWarning(It.IsAny<string>(), new Exception()),
                 Times.Once);
         }
 
@@ -195,9 +195,9 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             _locationService.GetLocationByCoordinates(latitude, longitude);
 
             // Assert
-            //TODO: Fix once we have logger service back
-            Assert.IsTrue(true);
-            //MockBusinessLoggerService.Verify( logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Once);
+
+         
+            MockBusinessLoggerService.Verify( logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Once);
         }
 
         [TestMethod]

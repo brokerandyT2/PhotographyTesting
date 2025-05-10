@@ -1,5 +1,7 @@
 ﻿// Locations.Core.Business.Tests.UITests/Tests/Authentication/LoginTests.cs
 using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium;
 using System;
 using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
 
@@ -17,14 +19,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Authentication
             base.SetUp();
 
             // Initialize the login page object
-            _loginPage = new LoginPage(
-                WindowsDriver,
-                AndroidDriver,
-                iOSDriver,
-                CurrentPlatform);
+            _loginPage = new LoginPage(Driver, CurrentPlatform);
 
             // Verify we're on the login page
-            Assert.IsTrue(_loginPage.IsCurrentPage(), "Not on the login page");
+            Assert.That(_loginPage.IsCurrentPage(), Is.True, "Not on the login page");
         }
 
         [Test]
@@ -32,7 +30,6 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Authentication
         public void LoginPage_AllUIElementsDisplayed()
         {
             Log("Checking UI elements on Login page");
-
             // No need to check individual elements since IsCurrentPage already verifies critical elements
             Assert.Pass("Login page displayed correctly");
         }
@@ -48,10 +45,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Authentication
             _loginPage.ClickSave();
 
             // Verify processing overlay appears and then disappears
-            Assert.IsTrue(_loginPage.WaitForProcessingToComplete(), "Processing did not complete");
+            Assert.That(_loginPage.WaitForProcessingToComplete(), Is.True, "Processing did not complete");
 
             // Current page should no longer be the login page if successful
-            Assert.IsFalse(_loginPage.IsCurrentPage(), "Still on login page after valid login");
+            Assert.That(_loginPage.IsCurrentPage(), Is.False, "Still on login page after valid login");
         }
 
         [Test]
@@ -65,10 +62,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Authentication
             _loginPage.ClickSave();
 
             // Validation message should be displayed
-            Assert.IsTrue(_loginPage.IsEmailValidationDisplayed(), "Email validation message not displayed");
+            Assert.That(_loginPage.IsEmailValidationDisplayed(), Is.True, "Email validation message not displayed");
 
             // Should still be on login page
-            Assert.IsTrue(_loginPage.IsCurrentPage(), "Not on login page after invalid login");
+            Assert.That(_loginPage.IsCurrentPage(), Is.True, "Not on login page after invalid login");
         }
 
         [Test]
@@ -79,12 +76,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Authentication
 
             // Toggle hemisphere switch to North
             _loginPage.SetHemisphere(true);
+
             // Verify effects (would need to check label change)
 
             // Toggle hemisphere switch to South
             _loginPage.SetHemisphere(false);
-            // Verify effects (would need to check label change)
 
+            // Verify effects (would need to check label change)
             Assert.Pass("Hemisphere switch toggles correctly");
         }
 
@@ -105,7 +103,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Authentication
             );
 
             // Should no longer be on login page
-            Assert.IsFalse(_loginPage.IsCurrentPage(), "Still on login page after complete login");
+            Assert.That(_loginPage.IsCurrentPage(), Is.False, "Still on login page after complete login");
         }
     }
 }

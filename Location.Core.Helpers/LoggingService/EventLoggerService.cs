@@ -102,5 +102,20 @@ namespace Location.Core.Helpers.LoggingService
             // Nothing to clear as this implementation doesn't store logs
             return Task.CompletedTask;
         }
+
+        public void LogInformation(string message)
+        {
+            LogInfo(message);
+        }
+
+        public void LogCritical(string message, Exception? exception = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> PurgeOldErrorLogsAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

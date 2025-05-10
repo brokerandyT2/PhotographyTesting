@@ -1,3 +1,4 @@
+using EncryptedSQLite;
 using Location.Core.Helpers;
 using Location.Core.Helpers.AlertService;
 using Locations.Core.Business.DataAccess.Interfaces;
@@ -27,11 +28,11 @@ public partial class Tips : ContentPageBase
     public Tips() : base()
     {
         var alertserv = new Location.Core.Helpers.AlertService.EventAlertService();
-        var loggingServ = new Locations.Core.Business.Services.LoggerService();
+        var loggingServ = new Location.Core.Helpers.LoggingService.LoggerService(DataEncrypted.GetAsyncConnection(),alertserv);
 
 
         InitializeComponent();
-        _tipService = new TipService<TipViewModel>(new Locations.Core.Data.Queries.TipRepository(_alertService, null),alertserv, new Locations.Core.Business.Services.LoggerService());
+        _tipService = new TipService<TipViewModel>(new Locations.Core.Data.Queries.TipRepository(_alertService, null),alertserv, new Location.Core.Helpers.LoggingService.LoggerService(DataEncrypted.GetAsyncConnection(), alertserv));
         BindingContext = _tipService.GetAllAsync();
         pick.SelectedIndex = 0;
     }
@@ -44,7 +45,7 @@ public partial class Tips : ContentPageBase
         IAlertService alertService) : base(settingsService, alertService, PageEnums.Tips, false)
     {
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
-        _tipService = new TipService<TipViewModel>(new Locations.Core.Data.Queries.TipRepository(_alertService, null), alertService, new Locations.Core.Business.Services.LoggerService());
+        _tipService = new TipService<TipViewModel>(new Locations.Core.Data.Queries.TipRepository(alertService, null), alertService, new Location.Core.Helpers.LoggingService.LoggerService(DataEncrypted.GetAsyncConnection(), alertService));
 
         InitializeComponent();
 

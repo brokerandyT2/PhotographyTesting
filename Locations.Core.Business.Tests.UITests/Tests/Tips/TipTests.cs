@@ -1,5 +1,7 @@
 ﻿// Locations.Core.Business.Tests.UITests/Tests/Tips/TipsTests.cs
 using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium;
 using System;
 using System.Threading;
 using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
@@ -21,7 +23,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
             base.SetUp();
 
             // First login if needed
-            var loginPage = new LoginPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var loginPage = new LoginPage(Driver, CurrentPlatform);
             if (loginPage.IsCurrentPage())
             {
                 loginPage.Login();
@@ -34,13 +36,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
                 switch (CurrentPlatform)
                 {
                     case AppiumSetup.Platform.Android:
-                        AndroidDriver.FindElementByXPath("//android.widget.Button[contains(@text, 'Tips') or contains(@content-desc, 'Tips')]").Click();
+                        Driver.FindElement(By.XPath("//android.widget.Button[contains(@text, 'Tips') or contains(@content-desc, 'Tips')]")).Click();
                         break;
                     case AppiumSetup.Platform.iOS:
-                        iOSDriver.FindElementByXPath("//XCUIElementTypeButton[contains(@name, 'Tips')]").Click();
+                        Driver.FindElement(By.XPath("//XCUIElementTypeButton[contains(@name, 'Tips')]")).Click();
                         break;
                     case AppiumSetup.Platform.Windows:
-                        WindowsDriver.FindElementByXPath("//Button[contains(@Name, 'Tips')]").Click();
+                        Driver.FindElement(By.XPath("//Button[contains(@Name, 'Tips')]")).Click();
                         break;
                 }
 
@@ -53,17 +55,17 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
             }
 
             // Initialize tips page
-            _tipsPage = new TipsPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _tipsPage = new TipsPage(Driver, CurrentPlatform);
 
             // Check if we're on a tutorial page first
-            _tutorialPage = new PageTutorialModalPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _tutorialPage = new PageTutorialModalPage(Driver, CurrentPlatform);
             if (_tutorialPage.IsCurrentPage())
             {
                 _tutorialPage.WaitForDismissal();
             }
 
             // Verify we're on the tips page
-            Assert.IsTrue(_tipsPage.IsCurrentPage(), "Not on the tips page");
+            Assert.That(_tipsPage.IsCurrentPage(), Is.True, "Not on the tips page");
         }
 
         [Test]
@@ -73,7 +75,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
             Log("Checking UI elements on Tips page");
 
             // Verify tip content is loaded
-            Assert.IsTrue(_tipsPage.HasTipContent(), "Tip content not displayed");
+            Assert.That(_tipsPage.HasTipContent(), Is.True, "Tip content not displayed");
         }
 
         [Test]
@@ -101,11 +103,12 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
             string updatedTipText = _tipsPage.GetTipText();
 
             // Verify content changed - at least one of these should be different
-            Assert.IsTrue(
+            Assert.That(
                 initialFStop != updatedFStop ||
                 initialShutterSpeed != updatedShutterSpeed ||
                 initialISO != updatedISO ||
                 initialTipText != updatedTipText,
+                Is.True,
                 "Tip content did not change after selecting a different tip type"
             );
 
@@ -116,7 +119,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
             Thread.Sleep(2000);
 
             // Verify tip content is still displayed
-            Assert.IsTrue(_tipsPage.HasTipContent(), "Tip content not displayed after second selection");
+            Assert.That(_tipsPage.HasTipContent(), Is.True, "Tip content not displayed after second selection");
         }
 
         [Test]
@@ -159,13 +162,14 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
 
             // For this test, we're just verifying that we've navigated away from the tips page
             // Ideally, we would initialize an ExposureCalculatorPage object and verify we're on that page
-            Assert.IsFalse(_tipsPage.IsCurrentPage(), "Still on tips page after clicking exposure calculator button");
+            Assert.That(_tipsPage.IsCurrentPage(), Is.False, "Still on tips page after clicking exposure calculator button");
 
             // Also check if we're on a feature not supported page
-            var featureNotSupportedPage = new FeatureNotSupportedPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var featureNotSupportedPage = new FeatureNotSupportedPage(Driver, CurrentPlatform);
             if (featureNotSupportedPage.IsCurrentPage())
             {
-                Assert.IsTrue(featureNotSupportedPage.IsFeatureExposureCalculator(),
+                Assert.That(featureNotSupportedPage.IsFeatureExposureCalculator(),
+                    Is.True,
                     "Feature not supported page doesn't indicate exposure calculator");
             }
             else
@@ -191,10 +195,11 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
             string iso = _tipsPage.GetISO();
 
             // Verify at least one of these settings is not empty
-            Assert.IsTrue(
+            Assert.That(
                 !string.IsNullOrEmpty(fStop) ||
                 !string.IsNullOrEmpty(shutterSpeed) ||
                 !string.IsNullOrEmpty(iso),
+                Is.True,
                 "No camera settings displayed"
             );
 
@@ -202,7 +207,8 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
             if (!string.IsNullOrEmpty(fStop))
             {
                 // Common f-stop values include f/1.4, f/2, f/2.8, f/4, f/5.6, etc.
-                Assert.IsTrue(fStop.Contains("f/") || fStop.Contains("F/") || fStop.StartsWith("f") || fStop.StartsWith("F"),
+                Assert.That(fStop.Contains("f/") || fStop.Contains("F/") || fStop.StartsWith("f") || fStop.StartsWith("F"),
+                    Is.True,
                     $"F-stop format invalid: {fStop}");
             }
 
@@ -210,7 +216,8 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
             if (!string.IsNullOrEmpty(shutterSpeed))
             {
                 // Shutter speeds are often shown as fractions (e.g., 1/125) or seconds (e.g., 2s)
-                Assert.IsTrue(shutterSpeed.Contains("/") || shutterSpeed.Contains("s") || double.TryParse(shutterSpeed, out _),
+                Assert.That(shutterSpeed.Contains("/") || shutterSpeed.Contains("s") || double.TryParse(shutterSpeed, out _),
+                    Is.True,
                     $"Shutter speed format invalid: {shutterSpeed}");
             }
 
@@ -219,7 +226,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
             {
                 // Remove any "ISO" prefix for parsing
                 string isoValue = iso.Replace("ISO", "").Replace("iso", "").Trim();
-                Assert.IsTrue(int.TryParse(isoValue, out _), $"ISO format invalid: {iso}");
+                Assert.That(int.TryParse(isoValue, out _), Is.True, $"ISO format invalid: {iso}");
             }
         }
 
@@ -233,10 +240,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Tips
             string tipText = _tipsPage.GetTipText();
 
             // Verify tip text is not empty
-            Assert.IsFalse(string.IsNullOrEmpty(tipText), "Tip text is empty");
+            Assert.That(string.IsNullOrEmpty(tipText), Is.False, "Tip text is empty");
 
             // Verify tip text has reasonable length
-            Assert.IsTrue(tipText.Length > 10, "Tip text is too short");
+            Assert.That(tipText.Length > 10, Is.True, "Tip text is too short");
         }
     }
 }

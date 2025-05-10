@@ -1,5 +1,6 @@
 ﻿// MockFactory.cs
 using Location.Core.Helpers.AlertService;
+using Location.Core.Helpers.LoggingService;
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
@@ -112,8 +113,8 @@ namespace Locations.Core.Business.Tests.TestHelpers
 
             // Setup default behaviors
             mock.Setup(l => l.LogInformation(It.IsAny<string>())).Verifiable();
-            mock.Setup(l => l.LogWarning(It.IsAny<string>())).Verifiable();
-            mock.Setup(l => l.LogError(It.IsAny<string>())).Verifiable();
+            mock.Setup(l => l.LogWarning(It.IsAny<string>(), new Exception())).Verifiable();
+            mock.Setup(l => l.LogError(It.IsAny<string>(), new Exception())).Verifiable();
             mock.Setup(l => l.LogError(It.IsAny<string>(), It.IsAny<Exception>())).Verifiable();
 
             return mock;
@@ -122,14 +123,14 @@ namespace Locations.Core.Business.Tests.TestHelpers
         /// <summary>
         /// Creates a mocked business logger service
         /// </summary>
-        public static Mock<Locations.Core.Business.DataAccess.Interfaces.ILoggerService> CreateBusinessLoggerServiceMock()
+        public static Mock<ILoggerService> CreateBusinessLoggerServiceMock()
         {
-            var mock = new Mock<Locations.Core.Business.DataAccess.Interfaces.ILoggerService>();
+            var mock = new Mock<ILoggerService>();
 
             // Setup default behaviors
             mock.Setup(l => l.LogInformation(It.IsAny<string>())).Verifiable();
-            mock.Setup(l => l.LogWarning(It.IsAny<string>())).Verifiable();
-            mock.Setup(l => l.LogError(It.IsAny<string>())).Verifiable();
+            mock.Setup(l => l.LogWarning(It.IsAny<string>(), new Exception())).Verifiable();
+            mock.Setup(l => l.LogError(It.IsAny<string>(), new Exception())).Verifiable();
             mock.Setup(l => l.LogError(It.IsAny<string>(), It.IsAny<Exception>())).Verifiable();
 
             return mock;

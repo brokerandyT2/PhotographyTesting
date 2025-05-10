@@ -1,5 +1,8 @@
 ﻿// Locations.Core.Business.Tests.UITests/BaseTest.cs
 using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium;
+using OpenQA.Selenium.Appium.Windows;
 using System;
 using System.Threading;
 
@@ -9,10 +12,17 @@ namespace Locations.Core.Business.Tests.UITests
     public abstract class BaseTest : AppiumSetup
     {
         protected const string LogTag = "UITest";
+        protected AppiumDriver WindowsDriver => CurrentPlatform == Platform.Windows ? Driver : null;
+        protected AppiumDriver AndroidDriver => CurrentPlatform == Platform.Android ? Driver : null;
+        protected AppiumDriver IOSDriver => CurrentPlatform == Platform.iOS ? Driver : null;
 
         [SetUp]
         public virtual void SetUp()
         {
+           
+
+
+
             // By default, use Android for testing
             // This can be overridden in specific test classes if needed
             InitializeDriver(Platform.Android);
@@ -37,19 +47,8 @@ namespace Locations.Core.Business.Tests.UITests
                     // Ensure directory exists
                     System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(screenshotPath));
 
-                    // Take screenshot based on current platform
-                    switch (CurrentPlatform)
-                    {
-                        case Platform.Windows:
-                            WindowsDriver.GetScreenshot().SaveAsFile(screenshotPath);
-                            break;
-                        case Platform.Android:
-                            AndroidDriver.GetScreenshot().SaveAsFile(screenshotPath);
-                            break;
-                        case Platform.iOS:
-                            iOSDriver.GetScreenshot().SaveAsFile(screenshotPath);
-                            break;
-                    }
+                    // Take screenshot using the generic Driver
+                    Driver.GetScreenshot().SaveAsFile(screenshotPath);
 
                     TestContext.AddTestAttachment(screenshotPath, "Screenshot on failure");
                 }
@@ -141,7 +140,7 @@ namespace Locations.Core.Business.Tests.UITests
             switch (CurrentPlatform)
             {
                 case Platform.Android:
-                    AndroidDriver.Navigate().Back();
+                    Driver.Navigate().Back();
                     break;
                 case Platform.iOS:
                     // iOS typically uses a back button in the UI

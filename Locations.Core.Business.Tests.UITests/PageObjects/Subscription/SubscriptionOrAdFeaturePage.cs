@@ -76,7 +76,7 @@ namespace Locations.Core.Business.Tests.UITests.PageObjects.Subscription
                 switch (CurrentPlatform)
                 {
                     case AppiumSetup.Platform.Android:
-                        AndroidDriver.Navigate().Back();
+                        Driver.Navigate().Back();
                         break;
                     case AppiumSetup.Platform.iOS:
                         // On iOS, back navigation may vary

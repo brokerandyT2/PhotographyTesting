@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EncryptedSQLite\EncryptedSQLite.csproj" />
     <ProjectReference Include="..\Locations.Core.Business\Locations.Core.Business.csproj" />
   </ItemGroup>
 

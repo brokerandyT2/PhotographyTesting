@@ -46,7 +46,7 @@ namespace Location.Core.Helpers.LoggingService
         /// <summary>
         /// Logs an information message
         /// </summary>
-        public void LogInfo(string message)
+        public void LogInformation(string message)
         {
             if (string.IsNullOrEmpty(message)) return;
 
@@ -105,7 +105,23 @@ namespace Location.Core.Helpers.LoggingService
                 }
             });
         }
+        public void LogCritical(string message, Exception? exception = null)
+        {
+            if (string.IsNullOrEmpty(message)) return;
 
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var log = new LogModel(LogLevel.Critical, message, exception?.ToString() ?? string.Empty);
+                    await _database.InsertAsync(log);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to log error: {ex.Message}");
+                }
+            });
+        }
         /// <summary>
         /// Logs a debug message
         /// </summary>
@@ -188,6 +204,11 @@ namespace Location.Core.Helpers.LoggingService
                 System.Diagnostics.Debug.WriteLine($"Error clearing logs: {ex.Message}");
                 _alertService?.ShowError("Failed to clear logs");
             }
+        }
+
+        public Task<int> PurgeOldErrorLogsAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

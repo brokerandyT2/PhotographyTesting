@@ -1,4 +1,6 @@
 ﻿using Location.Core.Helpers.AlertService;
+using Location.Core.Helpers.LoggingService;
+
 //using Location.Core.Helpers.LoggingService;
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Data.Models;
@@ -10,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataErrorEventArgs = Locations.Core.Data.Models.DataErrorEventArgs;
-using ILoggerService = Locations.Core.Business.DataAccess.Interfaces.ILoggerService;
+using ErrorSource = Locations.Core.Data.Models.ErrorSource;
 
 namespace Locations.Core.Business.DataAccess.Services
 {

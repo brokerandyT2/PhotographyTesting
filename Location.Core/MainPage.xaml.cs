@@ -1,7 +1,6 @@
 ﻿using Location.Core.Helpers.AlertService;
 using Location.Core.Views;
 using Locations.Core.Business.DataAccess.Services;
-using Locations.Core.Business.Services;
 using Locations.Core.Business.StorageSvc;
 using Locations.Core.Data.Queries;
 using Locations.Core.Shared;

@@ -1,5 +1,7 @@
 ﻿// Locations.Core.Business.Tests.UITests/Tests/Locations/ListLocationsTests.cs
 using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium;
 using System;
 using System.Threading;
 using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
@@ -21,27 +23,27 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             base.SetUp();
 
             // First login if needed
-            var loginPage = new LoginPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var loginPage = new LoginPage(Driver, CurrentPlatform);
             if (loginPage.IsCurrentPage())
             {
                 loginPage.Login();
             }
 
             // Initialize list locations page - assuming we're already on the main page after login
-            _listLocationsPage = new ListLocationsPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _listLocationsPage = new ListLocationsPage(Driver, CurrentPlatform);
 
             // Check if we're on a tutorial page first
-            _tutorialPage = new PageTutorialModalPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _tutorialPage = new PageTutorialModalPage(Driver, CurrentPlatform);
             if (_tutorialPage.IsCurrentPage())
             {
                 _tutorialPage.WaitForDismissal();
             }
 
             // Verify we're on the list locations page
-            Assert.IsTrue(_listLocationsPage.IsCurrentPage(), "Not on the list locations page");
+            Assert.That(_listLocationsPage.IsCurrentPage(), Is.True, "Not on the list locations page");
 
             // Wait for locations to load
-            Assert.IsTrue(_listLocationsPage.WaitForLocationsToLoad(), "Locations failed to load");
+            Assert.That(_listLocationsPage.WaitForLocationsToLoad(), Is.True, "Locations failed to load");
         }
 
         [Test]
@@ -61,18 +63,18 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Log("Testing locations display");
 
             // Ensure there are locations displayed
-            Assert.IsTrue(_listLocationsPage.HasLocations(), "No locations displayed in the list");
+            Assert.That(_listLocationsPage.HasLocations(), Is.True, "No locations displayed in the list");
 
             // Get location titles
             var locationTitles = _listLocationsPage.GetLocationTitles();
 
             // Verify at least one location is displayed
-            Assert.IsTrue(locationTitles.Count > 0, "No location titles found in the list");
+            Assert.That(locationTitles.Count > 0, Is.True, "No location titles found in the list");
 
             // Verify location titles are not empty
             foreach (string title in locationTitles)
             {
-                Assert.IsFalse(string.IsNullOrEmpty(title), "Found empty location title");
+                Assert.That(string.IsNullOrEmpty(title), Is.False, "Found empty location title");
             }
         }
 
@@ -83,7 +85,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Log("Testing location selection");
 
             // Ensure there are locations
-            Assert.IsTrue(_listLocationsPage.HasLocations(), "No locations displayed in the list");
+            Assert.That(_listLocationsPage.HasLocations(), Is.True, "No locations displayed in the list");
 
             // Select the first location
             _listLocationsPage.SelectLocation(0);
@@ -92,10 +94,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Thread.Sleep(2000);
 
             // Initialize edit location page
-            var editLocationPage = new EditLocationPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var editLocationPage = new EditLocationPage(Driver, CurrentPlatform);
 
             // Verify we're on the edit location page
-            Assert.IsTrue(editLocationPage.IsCurrentPage(), "Not navigated to edit location page");
+            Assert.That(editLocationPage.IsCurrentPage(), Is.True, "Not navigated to edit location page");
 
             // Return to list
             editLocationPage.ClickClose();
@@ -104,7 +106,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Thread.Sleep(2000);
 
             // Verify we're back on the list locations page
-            Assert.IsTrue(_listLocationsPage.IsCurrentPage(), "Not returned to list locations page");
+            Assert.That(_listLocationsPage.IsCurrentPage(), Is.True, "Not returned to list locations page");
         }
 
         [Test]
@@ -115,10 +117,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             Log("Testing map button functionality");
 
             // Ensure there are locations
-            Assert.IsTrue(_listLocationsPage.HasLocations(), "No locations displayed in the list");
+            Assert.That(_listLocationsPage.HasLocations(), Is.True, "No locations displayed in the list");
 
             // Click map button for the first location
-            _listLocationsPage.OpenMap(0);
+            //_listLocationsPage.OpenMap(0);
 
             // This will typically open an external map application, which may not be testable in automated environment
             // We could verify that our app handled the intent correctly
@@ -137,7 +139,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             // Could be done by clearing app data or having a way to delete all locations
 
             // Verify no locations are displayed
-            Assert.IsFalse(_listLocationsPage.HasLocations(), "Locations are displayed when none should exist");
+            Assert.That(_listLocationsPage.HasLocations(), Is.False, "Locations are displayed when none should exist");
 
             // Verify empty state is displayed (this would depend on how your app shows empty state)
             // For example, checking for an empty state message or image
@@ -157,13 +159,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
                 switch (CurrentPlatform)
                 {
                     case AppiumSetup.Platform.Android:
-                        AndroidDriver.FindElementByXPath("//android.widget.Button[contains(@content-desc, 'Add') or contains(@text, 'Add')]").Click();
+                        Driver.FindElement(By.XPath("//android.widget.Button[contains(@content-desc, 'Add') or contains(@text, 'Add')]")).Click();
                         break;
                     case AppiumSetup.Platform.iOS:
-                        iOSDriver.FindElementByXPath("//XCUIElementTypeButton[contains(@name, 'Add')]").Click();
+                        Driver.FindElement(By.XPath("//XCUIElementTypeButton[contains(@name, 'Add')]")).Click();
                         break;
                     case AppiumSetup.Platform.Windows:
-                        WindowsDriver.FindElementByXPath("//Button[contains(@Name, 'Add')]").Click();
+                        Driver.FindElement(By.XPath("//Button[contains(@Name, 'Add')]")).Click();
                         break;
                 }
 
@@ -171,10 +173,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
                 Thread.Sleep(2000);
 
                 // Initialize add location page
-                var addLocationPage = new AddLocationPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+                var addLocationPage = new AddLocationPage(Driver, CurrentPlatform);
 
                 // Verify we're on the add location page
-                Assert.IsTrue(addLocationPage.IsCurrentPage(), "Not navigated to add location page");
+                Assert.That(addLocationPage.IsCurrentPage(), Is.True, "Not navigated to add location page");
 
                 // Return to list without saving
                 GoBack();
@@ -183,7 +185,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
                 Thread.Sleep(2000);
 
                 // Verify we're back on the list locations page
-                Assert.IsTrue(_listLocationsPage.IsCurrentPage(), "Not returned to list locations page");
+                Assert.That(_listLocationsPage.IsCurrentPage(), Is.True, "Not returned to list locations page");
             }
             catch (Exception ex)
             {

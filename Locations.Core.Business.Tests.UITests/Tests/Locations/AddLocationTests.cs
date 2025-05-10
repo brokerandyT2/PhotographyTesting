@@ -1,5 +1,7 @@
 ﻿// Locations.Core.Business.Tests.UITests/Tests/Locations/AddLocationTests.cs
 using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium;
 using System;
 using System.Threading;
 using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
@@ -21,7 +23,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             base.SetUp();
 
             // First login if needed
-            var loginPage = new LoginPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var loginPage = new LoginPage(Driver, CurrentPlatform);
             if (loginPage.IsCurrentPage())
             {
                 loginPage.Login();
@@ -34,13 +36,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
                 switch (CurrentPlatform)
                 {
                     case AppiumSetup.Platform.Android:
-                        AndroidDriver.FindElementByXPath("//android.widget.Button[contains(@content-desc, 'Add') or contains(@text, 'Add')]").Click();
+                        Driver.FindElement(By.XPath("//android.widget.Button[contains(@content-desc, 'Add') or contains(@text, 'Add')]")).Click();
                         break;
                     case AppiumSetup.Platform.iOS:
-                        iOSDriver.FindElementByXPath("//XCUIElementTypeButton[contains(@name, 'Add')]").Click();
+                        Driver.FindElement(By.XPath("//XCUIElementTypeButton[contains(@name, 'Add')]")).Click();
                         break;
                     case AppiumSetup.Platform.Windows:
-                        WindowsDriver.FindElementByXPath("//Button[contains(@Name, 'Add')]").Click();
+                        Driver.FindElement(By.XPath("//Button[contains(@Name, 'Add')]")).Click();
                         break;
                 }
 
@@ -54,17 +56,17 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             }
 
             // Initialize page object
-            _addLocationPage = new AddLocationPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _addLocationPage = new AddLocationPage(Driver, CurrentPlatform);
 
             // Check if we're on a tutorial page first
-            _tutorialPage = new PageTutorialModalPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _tutorialPage = new PageTutorialModalPage(Driver, CurrentPlatform);
             if (_tutorialPage.IsCurrentPage())
             {
                 _tutorialPage.WaitForDismissal();
             }
 
             // Verify we're on the add location page
-            Assert.IsTrue(_addLocationPage.IsCurrentPage(), "Not on the add location page");
+            Assert.That(!_addLocationPage.IsCurrentPage(), Is.False, "Not on Add Location page");
         }
 
         [Test]
@@ -88,16 +90,19 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             string longitude = _addLocationPage.GetLongitude();
 
             // Verify coordinates are populated (not empty or zero)
-            Assert.IsFalse(string.IsNullOrEmpty(latitude), "Latitude was not populated");
-            Assert.IsFalse(string.IsNullOrEmpty(longitude), "Longitude was not populated");
+            Assert.That(!string.IsNullOrEmpty(latitude), Is.True, "Latitude is empty");
+            Assert.That(!string.IsNullOrEmpty(longitude), Is.True, "Longitude is empty");
 
             // Verify coordinates are valid numbers
-            Assert.IsTrue(double.TryParse(latitude, out double lat), "Latitude is not a valid number");
-            Assert.IsTrue(double.TryParse(longitude, out double lon), "Longitude is not a valid number");
+            bool isLatValid = double.TryParse(latitude, out double lat);
+            Assert.That(isLatValid, Is.True, "Latitude is not a valid number");
+
+            bool isLonValid = double.TryParse(longitude, out double lon);
+            Assert.That(isLonValid, Is.True, "Longitude is not a valid number");
 
             // Verify coordinates are within reasonable range
-            Assert.IsTrue(lat >= -90 && lat <= 90, "Latitude out of valid range");
-            Assert.IsTrue(lon >= -180 && lon <= 180, "Longitude out of valid range");
+            Assert.That(lat >= -90 && lat <= 90, Is.True, "Latitude is out of valid range");
+            Assert.That(lon >= -180 && lon <= 180, Is.True, "Longitude is out of valid range");
         }
 
         [Test]
@@ -111,10 +116,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             _addLocationPage.CreateLocation(locationTitle);
 
             // Verify no error is displayed
-            Assert.IsFalse(_addLocationPage.HasError(), "Error displayed after creating location");
+            Assert.That(!_addLocationPage.HasError(), Is.True, "Error occurred when creating location");
 
             // Verify we're no longer on the add location page
-            Assert.IsFalse(_addLocationPage.IsCurrentPage(), "Still on add location page after successful creation");
+            Assert.That(!_addLocationPage.IsCurrentPage(), Is.True, "Still on add location page after creation");
         }
 
         [Test]
@@ -130,10 +135,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             _addLocationPage.CreateLocation(locationTitle, locationDescription);
 
             // Verify no error is displayed
-            Assert.IsFalse(_addLocationPage.HasError(), "Error displayed after creating location");
+            Assert.That(!_addLocationPage.HasError(), Is.True, "Error occurred when creating location");
 
             // Verify we're no longer on the add location page
-            Assert.IsFalse(_addLocationPage.IsCurrentPage(), "Still on add location page after successful creation");
+            Assert.That(!_addLocationPage.IsCurrentPage(), Is.True, "Still on add location page after creation");
         }
 
         [Test]
@@ -145,9 +150,8 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Locations
             // Try to create a location with an empty title (assuming title is required)
             _addLocationPage.CreateLocation("");
 
-            // Verify error is displayed
-            Assert.IsTrue(_addLocationPage.HasError() || _addLocationPage.IsCurrentPage(),
-                "No error displayed for invalid input");
+            // Verify error is displayed or we're still on the add location page
+            Assert.That(_addLocationPage.HasError() || _addLocationPage.IsCurrentPage(), Is.True, "No error shown for invalid input");
         }
 
         [Test]

@@ -157,9 +157,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             await _locationService.DeleteAsync(locationId);
 
             // Assert
-            //TODO: Fix once we have logger service back
-            Assert.IsTrue(true); //
-            //MockBusinessLoggerService.Verify(                logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Once);
+           MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Once);
         }
 
         #endregion
@@ -295,9 +293,8 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             await _locationService.DeleteAsync(testLocation);
 
             // Assert
-            //TODO: Fix once we have logger service back
-            Assert.IsTrue(true); 
-            //MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Once);
+
+            MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Once);
         }
 
         #endregion

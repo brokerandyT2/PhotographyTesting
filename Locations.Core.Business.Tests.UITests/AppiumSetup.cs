@@ -1,24 +1,23 @@
 ﻿// Locations.Core.Business.Tests.UITests/AppiumSetup.cs
 using NUnit.Framework;
 using OpenQA.Selenium.Appium;
-using OpenQA.Selenium.Appium.Windows;
-using OpenQA.Selenium.Appium.Android;
-using OpenQA.Selenium.Appium.iOS;
 using OpenQA.Selenium;
-using System;
+using OpenQA.Selenium.Appium.Enums;
 using System.IO;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Reflection;
+using System.Collections.Generic;
+using OpenQA.Selenium.Appium.Android;
+using OpenQA.Selenium.Appium.iOS;
+using OpenQA.Selenium.Appium.Windows;
 
 namespace Locations.Core.Business.Tests.UITests
 {
     public class AppiumSetup
     {
-        // Platform-specific drivers
-        protected WindowsDriver<WindowsElement> WindowsDriver;
-        protected AndroidDriver<AndroidElement> AndroidDriver;
-        protected IOSDriver<IOSElement> iOSDriver;
+        // Single driver for all platforms
+        protected AppiumDriver Driver;
 
         // Current platform being tested
         protected Platform CurrentPlatform;
@@ -41,74 +40,81 @@ namespace Locations.Core.Business.Tests.UITests
             var options = new AppiumOptions();
             var appConfig = LoadAppiumConfig();
 
+            // Common capabilities for Appium
+            Dictionary<string, object> appiumOptions = new Dictionary<string, object>();
+
             switch (platform)
             {
                 case Platform.Windows:
-                    options.AddAdditionalCapability("app", GetWindowsAppPath());
-                    options.AddAdditionalCapability("deviceName", appConfig.Windows.DeviceName);
+                    options.PlatformName = "Windows";
+                    appiumOptions.Add("app", GetWindowsAppPath());
+                    appiumOptions.Add("deviceName", appConfig.Windows.DeviceName);
                     break;
 
                 case Platform.Android:
-                    options.AddAdditionalCapability("platformName", "Android");
-                    options.AddAdditionalCapability("deviceName", appConfig.Android.DeviceName);
-                    options.AddAdditionalCapability("automationName", appConfig.Android.AutomationName);
+                    options.PlatformName = "Android";
+                    appiumOptions.Add("deviceName", appConfig.Android.DeviceName);
+                    appiumOptions.Add("automationName", appConfig.Android.AutomationName);
 
                     // Check if we should use an APK file or an installed app
                     if (!string.IsNullOrEmpty(appConfig.Android.AppPath) && File.Exists(appConfig.Android.AppPath))
                     {
-                        options.AddAdditionalCapability("app", appConfig.Android.AppPath);
+                        appiumOptions.Add("app", appConfig.Android.AppPath);
                     }
                     else
                     {
                         // Use installed app package and activity
-                        options.AddAdditionalCapability("appPackage", appConfig.Android.AppPackage);
-                        options.AddAdditionalCapability("appActivity", appConfig.Android.AppActivity);
+                        appiumOptions.Add("appPackage", appConfig.Android.AppPackage);
+                        appiumOptions.Add("appActivity", appConfig.Android.AppActivity);
                     }
 
                     // Add additional capabilities for Android
-                    options.AddAdditionalCapability("platformVersion", appConfig.Android.PlatformVersion);
-                    options.AddAdditionalCapability("noReset", appConfig.Android.NoReset);
-                    options.AddAdditionalCapability("fullReset", appConfig.Android.FullReset);
+                    appiumOptions.Add("platformVersion", appConfig.Android.PlatformVersion);
+                    appiumOptions.Add("noReset", appConfig.Android.NoReset);
+                    appiumOptions.Add("fullReset", appConfig.Android.FullReset);
 
                     if (appConfig.Android.AdditionalCapabilities != null)
                     {
                         foreach (var cap in appConfig.Android.AdditionalCapabilities)
                         {
-                            options.AddAdditionalCapability(cap.Key, cap.Value);
+                            appiumOptions.Add(cap.Key, cap.Value);
                         }
                     }
                     break;
 
                 case Platform.iOS:
-                    options.AddAdditionalCapability("platformName", "iOS");
-                    options.AddAdditionalCapability("deviceName", appConfig.iOS.DeviceName);
-                    options.AddAdditionalCapability("automationName", appConfig.iOS.AutomationName);
+                    options.PlatformName = "iOS";
+                    appiumOptions.Add("deviceName", appConfig.iOS.DeviceName);
+                    appiumOptions.Add("automationName", appConfig.iOS.AutomationName);
 
                     // Check if we should use an app file or an installed app
                     if (!string.IsNullOrEmpty(appConfig.iOS.AppPath) && File.Exists(appConfig.iOS.AppPath))
                     {
-                        options.AddAdditionalCapability("app", appConfig.iOS.AppPath);
+                        appiumOptions.Add("app", appConfig.iOS.AppPath);
                     }
                     else
                     {
                         // Use installed app bundle ID
-                        options.AddAdditionalCapability("bundleId", appConfig.iOS.BundleId);
+                        appiumOptions.Add("bundleId", appConfig.iOS.BundleId);
                     }
 
                     // Add additional capabilities for iOS
-                    options.AddAdditionalCapability("platformVersion", appConfig.iOS.PlatformVersion);
-                    options.AddAdditionalCapability("noReset", appConfig.iOS.NoReset);
-                    options.AddAdditionalCapability("fullReset", appConfig.iOS.FullReset);
+                    appiumOptions.Add("platformVersion", appConfig.iOS.PlatformVersion);
+                    appiumOptions.Add("noReset", appConfig.iOS.NoReset);
+                    appiumOptions.Add("fullReset", appConfig.iOS.FullReset);
 
                     if (appConfig.iOS.AdditionalCapabilities != null)
                     {
                         foreach (var cap in appConfig.iOS.AdditionalCapabilities)
                         {
-                            options.AddAdditionalCapability(cap.Key, cap.Value);
+                            appiumOptions.Add(cap.Key, cap.Value);
                         }
                     }
                     break;
             }
+
+            // Add the appium options to the main options object
+            options.AddAdditionalOption("appium:options", appiumOptions);
 
             return options;
         }
@@ -233,21 +239,22 @@ namespace Locations.Core.Business.Tests.UITests
             {
                 switch (platform)
                 {
-                    case Platform.Windows:
-                        WindowsDriver = new WindowsDriver<WindowsElement>(new Uri(serverUri), options);
-                        WindowsDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(appConfig.DefaultTimeoutSeconds);
-                        break;
-
                     case Platform.Android:
-                        AndroidDriver = new AndroidDriver<AndroidElement>(new Uri(serverUri), options);
-                        AndroidDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(appConfig.DefaultTimeoutSeconds);
+                        // For Android
+                        Driver = new AndroidDriver(new Uri(serverUri), options);
                         break;
-
-                    case Platform.iOS:
-                        iOSDriver = new IOSDriver<IOSElement>(new Uri(serverUri), options);
-                        iOSDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(appConfig.DefaultTimeoutSeconds);
+                        case Platform.iOS:
+                        // For iOS
+                        Driver = new IOSDriver(new Uri(serverUri), options);
+                        break;
+                    default:
+                        // For Windows
+                        Driver = new WindowsDriver(new Uri(serverUri), options);
                         break;
                 }
+                // Create a single AppiumDriver for all platforms
+
+                Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(appConfig.DefaultTimeoutSeconds);
 
                 TestContext.Progress.WriteLine("Connected to Appium server successfully");
             }
@@ -262,62 +269,29 @@ namespace Locations.Core.Business.Tests.UITests
         // Clean up drivers
         protected void CleanupDriver()
         {
-            switch (CurrentPlatform)
-            {
-                case Platform.Windows:
-                    WindowsDriver?.Quit();
-                    WindowsDriver = null;
-                    break;
-
-                case Platform.Android:
-                    AndroidDriver?.Quit();
-                    AndroidDriver = null;
-                    break;
-
-                case Platform.iOS:
-                    iOSDriver?.Quit();
-                    iOSDriver = null;
-                    break;
-            }
+            Driver?.Quit();
+            Driver = null;
 
             // Stop Appium server if we started it
             StopAppiumServer();
         }
 
-        // Helper method to locate element by accessibility ID across platforms
+        // Helper method to locate element by accessibility ID
         protected IWebElement FindElementByAccessibilityId(string id)
         {
-            return CurrentPlatform switch
-            {
-                Platform.Windows => WindowsDriver.FindElementByAccessibilityId(id),
-                Platform.Android => AndroidDriver.FindElementByAccessibilityId(id),
-                Platform.iOS => iOSDriver.FindElementByAccessibilityId(id),
-                _ => throw new ArgumentException("Unsupported platform")
-            };
+            return Driver.FindElement(MobileBy.AccessibilityId(id));
         }
 
-        // Helper method to find element by ID across platforms
+        // Helper method to find element by ID
         protected IWebElement FindElementById(string id)
         {
-            return CurrentPlatform switch
-            {
-                Platform.Windows => WindowsDriver.FindElementById(id),
-                Platform.Android => AndroidDriver.FindElementById(id),
-                Platform.iOS => iOSDriver.FindElementById(id),
-                _ => throw new ArgumentException("Unsupported platform")
-            };
+            return Driver.FindElement(By.Id(id));
         }
 
-        // Helper method to find element by XPath across platforms
+        // Helper method to find element by XPath
         protected IWebElement FindElementByXPath(string xpath)
         {
-            return CurrentPlatform switch
-            {
-                Platform.Windows => WindowsDriver.FindElementByXPath(xpath),
-                Platform.Android => AndroidDriver.FindElementByXPath(xpath),
-                Platform.iOS => iOSDriver.FindElementByXPath(xpath),
-                _ => throw new ArgumentException("Unsupported platform")
-            };
+            return Driver.FindElement(By.XPath(xpath));
         }
 
         // Wait for an element to be present

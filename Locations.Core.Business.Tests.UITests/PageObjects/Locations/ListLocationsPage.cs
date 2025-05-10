@@ -36,7 +36,46 @@ namespace Locations.Core.Business.Tests.UITests.PageObjects.Locations
                 return false;
             }
         }
+        public bool WaitForLocationsToLoad(int timeoutSeconds = 15)
+        {
+            try
+            {
+                // Wait for either locations to appear or loading to finish
+                DateTime endTime = DateTime.Now.AddSeconds(timeoutSeconds);
+                while (DateTime.Now < endTime)
+                {
+                    // Check if still loading
+                    if (IsLoading())
+                    {
+                        Thread.Sleep(500);
+                        continue;
+                    }
 
+                    // Check if error is displayed
+                    if (HasError())
+                    {
+                        return false;
+                    }
+
+                    // If not loading and no error, check if we have locations
+                    // or at least the collection view is visible
+                    if (IsElementDisplayed(CollectionView))
+                    {
+                        return true;
+                    }
+
+                    Thread.Sleep(500);
+                }
+
+                // Timeout reached
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception in WaitForLocationsToLoad: {ex.Message}");
+                return false;
+            }
+        }
         public bool IsLoading()
         {
             try

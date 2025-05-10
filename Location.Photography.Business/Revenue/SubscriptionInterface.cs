@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Location.Photography.Business.Revenue
 {
-    public class SubscriptionManager : ISubscriptionManager
+    public class SubscriptionManagers : ISubscriptionManager
     {
         private readonly ISettingService<SettingsViewModel> _settingService;
 
@@ -39,7 +39,7 @@ namespace Location.Photography.Business.Revenue
             { SubscriptionType.SubscriptionTypeEnum.Professional, MagicStrings.Pro }
         };
 
-        public SubscriptionManager(ISettingService<SettingsViewModel> settingService)
+        public SubscriptionManagers(ISettingService<SettingsViewModel> settingService)
         {
             _settingService = settingService ?? throw new ArgumentNullException(nameof(settingService));
         }

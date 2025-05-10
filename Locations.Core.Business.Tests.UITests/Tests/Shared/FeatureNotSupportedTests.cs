@@ -1,5 +1,7 @@
 ﻿// Locations.Core.Business.Tests.UITests/Tests/Shared/FeatureNotSupportedTests.cs
 using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium;
 using System;
 using System.Threading;
 using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
@@ -26,7 +28,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             // For demonstration purposes, we'll show how it would be structured
 
             // First login if needed
-            var loginPage = new LoginPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var loginPage = new LoginPage(Driver, CurrentPlatform);
             if (loginPage.IsCurrentPage())
             {
                 loginPage.Login();
@@ -39,13 +41,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
                 switch (CurrentPlatform)
                 {
                     case AppiumSetup.Platform.Android:
-                        AndroidDriver.FindElementByXPath("//android.widget.Button[contains(@text, 'Tips') or contains(@content-desc, 'Tips')]").Click();
+                        Driver.FindElement(By.XPath("//android.widget.Button[contains(@text, 'Tips') or contains(@content-desc, 'Tips')]")).Click();
                         break;
                     case AppiumSetup.Platform.iOS:
-                        iOSDriver.FindElementByXPath("//XCUIElementTypeButton[contains(@name, 'Tips')]").Click();
+                        Driver.FindElement(By.XPath("//XCUIElementTypeButton[contains(@name, 'Tips')]")).Click();
                         break;
                     case AppiumSetup.Platform.Windows:
-                        WindowsDriver.FindElementByXPath("//Button[contains(@Name, 'Tips')]").Click();
+                        Driver.FindElement(By.XPath("//Button[contains(@Name, 'Tips')]")).Click();
                         break;
                 }
 
@@ -58,7 +60,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             }
 
             // Initialize tips page
-            _tipsPage = new TipsPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _tipsPage = new TipsPage(Driver, CurrentPlatform);
 
             // Check if exposure calculator button is visible
             if (!_tipsPage.IsExposureCalcButtonVisible())
@@ -73,14 +75,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             Thread.Sleep(2000);
 
             // Initialize feature not supported page
-            _featureNotSupportedPage = new FeatureNotSupportedPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _featureNotSupportedPage = new FeatureNotSupportedPage(Driver, CurrentPlatform);
 
             // Check if we're on the feature not supported page
             if (_featureNotSupportedPage.IsCurrentPage())
             {
                 // Verify it's for the exposure calculator feature
-                Assert.IsTrue(_featureNotSupportedPage.IsFeatureExposureCalculator(),
-                    "Feature not supported page doesn't indicate exposure calculator");
+                Assert.That(_featureNotSupportedPage.IsFeatureExposureCalculator(), Is.True, "Feature not supported page doesn't indicate exposure calculator");
             }
             else
             {
@@ -101,7 +102,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             // Similar to the previous test
 
             // For demonstration purposes, we'll assume we're already on the feature not supported page
-            _featureNotSupportedPage = new FeatureNotSupportedPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _featureNotSupportedPage = new FeatureNotSupportedPage(Driver, CurrentPlatform);
 
             if (!_featureNotSupportedPage.IsCurrentPage())
             {
@@ -112,12 +113,11 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             string contentText = _featureNotSupportedPage.GetContentText();
 
             // Verify text is not empty
-            Assert.IsFalse(string.IsNullOrEmpty(contentText), "Feature not supported message is empty");
+            Assert.That(!string.IsNullOrEmpty(contentText), Is.True);
 
             // Verify text mentions subscription or premium
-            Assert.IsTrue(contentText.Contains("Premium") || contentText.Contains("subscription") ||
-                         contentText.Contains("upgrade"),
-                "Feature not supported message doesn't mention subscription or premium");
+            Assert.That(contentText.Contains("Premium") || contentText.Contains("subscription") ||
+                         contentText.Contains("upgrade"), Is.True);
         }
 
         [Test]
@@ -131,7 +131,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             // Similar to the previous tests
 
             // For demonstration purposes, we'll assume we're already on the feature not supported page
-            _featureNotSupportedPage = new FeatureNotSupportedPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _featureNotSupportedPage = new FeatureNotSupportedPage(Driver, CurrentPlatform);
 
             if (!_featureNotSupportedPage.IsCurrentPage())
             {
@@ -145,8 +145,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Shared
             Thread.Sleep(2000);
 
             // Verify we're no longer on the feature not supported page
-            Assert.IsFalse(_featureNotSupportedPage.IsCurrentPage(),
-                "Still on feature not supported page after navigation");
+            Assert.That(!_featureNotSupportedPage.IsCurrentPage(), Is.True, "Still on feature not supported page after navigation");
         }
     }
 }

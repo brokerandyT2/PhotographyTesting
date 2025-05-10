@@ -65,7 +65,7 @@ namespace Locations.Core.Business.Tests.UITests.PageObjects.Shared
                 switch (CurrentPlatform)
                 {
                     case AppiumSetup.Platform.Android:
-                        AndroidDriver.Navigate().Back();
+                        Driver.Navigate().Back();
                         break;
                     case AppiumSetup.Platform.iOS:
                         // On iOS, might need to look for a different back mechanism

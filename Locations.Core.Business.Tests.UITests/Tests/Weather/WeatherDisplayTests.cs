@@ -1,10 +1,12 @@
 ﻿// Locations.Core.Business.Tests.UITests/Tests/Weather/WeatherDisplayTests.cs
 using NUnit.Framework;
+using OpenQA.Selenium.Appium;
 using System;
 using System.Threading;
 using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
 using Locations.Core.Business.Tests.UITests.PageObjects.Locations;
 using Locations.Core.Business.Tests.UITests.PageObjects.Weather;
+using OpenQA.Selenium;
 
 namespace Locations.Core.Business.Tests.UITests.Tests.Weather
 {
@@ -22,7 +24,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
             base.SetUp();
 
             // First login if needed
-            var loginPage = new LoginPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            var loginPage = new LoginPage(Driver, CurrentPlatform);
             if (loginPage.IsCurrentPage())
             {
                 loginPage.Login();
@@ -32,10 +34,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
             Thread.Sleep(2000); // Wait for main page to load
 
             // Initialize list locations page
-            _listLocationsPage = new ListLocationsPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _listLocationsPage = new ListLocationsPage(Driver, CurrentPlatform);
 
             // Wait for locations to load
-            Assert.IsTrue(_listLocationsPage.WaitForLocationsToLoad(), "Locations failed to load");
+            Assert.That(_listLocationsPage.WaitForLocationsToLoad(), Is.True, "Locations failed to load");
 
             // Check if there are locations available, if not create one
             if (!_listLocationsPage.HasLocations())
@@ -47,13 +49,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
                     switch (CurrentPlatform)
                     {
                         case AppiumSetup.Platform.Android:
-                            AndroidDriver.FindElementByXPath("//android.widget.Button[contains(@content-desc, 'Add') or contains(@text, 'Add')]").Click();
+                            Driver.FindElement(By.XPath("//android.widget.Button[contains(@content-desc, 'Add') or contains(@text, 'Add')]")).Click();
                             break;
                         case AppiumSetup.Platform.iOS:
-                            iOSDriver.FindElementByXPath("//XCUIElementTypeButton[contains(@name, 'Add')]").Click();
+                            Driver.FindElement(By.XPath("//XCUIElementTypeButton[contains(@name, 'Add')]")).Click();
                             break;
                         case AppiumSetup.Platform.Windows:
-                            WindowsDriver.FindElementByXPath("//Button[contains(@Name, 'Add')]").Click();
+                            Driver.FindElement(By.XPath("//Button[contains(@Name, 'Add')]")).Click();
                             break;
                     }
 
@@ -66,14 +68,14 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
                 }
 
                 // Create a test location
-                var addLocationPage = new AddLocationPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+                var addLocationPage = new AddLocationPage(Driver, CurrentPlatform);
                 addLocationPage.CreateLocation("Test Location " + DateTime.Now.ToString("yyyyMMddHHmmss"));
 
                 // Wait for navigation back to list
                 Thread.Sleep(2000);
 
                 // Reinitialize list locations page
-                _listLocationsPage = new ListLocationsPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+                _listLocationsPage = new ListLocationsPage(Driver, CurrentPlatform);
                 _listLocationsPage.WaitForLocationsToLoad();
             }
 
@@ -84,10 +86,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
             Thread.Sleep(2000);
 
             // Initialize edit location page
-            _editLocationPage = new EditLocationPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _editLocationPage = new EditLocationPage(Driver, CurrentPlatform);
 
             // Verify we're on the edit location page
-            Assert.IsTrue(_editLocationPage.IsCurrentPage(), "Not on the edit location page");
+            Assert.That(_editLocationPage.IsCurrentPage(), Is.True, "Not on the edit location page");
 
             // Click weather button
             _editLocationPage.ClickWeatherButton();
@@ -96,10 +98,10 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
             Thread.Sleep(3000);
 
             // Initialize weather display page
-            _weatherDisplayPage = new WeatherDisplayPage(WindowsDriver, AndroidDriver, iOSDriver, CurrentPlatform);
+            _weatherDisplayPage = new WeatherDisplayPage(Driver, CurrentPlatform);
 
             // Verify we're on the weather display page
-            Assert.IsTrue(_weatherDisplayPage.IsCurrentPage(), "Not on the weather display page");
+            Assert.That(_weatherDisplayPage.IsCurrentPage(), Is.True, "Not on the weather display page");
         }
 
         [TearDown]
@@ -129,7 +131,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
             Log("Checking UI elements on Weather Display page");
 
             // Verify weather data is loaded
-            Assert.IsTrue(_weatherDisplayPage.HasWeatherData(), "Weather data not displayed");
+            Assert.That(_weatherDisplayPage.HasWeatherData(), Is.True, "Weather data not displayed");
         }
 
         [Test]
@@ -142,7 +144,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
             string forecast = _weatherDisplayPage.GetDayOneForecast();
 
             // Verify forecast is not empty
-            Assert.IsFalse(string.IsNullOrEmpty(forecast), "Day one forecast is empty");
+            Assert.That(string.IsNullOrEmpty(forecast), Is.False, "Day one forecast is empty");
         }
 
         [Test]
@@ -156,19 +158,19 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
             string highTemp = _weatherDisplayPage.GetDayOneHighTemperature();
 
             // Verify temperatures are not empty
-            Assert.IsFalse(string.IsNullOrEmpty(lowTemp), "Low temperature is empty");
-            Assert.IsFalse(string.IsNullOrEmpty(highTemp), "High temperature is empty");
+            Assert.That(string.IsNullOrEmpty(lowTemp), Is.False, "Low temperature is empty");
+            Assert.That(string.IsNullOrEmpty(highTemp), Is.False, "High temperature is empty");
 
             // Attempt to parse temperatures as numbers
             bool lowTempIsNumeric = double.TryParse(lowTemp.Replace("°", "").Replace("F", "").Replace("C", "").Trim(), out double lowValue);
             bool highTempIsNumeric = double.TryParse(highTemp.Replace("°", "").Replace("F", "").Replace("C", "").Trim(), out double highValue);
 
             // Verify temperatures are numeric
-            Assert.IsTrue(lowTempIsNumeric, "Low temperature is not a valid number");
-            Assert.IsTrue(highTempIsNumeric, "High temperature is not a valid number");
+            Assert.That(lowTempIsNumeric, Is.True, "Low temperature is not a valid number");
+            Assert.That(highTempIsNumeric, Is.True, "High temperature is not a valid number");
 
             // Verify high temperature is greater than or equal to low temperature
-            Assert.IsTrue(highValue >= lowValue, "High temperature is less than low temperature");
+            Assert.That(highValue >= lowValue, Is.True, "High temperature is less than low temperature");
         }
 
         [Test]
@@ -182,13 +184,13 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
 
             // Verify wind information is displayed
             string windSpeed = _weatherDisplayPage.GetWindSpeed();
-            Assert.IsFalse(string.IsNullOrEmpty(windSpeed), "Wind speed is empty after expanding details");
+            Assert.That(string.IsNullOrEmpty(windSpeed), Is.False, "Wind speed is empty after expanding details");
 
             // Verify sunrise/sunset information is displayed
             string sunrise = _weatherDisplayPage.GetSunrise();
             string sunset = _weatherDisplayPage.GetSunset();
-            Assert.IsFalse(string.IsNullOrEmpty(sunrise), "Sunrise time is empty after expanding details");
-            Assert.IsFalse(string.IsNullOrEmpty(sunset), "Sunset time is empty after expanding details");
+            Assert.That(string.IsNullOrEmpty(sunrise), Is.False, "Sunrise time is empty after expanding details");
+            Assert.That(string.IsNullOrEmpty(sunset), Is.False, "Sunset time is empty after expanding details");
         }
 
         [Test]
@@ -234,7 +236,7 @@ namespace Locations.Core.Business.Tests.UITests.Tests.Weather
             Thread.Sleep(2000);
 
             // Verify we're back on the edit location page
-            Assert.IsTrue(_editLocationPage.IsCurrentPage(), "Not returned to edit location page");
+            Assert.That(_editLocationPage.IsCurrentPage(), Is.True, "Not returned to edit location page");
         }
     }
 }
