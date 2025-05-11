@@ -4,10 +4,17 @@
              xmlns:basePages="clr-namespace:Location.Photography.Base"
              xmlns:strings="clr-namespace:Location.Photography.Resources"
              xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:converters="clr-namespace:Location.Photography.Converters;assembly=Location.Photography"
              x:Class="Location.Photography.Pro.SunCalculations"
              Title="Sun Calculations">
 
-    <Grid>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid Padding="10" Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -15,7 +22,7 @@
 
         <!-- Main Content -->
         <ScrollView Grid.Row="0">
-            <Grid Padding="20">
+            <Grid Padding="10" Margin="5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -26,38 +33,42 @@
                 <!-- Location Image -->
                 <Image Grid.Row="0" Source="{Binding LocationPhoto}" 
                        HeightRequest="200" Aspect="AspectFill" 
-                       Margin="0,0,0,20" 
+                       Margin="5" 
                        x:Name="locationPhoto" />
 
                 <!-- Location Picker -->
-                <Grid Grid.Row="1" Margin="0,0,0,20">
+                <Grid Grid.Row="1" Padding="10" Margin="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Label Grid.Row="0" Text="{x:Static strings:AppResources.chooseyourlocation}" Margin="0,0,0,5" />
+                    <Label Grid.Row="0" Text="{x:Static strings:AppResources.chooseyourlocation}" FontSize="14" Margin="5" />
                     <Picker Grid.Row="1" ItemsSource="{Binding LocationsS}" 
                             SelectedItem="{Binding SelectedLocation}"
                             ItemDisplayBinding="{Binding Title}"
                             x:Name="locationPicker" 
+                            FontSize="14"
+                            Margin="5"
                             SelectedIndexChanged="LocationPicker_SelectedIndexChanged" />
                 </Grid>
 
                 <!-- Date Picker -->
-                <Grid Grid.Row="2" Margin="0,0,0,20">
+                <Grid Grid.Row="2" Padding="10" Margin="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Label Grid.Row="0" Text="{x:Static strings:AppResources.choosedate}" Margin="0,0,0,5" />
+                    <Label Grid.Row="0" Text="{x:Static strings:AppResources.choosedate}" FontSize="14" Margin="5" />
                     <DatePicker Grid.Row="1" Date="{Binding Date}"
                                 Format="{Binding DateFormat}"
                                 x:Name="datePicker" 
+                                FontSize="14"
+                                Margin="5"
                                 DateSelected="DatePicker_DateSelected" />
                 </Grid>
 
                 <!-- Sun Times Results -->
-                <Grid Grid.Row="3">
+                <Grid Grid.Row="3" Padding="10" Margin="5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -78,80 +89,81 @@
                     </Grid.RowDefinitions>
 
                     <!-- Astronomical Dawn -->
-                    <Image Grid.Row="0" Grid.Column="0" Source="weathersunsetupcustom.png" HeightRequest="24" Margin="0,0,10,0"/>
-                    <Label Grid.Row="0" Grid.Column="1" Text="{x:Static strings:AppResources.AstronomicalDawn}" VerticalOptions="Center"/>
-                    <Label Grid.Row="0" Grid.Column="2" Text="{Binding AstronomicalDawnFormatted}" VerticalOptions="Center"/>
+                    <Image Grid.Row="0" Grid.Column="0" Source="weathersunsetupcustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="0" Grid.Column="1" Text="{x:Static strings:AppResources.AstronomicalDawn}" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="0" Grid.Column="2" Text="{Binding AstronomicalDawnFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
 
                     <!-- Nautical Dawn -->
-                    <Image Grid.Row="1" Grid.Column="0" Source="weathersunsetupcustom.png" HeightRequest="24" Margin="0,10,10,0"/>
-                    <Label Grid.Row="1" Grid.Column="1" Text="Nautical Dawn" VerticalOptions="Center" Margin="0,10,0,0"/>
-                    <Label Grid.Row="1" Grid.Column="2" Text="{Binding NauticalDawnFormatted}" VerticalOptions="Center" Margin="0,10,0,0"/>
+                    <Image Grid.Row="1" Grid.Column="0" Source="weathersunsetupcustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="1" Grid.Column="1" Text="Nautical Dawn" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="1" Grid.Column="2" Text="{Binding NauticalDawnFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
 
                     <!-- Civil Dawn -->
-                    <Image Grid.Row="2" Grid.Column="0" Source="weathersunsetupcustom.png" HeightRequest="24" Margin="0,10,10,0"/>
-                    <Label Grid.Row="2" Grid.Column="1" Text="Civil Dawn" VerticalOptions="Center" Margin="0,10,0,0"/>
-                    <Label Grid.Row="2" Grid.Column="2" Text="{Binding CivilDawnFormatted}" VerticalOptions="Center" Margin="0,10,0,0"/>
+                    <Image Grid.Row="2" Grid.Column="0" Source="weathersunsetupcustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="2" Grid.Column="1" Text="Civil Dawn" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="2" Grid.Column="2" Text="{Binding CivilDawnFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
 
                     <!-- Sunrise -->
-                    <Image Grid.Row="3" Grid.Column="0" Source="weathersunsetupcustom.png" HeightRequest="24" Margin="0,10,10,0"/>
-                    <Label Grid.Row="3" Grid.Column="1" Text="{x:Static strings:AppResources.Sunrise}" VerticalOptions="Center" Margin="0,10,0,0"/>
-                    <Label Grid.Row="3" Grid.Column="2" x:Name="sunriseDisplay" Text="{Binding SunRiseFormatted}" VerticalOptions="Center" Margin="0,10,0,0"/>
+                    <Image Grid.Row="3" Grid.Column="0" Source="weathersunsetupcustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="3" Grid.Column="1" Text="{x:Static strings:AppResources.Sunrise}" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="3" Grid.Column="2" x:Name="sunriseDisplay" Text="{Binding SunRiseFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
 
                     <!-- Golden Hour Morning End -->
-                    <Image Grid.Row="4" Grid.Column="0" Source="sunclockoutlinecustom.png" HeightRequest="24" Margin="0,10,10,0"/>
-                    <Label Grid.Row="4" Grid.Column="1" Text="{x:Static strings:AppResources.goldenhourmorning}" VerticalOptions="Center" Margin="0,10,0,0"/>
-                    <Label Grid.Row="4" Grid.Column="2" x:Name="goldenhourmorningdisplay" Text="{Binding GoldenHourMorningFormatted}" VerticalOptions="Center" Margin="0,10,0,0"/>
+                    <Image Grid.Row="4" Grid.Column="0" Source="sunclockoutlinecustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="4" Grid.Column="1" Text="{x:Static strings:AppResources.goldenhourmorning}" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="4" Grid.Column="2" x:Name="goldenhourmorningdisplay" Text="{Binding GoldenHourMorningFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
 
                     <!-- Solar Noon -->
-                    <Image Grid.Row="5" Grid.Column="0" Source="sunclockoutlinecustom.png" HeightRequest="24" Margin="0,10,10,0"/>
-                    <Label Grid.Row="5" Grid.Column="1" Text="{x:Static strings:AppResources.solarnoon}" VerticalOptions="Center" Margin="0,10,0,0"/>
-                    <Label Grid.Row="5" Grid.Column="2" x:Name="solarnoondisplay" Text="{Binding SolarNoonFormatted}" VerticalOptions="Center" Margin="0,10,0,0"/>
+                    <Image Grid.Row="5" Grid.Column="0" Source="sunclockoutlinecustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="5" Grid.Column="1" Text="{x:Static strings:AppResources.solarnoon}" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="5" Grid.Column="2" x:Name="solarnoondisplay" Text="{Binding SolarNoonFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
 
                     <!-- Golden Hour Evening Start -->
-                    <Image Grid.Row="6" Grid.Column="0" Source="weathersunsetdowncustom.png" HeightRequest="24" Margin="0,10,10,0"/>
-                    <Label Grid.Row="6" Grid.Column="1" Text="{x:Static strings:AppResources.goldenhourevening}" VerticalOptions="Center" Margin="0,10,0,0"/>
-                    <Label Grid.Row="6" Grid.Column="2" x:Name="goldenhoureveningdisplay" Text="{Binding GoldenHourEveningFormatted}" VerticalOptions="Center" Margin="0,10,0,0"/>
+                    <Image Grid.Row="6" Grid.Column="0" Source="weathersunsetdowncustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="6" Grid.Column="1" Text="{x:Static strings:AppResources.goldenhourevening}" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="6" Grid.Column="2" x:Name="goldenhoureveningdisplay" Text="{Binding GoldenHourEveningFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
 
                     <!-- Sunset -->
-                    <Image Grid.Row="7" Grid.Column="0" Source="weathersunsetdowncustom.png" HeightRequest="24" Margin="0,10,10,0"/>
-                    <Label Grid.Row="7" Grid.Column="1" Text="{x:Static strings:AppResources.Sunset}" VerticalOptions="Center" Margin="0,10,0,0"/>
-                    <Label Grid.Row="7" Grid.Column="2" x:Name="sunsetdisplay" Text="{Binding SunSetFormatted}" VerticalOptions="Center" Margin="0,10,0,0"/>
+                    <Image Grid.Row="7" Grid.Column="0" Source="weathersunsetdowncustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="7" Grid.Column="1" Text="{x:Static strings:AppResources.Sunset}" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="7" Grid.Column="2" x:Name="sunsetdisplay" Text="{Binding SunSetFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
 
                     <!-- Civil Dusk -->
-                    <Image Grid.Row="8" Grid.Column="0" Source="weathersunsetdowncustom.png" HeightRequest="24" Margin="0,10,10,0"/>
-                    <Label Grid.Row="8" Grid.Column="1" Text="Civil Dusk" VerticalOptions="Center" Margin="0,10,0,0"/>
-                    <Label Grid.Row="8" Grid.Column="2" Text="{Binding CivilDuskFormatted}" VerticalOptions="Center" Margin="0,10,0,0"/>
+                    <Image Grid.Row="8" Grid.Column="0" Source="weathersunsetdowncustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="8" Grid.Column="1" Text="Civil Dusk" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="8" Grid.Column="2" Text="{Binding CivilDuskFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
 
                     <!-- Nautical Dusk -->
-                    <Image Grid.Row="9" Grid.Column="0" Source="weathersunsetdowncustom.png" HeightRequest="24" Margin="0,10,10,0"/>
-                    <Label Grid.Row="9" Grid.Column="1" Text="Nautical Dusk" VerticalOptions="Center" Margin="0,10,0,0"/>
-                    <Label Grid.Row="9" Grid.Column="2" Text="{Binding NauticalDuskFormatted}" VerticalOptions="Center" Margin="0,10,0,0"/>
+                    <Image Grid.Row="9" Grid.Column="0" Source="weathersunsetdowncustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="9" Grid.Column="1" Text="Nautical Dusk" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="9" Grid.Column="2" Text="{Binding NauticalDuskFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
 
                     <!-- Astronomical Dusk -->
-                    <Image Grid.Row="10" Grid.Column="0" Source="weathersunsetdowncustom.png" HeightRequest="24" Margin="0,10,10,0"/>
-                    <Label Grid.Row="10" Grid.Column="1" Text="{x:Static strings:AppResources.AstronomicalDusk}" VerticalOptions="Center" Margin="0,10,0,0"/>
-                    <Label Grid.Row="10" Grid.Column="2" Text="{Binding AstronomicalDuskFormatted}" VerticalOptions="Center" Margin="0,10,0,0"/>
+                    <Image Grid.Row="10" Grid.Column="0" Source="weathersunsetdowncustom.png" HeightRequest="24" Margin="5"/>
+                    <Label Grid.Row="10" Grid.Column="1" Text="{x:Static strings:AppResources.AstronomicalDusk}" VerticalOptions="Center" FontSize="14" Margin="5"/>
+                    <Label Grid.Row="10" Grid.Column="2" Text="{Binding AstronomicalDuskFormatted}" VerticalOptions="Center" FontSize="14" Margin="5"/>
                 </Grid>
             </Grid>
         </ScrollView>
 
         <!-- Busy indicator overlay -->
-        <Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding VmIsBusy}" BackgroundColor="#80000000">
-            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+        <Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding VmIsBusy}" BackgroundColor="{StaticResource TransparentOverlayBrush}" Padding="10" Margin="5">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
                 <ActivityIndicator IsRunning="{Binding VmIsBusy}" HeightRequest="50" WidthRequest="50" Color="White" />
-                <Label Text="Calculating, please wait..." TextColor="White" Margin="0,10,0,0"/>
+                <Label Text="Calculating, please wait..." TextColor="White" FontSize="14" Margin="5"/>
             </VerticalStackLayout>
         </Grid>
 
         <!-- Error message display -->
-        <Border Grid.Row="1" 
-                IsVisible="{Binding VmErrorMessage, Converter={StaticResource StringToBoolConverter}}"
-                BackgroundColor="#FFEBEE"
-                Margin="10">
+        <Grid Grid.Row="1" 
+              IsVisible="{Binding VmErrorMessage, Converter={StaticResource StringToBoolConverter}}"
+              BackgroundColor="{StaticResource TransparentErrorBrush}"
+              Padding="10"
+              Margin="5">
             <Label Text="{Binding VmErrorMessage}"
-                   TextColor="Red"
+                   TextColor="{StaticResource ErrorRed}"
                    FontSize="14"
-                   Margin="10" />
-        </Border>
+                   Margin="5" />
+        </Grid>
     </Grid>
 </basePages:ContentPageBase>

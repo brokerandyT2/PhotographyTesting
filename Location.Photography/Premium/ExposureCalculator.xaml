@@ -18,7 +18,7 @@
     </ContentPage.Resources>
 
     <ScrollView>
-        <Grid Padding="15,10">
+        <Grid Padding="10" Margin="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -31,7 +31,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -41,20 +41,32 @@
             </Grid.ColumnDefinitions>
 
             <!-- Header and close button -->
-            <Label Text="Exposure Calculator" FontSize="Large" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
-            <ImageButton Grid.Row="0" Grid.Column="3" 
+            <Label Text="Exposure Calculator" 
+                   FontSize="14" 
+                   FontAttributes="Bold" 
+                   Grid.Row="0" 
+                   Grid.Column="0" 
+                   Grid.ColumnSpan="3"
+                   Margin="5"/>
+
+            <ImageButton Grid.Row="0" 
+                         Grid.Column="3" 
                          Source="closeoutlinecustom.png" 
                          HorizontalOptions="End" 
                          x:Name="CloseButton" 
                          Pressed="CloseButton_Pressed"
+                         Padding="5"
+                         CornerRadius="10"
+                         Margin="5"
                          IsVisible="False"/>
 
             <!-- Exposure Increments -->
             <Label Text="{x:Static strings:AppResources.exposureincrements}" 
-                   FontSize="Medium" 
+                   FontSize="14" 
                    FontAttributes="Bold" 
                    Grid.Row="1" 
-                   Grid.ColumnSpan="4"/>
+                   Grid.ColumnSpan="4"
+                   Margin="5"/>
 
             <RadioButton x:Name="exposurefull" 
                          Content="{x:Static strings:AppResources.full}" 
@@ -63,29 +75,34 @@
                          Grid.Row="2" 
                          Grid.Column="0" 
                          CheckedChanged="exposuresteps_CheckedChanged"
-                         IsChecked="True"/>
+                         IsChecked="True"
+                         Margin="5"/>
+
             <RadioButton x:Name="exposurehalfstop" 
                          Content="{x:Static strings:AppResources.half}" 
                          GroupName="Exposure" 
                          Value="1" 
                          Grid.Row="2" 
                          Grid.Column="1" 
-                         CheckedChanged="exposuresteps_CheckedChanged"/>
+                         CheckedChanged="exposuresteps_CheckedChanged"
+                         Margin="5"/>
+
             <RadioButton x:Name="exposurethirdstop" 
                          Content="{x:Static strings:AppResources.thirds}" 
                          GroupName="Exposure" 
                          Value="2" 
                          Grid.Row="2" 
                          Grid.Column="2" 
-                         CheckedChanged="exposuresteps_CheckedChanged"/>
+                         CheckedChanged="exposuresteps_CheckedChanged"
+                         Margin="5"/>
 
             <!-- Calculate -->
             <Label Text="{x:Static strings:AppResources.calculate}" 
-                   FontSize="Medium" 
+                   FontSize="14" 
                    FontAttributes="Bold" 
                    Grid.Row="3" 
                    Grid.ColumnSpan="4"
-                   Margin="0,15,0,5"/>
+                   Margin="5"/>
 
             <RadioButton x:Name="shutter" 
                          Content="{x:Static strings:AppResources.shutterspeednocolon}" 
@@ -94,51 +111,61 @@
                          Grid.Row="4" 
                          Grid.Column="0" 
                          CheckedChanged="calculate_CheckedChanged"
-                         IsChecked="True"/>
+                         IsChecked="True"
+                         Margin="5"/>
+
             <RadioButton x:Name="aperture" 
                          Content="{x:Static strings:AppResources.aperturenocolon}" 
                          GroupName="Calculate" 
                          Value="3" 
                          Grid.Row="4" 
                          Grid.Column="1" 
-                         CheckedChanged="calculate_CheckedChanged"/>
+                         CheckedChanged="calculate_CheckedChanged"
+                         Margin="5"/>
+
             <RadioButton x:Name="iso" 
                          Content="{x:Static strings:AppResources.isonocolon}" 
                          GroupName="Calculate" 
                          Value="1" 
                          Grid.Row="4" 
                          Grid.Column="2" 
-                         CheckedChanged="calculate_CheckedChanged"/>
+                         CheckedChanged="calculate_CheckedChanged"
+                         Margin="5"/>
 
             <!-- Base Exposure -->
             <Label Text="{x:Static strings:AppResources.baseexposure}" 
-                   FontSize="Medium" 
+                   FontSize="14" 
                    FontAttributes="Bold" 
                    Grid.Row="5" 
                    Grid.ColumnSpan="4"
-                   Margin="0,15,0,5"/>
+                   Margin="5"/>
 
             <Label Text="{x:Static strings:AppResources.shutterspeed}" 
-                   TextColor="#CC0000" 
-                   FontSize="Medium" 
+                   TextColor="{StaticResource Primary}" 
+                   FontSize="14" 
                    FontAttributes="Bold" 
                    Grid.Row="6" 
                    Grid.Column="0"
-                   HorizontalOptions="Center"/>
+                   HorizontalOptions="Center"
+                   Margin="5"/>
+
             <Label Text="{x:Static strings:AppResources.fStop}" 
-                   TextColor="#CC0000" 
-                   FontSize="Medium" 
+                   TextColor="{StaticResource Primary}" 
+                   FontSize="14" 
                    FontAttributes="Bold" 
                    Grid.Row="6" 
                    Grid.Column="1"
-                   HorizontalOptions="Center"/>
+                   HorizontalOptions="Center"
+                   Margin="5"/>
+
             <Label Text="{x:Static strings:AppResources.iso}" 
-                   TextColor="#CC0000" 
-                   FontSize="Medium" 
+                   TextColor="{StaticResource Primary}" 
+                   FontSize="14" 
                    FontAttributes="Bold" 
                    Grid.Row="6" 
                    Grid.Column="2"
-                   HorizontalOptions="Center"/>
+                   HorizontalOptions="Center"
+                   Margin="5"/>
 
             <Picker x:Name="ShutterSpeed_Picker" 
                     Grid.Row="7" 
@@ -146,95 +173,119 @@
                     ItemsSource="{Binding ShutterSpeedsForPicker}" 
                     SelectedItem="{Binding ShutterSpeedSelected}"
                     SelectedIndexChanged="ShutterSpeed_Picker_SelectedIndexChanged"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                    FontSize="14"
+                    Margin="5"/>
+
             <Picker x:Name="fstop_Picker" 
                     Grid.Row="7" 
                     Grid.Column="1" 
                     ItemsSource="{Binding ApeaturesForPicker}" 
                     SelectedItem="{Binding FStopSelected}"
-                    SelectedIndexChanged="fstop_Picker_SelectedIndexChanged"/>
+                    SelectedIndexChanged="fstop_Picker_SelectedIndexChanged"
+                    FontSize="14"
+                    Margin="5"/>
+
             <Picker x:Name="ISO_Picker" 
                     Grid.Row="7" 
                     Grid.Column="2" 
                     ItemsSource="{Binding ISOsForPicker}" 
                     SelectedItem="{Binding ISOSelected}"
-                    SelectedIndexChanged="ISO_Picker_SelectedIndexChanged"/>
+                    SelectedIndexChanged="ISO_Picker_SelectedIndexChanged"
+                    FontSize="14"
+                    Margin="5"/>
 
             <!-- Results -->
             <Label Text="{x:Static strings:AppResources.results}" 
-                   FontSize="Medium" 
+                   FontSize="14" 
                    FontAttributes="Bold" 
                    Grid.Row="8" 
                    Grid.ColumnSpan="4"
-                   Margin="0,15,0,5"/>
+                   Margin="5"/>
 
             <Label Text="{x:Static strings:AppResources.shutterspeed}" 
-                   TextColor="#CC0000" 
-                   FontSize="Medium" 
+                   TextColor="{StaticResource Primary}" 
+                   FontSize="14" 
                    FontAttributes="Bold" 
                    Grid.Row="9" 
                    Grid.Column="0"
-                   HorizontalOptions="Center"/>
+                   HorizontalOptions="Center"
+                   Margin="5"/>
+
             <Label Text="{x:Static strings:AppResources.fStop}" 
-                   TextColor="#CC0000" 
-                   FontSize="Medium" 
+                   TextColor="{StaticResource Primary}" 
+                   FontSize="14" 
                    FontAttributes="Bold" 
                    Grid.Row="9" 
                    Grid.Column="1"
-                   HorizontalOptions="Center"/>
+                   HorizontalOptions="Center"
+                   Margin="5"/>
+
             <Label Text="{x:Static strings:AppResources.iso}" 
-                   TextColor="#CC0000" 
-                   FontSize="Medium" 
+                   TextColor="{StaticResource Primary}" 
+                   FontSize="14" 
                    FontAttributes="Bold" 
                    Grid.Row="9" 
                    Grid.Column="2"
-                   HorizontalOptions="Center"/>
+                   HorizontalOptions="Center"
+                   Margin="5"/>
 
             <Label Text="{Binding ShutterSpeedResult}" 
                    x:Name="shutterspeedresult" 
                    Grid.Row="10" 
                    Grid.Column="0"
                    HorizontalOptions="Center"
-                   FontSize="Medium"/>
+                   FontSize="14"
+                   Margin="5"/>
+
             <Label Text="{Binding FStopResult}" 
                    x:Name="fstopresult" 
                    Grid.Row="10" 
                    Grid.Column="1"
                    HorizontalOptions="Center"
-                   FontSize="Medium"/>
+                   FontSize="14"
+                   Margin="5"/>
+
             <Label Text="{Binding ISOResult}" 
                    x:Name="isoresult" 
                    Grid.Row="10" 
                    Grid.Column="2"
                    HorizontalOptions="Center"
-                   FontSize="Medium"/>
+                   FontSize="14"
+                   Margin="5"/>
 
             <!-- Error message -->
-            <Frame IsVisible="{Binding ShowError}" 
-                   Grid.Row="11" 
-                   Grid.ColumnSpan="4" 
-                   BackgroundColor="#FFCCCC" 
-                   Padding="10" 
-                   Margin="0,15,0,0" 
-                   BorderColor="#FF0000">
+            <Grid IsVisible="{Binding ShowError}" 
+                  Grid.Row="11" 
+                  Grid.ColumnSpan="4" 
+                  BackgroundColor="{StaticResource TransparentErrorBrush}" 
+                  Padding="10" 
+                  Margin="5">
                 <Label x:Name="errorLabel" 
                        Text="{Binding ErrorMessage}" 
-                       TextColor="#CC0000"/>
-            </Frame>
+                       TextColor="{StaticResource ErrorRed}"
+                       FontSize="14"
+                       Margin="5"/>
+            </Grid>
 
             <!-- Busy indicator overlay -->
             <Grid IsVisible="{Binding VmIsBusy}" 
-                  BackgroundColor="#80000000"
+                  BackgroundColor="{StaticResource TransparentOverlayBrush}"
                   Grid.RowSpan="12"
-                  Grid.ColumnSpan="4">
-                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                  Grid.ColumnSpan="4"
+                  Padding="10"
+                  Margin="5">
+                <VerticalStackLayout VerticalOptions="Center" 
+                                     HorizontalOptions="Center"
+                                     Spacing="10">
                     <ActivityIndicator IsRunning="{Binding VmIsBusy}" 
                                        HeightRequest="50" 
                                        WidthRequest="50" 
                                        Color="White" />
                     <Label Text="Processing, please wait..." 
                            TextColor="White" 
-                           Margin="0,10,0,0"/>
+                           FontSize="14"
+                           Margin="5"/>
                 </VerticalStackLayout>
             </Grid>
         </Grid>

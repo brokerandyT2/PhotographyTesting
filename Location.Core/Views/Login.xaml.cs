@@ -4,20 +4,15 @@ using Locations.Core.Business.StorageSvc;
 using Locations.Core.Shared;
 using Locations.Core.Shared.Enums;
 using Locations.Core.Shared.ViewModels;
+
 namespace Location.Core.Views;
 
 public partial class Login : ContentPage
 {
-
-
     public Login()
     {
         InitializeComponent();
     }
-
-  
-
-   
 
     private void HemisphereSwitch_Toggled(object sender, ToggledEventArgs e)
     {
@@ -127,8 +122,8 @@ public partial class Login : ContentPage
 
             // Show processing indicator
             processingOverlay.IsVisible = true;
-          await  NativeStorageService.SaveSetting(MagicStrings.Email, email);
-          await  NativeStorageService.SaveSetting(MagicStrings.UniqueID, Guid.NewGuid().ToString());
+            await NativeStorageService.SaveSetting(MagicStrings.Email, email);
+            await NativeStorageService.SaveSetting(MagicStrings.UniqueID, Guid.NewGuid().ToString());
 
             try
             {
@@ -141,7 +136,7 @@ public partial class Login : ContentPage
                         timeFormat,
                         windDirection,
                         email
-                    ); 
+                    );
                     Task.Delay(3000).Wait();
                 });
 

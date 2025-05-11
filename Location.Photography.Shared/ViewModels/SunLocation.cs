@@ -257,7 +257,7 @@ namespace Location.Photography.Shared.ViewModels
             _locations = new ObservableCollection<LocationViewModel>();
             _selectedDate = DateTime.Now;
             _selectedTime = DateTime.Now.TimeOfDay;
-
+            
             // Initialize commands
             StartMonitoringCommand = new RelayCommand(() => BeginMonitoring = true, () => !_beginMonitoring && !VmIsBusy);
             StopMonitoringCommand = new RelayCommand(() => BeginMonitoring = false, () => _beginMonitoring && !VmIsBusy);

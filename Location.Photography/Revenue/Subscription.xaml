@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <basePages:ContentPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:basePages="clr-namespace:Location.Photography.Base"
-             xmlns:viewmodels="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
-             xmlns:converters="clr-namespace:Location.Photography.Converters"
-             xmlns:strings="clr-namespace:Location.Photography.Resources"
-             x:Class="Location.Photography.Revenue.Subscription"
-             x:DataType="viewmodels:SubscriptionViewModel"
-             >
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:basePages="clr-namespace:Location.Photography.Base"
+            xmlns:viewmodels="clr-namespace:Location.Photography.Shared.ViewModels;assembly=Location.Photography.Shared"
+            xmlns:converters="clr-namespace:Location.Photography.Converters"
+            xmlns:strings="clr-namespace:Location.Photography.Resources"
+            x:Class="Location.Photography.Revenue.Subscription"
+            x:DataType="viewmodels:SubscriptionViewModel">
 
     <ContentPage.Resources>
         <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
@@ -15,7 +14,7 @@
         <converters:BoolToTextConverter x:Key="BoolToTextConverter" />
     </ContentPage.Resources>
 
-    <Grid>
+    <Grid Padding="10" Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -23,7 +22,7 @@
 
         <!-- Main Content -->
         <ScrollView Grid.Row="0">
-            <Grid Padding="20" RowSpacing="20">
+            <Grid Padding="10" Margin="5" RowSpacing="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -31,170 +30,228 @@
                 </Grid.RowDefinitions>
 
                 <!-- Header -->
-                <VerticalStackLayout Grid.Row="0" Spacing="5">
+                <VerticalStackLayout Grid.Row="0" Spacing="5" Margin="5">
                     <Label Text="Photography Premium Access" 
-                           FontSize="24" 
-                           FontAttributes="Bold"
-                           HorizontalOptions="Center"/>
+                          FontSize="14" 
+                          FontAttributes="Bold"
+                          HorizontalOptions="Center"/>
 
                     <Label Text="Unlock premium features and enhance your photography experience"
-                           HorizontalOptions="Center"
-                           HorizontalTextAlignment="Center"/>
+                          FontSize="14"
+                          HorizontalOptions="Center"
+                          HorizontalTextAlignment="Center"/>
                 </VerticalStackLayout>
 
                 <!-- Subscription Info -->
-                <VerticalStackLayout Grid.Row="1" Spacing="20">
+                <VerticalStackLayout Grid.Row="1" Spacing="20" Margin="5">
 
                     <!-- Active Subscription Info -->
-                    <Frame IsVisible="{Binding HasActiveSubscription}"
-                           BackgroundColor="#f0f9ff"
-                           BorderColor="#93c5fd"
-                           Padding="15" 
-                           CornerRadius="10">
+                    <Grid IsVisible="{Binding HasActiveSubscription}"
+                         BackgroundColor="{StaticResource LightBlue}"
+                         Padding="10" 
+                         Margin="5">
                         <VerticalStackLayout Spacing="10">
                             <Label Text="You are currently subscribed!"
-                                   FontSize="18"
-                                   FontAttributes="Bold"
-                                   TextColor="#0369a1"
-                                   HorizontalOptions="Center"/>
+                                  FontSize="14"
+                                  FontAttributes="Bold"
+                                  TextColor="{StaticResource DarkBlue}"
+                                  HorizontalOptions="Center"/>
 
                             <Label Text="{Binding CurrentSubscriptionInfo}"
-                                   FontSize="16"
-                                   TextColor="#0c4a6e"
-                                   HorizontalOptions="Center"/>
+                                  FontSize="14"
+                                  TextColor="{StaticResource DarkBlue}"
+                                  HorizontalOptions="Center"/>
 
                             <Label Text="{Binding ExpirationDateDisplay, StringFormat='Expires: {0}'}"
-                                   IsVisible="{Binding ExpirationDateDisplay, Converter={StaticResource StringToBoolConverter}}"
-                                   TextColor="#0c4a6e"
-                                   HorizontalOptions="Center"/>
+                                  IsVisible="{Binding ExpirationDateDisplay, Converter={StaticResource StringToBoolConverter}}"
+                                  FontSize="14"
+                                  TextColor="{StaticResource DarkBlue}"
+                                  HorizontalOptions="Center"/>
                         </VerticalStackLayout>
-                    </Frame>
+                    </Grid>
 
                     <!-- Available Subscriptions -->
                     <VerticalStackLayout IsVisible="{Binding HasActiveSubscription, Converter={StaticResource InvertedBoolConverter}}"
-                                        Spacing="15">
+                                       Spacing="15"
+                                       Margin="5">
 
                         <Label Text="Choose your subscription plan:"
-                               FontSize="16"
-                               FontAttributes="Bold"/>
+                              FontSize="14"
+                              FontAttributes="Bold"/>
 
                         <!-- Premium Plans -->
                         <Label Text="Premium Plans" 
-                               FontSize="18" 
-                               FontAttributes="Bold" 
-                               Margin="0,10,0,0"/>
+                              FontSize="14" 
+                              FontAttributes="Bold" 
+                              Margin="5"/>
 
                         <CollectionView ItemsSource="{Binding PremiumSubscriptions}"
-                                        SelectionMode="Single"
-                                        SelectedItem="{Binding SelectedSubscription}">
+                                       SelectionMode="Single"
+                                       SelectedItem="{Binding SelectedSubscription}"
+                                       Margin="5">
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:SubscriptionViewModel">
-                                    <Frame Margin="0,5" Padding="15" BorderColor="#d4d4d8">
-                                        <Grid ColumnDefinitions="*,Auto" RowSpacing="5">
-                                            <VerticalStackLayout Grid.Column="0" Spacing="5">
-                                                <Label Text="{Binding Name}" 
-                                                       FontAttributes="Bold" 
-                                                       FontSize="16"/>
+                                    <Grid Padding="10" Margin="5" BackgroundColor="{StaticResource LightGray}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                                                <Label Text="{Binding Description}" 
-                                                       FontSize="14"
-                                                       TextColor="#71717a"/>
+                                        <Label Text="{Binding Name}" 
+                                              FontAttributes="Bold" 
+                                              FontSize="14"
+                                              Grid.Row="0"
+                                              Grid.Column="0"
+                                              Margin="5"/>
 
-                                                <Label Text="Includes free trial" 
-                                                       IsVisible="{Binding HasFreeTrial}"
-                                                       FontSize="12"
-                                                       TextColor="#22c55e"
-                                                       FontAttributes="Bold"/>
-                                            </VerticalStackLayout>
+                                        <Label Text="{Binding Description}" 
+                                              FontSize="14"
+                                              TextColor="{StaticResource Gray600}"
+                                              Grid.Row="1"
+                                              Grid.Column="0"
+                                              Margin="5"/>
 
-                                            <Label Grid.Column="1"
-                                                   Text="{Binding Price}" 
-                                                   FontSize="18" 
-                                                   FontAttributes="Bold"
-                                                   VerticalOptions="Center"/>
-                                        </Grid>
-                                    </Frame>
+                                        <Label Text="Includes free trial" 
+                                              IsVisible="{Binding HasFreeTrial}"
+                                              FontSize="14"
+                                              TextColor="{StaticResource SuccessGreen}"
+                                              FontAttributes="Bold"
+                                              Grid.Row="2"
+                                              Grid.Column="0"
+                                              Margin="5"/>
+
+                                        <Label Grid.Row="0"
+                                              Grid.Column="1"
+                                              Grid.RowSpan="3"
+                                              Text="{Binding Price}" 
+                                              FontSize="14" 
+                                              FontAttributes="Bold"
+                                              VerticalOptions="Center"
+                                              Margin="5"/>
+                                    </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
 
                         <!-- Professional Plans -->
                         <Label Text="Professional Plans" 
-                               FontSize="18" 
-                               FontAttributes="Bold" 
-                               Margin="0,10,0,0"/>
+                              FontSize="14" 
+                              FontAttributes="Bold" 
+                              Margin="5"/>
 
                         <CollectionView ItemsSource="{Binding ProfessionalSubscriptions}"
-                                        SelectionMode="Single"
-                                        SelectedItem="{Binding SelectedSubscription}">
+                                       SelectionMode="Single"
+                                       SelectedItem="{Binding SelectedSubscription}"
+                                       Margin="5">
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:SubscriptionViewModel">
-                                    <Frame Margin="0,5" Padding="15" BorderColor="#d4d4d8">
-                                        <Grid ColumnDefinitions="*,Auto" RowSpacing="5">
-                                            <VerticalStackLayout Grid.Column="0" Spacing="5">
-                                                <Label Text="{Binding Name}" 
-                                                       FontAttributes="Bold" 
-                                                       FontSize="16"/>
+                                    <Grid Padding="10" Margin="5" BackgroundColor="{StaticResource LightGray}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                                                <Label Text="{Binding Description}" 
-                                                       FontSize="14"
-                                                       TextColor="#71717a"/>
+                                        <Label Text="{Binding Name}" 
+                                              FontAttributes="Bold" 
+                                              FontSize="14"
+                                              Grid.Row="0"
+                                              Grid.Column="0"
+                                              Margin="5"/>
 
-                                                <Label Text="Includes free trial" 
-                                                       IsVisible="{Binding HasFreeTrial}"
-                                                       FontSize="12"
-                                                       TextColor="#22c55e"
-                                                       FontAttributes="Bold"/>
-                                            </VerticalStackLayout>
+                                        <Label Text="{Binding Description}" 
+                                              FontSize="14"
+                                              TextColor="{StaticResource Gray600}"
+                                              Grid.Row="1"
+                                              Grid.Column="0"
+                                              Margin="5"/>
 
-                                            <Label Grid.Column="1"
-                                                   Text="{Binding Price}" 
-                                                   FontSize="18" 
-                                                   FontAttributes="Bold"
-                                                   VerticalOptions="Center"/>
-                                        </Grid>
-                                    </Frame>
+                                        <Label Text="Includes free trial" 
+                                              IsVisible="{Binding HasFreeTrial}"
+                                              FontSize="14"
+                                              TextColor="{StaticResource SuccessGreen}"
+                                              FontAttributes="Bold"
+                                              Grid.Row="2"
+                                              Grid.Column="0"
+                                              Margin="5"/>
+
+                                        <Label Grid.Row="0"
+                                              Grid.Column="1"
+                                              Grid.RowSpan="3"
+                                              Text="{Binding Price}" 
+                                              FontSize="14" 
+                                              FontAttributes="Bold"
+                                              VerticalOptions="Center"
+                                              Margin="5"/>
+                                    </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
 
                         <Button Text="Subscribe Now" 
-                                Command="{Binding PurchaseCommand}"
-                                CommandParameter="{Binding SelectedSubscription.Id}"
-                                IsEnabled="{Binding SelectedSubscription, Converter={StaticResource StringToBoolConverter}}"
-                                BackgroundColor="#0284c7"
-                                TextColor="White"
-                                FontAttributes="Bold"
-                                Margin="0,10"/>
+                               Command="{Binding PurchaseCommand}"
+                               CommandParameter="{Binding SelectedSubscription.Id}"
+                               IsEnabled="{Binding SelectedSubscription, Converter={StaticResource StringToBoolConverter}}"
+                               BackgroundColor="{StaticResource Primary}"
+                               TextColor="White"
+                               FontAttributes="Bold"
+                               FontSize="14"
+                               Padding="5"
+                               CornerRadius="10"
+                               MinimumHeightRequest="50"
+                               Margin="5"/>
                     </VerticalStackLayout>
 
                     <!-- Restore Purchases -->
                     <Button Grid.Row="2"
-                            Text="Restore Purchases" 
-                            Command="{Binding RestorePurchasesCommand}"
-                            BackgroundColor="Transparent"
-                            TextColor="#0284c7"/>
+                           Text="Restore Purchases" 
+                           Command="{Binding RestorePurchasesCommand}"
+                           FontSize="14"
+                           Padding="5"
+                           CornerRadius="10"
+                           MinimumHeightRequest="50"
+                           Margin="5"/>
                 </VerticalStackLayout>
             </Grid>
         </ScrollView>
 
         <!-- Busy indicator overlay -->
-        <Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding VmIsBusy}" BackgroundColor="#80000000">
-            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                <ActivityIndicator IsRunning="{Binding VmIsBusy}" HeightRequest="50" WidthRequest="50" Color="White" />
-                <Label Text="Processing, please wait..." TextColor="White" Margin="0,10,0,0"/>
+        <Grid Grid.Row="0" Grid.RowSpan="2" 
+             IsVisible="{Binding VmIsBusy}" 
+             BackgroundColor="{StaticResource TransparentOverlayBrush}"
+             Padding="10"
+             Margin="5">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
+                <ActivityIndicator IsRunning="{Binding VmIsBusy}" 
+                                  HeightRequest="50" 
+                                  WidthRequest="50" 
+                                  Color="White" />
+                <Label Text="Processing, please wait..." 
+                      TextColor="White" 
+                      FontSize="14"
+                      Margin="5"/>
             </VerticalStackLayout>
         </Grid>
 
         <!-- Error message display -->
-        <Border Grid.Row="1" 
-                IsVisible="{Binding VmErrorMessage, Converter={StaticResource StringToBoolConverter}}"
-                BackgroundColor="#FFEBEE"
-                Margin="10">
+        <Grid Grid.Row="1" 
+             IsVisible="{Binding VmErrorMessage, Converter={StaticResource StringToBoolConverter}}"
+             BackgroundColor="{StaticResource TransparentErrorBrush}"
+             Padding="10"
+             Margin="5">
             <Label Text="{Binding VmErrorMessage}"
-                   TextColor="Red"
-                   FontSize="14"
-                   Margin="10" />
-        </Border>
+                  TextColor="{StaticResource ErrorRed}"
+                  FontSize="14"
+                  Margin="5" />
+        </Grid>
     </Grid>
 </basePages:ContentPageBase>
