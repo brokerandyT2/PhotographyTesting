@@ -181,12 +181,15 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.Description = "Test Description";
 
             var tcs = new TaskCompletionSource<bool>();
-            var result = new Shared.ViewModelServices.OperationResult<LocationViewModel>(false, null, "Failed to save location");
+            var result = Locations.Core.Shared.ViewModelServices.OperationResult<bool>.Failure(
+                Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
+                "Failed to save settings");
 
             _mockLocationService.Setup(service => service.SaveLocationAsync(It.IsAny<LocationViewModel>(),
                                                                     It.IsAny<bool>(), It.IsAny<bool>()))
                 .Callback(() => tcs.SetResult(true))
-                .ReturnsAsync(result);
+                .Returns(result);
+    
 
             // Act
             _viewModel.SaveCommand.Execute(null);
@@ -230,7 +233,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.Id = 1;
 
             var tcs = new TaskCompletionSource<bool>();
-            var result = new Shared.ViewModelServices.OperationResult<bool>(true, true);
+            var result = new Shared.ViewModelServices.OperationResult<string>.Success(_viewModel.Id.ToString());
 
             _mockLocationService.Setup(service => service.DeleteLocationAsync(It.IsAny<LocationViewModel>()))
                 .Callback(() => tcs.SetResult(true))
@@ -255,11 +258,12 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.Id = 1;
 
             var tcs = new TaskCompletionSource<bool>();
-            var result = new Shared.ViewModels.OperationResult<bool>(false, false, "Failed to delete location");
+
+            var result = new Shared.ViewModelServices.OperationResult<string>.Success("Failed to delete location");
 
             _mockLocationService.Setup(service => service.DeleteLocationAsync(It.IsAny<LocationViewModel>()))
                 .Callback(() => tcs.SetResult(true))
-                .ThrowsAsync<Shared.ViewModels.OperationResult<>>()(result);
+                .ThrowsAsync<new Shared.ViewModels.OperationResult<string>>(false, false, result.ToString(), new Exception(), OperationErrorSource.Database);
 
 
             // Act
@@ -280,7 +284,8 @@ namespace Locations.Core.Business.Tests.ViewModels
             string filePath = "/path/to/photo.jpg";
 
             var tcs = new TaskCompletionSource<bool>();
-            var result = new Shared.ViewModelServices.OperationResult<string>(true, filePath);
+            var result = Locations.Core.Shared.ViewModelServices.OperationResult<string>.Success(filePath);
+
 
             _mockMediaService.Setup(service => service.CapturePhotoAsync())
                 .Callback(() => tcs.SetResult(true))
@@ -367,8 +372,9 @@ namespace Locations.Core.Business.Tests.ViewModels
         {
             // Arrange
             var tcs = new TaskCompletionSource<bool>();
-            var result = new Shared.ViewModelServices.OperationResult<bool>(false, false, "Failed to start location tracking");
-
+            var result = Locations.Core.Shared.ViewModelServices.OperationResult<bool>.Failure(
+     Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
+     "Failed to save settings");
             _mockGeolocationService.Setup(service => service.StartTrackingAsync(It.IsAny<GeolocationAccuracy>()))
                 .Callback(() => tcs.SetResult(true))
                 .ReturnsAsync(result);
