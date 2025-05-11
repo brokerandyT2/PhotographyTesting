@@ -22,6 +22,7 @@
     <PackageReference Include="Nominatim.API" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Services\GeoLocationAPI\" />
     <Folder Include="Services\MediaServices\" />
   </ItemGroup>
 </Project>
