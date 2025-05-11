@@ -12,8 +12,13 @@ using Nominatim.API.Interfaces;
 using System.Net.Http;
 using System.Net;
 
+// Use explicit namespaces to resolve ambiguity
+using OperationErrorEventArgs = Locations.Core.Shared.ViewModelServices.OperationErrorEventArgs;
+using OperationErrorSource = Locations.Core.Shared.ViewModelServices.OperationErrorSource;
+
 namespace Locations.Core.Business.Tests.Services.GeoLocationTests
 {
+    // We need to use the actual Nominatim API classes, or at least adapt our tests to use them
     [TestClass]
     [TestCategory("GeoLocationAPI")]
     public class GeoLocationAPITests : BaseServiceTests
@@ -88,17 +93,20 @@ namespace Locations.Core.Business.Tests.Services.GeoLocationTests
             double latitude = 40.7128;
             double longitude = -74.0060;
 
-            var geocodeResponse = new GeocodeResponse
+            // Create a minimal GeocodeResponse with just the needed properties to make the test pass
+            var addressObj = new Nominatim.API.Models.Address
             {
-                Address = new Address
-                {
-                    City = "New York City",
-                    State = "New York"
-                }
+                City = "New York City",
+                State = "New York"
+            };
+
+            var geocodeResponse = new Nominatim.API.Models.GeocodeResponse
+            {
+                Address = addressObj
             };
 
             _mockReverseGeocoder.Setup(g => g.ReverseGeocode(It.IsAny<ReverseGeocodeRequest>()))
-                .ReturnsAsync(geocodeResponse);
+                .Returns(Task.FromResult(geocodeResponse));
 
             // Act
             var result = await _geoLocationAPIWrapper.GetCityAndState(latitude, longitude);
@@ -116,18 +124,20 @@ namespace Locations.Core.Business.Tests.Services.GeoLocationTests
             double latitude = 40.7128;
             double longitude = -74.0060;
 
-            var geocodeResponse = new GeocodeResponse
+            var addressObj = new Nominatim.API.Models.Address
             {
-                Address = new Address
-                {
-                    City = null,
-                    Town = "Small Town",
-                    State = "New York"
-                }
+                City = null,
+                Town = "Small Town",
+                State = "New York"
+            };
+
+            var geocodeResponse = new Nominatim.API.Models.GeocodeResponse
+            {
+                Address = addressObj
             };
 
             _mockReverseGeocoder.Setup(g => g.ReverseGeocode(It.IsAny<ReverseGeocodeRequest>()))
-                .ReturnsAsync(geocodeResponse);
+                .Returns(Task.FromResult(geocodeResponse));
 
             // Act
             var result = await _geoLocationAPIWrapper.GetCityAndState(latitude, longitude);
@@ -145,19 +155,21 @@ namespace Locations.Core.Business.Tests.Services.GeoLocationTests
             double latitude = 40.7128;
             double longitude = -74.0060;
 
-            var geocodeResponse = new GeocodeResponse
+            var addressObj = new Nominatim.API.Models.Address
             {
-                Address = new Address
-                {
-                    City = null,
-                    Town = null,
-                    Village = "Small Village",
-                    State = "New York"
-                }
+                City = null,
+                Town = null,
+                Village = "Small Village",
+                State = "New York"
+            };
+
+            var geocodeResponse = new Nominatim.API.Models.GeocodeResponse
+            {
+                Address = addressObj
             };
 
             _mockReverseGeocoder.Setup(g => g.ReverseGeocode(It.IsAny<ReverseGeocodeRequest>()))
-                .ReturnsAsync(geocodeResponse);
+                .Returns(Task.FromResult(geocodeResponse));
 
             // Act
             var result = await _geoLocationAPIWrapper.GetCityAndState(latitude, longitude);
@@ -175,19 +187,21 @@ namespace Locations.Core.Business.Tests.Services.GeoLocationTests
             double latitude = 40.7128;
             double longitude = -74.0060;
 
-            var geocodeResponse = new GeocodeResponse
+            var addressObj = new Nominatim.API.Models.Address
             {
-                Address = new Address
-                {
-                    City = null,
-                    Town = null,
-                    Village = null,
-                    State = "New York"
-                }
+                City = null,
+                Town = null,
+                Village = null,
+                State = "New York"
+            };
+
+            var geocodeResponse = new Nominatim.API.Models.GeocodeResponse
+            {
+                Address = addressObj
             };
 
             _mockReverseGeocoder.Setup(g => g.ReverseGeocode(It.IsAny<ReverseGeocodeRequest>()))
-                .ReturnsAsync(geocodeResponse);
+                .Returns(Task.FromResult(geocodeResponse));
 
             // Act
             var result = await _geoLocationAPIWrapper.GetCityAndState(latitude, longitude);
@@ -205,17 +219,19 @@ namespace Locations.Core.Business.Tests.Services.GeoLocationTests
             double latitude = 40.7128;
             double longitude = -74.0060;
 
-            var geocodeResponse = new GeocodeResponse
+            var addressObj = new Nominatim.API.Models.Address
             {
-                Address = new Address
-                {
-                    City = "New York City",
-                    State = null
-                }
+                City = "New York City",
+                State = null
+            };
+
+            var geocodeResponse = new Nominatim.API.Models.GeocodeResponse
+            {
+                Address = addressObj
             };
 
             _mockReverseGeocoder.Setup(g => g.ReverseGeocode(It.IsAny<ReverseGeocodeRequest>()))
-                .ReturnsAsync(geocodeResponse);
+                .Returns(Task.FromResult(geocodeResponse));
 
             // Act
             var result = await _geoLocationAPIWrapper.GetCityAndState(latitude, longitude);
@@ -233,13 +249,13 @@ namespace Locations.Core.Business.Tests.Services.GeoLocationTests
             double latitude = 40.7128;
             double longitude = -74.0060;
 
-            var geocodeResponse = new GeocodeResponse
+            var geocodeResponse = new Nominatim.API.Models.GeocodeResponse
             {
                 Address = null
             };
 
             _mockReverseGeocoder.Setup(g => g.ReverseGeocode(It.IsAny<ReverseGeocodeRequest>()))
-                .ReturnsAsync(geocodeResponse);
+                .Returns(Task.FromResult(geocodeResponse));
 
             // Act
             var result = await _geoLocationAPIWrapper.GetCityAndState(latitude, longitude);
@@ -257,7 +273,7 @@ namespace Locations.Core.Business.Tests.Services.GeoLocationTests
             double longitude = -74.0060;
 
             _mockReverseGeocoder.Setup(g => g.ReverseGeocode(It.IsAny<ReverseGeocodeRequest>()))
-                .ThrowsAsync(new Exception("Network error"));
+                .Throws(new Exception("Network error"));
 
             // Act
             var result = await _geoLocationAPIWrapper.GetCityAndState(latitude, longitude);

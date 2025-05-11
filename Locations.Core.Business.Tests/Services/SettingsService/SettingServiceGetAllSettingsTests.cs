@@ -4,7 +4,6 @@ using Locations.Core.Business.Tests.Base;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using Locations.Core.Shared.ViewModelServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -12,6 +11,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MockFactory = Locations.Core.Business.Tests.TestHelpers.MockFactory;
 using TestDataFactory = Locations.Core.Business.Tests.TestHelpers.TestDataFactory;
+// Use explicit namespace to resolve ambiguity
+using OperationResult = Locations.Core.Shared.ViewModelServices.OperationResult<Locations.Core.Shared.ViewModels.SettingsViewModel>;
 
 namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
 {

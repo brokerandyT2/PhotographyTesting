@@ -6,7 +6,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Threading.Tasks;
-
+using OperationErrorEventArgs = Locations.Core.Shared.ViewModelServices.OperationErrorEventArgs;
+using OperationErrorSource = Locations.Core.Shared.ViewModelServices.OperationErrorSource;
 namespace Locations.Core.Business.Tests.ViewModels
 {
     [TestClass]
