@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="Nominatim.API" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\MediaServices\" />

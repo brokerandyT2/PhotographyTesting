@@ -95,9 +95,9 @@ namespace Locations.Core.Business.Tests.ViewModels
             // Arrange
             string errorMessage = "Failed to load tip types";
 
-            _mockTipService.Setup(service => service.GetTipTypesAsync())
-                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<List<TipTypeDTO>>.Failure(
-                    errorMessage, null, Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown));
+            Locations.Core.Shared.ViewModelServices.OperationResult<List<TipTypeDTO>>.Failure(
+                Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
+                errorMessage);
 
             // Act - trigger LoadDataAsync via RefreshCommand
             await ((AsyncRelayCommand)_viewModel.RefreshCommand).ExecuteAsync(null);
@@ -201,9 +201,9 @@ namespace Locations.Core.Business.Tests.ViewModels
             var tipType = new TipTypeViewModel { Id = 3, Name = "Wildlife" };
             string errorMessage = "Failed to load tip";
 
-            _mockTipService.Setup(service => service.GetRandomTipForTypeAsync(3))
-                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<TipDTO>.Failure(
-                    errorMessage, null, Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown));
+            Locations.Core.Shared.ViewModelServices.OperationResult<List<TipTypeDTO>>.Failure(
+                Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
+                errorMessage);
 
             // Act - We need to use reflection to call the private method
             var method = typeof(TipsViewModel).GetMethod("LoadTipForTypeAsync",

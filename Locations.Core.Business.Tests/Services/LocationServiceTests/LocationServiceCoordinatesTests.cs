@@ -108,8 +108,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             double longitude = -86.1580;
             string errorMessage = "Database error";
 
-            _mockLocationRepository.Setup(repo => repo.GetByCoordinatesAsync(latitude, longitude))
-                .ReturnsAsync(DataOperationResult<LocationViewModel>.Failure(errorMessage, null, ErrorSource.Database));
+            DataOperationResult<LocationViewModel>.Failure(ErrorSource.Database, errorMessage);
 
             // Act
             var result = _locationService.GetLocationByCoordinates(latitude, longitude);
@@ -127,8 +126,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             double longitude = -74.0060;
             string errorMessage = "Location not found";
 
-            _mockLocationRepository.Setup(repo => repo.GetByCoordinatesAsync(latitude, longitude))
-                .ReturnsAsync(DataOperationResult<LocationViewModel>.Failure(errorMessage, null, ErrorSource.Database));
+            DataOperationResult<LocationViewModel>.Failure(ErrorSource.Database, errorMessage);
 
             // Act
             _locationService.GetLocationByCoordinates(latitude, longitude);

@@ -202,17 +202,14 @@ namespace Locations.Core.Business.Tests.ViewModels
 
             // Setup for GetSettings_Async which is called when settings are saved
             var settingsViewModel = new SettingsViewModel();
-            var result = new Locations.Core.Shared.ViewModelServices.OperationResult<SettingsViewModel>(
-                true, settingsViewModel, null, null, ServiceOperationErrorSource.Unknown);
+            var result = Locations.Core.Shared.ViewModelServices.OperationResult<SettingsViewModel>.Success(settingsViewModel);
 
             _mockSettingsService.Setup(service => service.GetSettings_Async())
                 .ReturnsAsync(result);
 
             // Setup the SaveSettingAsync method that will be called for individual settings
             _mockSettingsService.Setup(service => service.SaveSettingAsync(It.IsAny<SettingViewModel>()))
-                .Callback(() => tcs.SetResult(true))
-                .ReturnsAsync(new Locations.Core.Shared.ViewModelServices.OperationResult<bool>(
-                    true, true, null, null, ServiceOperationErrorSource.Unknown));
+      .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<bool>.Success(true));
 
             // Use reflection to set the private _settingsService field
             var fieldInfo = typeof(SettingsViewModel).GetField("_settingsService",
@@ -236,10 +233,11 @@ namespace Locations.Core.Business.Tests.ViewModels
             var tcs = new TaskCompletionSource<bool>();
 
             // Setup the SaveSettingAsync method to fail
+
             _mockSettingsService.Setup(service => service.SaveSettingAsync(It.IsAny<SettingViewModel>()))
-                .Callback(() => tcs.SetResult(true))
-                .ReturnsAsync(new Locations.Core.Shared.ViewModelServices.OperationResult<bool>(
-                    false, false, "Failed to save settings", null, ServiceOperationErrorSource.Unknown));
+      .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<bool>.Failure(
+          Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
+          "Failed to save settings"));
 
             // Use reflection to set the private _settingsService field
             var fieldInfo = typeof(SettingsViewModel).GetField("_settingsService",

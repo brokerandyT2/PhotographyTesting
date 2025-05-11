@@ -6,6 +6,7 @@ using Moq;
 using System;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
+using Locations.Core.Shared.DTO;
 
 namespace Locations.Core.Business.Tests.ViewModels
 {
@@ -120,7 +121,16 @@ namespace Locations.Core.Business.Tests.ViewModels
                 true, weatherData);
 
             _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
-                .ReturnsAsync(result);
+                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<WeatherDTO>.Success(
+                    new WeatherDTO
+                    {
+                        // Populate with the same data as weatherData, but in DTO format
+                        Id = weatherData.Id,
+                        LocationId = weatherData.LocationId,
+                        Temperature = weatherData.Temperature,
+                        Description = weatherData.Description,
+                        LastUpdate = weatherData.LastUpdate
+                    }));
 
             // Act
             await ((AsyncRelayCommand)_viewModel.RefreshWeatherCommand).ExecuteAsync(null);
@@ -155,7 +165,9 @@ namespace Locations.Core.Business.Tests.ViewModels
                 false, null, "Failed to fetch weather data");
 
             _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
-                .ReturnsAsync(result);
+                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<WeatherDTO>.Failure(
+                    Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
+                    "Failed to fetch weather data"));
 
             // Act
             await ((AsyncRelayCommand)_viewModel.RefreshWeatherCommand).ExecuteAsync(null);
@@ -195,7 +207,7 @@ namespace Locations.Core.Business.Tests.ViewModels
                 true, forecastData);
 
             _mockWeatherService.Setup(service => service.GetForecastForLocationAsync(1, 5))
-                .ReturnsAsync(result);
+                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<string>.Success(forecastData));
 
             // Act
             await _viewModel.FetchForecastAsync(5);
@@ -229,7 +241,9 @@ namespace Locations.Core.Business.Tests.ViewModels
                 false, null, "Failed to fetch forecast data");
 
             _mockWeatherService.Setup(service => service.GetForecastForLocationAsync(1, 5))
-                .ReturnsAsync(result);
+                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<string>.Failure(
+                    Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
+                    "Failed to fetch forecast data"));
 
             // Act
             await _viewModel.FetchForecastAsync(5);
