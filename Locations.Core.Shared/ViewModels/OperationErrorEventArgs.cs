@@ -15,7 +15,9 @@ namespace Locations.Core.Shared.ViewModels
         InvalidArgument,
         Authentication,
         Authorization,
-        Service
+        Service,
+        Permission,
+        ModelValidation
     }
 
     public class OperationErrorEventArgs : EventArgs

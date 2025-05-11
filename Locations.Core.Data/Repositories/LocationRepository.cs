@@ -65,7 +65,11 @@ namespace Locations.Core.Data.Queries
                         ErrorSource.Database,
                         $"Location with ID {id} not found");
                 }
-
+                if(!File.Exists(result.Photo))
+                {
+                    result.Photo = string.Empty;
+                    SaveAsync(result);
+                }
                 return DataOperationResult<LocationViewModel>.Success(result);
             }
             catch (SQLiteException ex)

@@ -1,9 +1,11 @@
 using Location.Core.Helpers;
 using Location.Core.Helpers.AlertService;
+using Location.Core.Helpers.EncryptionService;
 using Location.Core.Resources;
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
+using System.Threading.Tasks;
 
 
 namespace Location.Core.Views;
@@ -202,8 +204,9 @@ public partial class AddLocation : ContentPageBase
     {
         if (BindingContext is LocationViewModel viewModel)
         {
+
             // Execute the save command
-            viewModel.SaveCommand.Execute(null);
+            viewModel.SaveCommand.Execute(BindingContext as LocationViewModel);
 
             // If save was successful (no error message), reset view or close modal
             if (string.IsNullOrEmpty(viewModel.ErrorMessage))
@@ -242,12 +245,14 @@ public partial class AddLocation : ContentPageBase
     /// <summary>
     /// Handle add photo button press
     /// </summary>
-    private void AddPhoto_Pressed(object sender, EventArgs e)
+    private async void AddPhoto_Pressed(object sender, EventArgs e)
     {
+
         if (BindingContext is LocationViewModel viewModel)
         {
             viewModel.TakePhotoCommand.Execute(null);
         }
+           
     }
 
     /// <summary>
@@ -264,7 +269,8 @@ public partial class AddLocation : ContentPageBase
     private void ViewModel_ErrorOccurred(object sender, Locations.Core.Shared.ViewModels.OperationErrorEventArgs e)
     {
         // Display error to user if it's not already displayed in the UI
-        MainThread.BeginInvokeOnMainThread(async () => {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
             await DisplayAlert(
                 AppResources.Error,
                 e.Message,
@@ -355,4 +361,6 @@ public partial class AddLocation : ContentPageBase
     }
 
     #endregion
+
+  
 }

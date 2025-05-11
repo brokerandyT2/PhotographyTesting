@@ -121,15 +121,15 @@ namespace Locations.Core.Shared.ViewModels
                 _geolocationService.ErrorOccurred += (sender, e) => OnServiceErrorOccurred(sender,
                     new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.GeolocationService,
-                        e.Message,
-                        e.Exception));
+                        e.ToString(),
+                        new Exception()));
 
             if (_mediaService != null)
                 _mediaService.ErrorOccurred += (sender, e) => OnServiceErrorOccurred(sender,
                     new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.MediaService,
-                        e.Message,
-                        e.Exception));
+                        e.ToString(),
+                        new Exception()));
         }
 
         /// <summary>

@@ -101,6 +101,8 @@ namespace Locations.Core.Shared.ViewModelServices
 
     public interface IGeolocationService
     {
+        Action<object, object> ErrorOccurred { get; set; }
+
         /// <summary>
         /// Event raised when the device location changes
         /// </summary>
@@ -109,7 +111,7 @@ namespace Locations.Core.Shared.ViewModelServices
         /// <summary>
         /// Event for error notification
         /// </summary>
-        event OperationErrorEventHandler ErrorOccurred;
+        //event OperationErrorEventHandler ErrorOccurred;
 
         /// <summary>
         /// Starts tracking the device location

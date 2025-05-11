@@ -1,4 +1,5 @@
 ﻿using System;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Locations.Core.Shared.ViewModelServices
 {
@@ -66,6 +67,11 @@ namespace Locations.Core.Shared.ViewModelServices
                 Exception = ex
             };
         }
+
+      
+
+
+
     }
 
     /// <summary>

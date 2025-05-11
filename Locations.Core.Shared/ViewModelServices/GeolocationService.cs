@@ -8,7 +8,7 @@ namespace Locations.Core.Shared.ViewModelServices
     /// <summary>
     /// Service for handling geolocation operations
     /// </summary>
-    public class GeolocationService : IGeolocationService
+ /*   public class GeolocationService : IGeolocationService
     {
       //  private readonly ILoggerService? _loggerService;
         private GeolocationAccuracy _currentAccuracy = GeolocationAccuracy.Medium;
@@ -25,16 +25,29 @@ namespace Locations.Core.Shared.ViewModelServices
         /// </summary>
         public event OperationErrorEventHandler? ErrorOccurred;
 
+        event OperationErrorEventHandler IGeolocationService.ErrorOccurred
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         /// <summary>
         /// Constructor with optional logger
         /// </summary>
-      /*  public GeolocationService(ILoggerService? loggerService = null)
-        {
-            _loggerService = loggerService;
+          public GeolocationService(ILoggerService? loggerService = null)
+          {
+              _loggerService = loggerService;
 
-            // Subscribe to platform's location changes when the service is created
-            Microsoft.Maui.Devices.Sensors.Geolocation.LocationChanged += OnPlatformLocationChanged;
-        } */
+              // Subscribe to platform's location changes when the service is created
+              Microsoft.Maui.Devices.Sensors.Geolocation.LocationChanged += OnPlatformLocationChanged;
+          } 
 
         /// <summary>
         /// Starts tracking the device location
@@ -468,5 +481,5 @@ namespace Locations.Core.Shared.ViewModelServices
         {
             ErrorOccurred?.Invoke(this, e);
         }
-    }
+    }*/
 }

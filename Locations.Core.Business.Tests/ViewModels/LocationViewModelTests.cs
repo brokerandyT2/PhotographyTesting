@@ -263,7 +263,7 @@ namespace Locations.Core.Business.Tests.ViewModels
 
             _mockLocationService.Setup(service => service.DeleteLocationAsync(It.IsAny<LocationViewModel>()))
                 .Callback(() => tcs.SetResult(true))
-                .ThrowsAsync<new Shared.ViewModels.OperationResult<string>>(false, false, result.ToString(), new Exception(), OperationErrorSource.Database);
+                .ThrowsAsync<new Shared.ViewModels.OperationResult<string>>(false, false, new Exception(), OperationErrorSource.Database);
 
 
             // Act
