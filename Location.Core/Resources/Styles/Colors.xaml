@@ -12,7 +12,9 @@
     <Color x:Key="Secondary">#DFD8F7</Color>
     <Color x:Key="SecondaryDarkText">#9880e5</Color>
     <Color x:Key="Tertiary">#2B0B98</Color>
-
+    <Color x:Key="LightGreen">#90EE90</Color>
+    <Color x:Key="ErrorRed">#fa667d</Color>
+    
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
     <Color x:Key="Magenta">#D600AA</Color>
@@ -20,7 +22,7 @@
     <Color x:Key="OffBlack">#1f1f1f</Color>
 
     <!-- New color definitions -->
-    <Color x:Key="ErrorRed">#FFEBEE</Color>
+
     <Color x:Key="OverlayBlack">#000000</Color>
     <Color x:Key="WarningYellow">#FFF9C4</Color>
     <Color x:Key="SuccessGreen">#E8F5E9</Color>

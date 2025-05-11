@@ -72,7 +72,7 @@ namespace Locations.Core.Business
             types.Add(new TipTypeViewModel { Name = "Golden Hour", I8n = MagicStrings.English_for_i8n });
             types.Add(new TipTypeViewModel { Name = "Sunset", I8n = MagicStrings.English_for_i8n });
             
-            int i = 1;
+            int i = 0;
             foreach (var type in types)
             {
                 var id = _tipTypeBusiness.SaveAsync(type);
