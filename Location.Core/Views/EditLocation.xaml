@@ -48,7 +48,11 @@
             <Label Grid.Row="6" Grid.Column="2" Text="{Binding Longitude}" FontSize="Medium" HorizontalOptions="Start"/>
             <Label Text="{x:Static system:Environment.NewLine}" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="7"/>
             <Label Text="{x:Static strings:AppResources.Description}" FontSize="Medium" Grid.Row="8" Grid.ColumnSpan="4" HorizontalOptions="Start"/>
-            <Editor Text="{Binding Description}" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="4"/>
+            <Editor Text="{Binding Description}" 
+        Grid.Row="7" 
+        Grid.Column="0" 
+        Grid.ColumnSpan="4" 
+        Style="{StaticResource MultilineEditor}"/>
             <Button x:Name="Save" Text="Save" HeightRequest="50" Grid.Column="0" Grid.Row="10" Grid.ColumnSpan="4" />
             <Button x:Name="CloseModal" Text="{x:Static strings:AppResources.CloseLocationDetails}" Grid.Row="10" Grid.ColumnSpan="2" IsVisible="False"/>
         </Grid>

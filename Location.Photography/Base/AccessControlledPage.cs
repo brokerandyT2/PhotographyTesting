@@ -1,14 +1,18 @@
 ﻿using Location.Core.Helpers;
 using Location.Core.Helpers.AlertService;
+using Location.Photography.Helpers; // Use the local ResourceProvider
 using Location.Photography.Resources;
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Location.Photography.Base
 {
     /// <summary>
-    /// Base class for all content pages in the application.
+    /// Base class for all content pages in the Photography module.
     /// Handles subscription checking, ad-supported access, and page visit tracking.
     /// </summary>
     public abstract class ContentPageBase : ContentPage
@@ -129,6 +133,9 @@ namespace Location.Photography.Base
         {
             try
             {
+                // Apply standard resources using Photography's own ResourceProvider
+                ResourceProvider.ApplyStandardResources(this);
+
                 // Check if this is the first visit to show tutorial
                 CheckFirstVisit();
 
@@ -208,8 +215,14 @@ namespace Location.Photography.Base
                 }
                 else
                 {
-                    // Neither subscription nor ad-supported access is valid, show subscription modal
-                    //await Navigation.PushModalAsync(new SubscriptionOrAdFeature(CurrentPageType));
+                    // Neither subscription nor ad-supported access is valid
+                    // Use a direct string instead of a resource reference
+                    await DisplayAlert(
+                        AppResources.SubscriptionRequired,
+                        "This feature requires a subscription to access.",
+                        AppResources.OK);
+
+                    await Navigation.PopAsync();
                 }
             }
             catch (Exception ex)
@@ -331,7 +344,7 @@ namespace Location.Photography.Base
             {
                 // Get hours per ad for display
                 var hoursPerAd = _settingsService.GetSettingWithMagicString(MagicStrings.AdGivesHours);
-                //throw new NotImplementedException();
+
                 // Show dialog asking user if they want to watch an ad
                 bool userWatchesAd = await DisplayAlert(
                    AppResources.SubscriptionRequired,
@@ -388,8 +401,8 @@ namespace Location.Photography.Base
             {
                 if (!string.IsNullOrEmpty(PageViewedMagicString) && _settingsService != null)
                 {
-                    throw new NotImplementedException();
-                    //PageHelpers.CheckVisit(PageViewedMagicString, CurrentPageType, _settingsService, Navigation);
+                    // Use the PageHelpers class from Location.Core
+                    Location.Core.Helpers.PageHelpers.CheckVisit(PageViewedMagicString, CurrentPageType, _settingsService, Navigation);
                 }
             }
             catch (Exception ex)
@@ -486,9 +499,8 @@ namespace Location.Photography.Base
         /// </summary>
         private void ViewModel_ErrorOccurred(object sender, Locations.Core.Shared.ViewModels.OperationErrorEventArgs e)
         {
-            throw new NotImplementedException();
             Microsoft.Maui.Controls.Application.Current.Dispatcher.Dispatch(() => {
-             //   DisplayAlert(AppResources.Error, e.Message, AppResources.OK);
+                DisplayAlert(AppResources.Error, e.Message, AppResources.OK);
             });
         }
 

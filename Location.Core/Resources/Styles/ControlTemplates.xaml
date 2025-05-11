@@ -1,0 +1,34 @@
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Error Message Template -->
+    <ControlTemplate x:Key="ErrorMessageTemplate">
+        <Grid IsVisible="{TemplateBinding BindingContext.VmErrorMessage, Converter={StaticResource StringToBoolConverter}}"
+              BackgroundColor="#80FFEBEE"
+              Margin="5"
+              Padding="10">
+            <Label Text="{TemplateBinding BindingContext.VmErrorMessage}"
+                   TextColor="{StaticResource ErrorRed}"
+                   FontSize="14" />
+        </Grid>
+    </ControlTemplate>
+
+    <!-- Busy Indicator Template -->
+    <ControlTemplate x:Key="BusyIndicatorTemplate">
+        <Grid IsVisible="{TemplateBinding BindingContext.VmIsBusy}" 
+              BackgroundColor="#80000000"
+              InputTransparent="False">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                <ActivityIndicator IsRunning="{TemplateBinding BindingContext.VmIsBusy}" 
+                                   HeightRequest="50" 
+                                   WidthRequest="50" 
+                                   Color="White" />
+                <Label Text="Processing, please wait..." 
+                       TextColor="White" 
+                       Margin="0,10,0,0"/>
+            </VerticalStackLayout>
+        </Grid>
+    </ControlTemplate>
+
+</ResourceDictionary>

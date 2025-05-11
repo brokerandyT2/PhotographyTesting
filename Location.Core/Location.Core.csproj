@@ -88,6 +88,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Update="Resources\Styles\ControlTemplates.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\AddLocation.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -144,10 +147,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AppResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Helpers\" />
   </ItemGroup>
 
 </Project>

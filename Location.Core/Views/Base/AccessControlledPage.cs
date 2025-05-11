@@ -1,11 +1,9 @@
-﻿
-using Location.Core.Helpers;
+﻿using Location.Core.Helpers;
 using Location.Core.Helpers.AlertService;
 using Location.Core.Resources;
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Shared;
 using Locations.Core.Shared.ViewModels;
-
 
 namespace Location.Core.Views
 {
@@ -134,6 +132,9 @@ namespace Location.Core.Views
         {
             try
             {
+                // Apply standard resources from ResourceProvider
+                ResourceProvider.ApplyStandardResources(this);
+
                 // Check if this is the first visit to show tutorial
                 CheckFirstVisit();
 

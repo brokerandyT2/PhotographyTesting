@@ -31,11 +31,11 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
-            .UseMauiCameraView()
+
             .UseExpander()
             .UseBarcodeReader()
             .UseSkiaSharp()
-            .UseMauiCameraView()
+
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -68,6 +68,12 @@ public static class MauiProgram
         });
         Expander.EnableAnimations();
 
-        return builder.Build();
+        // Build the app
+        var app = builder.Build();
+
+        // Initialize ResourceProvider
+        ResourceProvider.Initialize();
+
+        return app;
     }
 }

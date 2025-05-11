@@ -52,7 +52,11 @@
                 <Label Grid.Row="5" Grid.Column="2" Text="{Binding Longitude}" FontSize="Medium" HorizontalOptions="Start"/>
                 <Label Text="{x:Static system:Environment.NewLine}" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="6"/>
                 <Label Text="{x:Static strings:AppResources.Description}" FontSize="Medium" Grid.Row="6" Grid.ColumnSpan="4" HorizontalOptions="Start"/>
-                <Editor HeightRequest="150" Text="{Binding Description}" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="4"/>
+                <Editor Text="{Binding Description}" 
+        Grid.Row="7" 
+        Grid.Column="0" 
+        Grid.ColumnSpan="4" 
+        Style="{StaticResource MultilineEditor}"/>
 
                 <!-- Use event handler for the Save button -->
                 <Button x:Name="Save" 
