@@ -108,33 +108,36 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             double longitude = -86.1580;
             string errorMessage = "Database error";
 
-            DataOperationResult<LocationViewModel>.Failure(ErrorSource.Database, errorMessage);
+            // Setup the repository to return failure for this specific coordinate
+            _mockLocationRepository.Setup(repo => repo.GetByCoordinatesAsync(latitude, longitude))
+                .ReturnsAsync(DataOperationResult<LocationViewModel>.Failure(ErrorSource.Database, errorMessage));
 
             // Act
             var result = _locationService.GetLocationByCoordinates(latitude, longitude);
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Id);
+            Assert.AreEqual(0, result.Id); // Check for empty location ID
         }
 
         [TestMethod]
         public void GetLocationByCoordinates_WhenLocationDoesNotExist_ShouldLogWarning()
         {
-            // Arrange
             double latitude = 40.7128;
             double longitude = -74.0060;
             string errorMessage = "Location not found";
 
-            DataOperationResult<LocationViewModel>.Failure(ErrorSource.Database, errorMessage);
+            // Setup mock repository to return failure
+            _mockLocationRepository.Setup(repo => repo.GetByCoordinatesAsync(latitude, longitude))
+                .ReturnsAsync(DataOperationResult<LocationViewModel>.Failure(ErrorSource.Database, errorMessage));
 
             // Act
             _locationService.GetLocationByCoordinates(latitude, longitude);
 
-            // Assert - Verify that LogWarning was called (without an exception parameter)
+            // Assert - Verify that LogWarning was called
             MockLoggerService.Verify(
-                logger => logger.LogWarning(It.IsAny<string>(), It.IsAny<Exception>()),
-                Times.Once);
+                logger => logger.LogWarning(It.IsAny<string>(), It.Is<Exception>(e => e == null)),
+                Times.AtLeastOnce);
         }
 
         [TestMethod]

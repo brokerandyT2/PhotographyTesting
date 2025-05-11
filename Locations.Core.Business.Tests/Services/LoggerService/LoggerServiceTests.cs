@@ -16,76 +16,83 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
     [TestCategory("LoggerService")]
     public class LoggerServiceTests : BaseServiceTests
     {
-        private Mock<SQLiteAsyncConnection> _mockSqliteConnection;
         private LoggerServiceWrapper _loggerService;
 
         // Create a wrapper for LoggerService to simplify testing
         public class LoggerServiceWrapper
         {
-            private readonly SQLiteAsyncConnection _connection;
+            // Store logs for verification in tests
+            public List<Log> TestLogs { get; } = new List<Log>();
 
-            public LoggerServiceWrapper(SQLiteAsyncConnection connection)
+            public LoggerServiceWrapper()
             {
-                _connection = connection;
+                // No need for real SQLiteAsyncConnection in tests
             }
 
             public void LogDebug(string message)
             {
-                LogAsync("Debug", message, null);
+                RecordLog("Debug", message, null);
             }
 
             public void LogInformation(string message)
             {
-                LogAsync("Information", message, null);
+                RecordLog("Information", message, null);
             }
 
             public void LogWarning(string message)
             {
-                LogAsync("Warning", message, null);
+                RecordLog("Warning", message, null);
+            }
+
+            public void LogWarning(string message, Exception exception)
+            {
+                RecordLog("Warning", message, exception);
             }
 
             public void LogError(string message)
             {
-                LogAsync("Error", message, null);
+                RecordLog("Error", message, null);
             }
 
             public void LogError(string message, Exception exception)
             {
-                LogAsync("Error", message, exception);
+                RecordLog("Error", message, exception);
             }
 
             public void LogCritical(string message)
             {
-                LogAsync("Critical", message, null);
+                RecordLog("Critical", message, null);
             }
 
             public void LogCritical(string message, Exception exception)
             {
-                LogAsync("Critical", message, exception);
+                RecordLog("Critical", message, exception);
             }
 
-            private void LogAsync(string level, string message, Exception exception)
+            private void RecordLog(string level, string message, Exception exception)
             {
                 var log = new Log
                 {
+                    Id = TestLogs.Count + 1,
                     Timestamp = DateTime.Now,
                     Level = level,
                     Message = message,
                     Exception = exception?.ToString()
                 };
-                _connection.InsertAsync(log);
+                TestLogs.Add(log);
             }
 
             public List<Log> GetLogsByLevel(string level)
             {
-                // Mock implementation for testing
-                return new List<Log>();
+                return TestLogs.Where(log => log.Level.Equals(level, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             public List<Log> SearchLogs(string searchText)
             {
-                // Mock implementation for testing
-                return new List<Log>();
+                return TestLogs.Where(log =>
+                    log.Message.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                    (log.Exception != null && log.Exception.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
             }
         }
 
@@ -94,15 +101,8 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
         {
             base.Setup();
 
-            // Create a mock of SQLiteAsyncConnection
-            _mockSqliteConnection = new Mock<SQLiteAsyncConnection>();
-
-            // Setup basic functionality for the mock without using ReturnsAsync
-            _mockSqliteConnection.Setup(c => c.CreateTableAsync<Log>(CreateFlags.None))
-                .Returns(Task.FromResult(CreateTableResult.Created));
-
-            // Create LoggerService with the mock
-            _loggerService = new LoggerServiceWrapper(_mockSqliteConnection.Object);
+            // Create logger service wrapper without SQLite dependency
+            _loggerService = new LoggerServiceWrapper();
         }
 
         [TestMethod]
@@ -110,16 +110,15 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
         {
             // Arrange
             string testMessage = "Test debug message";
-            Log capturedLog = null;
-
-            _mockSqliteConnection.Setup(c => c.InsertAsync(It.IsAny<Log>()))
-                .Callback<Log>(log => capturedLog = log)
-                .Returns(Task.FromResult(1));
 
             // Act
             _loggerService.LogDebug(testMessage);
 
             // Assert
+            Assert.IsNotNull(_loggerService.TestLogs);
+            Assert.AreEqual(1, _loggerService.TestLogs.Count);
+
+            var capturedLog = _loggerService.TestLogs[0];
             Assert.IsNotNull(capturedLog);
             Assert.AreEqual("Debug", capturedLog.Level);
             Assert.AreEqual(testMessage, capturedLog.Message);
@@ -130,16 +129,15 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
         {
             // Arrange
             string testMessage = "Test info message";
-            Log capturedLog = null;
-
-            _mockSqliteConnection.Setup(c => c.InsertAsync(It.IsAny<Log>()))
-                .Callback<Log>(log => capturedLog = log)
-                .Returns(Task.FromResult(1));
 
             // Act
             _loggerService.LogInformation(testMessage);
 
             // Assert
+            Assert.IsNotNull(_loggerService.TestLogs);
+            Assert.AreEqual(1, _loggerService.TestLogs.Count);
+
+            var capturedLog = _loggerService.TestLogs[0];
             Assert.IsNotNull(capturedLog);
             Assert.AreEqual("Information", capturedLog.Level);
             Assert.AreEqual(testMessage, capturedLog.Message);
@@ -150,16 +148,15 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
         {
             // Arrange
             string testMessage = "Test warning message";
-            Log capturedLog = null;
-
-            _mockSqliteConnection.Setup(c => c.InsertAsync(It.IsAny<Log>()))
-                .Callback<Log>(log => capturedLog = log)
-                .Returns(Task.FromResult(1));
 
             // Act
             _loggerService.LogWarning(testMessage);
 
             // Assert
+            Assert.IsNotNull(_loggerService.TestLogs);
+            Assert.AreEqual(1, _loggerService.TestLogs.Count);
+
+            var capturedLog = _loggerService.TestLogs[0];
             Assert.IsNotNull(capturedLog);
             Assert.AreEqual("Warning", capturedLog.Level);
             Assert.AreEqual(testMessage, capturedLog.Message);
@@ -170,16 +167,15 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
         {
             // Arrange
             string testMessage = "Test error message";
-            Log capturedLog = null;
-
-            _mockSqliteConnection.Setup(c => c.InsertAsync(It.IsAny<Log>()))
-                .Callback<Log>(log => capturedLog = log)
-                .Returns(Task.FromResult(1));
 
             // Act
             _loggerService.LogError(testMessage);
 
             // Assert
+            Assert.IsNotNull(_loggerService.TestLogs);
+            Assert.AreEqual(1, _loggerService.TestLogs.Count);
+
+            var capturedLog = _loggerService.TestLogs[0];
             Assert.IsNotNull(capturedLog);
             Assert.AreEqual("Error", capturedLog.Level);
             Assert.AreEqual(testMessage, capturedLog.Message);
@@ -191,16 +187,15 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
             // Arrange
             string testMessage = "Test error message";
             var testException = new Exception("Test exception");
-            Log capturedLog = null;
-
-            _mockSqliteConnection.Setup(c => c.InsertAsync(It.IsAny<Log>()))
-                .Callback<Log>(log => capturedLog = log)
-                .Returns(Task.FromResult(1));
 
             // Act
             _loggerService.LogError(testMessage, testException);
 
             // Assert
+            Assert.IsNotNull(_loggerService.TestLogs);
+            Assert.AreEqual(1, _loggerService.TestLogs.Count);
+
+            var capturedLog = _loggerService.TestLogs[0];
             Assert.IsNotNull(capturedLog);
             Assert.AreEqual("Error", capturedLog.Level);
             Assert.AreEqual(testMessage, capturedLog.Message);
@@ -212,16 +207,15 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
         {
             // Arrange
             string testMessage = "Test critical message";
-            Log capturedLog = null;
-
-            _mockSqliteConnection.Setup(c => c.InsertAsync(It.IsAny<Log>()))
-                .Callback<Log>(log => capturedLog = log)
-                .Returns(Task.FromResult(1));
 
             // Act
             _loggerService.LogCritical(testMessage);
 
             // Assert
+            Assert.IsNotNull(_loggerService.TestLogs);
+            Assert.AreEqual(1, _loggerService.TestLogs.Count);
+
+            var capturedLog = _loggerService.TestLogs[0];
             Assert.IsNotNull(capturedLog);
             Assert.AreEqual("Critical", capturedLog.Level);
             Assert.AreEqual(testMessage, capturedLog.Message);
@@ -233,16 +227,15 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
             // Arrange
             string testMessage = "Test critical message";
             var testException = new Exception("Test exception");
-            Log capturedLog = null;
-
-            _mockSqliteConnection.Setup(c => c.InsertAsync(It.IsAny<Log>()))
-                .Callback<Log>(log => capturedLog = log)
-                .Returns(Task.FromResult(1));
 
             // Act
             _loggerService.LogCritical(testMessage, testException);
 
             // Assert
+            Assert.IsNotNull(_loggerService.TestLogs);
+            Assert.AreEqual(1, _loggerService.TestLogs.Count);
+
+            var capturedLog = _loggerService.TestLogs[0];
             Assert.IsNotNull(capturedLog);
             Assert.AreEqual("Critical", capturedLog.Level);
             Assert.AreEqual(testMessage, capturedLog.Message);
@@ -254,25 +247,21 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
         {
             // Arrange
             string logLevel = "Error";
-            var testLogs = new List<Log>
-            {
-                new Log { Id = 1, Level = "Error", Message = "Test error 1" },
-                new Log { Id = 2, Level = "Error", Message = "Test error 2" },
-                new Log { Id = 3, Level = "Warning", Message = "Test warning" }
-            };
 
-            // We'll skip the AsyncTableQuery mocking as it's causing issues
-            // Instead, use a direct approach for testing the GetLogsByLevel method
-            _mockSqliteConnection.Setup(c => c.Table<Log>())
-                .Throws(new NotImplementedException("This should not be called in the test"));
+            // Add test logs of different levels
+            _loggerService.LogError("Test error 1");
+            _loggerService.LogError("Test error 2");
+            _loggerService.LogWarning("Test warning");
+            _loggerService.LogInformation("Test info");
 
             // Act
             var result = _loggerService.GetLogsByLevel(logLevel);
 
-            // Assert - We know this returns an empty list from our wrapper implementation
-            // This test becomes more of a coverage test
+            // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual("Test error 1", result[0].Message);
+            Assert.AreEqual("Test error 2", result[1].Message);
         }
 
         [TestMethod]
@@ -280,25 +269,21 @@ namespace Locations.Core.Business.Tests.Services.LoggerServiceTests
         {
             // Arrange
             string searchText = "error";
-            var testLogs = new List<Log>
-            {
-                new Log { Id = 1, Level = "Error", Message = "Test error message" },
-                new Log { Id = 2, Level = "Warning", Message = "Test warning" },
-                new Log { Id = 3, Level = "Info", Message = "Another error example" }
-            };
 
-            // We'll skip the AsyncTableQuery mocking as it's causing issues
-            // Instead, use a direct approach for testing the SearchLogs method
-            _mockSqliteConnection.Setup(c => c.Table<Log>())
-                .Throws(new NotImplementedException("This should not be called in the test"));
+            // Add test logs with different contents
+            _loggerService.LogError("Test error message");
+            _loggerService.LogWarning("Test warning");
+            _loggerService.LogInformation("Another error example");
+            _loggerService.LogCritical("Critical message");
 
             // Act
             var result = _loggerService.SearchLogs(searchText);
 
-            // Assert - We know this returns an empty list from our wrapper implementation
-            // This test becomes more of a coverage test
+            // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(2, result.Count);
+            Assert.IsTrue(result.Any(log => log.Message.Contains("Test error message")));
+            Assert.IsTrue(result.Any(log => log.Message.Contains("Another error example")));
         }
     }
 }
