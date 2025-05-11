@@ -1,20 +1,23 @@
 ﻿<Project Sdk="MSTest.Sdk/3.6.4">
-
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseVSTest>true</UseVSTest>
+    <!-- Test Results Configuration -->
+    <VSTestLogger>trx;LogFileName=testresults.trx</VSTestLogger>
+    <VSTestResultsDirectory>$(MSBuildProjectDirectory)\TestResults</VSTestResultsDirectory>
+    <VSTestTraceDataCollectorDirectoryPath>$(MSBuildProjectDirectory)\TestResults</VSTestTraceDataCollectorDirectoryPath>
+    <VSTestCancelAfterDataCollectionStart>false</VSTestCancelAfterDataCollectionStart>
+    <CollectCoverage>true</CollectCoverage>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\EncryptedSQLite\EncryptedSQLite.csproj" />
     <ProjectReference Include="..\Locations.Core.Business\Locations.Core.Business.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.20.72" />
   </ItemGroup>
-
 </Project>

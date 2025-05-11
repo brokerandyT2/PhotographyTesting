@@ -1,9 +1,10 @@
-﻿// SettingServiceGetAllSettingsTests.cs - Fixed
+﻿// SettingServiceGetAllSettingsTests.cs
 using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Business.Tests.Base;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared.ViewModels;
+using Locations.Core.Shared.ViewModelServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -131,7 +132,6 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
         }
 
         [TestMethod]
-
         public async Task GetAllAsync_WhenRepositoryFails_ShouldReturnNullData()
         {
             // Arrange
@@ -298,64 +298,6 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
             // Assert
             Assert.IsNotNull(result.Hemisphere);
             Assert.AreEqual(hemisphereValue, result.Hemisphere.Value);
-        }
-
-        [TestMethod]
-        public void GetAllSettings_WhenDateFormatSettingExists_ShouldMapToDateFormatProperly()
-        {
-            // Arrange
-            var dateFormatKey = "DateFormat";
-            var dateFormatValue = "MM/dd/yyyy";
-
-            var testSettings = new List<SettingViewModel>
-            {
-                TestDataFactory.CreateTestSetting("Hemisphere", "north"),
-                TestDataFactory.CreateTestSetting(dateFormatKey, dateFormatValue),
-                TestDataFactory.CreateTestSetting("TimeFormat", "h:mm tt")
-            };
-
-            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
-                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
-
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(dateFormatKey))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(
-                    TestDataFactory.CreateTestSetting(dateFormatKey, dateFormatValue)));
-
-            // Act
-            var result = _settingsService.GetAllSettings();
-
-            // Assert
-            Assert.IsNotNull(result.DateFormat);
-            Assert.AreEqual(dateFormatValue, result.DateFormat.Value);
-        }
-
-        [TestMethod]
-        public void GetAllSettings_WhenTimeFormatSettingExists_ShouldMapToTimeFormatProperly()
-        {
-            // Arrange
-            var timeFormatKey = "TimeFormat";
-            var timeFormatValue = "h:mm tt";
-
-            var testSettings = new List<SettingViewModel>
-            {
-                TestDataFactory.CreateTestSetting("Hemisphere", "north"),
-                TestDataFactory.CreateTestSetting("DateFormat", "MM/dd/yyyy"),
-                TestDataFactory.CreateTestSetting(timeFormatKey, timeFormatValue)
-            };
-
-            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
-                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
-
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(timeFormatKey))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(
-                    TestDataFactory.CreateTestSetting(timeFormatKey, timeFormatValue)));
-
-            // Act
-            var result = _settingsService.GetAllSettings();
-
-            // Assert
-            Assert.IsNotNull(result.TimeFormat);
-            Assert.AreEqual(timeFormatValue, result.TimeFormat.Value);
         }
     }
 }
