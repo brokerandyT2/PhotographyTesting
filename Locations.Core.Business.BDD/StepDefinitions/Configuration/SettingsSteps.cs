@@ -180,11 +180,11 @@ namespace Locations.Core.Business.BDD.StepDefinitions.Configuration
             // Verify the setting using VerifySettingsApplied
         /*    Assert.That(_settingsPage.VerifySettingsApplied(
                 north: expectedValue,
-                useUSTimeFormat: null,
-                useUSDateFormat: null,
-                towardsWind: null,
-                useFahrenheit: null,
-                adSupport: null
+                useUSTimeFormat: true,
+                useUSDateFormat: true,
+                towardsWind: true,
+                useFahrenheit: true,
+                adSupport: true
             ), Is.True, $"Hemisphere setting was not saved as {hemisphere}"); */
         }
 
@@ -198,12 +198,12 @@ namespace Locations.Core.Business.BDD.StepDefinitions.Configuration
 
             // Verify the setting
             Assert.That(_settingsPage.VerifySettingsApplied(
-                north: null,
+                north: true,
                 useUSTimeFormat: expectedValue,
-                useUSDateFormat: null,
-                towardsWind: null,
-                useFahrenheit: null,
-                adSupport: null
+                useUSDateFormat: true,
+                towardsWind: true,
+                useFahrenheit: true,
+                adSupport: true
             ), Is.True, $"Time format setting was not saved as {timeFormat}");
         }
 
@@ -217,12 +217,12 @@ namespace Locations.Core.Business.BDD.StepDefinitions.Configuration
 
             // Verify the setting
             Assert.That(_settingsPage.VerifySettingsApplied(
-                north: null,
-                useUSTimeFormat: null,
+                north: true,
+                useUSTimeFormat: true,
                 useUSDateFormat: expectedValue,
-                towardsWind: null,
-                useFahrenheit: null,
-                adSupport: null
+                towardsWind: true,
+                useFahrenheit: true,
+                adSupport: true
             ), Is.True, $"Date format setting was not saved as {dateFormat}");
         }
 
@@ -236,12 +236,12 @@ namespace Locations.Core.Business.BDD.StepDefinitions.Configuration
 
             // Verify the setting
             Assert.That(_settingsPage.VerifySettingsApplied(
-                north: null,
-                useUSTimeFormat: null,
-                useUSDateFormat: null,
+                north: true,
+                useUSTimeFormat: true,
+                useUSDateFormat: true,
                 towardsWind: expectedValue,
-                useFahrenheit: null,
-                adSupport: null
+                useFahrenheit: true,
+                adSupport: true
             ), Is.True, $"Wind direction setting was not saved as {windDirection}");
         }
 
@@ -255,12 +255,12 @@ namespace Locations.Core.Business.BDD.StepDefinitions.Configuration
 
             // Verify the setting
             Assert.That(_settingsPage.VerifySettingsApplied(
-                north: null,
-                useUSTimeFormat: null,
-                useUSDateFormat: null,
-                towardsWind: null,
+                north: true,
+                useUSTimeFormat: true,
+                useUSDateFormat: true,
+                towardsWind: true,
                 useFahrenheit: expectedValue,
-                adSupport: null
+                adSupport: true
             ), Is.True, $"Temperature format setting was not saved as {temperatureFormat}");
         }
 
@@ -274,11 +274,11 @@ namespace Locations.Core.Business.BDD.StepDefinitions.Configuration
 
             // Verify the setting
             Assert.That(_settingsPage.VerifySettingsApplied(
-                north: null,
-                useUSTimeFormat: null,
-                useUSDateFormat: null,
-                towardsWind: null,
-                useFahrenheit: null,
+                north: true,
+                useUSTimeFormat: true,
+                useUSDateFormat: true,
+                towardsWind: true,
+                useFahrenheit: true,
                 adSupport: expectedValue
             ), Is.True, $"Ad support setting was not saved as {adSupport}");
         }

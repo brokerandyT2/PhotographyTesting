@@ -1,6 +1,4 @@
-﻿// Location.Core/ResourceProvider.cs
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
+﻿// Location.Core/Helpers/ResourceProvider.cs
 using System;
 using System.Collections.Generic;
 
@@ -13,7 +11,7 @@ namespace Location.Core
     public static class ResourceProvider
     {
         // Cache for transparent colors
-        private static Dictionary<string, Color> _colorCache = new Dictionary<string, Color>();
+        private static Dictionary<string, Microsoft.Maui.Graphics.Color> _colorCache = new Dictionary<string, Microsoft.Maui.Graphics.Color>();
 
         // Flag to track if the provider has been initialized
         private static bool _isInitialized = false;
@@ -59,51 +57,59 @@ namespace Location.Core
             try
             {
                 // Error overlay color (light red with 50% opacity)
-                if ((bool)Microsoft.Maui.Controls.Application.Current?.Resources.TryGetValue("ErrorRed", out var errorColor))
+                object errorColorObj = null;
+                if (Microsoft.Maui.Controls.Application.Current?.Resources != null &&
+                    Microsoft.Maui.Controls.Application.Current.Resources.TryGetValue("ErrorRed", out errorColorObj) &&
+                    errorColorObj is Microsoft.Maui.Graphics.Color errorColor)
                 {
-                    Color baseColor = (Color)errorColor;
-                    _colorCache["TransparentErrorBrush"] = baseColor.WithAlpha(0.5f);
+                    _colorCache["TransparentErrorBrush"] = errorColor.WithAlpha(0.5f);
                 }
                 else
                 {
                     // Fallback if color not found
-                    _colorCache["TransparentErrorBrush"] = Color.FromArgb("#80FFEBEE");
+                    _colorCache["TransparentErrorBrush"] = Microsoft.Maui.Graphics.Color.FromArgb("#80FFEBEE");
                 }
 
                 // Black overlay color (black with 50% opacity)
-                if ((bool)Microsoft.Maui.Controls.Application.Current?.Resources.TryGetValue("Black", out var overlayColor))
+                object overlayColorObj = null;
+                if (Microsoft.Maui.Controls.Application.Current?.Resources != null &&
+                    Microsoft.Maui.Controls.Application.Current.Resources.TryGetValue("Black", out overlayColorObj) &&
+                    overlayColorObj is Microsoft.Maui.Graphics.Color overlayColor)
                 {
-                    Color baseColor = (Color)overlayColor;
-                    _colorCache["TransparentOverlayBrush"] = baseColor.WithAlpha(0.5f);
+                    _colorCache["TransparentOverlayBrush"] = overlayColor.WithAlpha(0.5f);
                 }
                 else
                 {
                     // Fallback if color not found
-                    _colorCache["TransparentOverlayBrush"] = Color.FromArgb("#80000000");
+                    _colorCache["TransparentOverlayBrush"] = Microsoft.Maui.Graphics.Color.FromArgb("#80000000");
                 }
 
                 // Warning overlay color (yellow with 50% opacity)
-                if ((bool)Microsoft.Maui.Controls.Application.Current?.Resources.TryGetValue("WarningYellow", out var warningColor))
+                object warningColorObj = null;
+                if (Microsoft.Maui.Controls.Application.Current?.Resources != null &&
+                    Microsoft.Maui.Controls.Application.Current.Resources.TryGetValue("WarningYellow", out warningColorObj) &&
+                    warningColorObj is Microsoft.Maui.Graphics.Color warningColor)
                 {
-                    Color baseColor = (Color)warningColor;
-                    _colorCache["TransparentWarningBrush"] = baseColor.WithAlpha(0.5f);
+                    _colorCache["TransparentWarningBrush"] = warningColor.WithAlpha(0.5f);
                 }
                 else
                 {
                     // Fallback if color not found
-                    _colorCache["TransparentWarningBrush"] = Color.FromArgb("#80FFF9C4");
+                    _colorCache["TransparentWarningBrush"] = Microsoft.Maui.Graphics.Color.FromArgb("#80FFF9C4");
                 }
 
                 // Success overlay color (green with 50% opacity)
-                if ((bool)Microsoft.Maui.Controls.Application.Current?.Resources.TryGetValue("SuccessGreen", out var successColor))
+                object successColorObj = null;
+                if (Microsoft.Maui.Controls.Application.Current?.Resources != null &&
+                    Microsoft.Maui.Controls.Application.Current.Resources.TryGetValue("SuccessGreen", out successColorObj) &&
+                    successColorObj is Microsoft.Maui.Graphics.Color successColor)
                 {
-                    Color baseColor = (Color)successColor;
-                    _colorCache["TransparentSuccessBrush"] = baseColor.WithAlpha(0.5f);
+                    _colorCache["TransparentSuccessBrush"] = successColor.WithAlpha(0.5f);
                 }
                 else
                 {
                     // Fallback if color not found
-                    _colorCache["TransparentSuccessBrush"] = Color.FromArgb("#80E8F5E9");
+                    _colorCache["TransparentSuccessBrush"] = Microsoft.Maui.Graphics.Color.FromArgb("#80E8F5E9");
                 }
             }
             catch (Exception ex)
@@ -119,7 +125,7 @@ namespace Location.Core
         /// </summary>
         /// <param name="page">The page to apply resources to</param>
         /// <param name="libraryName">Optional library name for library-specific overrides</param>
-        public static void ApplyStandardResources(ContentPage page, string libraryName = null)
+        public static void ApplyStandardResources(Microsoft.Maui.Controls.ContentPage page, string libraryName = null)
         {
             if (page == null)
                 return;
@@ -149,7 +155,7 @@ namespace Location.Core
         /// </summary>
         /// <param name="name">The name of the cached color resource</param>
         /// <returns>The color, or Colors.Transparent if not found</returns>
-        public static Color GetColor(string name)
+        public static Microsoft.Maui.Graphics.Color GetColor(string name)
         {
             // Ensure initialization
             if (!_isInitialized)
@@ -158,7 +164,7 @@ namespace Location.Core
             if (_colorCache.TryGetValue(name, out var color))
                 return color;
 
-            return Colors.Transparent;
+            return Microsoft.Maui.Graphics.Colors.Transparent;
         }
 
         /// <summary>
@@ -167,28 +173,29 @@ namespace Location.Core
         /// <param name="resourceKey">The resource key</param>
         /// <param name="libraryName">Optional library name for library-specific overrides</param>
         /// <returns>The color, or Colors.Transparent if not found</returns>
-        public static Color GetResourceColor(string resourceKey, string libraryName = null)
+        public static Microsoft.Maui.Graphics.Color GetResourceColor(string resourceKey, string libraryName = null)
         {
             object resource = null;
 
             // Check library overrides first
             if (!string.IsNullOrEmpty(libraryName) &&
                 _libraryOverrides.ContainsKey(libraryName) &&
-                _libraryOverrides[libraryName].TryGetValue(resourceKey, out resource))
+                _libraryOverrides[libraryName].TryGetValue(resourceKey, out resource) &&
+                resource is Microsoft.Maui.Graphics.Color libraryColor)
             {
-                if (resource is Color color)
-                    return color;
+                return libraryColor;
             }
 
             // Check application resources
-            if ((bool)Microsoft.Maui.Controls.Application.Current?.Resources.TryGetValue(resourceKey, out resource))
+            if (Microsoft.Maui.Controls.Application.Current?.Resources != null &&
+                Microsoft.Maui.Controls.Application.Current.Resources.TryGetValue(resourceKey, out resource) &&
+                resource is Microsoft.Maui.Graphics.Color appColor)
             {
-                if (resource is Color color)
-                    return color;
+                return appColor;
             }
 
             // Default to transparent
-            return Colors.Transparent;
+            return Microsoft.Maui.Graphics.Colors.Transparent;
         }
 
         /// <summary>

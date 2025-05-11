@@ -88,9 +88,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <MauiXaml Update="Resources\Styles\ControlTemplates.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
     <MauiXaml Update="Views\AddLocation.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
