@@ -1,4 +1,4 @@
-﻿// DetailsViewModelTests.cs
+﻿// DetailsViewModelTests.cs - Fixed
 using CommunityToolkit.Mvvm.Input;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
@@ -6,8 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Threading.Tasks;
-using OperationErrorEventArgs = Locations.Core.Shared.ViewModelServices.OperationErrorEventArgs;
-using OperationErrorSource = Locations.Core.Shared.ViewModelServices.OperationErrorSource;
+
 namespace Locations.Core.Business.Tests.ViewModels
 {
     [TestClass]
@@ -81,8 +80,10 @@ namespace Locations.Core.Business.Tests.ViewModels
             var method = typeof(DetailsViewModel).GetMethod("OnSubViewModelErrorOccurred",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            // Create error args
-            var errorArgs = new OperationErrorEventArgs(OperationErrorSource.Unknown, errorMessage);
+            // Create error args - use ViewModelServices OperationErrorEventArgs
+            var errorArgs = new Locations.Core.Shared.ViewModelServices.OperationErrorEventArgs(
+                Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
+                errorMessage);
 
             // Act
             method.Invoke(_viewModel, new object[] { null, errorArgs });
@@ -96,8 +97,8 @@ namespace Locations.Core.Business.Tests.ViewModels
         public async Task LoadDataAsync_ShouldCallRefreshCommandsOnSubViewModels()
         {
             // Arrange
-            var mockLocationRefreshCommand = new Mock<AsyncRelayCommand>(null);
-            var mockWeatherRefreshCommand = new Mock<AsyncRelayCommand>(null);
+            var mockLocationRefreshCommand = new Mock<AsyncRelayCommand>(new Func<Task>(() => Task.CompletedTask));
+            var mockWeatherRefreshCommand = new Mock<AsyncRelayCommand>(new Func<Task>(() => Task.CompletedTask));
 
             // Use reflection to set the commands
             var locationViewModelType = typeof(LocationViewModel);
@@ -114,8 +115,23 @@ namespace Locations.Core.Business.Tests.ViewModels
             if (weatherRefreshCommandField != null)
                 weatherRefreshCommandField.SetValue(_weatherViewModel, mockWeatherRefreshCommand.Object);
 
-            // Act
-             _viewModel.RefreshCommand.Execute(null);
+            // Act - use the RefreshCommand if it exists, otherwise use a direct call to LoadDataAsync
+            if (_viewModel.RefreshCommand is AsyncRelayCommand refreshCommand)
+            {
+                await refreshCommand.ExecuteAsync(null);
+            }
+            else
+            {
+                // Use reflection to call LoadDataAsync directly
+                var loadDataMethod = typeof(DetailsViewModel).GetMethod("LoadDataAsync",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                if (loadDataMethod != null)
+                {
+                    var task = (Task)loadDataMethod.Invoke(_viewModel, null);
+                    await task;
+                }
+            }
 
             // Assert - this is a coverage test as we can't easily verify the commands were called
             Assert.IsFalse(_viewModel.IsError);

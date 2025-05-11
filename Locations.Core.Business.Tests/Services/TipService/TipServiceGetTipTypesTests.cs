@@ -1,10 +1,14 @@
-﻿// TipServiceGetTipTypesTests.cs
+﻿// TipServiceGetTipTypesTests.cs - Fixed
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Business.Tests.Base;
 using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared.ViewModels;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using MockFactory = Locations.Core.Business.Tests.TestHelpers.MockFactory;
 using TestDataFactory = Locations.Core.Business.Tests.TestHelpers.TestDataFactory;
 
@@ -45,14 +49,17 @@ namespace Locations.Core.Business.Tests.Services.TipServiceTests
                 TestDataFactory.CreateTestTipType(3)
             };
 
+            var result = new Locations.Core.Shared.ViewModels.OperationResult<List<TipTypeViewModel>>(
+                true, testTipTypes);
+
             _mockTipTypeService.Setup(service => service.GetAllSortedAsync())
-                .ReturnsAsync(new OperationResult<List<TipTypeViewModel>>(false, default, "GetTipTypesAsync_ShouldReturnNonNullResult", new Exception()));
+                .ReturnsAsync(result);
 
             // Act
-            var result = await _tipService.GetTipTypesAsync();
+            var tipResult = await _tipService.GetTipTypesAsync();
 
             // Assert
-            Assert.IsNotNull(result);
+            Assert.IsNotNull(tipResult);
         }
 
         [TestMethod]
@@ -66,14 +73,17 @@ namespace Locations.Core.Business.Tests.Services.TipServiceTests
                 TestDataFactory.CreateTestTipType(3)
             };
 
+            var result = new Locations.Core.Shared.ViewModels.OperationResult<List<TipTypeViewModel>>(
+                true, testTipTypes);
+
             _mockTipTypeService.Setup(service => service.GetAllSortedAsync())
-                .ReturnsAsync(new OperationResult<List<TipTypeViewModel>>(false, default, "GetTipTypesAsync_WhenTipTypesExist_ShouldReturnSuccessResult", new Exception()));
+                .ReturnsAsync(result);
 
             // Act
-        //    var result = await _tipService.GetTipTypesAsync();
+            var tipResult = await _tipService.GetTipTypesAsync();
 
             // Assert
-          //  Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(tipResult.IsSuccess);
         }
 
         [TestMethod]
@@ -87,14 +97,17 @@ namespace Locations.Core.Business.Tests.Services.TipServiceTests
                 TestDataFactory.CreateTestTipType(3)
             };
 
+            var result = new Locations.Core.Shared.ViewModels.OperationResult<List<TipTypeViewModel>>(
+                true, testTipTypes);
+
             _mockTipTypeService.Setup(service => service.GetAllSortedAsync())
-                .ReturnsAsync(new OperationResult<List<TipTypeViewModel>>(false, default, "GetTipTypesAsync_WhenTipTypesExist_ShouldReturnCorrectCount", new Exception()));
+                .ReturnsAsync(result);
 
             // Act
-        //    var result = await _tipService.GetTipTypesAsync();
+            var tipResult = await _tipService.GetTipTypesAsync();
 
             // Assert
-         //   Assert.AreEqual(3, result.Data.Count);
+            Assert.AreEqual(3, tipResult.Data.Count);
         }
 
         [TestMethod]
@@ -120,13 +133,18 @@ namespace Locations.Core.Business.Tests.Services.TipServiceTests
             // Arrange
             string errorMessage = "Service error";
 
+            var result = new Locations.Core.Shared.ViewModels.OperationResult<List<TipTypeViewModel>>(
+                false, null, errorMessage);
+
             _mockTipTypeService.Setup(service => service.GetAllSortedAsync())
-                .ReturnsAsync(new OperationResult<List<TipTypeViewModel>>(false, default, "GetTipTypesAsync_WhenTipTypeServiceFails_ShouldReturnFailureResult", new Exception()));
+                .ReturnsAsync(result);
+
             // Act
-            var result = await _tipService.GetTipTypesAsync();
+            var tipResult = await _tipService.GetTipTypesAsync();
 
             // Assert
-            Assert.IsFalse(result.IsSuccess);
+            Assert.IsFalse(tipResult.IsSuccess);
+            Assert.AreEqual(errorMessage, tipResult.ErrorMessage);
         }
 
         [TestMethod]
@@ -143,6 +161,7 @@ namespace Locations.Core.Business.Tests.Services.TipServiceTests
 
             // Assert
             Assert.IsFalse(result.IsSuccess);
+            Assert.IsTrue(result.ErrorMessage.Contains("Test exception"));
         }
 
         [TestMethod]

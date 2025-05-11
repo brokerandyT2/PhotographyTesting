@@ -1,13 +1,11 @@
-﻿using Locations.Core.Shared.ViewModels;
+﻿// WeatherViewModelTests.cs - Fixed
+using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
-
-// Use explicit namespace to resolve ambiguity
-using ServiceOperationResult = Locations.Core.Shared.ViewModelServices.OperationResult<Locations.Core.Shared.ViewModels.WeatherViewModel>;
 
 namespace Locations.Core.Business.Tests.ViewModels
 {
@@ -77,6 +75,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             Assert.AreEqual(1, _viewModel.Id);
             Assert.AreEqual(2, _viewModel.LocationId);
             Assert.AreEqual(new DateTime(2023, 1, 1), _viewModel.Timestamp);
+            // WeatherViewModelTests.cs - Fixed (continued)
             Assert.AreEqual(72.5, _viewModel.Temperature);
             Assert.AreEqual("Partly Cloudy", _viewModel.Description);
             Assert.AreEqual(5.2, _viewModel.WindSpeed);
@@ -117,7 +116,8 @@ namespace Locations.Core.Business.Tests.ViewModels
                 LastUpdate = DateTime.Now
             };
 
-            var result = new ServiceOperationResult(true, weatherData);
+            var result = new Locations.Core.Shared.ViewModels.OperationResult<WeatherViewModel>(
+                true, weatherData);
 
             _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
                 .ReturnsAsync(result);
@@ -151,7 +151,8 @@ namespace Locations.Core.Business.Tests.ViewModels
             // Arrange
             _viewModel.LocationId = 1;
 
-            var result = new ServiceOperationResult(false, null, "Failed to fetch weather data");
+            var result = new Locations.Core.Shared.ViewModels.OperationResult<WeatherViewModel>(
+                false, null, "Failed to fetch weather data");
 
             _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
                 .ReturnsAsync(result);
@@ -190,7 +191,8 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.LocationId = 1;
             string forecastData = "5-day forecast data";
 
-            var result = new Locations.Core.Shared.ViewModelServices.OperationResult<string>(true, forecastData);
+            var result = new Locations.Core.Shared.ViewModels.OperationResult<string>(
+                true, forecastData);
 
             _mockWeatherService.Setup(service => service.GetForecastForLocationAsync(1, 5))
                 .ReturnsAsync(result);
@@ -223,7 +225,8 @@ namespace Locations.Core.Business.Tests.ViewModels
             // Arrange
             _viewModel.LocationId = 1;
 
-            var result = new Locations.Core.Shared.ViewModelServices.OperationResult<string>(false, null, "Failed to fetch forecast data");
+            var result = new Locations.Core.Shared.ViewModels.OperationResult<string>(
+                false, null, "Failed to fetch forecast data");
 
             _mockWeatherService.Setup(service => service.GetForecastForLocationAsync(1, 5))
                 .ReturnsAsync(result);

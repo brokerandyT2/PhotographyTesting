@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿// TipsViewModelTests.cs - Fixed
+using CommunityToolkit.Mvvm.Input;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -96,8 +97,7 @@ namespace Locations.Core.Business.Tests.ViewModels
 
             _mockTipService.Setup(service => service.GetTipTypesAsync())
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<List<TipTypeDTO>>.Failure(
-                    Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
-                    errorMessage));
+                    errorMessage, null, Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown));
 
             // Act - trigger LoadDataAsync via RefreshCommand
             await ((AsyncRelayCommand)_viewModel.RefreshCommand).ExecuteAsync(null);
@@ -203,8 +203,7 @@ namespace Locations.Core.Business.Tests.ViewModels
 
             _mockTipService.Setup(service => service.GetRandomTipForTypeAsync(3))
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<TipDTO>.Failure(
-                    Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
-                    errorMessage));
+                    errorMessage, null, Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown));
 
             // Act - We need to use reflection to call the private method
             var method = typeof(TipsViewModel).GetMethod("LoadTipForTypeAsync",

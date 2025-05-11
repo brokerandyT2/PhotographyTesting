@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿// LocationServiceCoordinatesTests.cs - Fixed
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Threading.Tasks;
@@ -10,12 +11,6 @@ using Locations.Core.Shared.ViewModels;
 using Locations.Core.Business.Tests.Base;
 using MockFactory = Locations.Core.Business.Tests.TestHelpers.MockFactory;
 using TestDataFactory = Locations.Core.Business.Tests.TestHelpers.TestDataFactory;
-
-// Use explicit namespaces to resolve ambiguity
-using ViewModelOperationResult = Locations.Core.Shared.ViewModels.OperationResult<Locations.Core.Shared.ViewModels.LocationViewModel>;
-using ServiceOperationResult = Locations.Core.Shared.ViewModelServices.OperationResult<Locations.Core.Shared.ViewModels.LocationViewModel>;
-using ServiceLocationChangedEventArgs = Locations.Core.Shared.ViewModelServices.LocationChangedEventArgs;
-using ViewModelLocationChangedEventArgs = Locations.Core.Shared.ViewModels.LocationChangedEventArgs;
 
 namespace Locations.Core.Business.Tests.Services.LocationServiceTests
 {
@@ -81,25 +76,6 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
 
             // Assert
             Assert.AreEqual(latitude, result.Lattitude);
-        }
-
-        [TestMethod]
-        public void GetLocationByCoordinates_WhenLocationExists_ShouldReturnLocationWithCorrectLongitude()
-        {
-            // Arrange
-            double latitude = 40.7128;
-            double longitude = -74.0060;
-            var testLocation = TestDataFactory.CreateTestLocation();
-            testLocation.Lattitude = latitude;
-            testLocation.Longitude = longitude;
-
-            _mockLocationRepository.Setup(repo => repo.GetByCoordinatesAsync(latitude, longitude))
-                .ReturnsAsync(DataOperationResult<LocationViewModel>.Success(testLocation));
-
-            // Act
-            var result = _locationService.GetLocationByCoordinates(latitude, longitude);
-
-            // Assert
             Assert.AreEqual(longitude, result.Longitude);
         }
 
@@ -133,8 +109,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             string errorMessage = "Database error";
 
             _mockLocationRepository.Setup(repo => repo.GetByCoordinatesAsync(latitude, longitude))
-                .ReturnsAsync(DataOperationResult<LocationViewModel>.Failure(
-                    ErrorSource.Database, errorMessage));
+                .ReturnsAsync(DataOperationResult<LocationViewModel>.Failure(errorMessage, null, ErrorSource.Database));
 
             // Act
             var result = _locationService.GetLocationByCoordinates(latitude, longitude);
@@ -144,7 +119,6 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             Assert.AreEqual(0, result.Id);
         }
 
-        // In your test: Change your verification to not expect an Exception parameter
         [TestMethod]
         public void GetLocationByCoordinates_WhenLocationDoesNotExist_ShouldLogWarning()
         {
@@ -154,15 +128,14 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             string errorMessage = "Location not found";
 
             _mockLocationRepository.Setup(repo => repo.GetByCoordinatesAsync(latitude, longitude))
-                .ReturnsAsync(DataOperationResult<LocationViewModel>.Failure(
-                    ErrorSource.Database, errorMessage));
+                .ReturnsAsync(DataOperationResult<LocationViewModel>.Failure(errorMessage, null, ErrorSource.Database));
 
             // Act
             _locationService.GetLocationByCoordinates(latitude, longitude);
 
-            // Assert
+            // Assert - Verify that LogWarning was called (without an exception parameter)
             MockLoggerService.Verify(
-                logger => logger.LogWarning(It.IsAny<string>(), new Exception()),
+                logger => logger.LogWarning(It.IsAny<string>(), It.IsAny<Exception>()),
                 Times.Once);
         }
 
