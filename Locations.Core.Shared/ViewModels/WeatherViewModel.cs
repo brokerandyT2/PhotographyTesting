@@ -14,28 +14,38 @@ namespace Locations.Core.Shared.ViewModels
         // Services
         private readonly IWeatherService? _weatherService;
 
-        // Private fields for UI state
-        private bool _vmIsBusy;
-        private string _vmErrorMessage = string.Empty;
-
-        // UI state properties with notification
-        public bool VmIsBusy
+        // Standardized properties
+        private bool _isBusy;
+        public bool IsBusy
         {
-            get => _vmIsBusy;
+            get => _isBusy;
             set
             {
-                _vmIsBusy = value;
-                OnPropertyChanged(nameof(VmIsBusy));
+                _isBusy = value;
+                OnPropertyChanged(nameof(IsBusy));
             }
         }
 
-        public string VmErrorMessage
+        private bool _isError;
+        public bool IsError
         {
-            get => _vmErrorMessage;
+            get => _isError;
             set
             {
-                _vmErrorMessage = value;
-                OnPropertyChanged(nameof(VmErrorMessage));
+                _isError = value;
+                OnPropertyChanged(nameof(IsError));
+            }
+        }
+
+        private string _errorMessage = string.Empty;
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                _errorMessage = value;
+                OnPropertyChanged(nameof(ErrorMessage));
+                IsError = !string.IsNullOrEmpty(value);
             }
         }
 
@@ -49,7 +59,7 @@ namespace Locations.Core.Shared.ViewModels
         public WeatherViewModel() : base()
         {
             // Initialize commands
-            RefreshWeatherCommand = new AsyncRelayCommand(RefreshWeatherAsync, () => !VmIsBusy);
+            RefreshWeatherCommand = new AsyncRelayCommand(RefreshWeatherAsync, () => !IsBusy);
         }
 
         // Constructor with DI
@@ -57,7 +67,10 @@ namespace Locations.Core.Shared.ViewModels
         {
             _weatherService = weatherService;
         }
-
+        protected virtual void OnErrorOccurred(Locations.Core.Shared.ViewModels.OperationErrorEventArgs args)
+        {
+            ErrorOccurred?.Invoke(this, args);
+        }
         // Initialize from a DTO
         public void InitializeFromDTO(WeatherDTO dto)
         {
@@ -89,10 +102,10 @@ namespace Locations.Core.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error initializing from DTO: {ex.Message}";
+                ErrorMessage = $"Error initializing from DTO: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
         }
@@ -104,8 +117,8 @@ namespace Locations.Core.Shared.ViewModels
 
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 // Get the location ID to refresh weather for
                 var locationId = LocationId;
@@ -113,10 +126,10 @@ namespace Locations.Core.Shared.ViewModels
                 // Check if we have a valid location ID
                 if (locationId <= 0)
                 {
-                    VmErrorMessage = "Invalid location ID. Cannot refresh weather.";
+                    ErrorMessage = "Invalid location ID. Cannot refresh weather.";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         OperationErrorSource.InvalidArgument,
-                        VmErrorMessage));
+                        ErrorMessage));
                     return;
                 }
 
@@ -133,24 +146,24 @@ namespace Locations.Core.Shared.ViewModels
                 }
                 else
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to fetch weather data";
+                    ErrorMessage = result.ErrorMessage ?? "Failed to fetch weather data";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         result.Source,
-                        VmErrorMessage,
+                        ErrorMessage,
                         result.Exception));
                 }
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error refreshing weather: {ex.Message}";
+                ErrorMessage = $"Error refreshing weather: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -161,19 +174,20 @@ namespace Locations.Core.Shared.ViewModels
 
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 // Get the location ID to fetch forecast for
                 var locationId = LocationId;
 
                 // Check if we have a valid location ID
+                // Check if we have a valid location ID
                 if (locationId <= 0)
                 {
-                    VmErrorMessage = "Invalid location ID. Cannot fetch forecast.";
+                    ErrorMessage = "Invalid location ID. Cannot fetch forecast.";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         OperationErrorSource.InvalidArgument,
-                        VmErrorMessage));
+                        ErrorMessage));
                     return;
                 }
 
@@ -187,32 +201,29 @@ namespace Locations.Core.Shared.ViewModels
                 }
                 else
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to fetch forecast data";
+                    ErrorMessage = result.ErrorMessage ?? "Failed to fetch forecast data";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         result.Source,
-                        VmErrorMessage,
+                        ErrorMessage,
                         result.Exception));
                 }
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error fetching forecast: {ex.Message}";
+                ErrorMessage = $"Error fetching forecast: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
         // Method to handle error bubbling
-        protected virtual void OnErrorOccurred(OperationErrorEventArgs e)
-        {
-            ErrorOccurred?.Invoke(this, e);
-        }
+      
 
         // Helper methods for converting and formatting weather data
 
@@ -220,13 +231,12 @@ namespace Locations.Core.Shared.ViewModels
         {
             if (isFahrenheit)
             {
-                return $"{Temperature}°F";
+                return $"{Temperature} °F";
             }
             else
             {
                 // Convert to Celsius
-                var celsius = (Temperature - 32) * 5 / 9;
-                return $"{Math.Round(celsius, 1)}°C";
+                return $"{Temperature} °C";
             }
         }
 
@@ -239,8 +249,7 @@ namespace Locations.Core.Shared.ViewModels
             else
             {
                 // Convert to km/h
-                var kmh = WindSpeed * 1.60934;
-                return $"{Math.Round(kmh, 1)} km/h";
+                return $"{WindSpeed} kph";
             }
         }
 

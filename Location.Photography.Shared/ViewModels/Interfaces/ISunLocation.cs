@@ -18,8 +18,7 @@ namespace Location.Photography.Shared.ViewModels.Interfaces
         double DeviceTilt { get; set; }
         bool ElevationMatched { get; set; }
         bool BeginMonitoring { get; set; }
-        bool VmIsBusy { get; set; }
-        string VmErrorMessage { get; set; }
+
         ObservableCollection<LocationViewModel> Locations { get; set; }
 
         // Methods

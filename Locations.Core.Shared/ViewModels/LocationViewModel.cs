@@ -12,9 +12,6 @@ namespace Locations.Core.Shared.ViewModels
 {
     public partial class LocationViewModel : LocationDTO, ILocationViewModel, IValidatable
     {
-
-
-
         // Services injected via DI
         private readonly ILocationService? _locationService;
         private readonly IMediaService? _mediaService;
@@ -23,26 +20,38 @@ namespace Locations.Core.Shared.ViewModels
         // Event for error handling
         public event EventHandler<OperationErrorEventArgs>? ErrorOccurred;
 
-        // UI state properties with completely unique names
-        private bool _vmIsBusy;
-        public bool VmIsBusy
+        // Standardized properties
+        private bool _isBusy;
+        public bool IsBusy
         {
-            get => _vmIsBusy;
+            get => _isBusy;
             set
             {
-                _vmIsBusy = value;
-                OnPropertyChanged(nameof(VmIsBusy));
+                _isBusy = value;
+                OnPropertyChanged(nameof(IsBusy));
             }
         }
 
-        private string _vmErrorMessage = string.Empty;
-        public string VmErrorMessage
+        private bool _isError;
+        public bool IsError
         {
-            get => _vmErrorMessage;
+            get => _isError;
             set
             {
-                _vmErrorMessage = value;
-                OnPropertyChanged(nameof(VmErrorMessage));
+                _isError = value;
+                OnPropertyChanged(nameof(IsError));
+            }
+        }
+
+        private string _errorMessage = string.Empty;
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                _errorMessage = value;
+                OnPropertyChanged(nameof(ErrorMessage));
+                IsError = !string.IsNullOrEmpty(value);
             }
         }
 
@@ -86,10 +95,10 @@ namespace Locations.Core.Shared.ViewModels
             DateFormat = "MM/dd/yyyy";
 
             // Initialize commands
-            SaveCommand = new AsyncRelayCommand(SaveAsync, () => !VmIsBusy);
-            DeleteCommand = new AsyncRelayCommand(DeleteAsync, () => Id > 0 && !VmIsBusy);
-            TakePhotoCommand = new AsyncRelayCommand(TakePhotoAsync, () => !VmIsBusy);
-            PickPhotoCommand = new AsyncRelayCommand(PickPhotoAsync, () => !VmIsBusy);
+            SaveCommand = new AsyncRelayCommand(SaveAsync, () => !IsBusy);
+            DeleteCommand = new AsyncRelayCommand(DeleteAsync, () => Id > 0 && !IsBusy);
+            TakePhotoCommand = new AsyncRelayCommand(TakePhotoAsync, () => !IsBusy);
+            PickPhotoCommand = new AsyncRelayCommand(PickPhotoAsync, () => !IsBusy);
             StartLocationTrackingCommand = new AsyncRelayCommand(StartLocationTrackingAsync, () => !VmIsLocationTracking);
             StopLocationTrackingCommand = new AsyncRelayCommand(StopLocationTrackingAsync, () => VmIsLocationTracking);
         }
@@ -157,13 +166,13 @@ namespace Locations.Core.Shared.ViewModels
 
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 // Validate data first
                 if (!Validate(out var errors))
                 {
-                    VmErrorMessage = string.Join(Environment.NewLine, errors);
+                    ErrorMessage = string.Join(Environment.NewLine, errors);
                     return;
                 }
 
@@ -188,24 +197,24 @@ namespace Locations.Core.Shared.ViewModels
 
                 if (!result.IsSuccess)
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to save location";
+                    ErrorMessage = result.ErrorMessage ?? "Failed to save location";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                        VmErrorMessage,
+                        ErrorMessage,
                         result.Exception));
                 }
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error saving location: {ex.Message}";
+                ErrorMessage = $"Error saving location: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -219,8 +228,8 @@ namespace Locations.Core.Shared.ViewModels
 
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 // Implementation pending
                 await Task.Delay(500); // Simulating delete operation
@@ -228,10 +237,10 @@ namespace Locations.Core.Shared.ViewModels
 
                 if (!success)
                 {
-                    VmErrorMessage = "Failed to delete location";
+                    ErrorMessage = "Failed to delete location";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                        VmErrorMessage));
+                        ErrorMessage));
                 }
                 else
                 {
@@ -241,15 +250,15 @@ namespace Locations.Core.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error deleting location: {ex.Message}";
+                ErrorMessage = $"Error deleting location: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -263,8 +272,8 @@ namespace Locations.Core.Shared.ViewModels
 
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 var result = await _mediaService.CapturePhotoAsync();
 
@@ -274,23 +283,23 @@ namespace Locations.Core.Shared.ViewModels
                 }
                 else
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to capture photo";
+                    ErrorMessage = result.ErrorMessage ?? "Failed to capture photo";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.MediaService,
-                        VmErrorMessage));
+                        ErrorMessage));
                 }
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error taking photo: {ex.Message}";
+                ErrorMessage = $"Error taking photo: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -304,8 +313,8 @@ namespace Locations.Core.Shared.ViewModels
 
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 var result = await _mediaService.PickPhotoAsync();
 
@@ -315,23 +324,23 @@ namespace Locations.Core.Shared.ViewModels
                 }
                 else
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to pick photo";
+                    ErrorMessage = result.ErrorMessage ?? "Failed to pick photo";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.MediaService,
-                        VmErrorMessage));
+                        ErrorMessage));
                 }
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error picking photo: {ex.Message}";
+                ErrorMessage = $"Error picking photo: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -345,8 +354,8 @@ namespace Locations.Core.Shared.ViewModels
 
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 var result = await _geolocationService.StartTrackingAsync();
 
@@ -358,23 +367,23 @@ namespace Locations.Core.Shared.ViewModels
                 }
                 else
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to start location tracking";
+                    ErrorMessage = result.ErrorMessage ?? "Failed to start location tracking";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.GeolocationService,
-                        VmErrorMessage));
+                        ErrorMessage));
                 }
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error starting location tracking: {ex.Message}";
+                ErrorMessage = $"Error starting location tracking: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -388,8 +397,8 @@ namespace Locations.Core.Shared.ViewModels
 
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 await _geolocationService.StopTrackingAsync();
 
@@ -398,15 +407,15 @@ namespace Locations.Core.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error stopping location tracking: {ex.Message}";
+                ErrorMessage = $"Error stopping location tracking: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -438,7 +447,7 @@ namespace Locations.Core.Shared.ViewModels
         /// </summary>
         private void OnServiceErrorOccurred(object sender, OperationErrorEventArgs e)
         {
-            VmErrorMessage = e.Message;
+            ErrorMessage = e.Message;
             OnErrorOccurred(e);
         }
 

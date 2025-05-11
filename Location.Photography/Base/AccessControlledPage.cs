@@ -468,7 +468,7 @@ namespace Location.Photography.Base
             // If this is a ViewModel error, it can be bubbled up through the view model
             if (BindingContext is ViewModelBase viewModel)
             {
-                viewModel.VmErrorMessage = $"{message}: {ex.Message}";
+                viewModel.ErrorMessage = $"{message}: {ex.Message}";
             }
         }
 

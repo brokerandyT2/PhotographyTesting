@@ -1,21 +1,34 @@
-﻿
-using System;
-using System.Collections.Generic;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using Locations.Core.Shared.DTO;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace Location.Photography.Shared.ViewModels
 {
-    public abstract class ViewModelBase : DTOBase, INotifyPropertyChanged
+    public partial class ViewModelBase : ObservableObject
     {
+        [ObservableProperty]
+        private bool isBusy;
+
+        [ObservableProperty]
+        private bool isError;
+
+        private string _errorMessage = string.Empty;
+
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                if (SetProperty(ref _errorMessage, value))
+                {
+                    // Directly update IsError property when ErrorMessage changes
+                    IsError = !string.IsNullOrEmpty(value);
+                }
+            }
+        }
+
         protected ViewModelBase()
         {
         }
-
-        //abstract event PropertyChangedEventHandler? PropertyChanged;
-        public abstract event PropertyChangedEventHandler? PropertyChanged;
     }
 }

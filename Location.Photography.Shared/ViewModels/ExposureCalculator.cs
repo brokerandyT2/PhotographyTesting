@@ -1,312 +1,273 @@
 ﻿using Location.Photography.Shared.ExposureCalculator;
 using Location.Photography.Shared.ViewModels.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Location.Photography.Shared.ViewModels.ExposureCalculator;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Location.Photography.Shared.ViewModels
-{
-    public class ExposureCalculator : ViewModelBase, IExposureCalculator
     {
-        public override event PropertyChangedEventHandler? PropertyChanged;
-        private bool _showError;
-        private string _errorMessage;
-        private bool _vmIsBusy;
+        public partial class ExposureCalculator : ViewModelBase, IExposureCalculator
+        {
+            private bool _showError;
 
-        public bool ShowError
-        {
-            get => _showError;
-            set
+            public bool ShowError
             {
-                _showError = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowError)));
+                get => _showError;
+                set
+                {
+                    _showError = value;
+                    OnPropertyChanged(nameof(ShowError));
+                }
             }
-        }
 
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set
-            {
-                _errorMessage = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ErrorMessage)));
-                // Update ShowError based on whether there's an error message
-                ShowError = !string.IsNullOrEmpty(value);
-            }
-        }
+            // Map interface properties to the base class properties
 
-        public bool VmIsBusy
-        {
-            get => _vmIsBusy;
-            set
-            {
-                _vmIsBusy = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(VmIsBusy)));
-            }
-        }
 
-        private string[] _fullStopApeature = Apetures.Full;
-        private string[] _halfStopApeature = Apetures.Halves;
-        private string[] _thirdStopApeature = Apetures.Thirds;
+            private string[] _fullStopApeature = Apetures.Full;
+            private string[] _halfStopApeature = Apetures.Halves;
+            private string[] _thirdStopApeature = Apetures.Thirds;
 
-        private string[] _fullStopISO = ISOs.Full;
-        private string[] _halfStopISO = ISOs.Halves;
-        private string[] _thirdStopISO = ISOs.Thirds;
+            private string[] _fullStopISO = ISOs.Full;
+            private string[] _halfStopISO = ISOs.Halves;
+            private string[] _thirdStopISO = ISOs.Thirds;
 
-        private string[] _fullStopShutterSpeeds = ShutterSpeeds.Full;
-        private string[] _halfStopShutterSpeeds = ShutterSpeeds.Halves;
-        private string[] _thirdStopShutterSpeeds = ShutterSpeeds.Thirds;
-        private FixedValue _fixedvalue;
-        public enum FixedValue
-        { ShutterSpeeds = 0, ISOs = 1, Apeature = 3 }
-        public enum Divisions
-        { Full, Half, Thirds }
-        private Divisions _divisions;
-        public Divisions FullHalfThirds
-        {
-            get { return _divisions; }
-            set
+            private string[] _fullStopShutterSpeeds = ShutterSpeeds.Full;
+            private string[] _halfStopShutterSpeeds = ShutterSpeeds.Halves;
+            private string[] _thirdStopShutterSpeeds = ShutterSpeeds.Thirds;
+            private FixedValue _fixedvalue;
+            public enum FixedValue
+            { ShutterSpeeds = 0, ISOs = 1, Apeature = 3 }
+            public enum Divisions
+            { Full, Half, Thirds }
+            private Divisions _divisions;
+            public Divisions FullHalfThirds
             {
-                _divisions = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FullHalfThirds)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ApeaturesForPicker)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ISOsForPicker)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShutterSpeedsForPicker)));
+                get { return _divisions; }
+                set
+                {
+                    _divisions = value;
+                    OnPropertyChanged(nameof(FullHalfThirds));
+                    OnPropertyChanged(nameof(ApeaturesForPicker));
+                    OnPropertyChanged(nameof(ISOsForPicker));
+                    OnPropertyChanged(nameof(ShutterSpeedsForPicker));
+                }
             }
-        }
-        public string ISOResult
-        {
-            get => _isoResult;
-            set
+            public string ISOResult
             {
-                _isoResult = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ISOResult)));
+                get => _isoResult;
+                set
+                {
+                    _isoResult = value;
+                    OnPropertyChanged(nameof(ISOResult));
+                }
             }
-        }
-        private string _isoResult;
-        private string _shutterSpeedResult;
-        private string _fstopResult;
-        public string ShutterSpeedResult
-        {
-            get => _shutterSpeedResult;
-            set
+            private string _isoResult;
+            private string _shutterSpeedResult;
+            private string _fstopResult;
+            public string ShutterSpeedResult
             {
-                _shutterSpeedResult = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShutterSpeedResult)));
+                get => _shutterSpeedResult;
+                set
+                {
+                    _shutterSpeedResult = value;
+                    OnPropertyChanged(nameof(ShutterSpeedResult));
+                }
             }
-        }
-        public string FStopResult { get => _fstopResult; set { _fstopResult = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FStopResult))); } }
-        public FixedValue ToCalculate
-        {
-            get { return _fixedvalue; }
-            set
+            public string FStopResult { get => _fstopResult; set { _fstopResult = value; OnPropertyChanged(nameof(FStopResult)); } }
+            public FixedValue ToCalculate
             {
-                _fixedvalue = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToCalculate)));
+                get { return _fixedvalue; }
+                set
+                {
+                    _fixedvalue = value;
+                    OnPropertyChanged(nameof(ToCalculate));
+                }
             }
-        }
-        public string[] ApeaturesForPicker
-        {
-            get
+            public string[] ApeaturesForPicker
             {
-                //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ApeaturesForPicker)));
+                get
+                {
+                    if (FullHalfThirds == Divisions.Full)
+                    {
+                        return _fullStopApeature;
+                    }
+                    else if (FullHalfThirds == Divisions.Half)
+                    {
+                        return _halfStopApeature;
+                    }
+                    else
+                    {
+                        return _thirdStopApeature;
+                    }
+                }
+            }
+            public string[] ISOsForPicker
+            {
+                get
+                {
+                    if (FullHalfThirds == Divisions.Full)
+                    {
+                        return _fullStopISO;
+                    }
+                    else if (FullHalfThirds == Divisions.Half)
+                    {
+                        return _halfStopISO;
+                    }
+                    else
+                    {
+                        return _thirdStopApeature;
+                    }
+                }
+            }
+
+            public string[] ShutterSpeedsForPicker
+            {
+                get
+                {
+                    if (FullHalfThirds == Divisions.Full)
+                    {
+                        return _fullStopShutterSpeeds;
+                    }
+                    else if (FullHalfThirds == Divisions.Half)
+                    {
+                        return _halfStopShutterSpeeds;
+                    }
+                    else
+                    {
+                        return _thirdStopApeature;
+                    }
+                }
+            }
+
+            private string _fStopSelected;
+            private string _iSOSelected;
+            private string _shutterSpeedSelected;
+
+            public string FStopSelected
+            {
+                get { return _fStopSelected; }
+                set { _fStopSelected = value; OnPropertyChanged(nameof(FStopSelected)); }
+            }
+            public string ISOSelected
+            {
+                get { return _iSOSelected; }
+                set
+                {
+                    _iSOSelected = value;
+                    OnPropertyChanged(nameof(ISOSelected));
+                }
+            }
+
+            public string ShutterSpeedSelected
+            {
+                get
+                {
+                    return _shutterSpeedSelected;
+                }
+                set
+                {
+                    _shutterSpeedSelected = value;
+                    OnPropertyChanged(nameof(ShutterSpeedSelected));
+                }
+            }
+            private string _oldshutterpseed;
+            private string _oldfstop;
+            private string _oldISO;
+            public string OldShutterSpeed
+            {
+                get => _oldshutterpseed;
+                set
+                {
+                    _oldshutterpseed = value;
+                    OnPropertyChanged(nameof(OldShutterSpeed));
+                }
+            }
+            public string OldFstop { get => _oldfstop; set { _oldfstop = value; OnPropertyChanged(nameof(OldFstop)); } }
+            public string OldISO { get => _oldISO; set { _oldISO = value; OnPropertyChanged(nameof(OldISO)); } }
+
+            private enum CalculateType
+            {
+                ISO,
+                ShutterSpeed,
+                Apeature
+            }
+
+            public void Calculate()
+            {
+                ExposureCalculator.ExposureTriangleValues etv = new ExposureCalculator.ExposureTriangleValues();
+                etv.Aperture = OldFstop;
+                etv.Shutter = OldShutterSpeed;
+                etv.Iso = OldISO;
+
+                ExposureIncrements steps;
                 if (FullHalfThirds == Divisions.Full)
                 {
-
-                    return _fullStopApeature;
+                    steps = ExposureIncrements.Full;
                 }
-
                 else if (FullHalfThirds == Divisions.Half)
                 {
-                    return _halfStopApeature;
+                    steps = ExposureIncrements.Halves;
                 }
                 else
                 {
-                    return _thirdStopApeature;
+                    steps = ExposureIncrements.Thirds;
                 }
-
-            }
-        }
-        public string[] ISOsForPicker
-        {
-            get
-            {
-                //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ISOsForPicker)));
-                if (FullHalfThirds == Divisions.Full)
+                Calculator c = new Calculator(steps);
+                try
                 {
+                    // Clear any previous error
+                    ErrorMessage = string.Empty;
 
-                    return _fullStopISO;
+                    switch (ToCalculate)
+                    {
+                        case FixedValue.Apeature:
+                            ISOResult = ISOSelected;
+                            ShutterSpeedResult = ShutterSpeedSelected;
+                            FStopResult = c.CalculateNewApertureFromBaseExposure(etv, ShutterSpeedSelected, ISOSelected);
+                            break;
+
+                        case FixedValue.ShutterSpeeds:
+                            ISOResult = ISOSelected;
+                            FStopResult = FStopSelected;
+                            ShutterSpeedResult = c.CalculateNewShutterFromBaseExposure(etv, FStopSelected, ISOSelected);
+                            break;
+
+                        case FixedValue.ISOs:
+                            ISOResult = c.CalculateNewIsoFromBaseExposure(etv, FStopSelected, ShutterSpeedSelected);
+                            FStopResult = FStopSelected;
+                            ShutterSpeedResult = ShutterSpeedSelected;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    // Check if there was an error from the calculator
+                    if (!string.IsNullOrEmpty(c.ErrorMessage))
+                    {
+                        ErrorMessage = c.ErrorMessage;
+                    }
                 }
-
-                else if (FullHalfThirds == Divisions.Half)
+                catch (Exception ex)
                 {
-                    return _halfStopISO;
-                }
-                else
-                {
-                    return _thirdStopApeature;
+                    // Handle any exceptions during calculation
+                    ErrorMessage = ex.Message;
                 }
             }
-        }
 
-        public string[] ShutterSpeedsForPicker
-        {
-            get
+            // The remaining code is unchanged...
+            public enum ExposureIncrements
             {
-                if (FullHalfThirds == Divisions.Full)
-                {
-
-                    return _fullStopShutterSpeeds;
-                }
-
-                else if (FullHalfThirds == Divisions.Half)
-                {
-                    return _halfStopShutterSpeeds;
-                }
-                else
-                {
-                    return _thirdStopApeature;
-                }
-
-
+                Thirds,
+                Halves,
+                Full
             }
-        }
 
-        private string _fStopSelected;
-        private string _iSOSelected;
-        private string _shutterSpeedSelected;
-
-        public string FStopSelected
-        {
-            get { return _fStopSelected; }
-            set { _fStopSelected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FStopSelected))); }
-        }
-        public string ISOSelected
-        {
-            get { return _iSOSelected; }
-            set
+            public class ExposureTriangleValues
             {
-                _iSOSelected = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ISOSelected)));
+                public string Iso { get; set; }
+                public string Aperture { get; set; }
+                public string Shutter { get; set; }
             }
-        }
 
-        public string ShutterSpeedSelected
-        {
-            get
-            {
-                return _shutterSpeedSelected;
-            }
-            set
-            {
-                _shutterSpeedSelected = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShutterSpeedSelected)));
-            }
-        }
-        private string _oldshutterpseed;
-        private string _oldfstop;
-        private string _oldISO;
-        public string OldShutterSpeed
-        {
-            get => _oldshutterpseed;
-            set
-            {
-                _oldshutterpseed = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OldShutterSpeed)));
-            }
-        }
-        public string OldFstop { get => _oldfstop; set { _oldfstop = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OldFstop))); } }
-        public string OldISO { get => _oldISO; set { _oldISO = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OldISO))); } }
-
-        private enum CalculateType
-        {
-            ISO,
-            ShutterSpeed,
-            Apeature
-        }
-
-        public void Calculate()
-        {
-            ExposureCalculator.ExposureTriangleValues etv = new ExposureCalculator.ExposureTriangleValues();
-            etv.Aperture = OldFstop;
-            etv.Shutter = OldShutterSpeed;
-            etv.Iso = OldISO;
-
-            ExposureIncrements steps;
-            if (FullHalfThirds == Divisions.Full)
-            {
-                steps = ExposureIncrements.Full;
-            }
-            else if (FullHalfThirds == Divisions.Half)
-            {
-                steps = ExposureIncrements.Halves;
-            }
-            else
-            {
-                steps = ExposureIncrements.Thirds;
-            }
-            Calculator c = new Calculator(steps);
-            try
-            {
-                // Clear any previous error
-                ErrorMessage = string.Empty;
-
-                switch (ToCalculate)
-                {
-
-                    case FixedValue.Apeature:
-                        ISOResult = ISOSelected;
-                        ShutterSpeedResult = ShutterSpeedSelected;
-                        FStopResult = c.CalculateNewApertureFromBaseExposure(etv, ShutterSpeedSelected, ISOSelected);
-                        break;
-
-                    case FixedValue.ShutterSpeeds:
-                        ISOResult = ISOSelected;
-                        FStopResult = FStopSelected;
-                        ShutterSpeedResult = c.CalculateNewShutterFromBaseExposure(etv, FStopSelected, ISOSelected);
-                        break;
-
-                    case FixedValue.ISOs:
-                        ISOResult = c.CalculateNewIsoFromBaseExposure(etv, FStopSelected, ShutterSpeedSelected);
-                        FStopResult = FStopSelected;
-                        ShutterSpeedResult = ShutterSpeedSelected;
-
-                        break;
-                    default:
-                        break;
-                }
-
-                // Check if there was an error from the calculator
-                if (!string.IsNullOrEmpty(c.ErrorMessage))
-                {
-                    ErrorMessage = c.ErrorMessage;
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle any exceptions during calculation
-                ErrorMessage = ex.Message;
-            }
-        }
-        public enum ExposureIncrements
-        {
-            Thirds,
-            Halves,
-            Full
-        }
-        public class ExposureTriangleValues
-        {
-            public string Iso { get; set; }
-            public string Aperture { get; set; }
-            public string Shutter { get; set; }
-        }
-        public class Calculator
+            public class Calculator
         {
             private readonly ExposureIncrements _increments;
             private readonly Dictionary<ExposureIncrements, IList<string>> _shutterSpeeds;

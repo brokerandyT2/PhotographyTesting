@@ -23,8 +23,7 @@ namespace Location.Photography.Shared.ViewModels.Interfaces
         string ExpirationDateDisplay { get; }
         string ErrorMessage { get; }
         bool HasError { get; }
-        bool VmIsBusy { get; }
-        string VmErrorMessage { get; }
+
 
         ICommand LoadSubscriptionsCommand { get; }
         ICommand PurchaseCommand { get; }

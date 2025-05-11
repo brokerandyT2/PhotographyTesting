@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace Location.Photography.Shared.ViewModels
 {
-    public class SceneEvaluationViewModel : ViewModelBase, ISceneEvaluation
+    public partial class SceneEvaluationViewModel : ViewModelBase, ISceneEvaluation
     {
         #region Fields
         private byte[] RedComponents;
@@ -28,17 +28,11 @@ namespace Location.Photography.Shared.ViewModels
         private string _greenHistogram = string.Empty;
         private string _blueHistogram = string.Empty;
         private string _contrastHistogram = string.Empty;
-        private bool _vmIsBusy;
-        private string _vmErrorMessage = string.Empty;
         private bool _isProcessing;
         #endregion
 
         #region Events
-        public override event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Event for error handling
-        /// </summary>
+        public event PropertyChangedEventHandler? PropertyChanged;
         public event EventHandler<OperationErrorEventArgs>? ErrorOccurred;
         #endregion
 
@@ -95,30 +89,17 @@ namespace Location.Photography.Shared.ViewModels
             }
         }
 
+        // Interface compatibility properties
         public bool VmIsBusy
         {
-            get => _vmIsBusy;
-            set
-            {
-                if (_vmIsBusy != value)
-                {
-                    _vmIsBusy = value;
-                    OnPropertyChanged();
-                }
-            }
+            get => IsBusy;
+            set => IsBusy = value;
         }
 
         public string VmErrorMessage
         {
-            get => _vmErrorMessage;
-            set
-            {
-                if (_vmErrorMessage != value)
-                {
-                    _vmErrorMessage = value;
-                    OnPropertyChanged();
-                }
-            }
+            get => ErrorMessage;
+            set => ErrorMessage = value;
         }
 
         public bool IsProcessing
@@ -166,23 +147,23 @@ namespace Location.Photography.Shared.ViewModels
         {
             try
             {
-                VmIsBusy = true;
+                IsBusy = true;
                 IsProcessing = true;
-                VmErrorMessage = string.Empty;
+                ErrorMessage = string.Empty;
 
                 await GetImage();
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error evaluating scene: {ex.Message}";
+                ErrorMessage = $"Error evaluating scene: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
                 IsProcessing = false;
             }
         }
@@ -203,10 +184,10 @@ namespace Location.Photography.Shared.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    VmErrorMessage = $"Error capturing photo: {ex.Message}";
+                    ErrorMessage = $"Error capturing photo: {ex.Message}";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         OperationErrorSource.MediaService,
-                        VmErrorMessage,
+                        ErrorMessage,
                         ex));
                     return -1;
                 }
@@ -290,10 +271,10 @@ namespace Location.Photography.Shared.ViewModels
                         {
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
-                                VmErrorMessage = $"Error processing image: {ex.Message}";
+                                ErrorMessage = $"Error processing image: {ex.Message}";
                                 OnErrorOccurred(new OperationErrorEventArgs(
                                     OperationErrorSource.Unknown,
-                                    VmErrorMessage,
+                                    ErrorMessage,
                                     ex));
                             });
                         }
@@ -302,10 +283,10 @@ namespace Location.Photography.Shared.ViewModels
             }
             else
             {
-                VmErrorMessage = "Camera capture is not supported on this device.";
+                ErrorMessage = "Camera capture is not supported on this device.";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.MediaService,
-                    VmErrorMessage));
+                    ErrorMessage));
             }
 
             return 0;

@@ -17,9 +17,6 @@ namespace Locations.Core.Shared.ViewModels
         private TipViewModel _selectedTip;
         private readonly ITipService? _tipService;
 
-        // Events
-        public new event PropertyChangedEventHandler? PropertyChanged;
-
         // Properties with notification
         public ObservableCollection<TipTypeViewModel> TipTypes
         {
@@ -28,7 +25,6 @@ namespace Locations.Core.Shared.ViewModels
             {
                 _tipTypes = value;
                 OnPropertyChanged(nameof(TipTypes));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TipTypes)));
             }
         }
 
@@ -39,7 +35,6 @@ namespace Locations.Core.Shared.ViewModels
             {
                 _selectedTip = value;
                 OnPropertyChanged(nameof(SelectedTip));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedTip)));
             }
         }
 
@@ -55,7 +50,7 @@ namespace Locations.Core.Shared.ViewModels
 
             // Initialize commands
             SelectTipCommand = new RelayCommand<TipViewModel>(SelectTip);
-            RefreshTipsCommand = new AsyncRelayCommand(LoadDataAsync, () => !VmIsBusy);
+            RefreshTipsCommand = new AsyncRelayCommand(LoadDataAsync, () => !IsBusy);
         }
 
         // Constructor with DI
@@ -95,19 +90,19 @@ namespace Locations.Core.Shared.ViewModels
                 }
                 else
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to load tip types";
+                    ErrorMessage = result.ErrorMessage ?? "Failed to load tip types";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                        VmErrorMessage,
+                        ErrorMessage,
                         result.Exception));
                 }
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error loading tips: {ex.Message}";
+                ErrorMessage = $"Error loading tips: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
         }
@@ -119,7 +114,7 @@ namespace Locations.Core.Shared.ViewModels
             {
                 if (_tipService == null || tipType == null) return;
 
-                VmIsBusy = true;
+                IsBusy = true;
 
                 var result = await _tipService.GetRandomTipForTypeAsync(tipType.Id);
 
@@ -139,24 +134,24 @@ namespace Locations.Core.Shared.ViewModels
                 }
                 else
                 {
-                    VmErrorMessage = result.ErrorMessage ?? $"Failed to load tip for type: {tipType.Name}";
+                    ErrorMessage = result.ErrorMessage ?? $"Failed to load tip for type: {tipType.Name}";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                        VmErrorMessage,
+                        ErrorMessage,
                         result.Exception));
                 }
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error loading tip: {ex.Message}";
+                ErrorMessage = $"Error loading tip: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -181,7 +176,7 @@ namespace Locations.Core.Shared.ViewModels
         private void OnTipTypeErrorOccurred(object sender, OperationErrorEventArgs e)
         {
             // Bubble up errors from tip types
-            VmErrorMessage = e.Message;
+            ErrorMessage = e.Message;
             OnErrorOccurred(e);
         }
 
@@ -189,7 +184,7 @@ namespace Locations.Core.Shared.ViewModels
         private void OnTipErrorOccurred(object sender, OperationErrorEventArgs e)
         {
             // Bubble up errors from tip
-            VmErrorMessage = e.Message;
+            ErrorMessage = e.Message;
             OnErrorOccurred(e);
         }
 

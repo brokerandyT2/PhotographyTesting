@@ -81,7 +81,7 @@ public partial class SunLocation : ContentPageBase
         {
             if (BindingContext is Location.Photography.Shared.ViewModels.SunLocation viewModel)
             {
-                viewModel.VmIsBusy = true;
+                viewModel.IsBusy = true;
 
                 // Get locations from the service
                 var result = await _locationService.GetLocationsAsync();
@@ -105,7 +105,7 @@ public partial class SunLocation : ContentPageBase
                 else
                 {
                     // Handle error getting locations
-                    viewModel.VmErrorMessage = result.ErrorMessage ?? "Failed to load locations";
+                    viewModel.ErrorMessage = result.ErrorMessage ?? "Failed to load locations";
                 }
             }
         }
@@ -117,7 +117,7 @@ public partial class SunLocation : ContentPageBase
         {
             if (BindingContext is Location.Photography.Shared.ViewModels.SunLocation viewModel)
             {
-                viewModel.VmIsBusy = false;
+                viewModel.IsBusy = false;
             }
         }
     }
@@ -249,8 +249,8 @@ public partial class SunLocation : ContentPageBase
         // Pass the error to the ViewModel if available
         if (BindingContext is Location.Photography.Shared.ViewModels.SunLocation viewModel)
         {
-            viewModel.VmErrorMessage = $"{message}: {ex.Message}";
-            viewModel.VmIsBusy = false;
+            viewModel.ErrorMessage = $"{message}: {ex.Message}";
+            viewModel.IsBusy = false;
         }
     }
 

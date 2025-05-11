@@ -2,16 +2,13 @@
 using Innovative.SolarCalculator;
 using Location.Photography.Shared.ViewModels.Interfaces;
 using Locations.Core.Shared.ViewModels;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Location.Photography.Shared.ViewModels
 {
-    public class SunCalculations : ViewModelBase, ISunCalculations
+    public partial class SunCalculations : ViewModelBase, ISunCalculations
     {
         #region Fields
         private List<LocationViewModel> _locations = new List<LocationViewModel>();
@@ -32,8 +29,6 @@ namespace Location.Photography.Shared.ViewModels
         private DateTime _civildawn = DateTime.Now;
         private DateTime _civildusk = DateTime.Now;
 
-        private bool _vmIsBusy;
-        private string _vmErrorMessage = string.Empty;
         private string _locationPhoto = string.Empty;
         #endregion
 
@@ -309,25 +304,8 @@ namespace Location.Photography.Shared.ViewModels
             }
         }
 
-        public bool VmIsBusy
-        {
-            get => _vmIsBusy;
-            set
-            {
-                _vmIsBusy = value;
-                OnPropertyChanged();
-            }
-        }
+        // Mapping properties for ISunCalculations interface
 
-        public string VmErrorMessage
-        {
-            get => _vmErrorMessage;
-            set
-            {
-                _vmErrorMessage = value;
-                OnPropertyChanged();
-            }
-        }
         #endregion
 
         #region Commands
@@ -336,7 +314,7 @@ namespace Location.Photography.Shared.ViewModels
         #endregion
 
         #region Events
-        public override event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         public event EventHandler<OperationErrorEventArgs>? ErrorOccurred;
         #endregion
 
@@ -353,8 +331,8 @@ namespace Location.Photography.Shared.ViewModels
         {
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 if (Latitude == 0 && Longitude == 0)
                 {
@@ -376,16 +354,15 @@ namespace Location.Photography.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error calculating sun times: {ex.Message}";
+                ErrorMessage = $"Error calculating sun times: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
-
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -393,8 +370,8 @@ namespace Location.Photography.Shared.ViewModels
         {
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 // Note: In a real implementation, this would call a service to get locations
                 // For now, we'll assume this method would be implemented to load data
@@ -402,15 +379,15 @@ namespace Location.Photography.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error loading locations: {ex.Message}";
+                ErrorMessage = $"Error loading locations: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 

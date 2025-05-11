@@ -167,7 +167,7 @@ namespace Location.Photography.Pro
         {
             try
             {
-                viewModel.VmIsBusy = true;
+                viewModel.IsBusy = true;
 
                 // Get locations with details
                 var locations = await _locationService.GetLocationsWithDetailsAsync();
@@ -186,17 +186,17 @@ namespace Location.Photography.Pro
                 else
                 {
                     // No locations found
-                    viewModel.VmErrorMessage = "No locations found. Please add locations first.";
+                    viewModel.ErrorMessage = "No locations found. Please add locations first.";
                 }
             }
             catch (Exception ex)
             {
-                viewModel.VmErrorMessage = $"Error loading locations: {ex.Message}";
+                viewModel.ErrorMessage = $"Error loading locations: {ex.Message}";
                 HandleError(ex, "Error loading locations");
             }
             finally
             {
-                viewModel.VmIsBusy = false;
+                viewModel.IsBusy = false;
             }
         }
 

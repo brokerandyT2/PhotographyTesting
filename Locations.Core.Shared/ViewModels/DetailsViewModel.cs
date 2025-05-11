@@ -58,7 +58,7 @@ namespace Locations.Core.Shared.ViewModels
         private void OnSubViewModelErrorOccurred(object sender, OperationErrorEventArgs e)
         {
             // Bubble up errors from child viewmodels
-            VmErrorMessage = e.Message;
+            ErrorMessage = e.Message;
             OnErrorOccurred(e);
         }
 
@@ -82,10 +82,10 @@ namespace Locations.Core.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error refreshing details: {ex.Message}";
+                ErrorMessage = $"Error refreshing details: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
         }

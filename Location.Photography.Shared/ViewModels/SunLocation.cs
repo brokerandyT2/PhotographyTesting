@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace Location.Photography.Shared.ViewModels
 {
-    public class SunLocation : ViewModelBase, ISunLocation
+    public partial class SunLocation : ViewModelBase, ISunLocation
     {
         #region Fields
         private DateTime _selectedDateTime = DateTime.Now;
@@ -26,8 +26,6 @@ namespace Location.Photography.Shared.ViewModels
         private DateTime _selectedDate = DateTime.Now;
         private TimeSpan _selectedTime = DateTime.Now.TimeOfDay;
         private ObservableCollection<LocationViewModel> _locations;
-        private string _vmErrorMessage = string.Empty;
-        private bool _vmIsBusy;
         private bool _beginMonitoring;
 
         private const double SunSmoothingFactor = 0.1;
@@ -35,11 +33,7 @@ namespace Location.Photography.Shared.ViewModels
         #endregion
 
         #region Events
-        public override event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Event for error handling
-        /// </summary>
+        public event PropertyChangedEventHandler? PropertyChanged;
         public event EventHandler<OperationErrorEventArgs>? ErrorOccurred;
         #endregion
 
@@ -109,31 +103,7 @@ namespace Location.Photography.Shared.ViewModels
             }
         }
 
-        public string VmErrorMessage
-        {
-            get => _vmErrorMessage;
-            set
-            {
-                if (_vmErrorMessage != value)
-                {
-                    _vmErrorMessage = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public bool VmIsBusy
-        {
-            get => _vmIsBusy;
-            set
-            {
-                if (_vmIsBusy != value)
-                {
-                    _vmIsBusy = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        // Interface compatibility properties
 
         public DateTime SelectedDateTime
         {
@@ -257,10 +227,10 @@ namespace Location.Photography.Shared.ViewModels
             _locations = new ObservableCollection<LocationViewModel>();
             _selectedDate = DateTime.Now;
             _selectedTime = DateTime.Now.TimeOfDay;
-            
+
             // Initialize commands
-            StartMonitoringCommand = new RelayCommand(() => BeginMonitoring = true, () => !_beginMonitoring && !VmIsBusy);
-            StopMonitoringCommand = new RelayCommand(() => BeginMonitoring = false, () => _beginMonitoring && !VmIsBusy);
+            StartMonitoringCommand = new RelayCommand(() => BeginMonitoring = true, () => !_beginMonitoring && !IsBusy);
+            StopMonitoringCommand = new RelayCommand(() => BeginMonitoring = false, () => _beginMonitoring && !IsBusy);
         }
         #endregion
 
@@ -294,10 +264,10 @@ namespace Location.Photography.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error calculating sun direction: {ex.Message}";
+                ErrorMessage = $"Error calculating sun direction: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
         }
@@ -320,10 +290,10 @@ namespace Location.Photography.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error starting sensors: {ex.Message}";
+                ErrorMessage = $"Error starting sensors: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
         }
@@ -346,10 +316,10 @@ namespace Location.Photography.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error stopping sensors: {ex.Message}";
+                ErrorMessage = $"Error stopping sensors: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
         }

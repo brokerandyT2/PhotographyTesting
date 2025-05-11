@@ -172,8 +172,8 @@ namespace Locations.Core.Shared.ViewModels
             InitializeDefaultSettings();
 
             // Commands
-            SaveSettingsCommand = new AsyncRelayCommand(SaveSettingsAsync, () => !VmIsBusy);
-            ResetSettingsCommand = new AsyncRelayCommand(ResetSettingsAsync, () => !VmIsBusy);
+            SaveSettingsCommand = new AsyncRelayCommand(SaveSettingsAsync, () => !IsBusy);
+            ResetSettingsCommand = new AsyncRelayCommand(ResetSettingsAsync, () => !IsBusy);
         }
 
         // Constructor with DI
@@ -236,7 +236,7 @@ namespace Locations.Core.Shared.ViewModels
         private void OnSettingErrorOccurred(object sender, OperationErrorEventArgs e)
         {
             // Bubble up errors from settings
-            VmErrorMessage = e.Message;
+            ErrorMessage = e.Message;
             OnErrorOccurred(e);
         }
 
@@ -259,19 +259,19 @@ namespace Locations.Core.Shared.ViewModels
                 }
                 else
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to load settings";
+                    ErrorMessage = result.ErrorMessage ?? "Failed to load settings";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                        VmErrorMessage,
+                        ErrorMessage,
                         result.Exception));
                 }
             }
             catch (Exception ex)
-            {
-                VmErrorMessage = $"Error loading settings: {ex.Message}";
+            {       
+                ErrorMessage = $"Error loading settings: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
         }
@@ -343,8 +343,8 @@ namespace Locations.Core.Shared.ViewModels
         {
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 //if (_settingsService == null) return;
 
@@ -458,24 +458,24 @@ namespace Locations.Core.Shared.ViewModels
 
                 if (!result.IsSuccess)
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to save settings";
+                    ErrorMessage = result.ErrorMessage ?? "Failed to save settings";
                     OnErrorOccurred(new OperationErrorEventArgs(
                         Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                        VmErrorMessage,
+                        ErrorMessage,
                         result.Exception));
                 }
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error saving settings: {ex.Message}";
+                ErrorMessage = $"Error saving settings: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -484,8 +484,8 @@ namespace Locations.Core.Shared.ViewModels
         {
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 // Reset to default values
                 InitializeDefaultSettings();
@@ -498,15 +498,15 @@ namespace Locations.Core.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error resetting settings: {ex.Message}";
+                ErrorMessage = $"Error resetting settings: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     Locations.Core.Shared.ViewModels.OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 

@@ -19,9 +19,37 @@ namespace Locations.Core.Shared.ViewModels
         private string _apeture;
         private string _shutterspeed;
         private string _iso;
+        private bool _isBusy;
+        private bool _isError;
+        private string _errorMessage = string.Empty;
 
         // Event for error handling
         public event EventHandler<OperationErrorEventArgs>? ErrorOccurred;
+
+        // Standardized properties
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set => SetProperty(ref _isBusy, value);
+        }
+
+        public bool IsError
+        {
+            get => _isError;
+            set => SetProperty(ref _isError, value);
+        }
+
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                if (SetProperty(ref _errorMessage, value))
+                {
+                    IsError = !string.IsNullOrEmpty(value);
+                }
+            }
+        }
 
         // Properties with notification
         public int Id
@@ -105,7 +133,7 @@ namespace Locations.Core.Shared.ViewModels
             try
             {
                 Id = dto.Id;
-                
+
                 TipTypeId = dto.TipTypeID;
                 TipTypeName = dto.Title;
                 Description = dto.Content;
@@ -115,9 +143,10 @@ namespace Locations.Core.Shared.ViewModels
             }
             catch (Exception ex)
             {
+                ErrorMessage = $"Error initializing from DTO: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    $"Error initializing from DTO: {ex.Message}",
+                    ErrorMessage,
                     ex));
             }
         }

@@ -10,7 +10,6 @@ namespace Locations.Core.Shared.ViewModels
         private readonly ILocationService _locationService;
         private ObservableCollection<LocationViewModel> _items = new ObservableCollection<LocationViewModel>();
         private bool _isLoading;
-        private string _errorMessage;
 
         public ObservableCollection<LocationViewModel> Items
         {
@@ -22,12 +21,6 @@ namespace Locations.Core.Shared.ViewModels
         {
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
-        }
-
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set => SetProperty(ref _errorMessage, value);
         }
 
         public ICommand LoadLocationsCommand { get; }
@@ -52,6 +45,7 @@ namespace Locations.Core.Shared.ViewModels
         {
             try
             {
+                IsBusy = true;
                 IsLoading = true;
                 ErrorMessage = string.Empty;
 
@@ -85,6 +79,7 @@ namespace Locations.Core.Shared.ViewModels
             }
             finally
             {
+                IsBusy = false;
                 IsLoading = false;
             }
         }
@@ -95,6 +90,7 @@ namespace Locations.Core.Shared.ViewModels
             {
                 ErrorMessage = string.Empty;
                 IsLoading = true;
+                IsBusy = true;
 
                 var result = await _locationService.GetLocationAsync(locationId);
 
@@ -123,6 +119,7 @@ namespace Locations.Core.Shared.ViewModels
             }
             finally
             {
+                IsBusy = false;
                 IsLoading = false;
             }
         }

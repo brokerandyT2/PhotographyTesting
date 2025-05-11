@@ -48,8 +48,7 @@ namespace Location.Photography.Shared.ViewModels.Interfaces
         void CalculateSun();
 
         // UI state properties (from example pattern)
-        bool VmIsBusy { get; set; }
-        string VmErrorMessage { get; set; }
+      
 
         // Commands (following pattern in examples)
         ICommand LoadLocationsCommand { get; }

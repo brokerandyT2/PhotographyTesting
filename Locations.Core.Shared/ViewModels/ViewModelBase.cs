@@ -1,38 +1,44 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Locations.Core.Shared.ViewModels.Interface;
-using Locations.Core.Shared.ViewModelServices;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Locations.Core.Shared.ViewModels
 {
     public abstract class ViewModelBase : ObservableObject, IDTOBase
     {
-        // UI state properties
-        private bool _vmIsBusy;
-        public bool VmIsBusy
+        // UI state properties using standardized names
+        private bool _isBusy;
+        public bool IsBusy
         {
-            get => _vmIsBusy;
+            get => _isBusy;
             set
             {
-                _vmIsBusy = value;
-                OnPropertyChanged(nameof(VmIsBusy));
+                _isBusy = value;
+                OnPropertyChanged(nameof(IsBusy));
             }
         }
 
-        private string _vmErrorMessage = string.Empty;
-        public string VmErrorMessage
+        private bool _isError;
+        public bool IsError
         {
-            get => _vmErrorMessage;
+            get => _isError;
             set
             {
-                _vmErrorMessage = value;
-                OnPropertyChanged(nameof(VmErrorMessage));
+                _isError = value;
+                OnPropertyChanged(nameof(IsError));
+            }
+        }
+
+        private string _errorMessage = string.Empty;
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                _errorMessage = value;
+                OnPropertyChanged(nameof(ErrorMessage));
+                IsError = !string.IsNullOrEmpty(value);
             }
         }
 
@@ -55,15 +61,15 @@ namespace Locations.Core.Shared.ViewModels
 
         protected ViewModelBase()
         {
-            RefreshCommand = new AsyncRelayCommand(LoadDataAsync, () => !VmIsBusy);
+            RefreshCommand = new AsyncRelayCommand(LoadDataAsync, () => !IsBusy);
         }
 
         protected virtual async Task LoadDataAsync()
         {
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
                 IsRefreshing = true;
 
                 // Actual data loading should be implemented in derived classes
@@ -71,15 +77,15 @@ namespace Locations.Core.Shared.ViewModels
             }
             catch (Exception ex)
             {
-                VmErrorMessage = $"Error loading data: {ex.Message}";
+                ErrorMessage = $"Error loading data: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    VmErrorMessage,
+                    ErrorMessage,
                     ex));
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
                 IsRefreshing = false;
             }
         }

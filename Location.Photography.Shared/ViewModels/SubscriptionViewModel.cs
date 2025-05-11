@@ -14,7 +14,7 @@ using System.Windows.Input;
 
 namespace Location.Photography.Shared.ViewModels
 {
-    public class SubscriptionViewModel : ViewModelBase, ISubscriptionViewModel
+    public partial class SubscriptionViewModel : ViewModelBase, ISubscriptionViewModel
     {
         #region Fields
         private readonly ISubscriptionService _subscriptionService;
@@ -23,17 +23,14 @@ namespace Location.Photography.Shared.ViewModels
         private bool _hasActiveSubscription;
         private bool _isPremiumSubscription;
         private bool _isProfessionalSubscription;
-        private string _errorMessage;
         private string _currentSubscriptionInfo;
         private DateTime? _expirationDate;
         private SubscriptionType.SubscriptionTypeEnum _currentSubscriptionType;
         private SubscriptionProductViewModel _selectedSubscription;
-        private bool _vmIsBusy;
-        private string _vmErrorMessage = string.Empty;
         #endregion
 
         #region Events
-        public override event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<OperationErrorEventArgs> ErrorOccurred;
         #endregion
 
@@ -128,18 +125,10 @@ namespace Location.Photography.Shared.ViewModels
             }
         }
 
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set
-            {
-                _errorMessage = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(HasError));
-            }
-        }
+        // Using the base ErrorMessage property
+      
 
-        public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+        public bool HasError => IsError;
 
         public SubscriptionProductViewModel SelectedSubscription
         {
@@ -151,25 +140,6 @@ namespace Location.Photography.Shared.ViewModels
             }
         }
 
-        public bool VmIsBusy
-        {
-            get => _vmIsBusy;
-            set
-            {
-                _vmIsBusy = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string VmErrorMessage
-        {
-            get => _vmErrorMessage;
-            set
-            {
-                _vmErrorMessage = value;
-                OnPropertyChanged();
-            }
-        }
         #endregion
 
         #region Commands
@@ -194,16 +164,14 @@ namespace Location.Photography.Shared.ViewModels
         {
             try
             {
-                VmIsBusy = true;
+                IsBusy = true;
                 IsLoading = true;
                 ErrorMessage = string.Empty;
-                VmErrorMessage = string.Empty;
 
                 var initialized = await _subscriptionService.InitializeAsync();
                 if (!initialized)
                 {
                     ErrorMessage = "Unable to initialize subscription service.";
-                    VmErrorMessage = ErrorMessage;
                     OnErrorOccurred(new OperationErrorEventArgs(
                         OperationErrorSource.Unknown,
                         ErrorMessage,
@@ -217,7 +185,6 @@ namespace Location.Photography.Shared.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"Error initializing: {ex.Message}";
-                VmErrorMessage = ErrorMessage;
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     ErrorMessage,
@@ -225,7 +192,7 @@ namespace Location.Photography.Shared.ViewModels
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
                 IsLoading = false;
             }
         }
@@ -234,8 +201,8 @@ namespace Location.Photography.Shared.ViewModels
         {
             try
             {
-                VmIsBusy = true;
-                VmErrorMessage = string.Empty;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
 
                 var currentInfo = await _subscriptionService.GetCurrentSubscriptionInfoAsync();
 
@@ -260,7 +227,6 @@ namespace Location.Photography.Shared.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"Error checking subscription status: {ex.Message}";
-                VmErrorMessage = ErrorMessage;
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     ErrorMessage,
@@ -268,7 +234,7 @@ namespace Location.Photography.Shared.ViewModels
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -276,10 +242,9 @@ namespace Location.Photography.Shared.ViewModels
         {
             try
             {
-                VmIsBusy = true;
+                IsBusy = true;
                 IsLoading = true;
                 ErrorMessage = string.Empty;
-                VmErrorMessage = string.Empty;
 
                 AvailableSubscriptions.Clear();
                 PremiumSubscriptions.Clear();
@@ -309,7 +274,6 @@ namespace Location.Photography.Shared.ViewModels
                 else
                 {
                     ErrorMessage = "No subscription products available.";
-                    VmErrorMessage = ErrorMessage;
                     OnErrorOccurred(new OperationErrorEventArgs(
                         OperationErrorSource.Unknown,
                         ErrorMessage,
@@ -319,7 +283,6 @@ namespace Location.Photography.Shared.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"Error loading subscriptions: {ex.Message}";
-                VmErrorMessage = ErrorMessage;
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     ErrorMessage,
@@ -327,7 +290,7 @@ namespace Location.Photography.Shared.ViewModels
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
                 IsLoading = false;
             }
         }
@@ -337,7 +300,6 @@ namespace Location.Photography.Shared.ViewModels
             if (string.IsNullOrEmpty(productId))
             {
                 ErrorMessage = "No subscription selected.";
-                VmErrorMessage = ErrorMessage;
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     ErrorMessage,
@@ -347,10 +309,9 @@ namespace Location.Photography.Shared.ViewModels
 
             try
             {
-                VmIsBusy = true;
+                IsBusy = true;
                 IsLoading = true;
                 ErrorMessage = string.Empty;
-                VmErrorMessage = string.Empty;
 
                 var result = await _subscriptionService.PurchaseSubscriptionAsync(productId);
 
@@ -382,13 +343,10 @@ namespace Location.Photography.Shared.ViewModels
                             new Exception("Purchase failed with result: " + result)));
                         break;
                 }
-
-                VmErrorMessage = ErrorMessage;
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"Error during purchase: {ex.Message}";
-                VmErrorMessage = ErrorMessage;
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     ErrorMessage,
@@ -396,7 +354,7 @@ namespace Location.Photography.Shared.ViewModels
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
                 IsLoading = false;
             }
         }
@@ -405,10 +363,9 @@ namespace Location.Photography.Shared.ViewModels
         {
             try
             {
-                VmIsBusy = true;
+                IsBusy = true;
                 IsLoading = true;
                 ErrorMessage = string.Empty;
-                VmErrorMessage = string.Empty;
 
                 var restored = await _subscriptionService.RestorePurchasesAsync();
 
@@ -420,13 +377,11 @@ namespace Location.Photography.Shared.ViewModels
                 else
                 {
                     ErrorMessage = "No previous purchases found to restore.";
-                    VmErrorMessage = ErrorMessage;
                 }
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"Error restoring purchases: {ex.Message}";
-                VmErrorMessage = ErrorMessage;
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
                     ErrorMessage,
@@ -434,15 +389,12 @@ namespace Location.Photography.Shared.ViewModels
             }
             finally
             {
-                VmIsBusy = false;
+                IsBusy = false;
                 IsLoading = false;
             }
         }
 
-        protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+
 
         protected virtual void OnErrorOccurred(OperationErrorEventArgs e)
         {

@@ -14,9 +14,7 @@ namespace Location.Photography.Shared.ViewModels.Interfaces
         string ContrastHistogramImage { get; set; }
 
         // UI state properties
-        bool VmIsBusy { get; set; }
-        string VmErrorMessage { get; set; }
-        bool IsProcessing { get; set; }
+       
 
         // Commands
         ICommand EvaluateCommand { get; }

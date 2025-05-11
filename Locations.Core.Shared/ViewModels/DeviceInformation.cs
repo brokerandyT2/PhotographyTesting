@@ -17,6 +17,34 @@ namespace Locations.Core.Shared.ViewModels
         private string _model;
         private string _osVersion;
         private string _appVersion;
+        private bool _isBusy;
+        private bool _isError;
+        private string _errorMessage = string.Empty;
+
+        // Standardized properties
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set => SetProperty(ref _isBusy, value);
+        }
+
+        public bool IsError
+        {
+            get => _isError;
+            set => SetProperty(ref _isError, value);
+        }
+
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                if (SetProperty(ref _errorMessage, value))
+                {
+                    IsError = !string.IsNullOrEmpty(value);
+                }
+            }
+        }
 
         // Properties with notification
         public string DeviceId
@@ -92,9 +120,10 @@ namespace Locations.Core.Shared.ViewModels
             }
             catch (Exception ex)
             {
+                ErrorMessage = $"Error initializing from DTO: {ex.Message}";
                 OnErrorOccurred(new OperationErrorEventArgs(
                     OperationErrorSource.Unknown,
-                    $"Error initializing from DTO: {ex.Message}",
+                    ErrorMessage,
                     ex));
             }
         }
