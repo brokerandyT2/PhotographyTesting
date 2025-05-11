@@ -56,7 +56,7 @@
                    Margin="5"/>
 
             <Label x:Name="fStop" 
-                   Text="{Binding Fstop}" 
+                   Text="{Binding }" 
                    Grid.Row="4" 
                    Grid.Column="0"
                    FontSize="14"

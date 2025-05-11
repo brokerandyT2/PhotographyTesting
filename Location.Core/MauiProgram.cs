@@ -57,7 +57,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<LoggerService>();
         builder.Services.AddSingleton<ISQLiteAsyncConnection>(sp => DataEncrypted.GetAsyncConnection());
         builder.Services.AddSingleton<ILoggerService, LoggerService>();
-        builder.Services.AddSingleton<ILoggerService, LoggerService>();
+
 #if ANDROID
         //builder.Services.AddSingleton<Platforms.Android.IGoogleAuthService, Platforms.Android.GoogleAuthService>();
 #endif

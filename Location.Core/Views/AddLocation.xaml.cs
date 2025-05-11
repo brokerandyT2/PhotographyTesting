@@ -108,7 +108,7 @@ public partial class AddLocation : ContentPageBase
             // Show loading indicator
             var loadingViewModel = new LocationViewModel
             {
-                VmIsBusy = true
+                IsBusy = true
             };
             BindingContext = loadingViewModel;
 
@@ -152,7 +152,7 @@ public partial class AddLocation : ContentPageBase
                     _mediaService,
                     _geolocationService)
                 {
-                    VmErrorMessage = result.ErrorMessage ?? "Failed to load location"
+                    ErrorMessage = result.ErrorMessage ?? "Failed to load location"
                 };
                 BindingContext = errorViewModel;
 
@@ -177,7 +177,7 @@ public partial class AddLocation : ContentPageBase
                 _mediaService,
                 _geolocationService)
             {
-                VmErrorMessage = $"Error loading location: {ex.Message}"
+                ErrorMessage = $"Error loading location: {ex.Message}"
             };
             BindingContext = errorViewModel;
         }
@@ -186,7 +186,7 @@ public partial class AddLocation : ContentPageBase
             // Ensure busy indicator is hidden
             if (BindingContext is LocationViewModel vm)
             {
-                vm.VmIsBusy = false;
+                vm.IsBusy = false;
             }
         }
     }
@@ -206,7 +206,7 @@ public partial class AddLocation : ContentPageBase
             viewModel.SaveCommand.Execute(null);
 
             // If save was successful (no error message), reset view or close modal
-            if (string.IsNullOrEmpty(viewModel.VmErrorMessage))
+            if (string.IsNullOrEmpty(viewModel.ErrorMessage))
             {
                 if (_isEditMode)
                 {

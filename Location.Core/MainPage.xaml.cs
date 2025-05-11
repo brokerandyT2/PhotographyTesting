@@ -1,4 +1,5 @@
 ﻿using Location.Core.Helpers.AlertService;
+using Location.Core.Helpers.LoggingService;
 using Location.Core.Views;
 using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Business.StorageSvc;
@@ -8,7 +9,7 @@ using Locations.Core.Shared.ViewModels;
 using Newtonsoft.Json;
 using System.Globalization;
 using static Locations.Core.Shared.Enums.SubscriptionType;
-
+using EncryptedSQLite;
 #if PHOTOGRAPHY
 
 #endif
@@ -18,7 +19,7 @@ namespace Location.Core
     {
         private static SettingsService<SettingViewModel> ss = new SettingsService<SettingViewModel>(
             new SettingsRepository(
-                new EventAlertService(), null),new EventAlertService(), null);
+                new EventAlertService(), new LoggerService(DataEncrypted.GetAsyncConnection())), new EventAlertService(), new LoggerService(DataEncrypted.GetAsyncConnection()));
 #if DEBUG
         private static SubscriptionTypeEnum _subType = SubscriptionTypeEnum.Free;
 #else

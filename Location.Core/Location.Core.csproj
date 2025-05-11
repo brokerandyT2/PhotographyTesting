@@ -79,6 +79,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EncryptedSQLite\EncryptedSQLite.csproj" />
     <ProjectReference Include="..\Location.Core.Helpers\Location.Core.Helpers.csproj" />
     <ProjectReference Include="..\Location.Photography.Business\Location.Photography.Business.csproj" />
     <ProjectReference Include="..\Location.Photography.Shared\Location.Photography.Shared.csproj" />
