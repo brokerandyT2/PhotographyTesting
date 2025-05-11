@@ -35,7 +35,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             _locationService = new LocationService<LocationViewModel>(
                 _mockLocationRepository.Object,
                 MockAlertService.Object,
-                MockBusinessLoggerService.Object,
+                MockLoggerService.Object,
                 _mockWeatherService.Object);
         }
 
@@ -157,7 +157,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             _locationService.GetLocationByCoordinates(latitude, longitude);
 
             // Assert
-            MockBusinessLoggerService.Verify(
+            MockLoggerService.Verify(
                 logger => logger.LogWarning(It.IsAny<string>(), null),
                 Times.Once);
         }
@@ -196,7 +196,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             _locationService.GetLocationByCoordinates(latitude, longitude);
 
             // Assert
-            MockBusinessLoggerService.Verify(
+            MockLoggerService.Verify(
                 logger => logger.LogError(It.IsAny<string>(), It.IsAny<Exception>()),
                 Times.AtLeastOnce);
         }

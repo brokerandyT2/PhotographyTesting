@@ -1,13 +1,11 @@
-﻿// NativeStorageServiceTests.cs
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Threading.Tasks;
 using Locations.Core.Business.StorageSvc;
 using Locations.Core.Business.Tests.Base;
-using Locations.Core.Shared.ViewModels;
+using Locations.Core.Business.Tests.TestHelpers;
 using MockFactory = Locations.Core.Business.Tests.TestHelpers.MockFactory;
-using TestDataFactory = Locations.Core.Business.Tests.TestHelpers.TestDataFactory;
 
 namespace Locations.Core.Business.Tests.Services.StorageServiceTests
 {
@@ -15,14 +13,13 @@ namespace Locations.Core.Business.Tests.Services.StorageServiceTests
     [TestCategory("StorageService")]
     public class NativeStorageServiceTests : BaseServiceTests
     {
-        private NativeStorageService _storageService;
+        // Use a static class method approach for testing NativeStorageService
+        // since it contains static methods
 
         [TestInitialize]
         public override void Setup()
         {
             base.Setup();
-
-            _storageService = new NativeStorageService();
         }
 
         [TestMethod]
@@ -31,19 +28,37 @@ namespace Locations.Core.Business.Tests.Services.StorageServiceTests
             // Note: Since we can't easily mock SecureStorage operations,
             // this test simply verifies the method doesn't throw an exception
 
-            // Act
-            var result = NativeStorageService.DeleteSetting("test_key");
+            // Act - Using Moq to intercept the SecureStorage call would be ideal
+            // but would require refactoring the production code for testability
+            try
+            {
+                // This is a no-op test since we can't mock static methods without refactoring
+                bool result = NativeStorageService.DeleteSetting("test_key");
 
-            // No assertion as we can't verify the actual deletion due to mocking limitations
+                // We can only verify no exception was thrown, not the actual behavior
+                Assert.IsTrue(true); // Test passes if it reaches this line
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail($"Method threw an exception: {ex.Message}");
+            }
         }
 
         [TestMethod]
         public void GetSetting_WhenSettingExists_ShouldReturnSettingValue()
         {
-            // Act
-            var result = NativeStorageService.GetSetting("test_key");
+            try
+            {
+                // This is a no-op test since we can't mock static methods without refactoring
+                string result = NativeStorageService.GetSetting("test_key");
 
-            // Cannot assert content due to mocking limitations
+                // We can only verify no exception was thrown, not the actual value
+                Assert.IsNotNull(result); // This might fail in some environments
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail($"Method threw an exception: {ex.Message}");
+            }
         }
 
         [TestMethod]
@@ -53,10 +68,18 @@ namespace Locations.Core.Business.Tests.Services.StorageServiceTests
             string key = "test_key";
             string value = "test_value";
 
-            // Act
-            await NativeStorageService.SaveSetting(key, value);
+            try
+            {
+                // Act
+                await NativeStorageService.SaveSetting(key, value);
 
-            // Cannot assert due to mocking limitations
+                // Assert - verify no exception was thrown
+                Assert.IsTrue(true);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail($"Method threw an exception: {ex.Message}");
+            }
         }
 
         [TestMethod]
@@ -66,10 +89,18 @@ namespace Locations.Core.Business.Tests.Services.StorageServiceTests
             string key = "test_key";
             object value = new { Property = "test_value" };
 
-            // Act
-            await NativeStorageService.SaveSetting(key, value);
+            try
+            {
+                // Act
+                await NativeStorageService.SaveSetting(key, value);
 
-            // Cannot assert due to mocking limitations
+                // Assert - verify no exception was thrown
+                Assert.IsTrue(true);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail($"Method threw an exception: {ex.Message}");
+            }
         }
 
         [TestMethod]
@@ -80,10 +111,18 @@ namespace Locations.Core.Business.Tests.Services.StorageServiceTests
             string oldValue = "old_value";
             string newValue = "new_value";
 
-            // Act
-            await NativeStorageService.UpdateSetting(key, oldValue, newValue);
+            try
+            {
+                // Act
+                await NativeStorageService.UpdateSetting(key, oldValue, newValue);
 
-            // Cannot assert due to mocking limitations
+                // Assert - verify no exception was thrown
+                Assert.IsTrue(true);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail($"Method threw an exception: {ex.Message}");
+            }
         }
 
         [TestMethod]
@@ -94,10 +133,18 @@ namespace Locations.Core.Business.Tests.Services.StorageServiceTests
             object oldValue = new { Property = "old_value" };
             object newValue = new { Property = "new_value" };
 
-            // Act
-            await NativeStorageService.UpdateSetting(key, oldValue, newValue);
+            try
+            {
+                // Act
+                await NativeStorageService.UpdateSetting(key, oldValue, newValue);
 
-            // Cannot assert due to mocking limitations
+                // Assert - verify no exception was thrown
+                Assert.IsTrue(true);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail($"Method threw an exception: {ex.Message}");
+            }
         }
     }
 }

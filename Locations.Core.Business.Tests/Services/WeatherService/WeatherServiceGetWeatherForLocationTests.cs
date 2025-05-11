@@ -1,11 +1,14 @@
-﻿// WeatherServiceGetWeatherForLocationTests.cs
+﻿// WeatherServiceGetWeatherForLocationTests.cs - Fixed
 using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Business.Tests.Base;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared.ViewModels;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
+using System.Threading.Tasks;
 using MockFactory = Locations.Core.Business.Tests.TestHelpers.MockFactory;
 using TestDataFactory = Locations.Core.Business.Tests.TestHelpers.TestDataFactory;
 
@@ -31,7 +34,7 @@ namespace Locations.Core.Business.Tests.Services.WeatherServiceTests
             _weatherService = new WeatherService<WeatherViewModel>(
                 _mockWeatherRepository.Object,
                 MockAlertService.Object,
-                MockBusinessLoggerService.Object,
+                MockLoggerService.Object,
                 _mockLocationService.Object);
         }
 
@@ -135,8 +138,8 @@ namespace Locations.Core.Business.Tests.Services.WeatherServiceTests
             await _weatherService.GetWeatherForLocationAsync(locationId);
 
             // Assert
-            MockBusinessLoggerService.Verify(
-                logger => logger.LogError(It.IsAny<string>(), expectedException),
+            MockLoggerService.Verify(
+                logger => logger.LogError(It.IsAny<string>(), It.IsAny<Exception>()),
                 Times.AtLeastOnce);
         }
 

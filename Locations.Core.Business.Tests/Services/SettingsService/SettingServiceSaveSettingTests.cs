@@ -1,10 +1,13 @@
-﻿// SettingServiceSaveSettingTests.cs
+﻿// SettingServiceSaveSettingTests.cs - Fixed
 using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Business.Tests.Base;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared.ViewModels;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
+using System.Threading.Tasks;
 using MockFactory = Locations.Core.Business.Tests.TestHelpers.MockFactory;
 using TestDataFactory = Locations.Core.Business.Tests.TestHelpers.TestDataFactory;
 
@@ -28,7 +31,7 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
             _settingsService = new SettingsService<SettingViewModel>(
                 _mockSettingsRepository.Object,
                 MockAlertService.Object,
-                MockBusinessLoggerService.Object);
+                MockLoggerService.Object);
         }
 
         [TestMethod]
@@ -191,10 +194,12 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
                 .ThrowsAsync(expectedException);
 
             // Act
-        //    _settingsService.SaveSetting(settingName, settingValue);
+            _settingsService.SaveSetting(settingName, settingValue);
 
             // Assert
-           // MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.AtLeastOnce);
+            MockLoggerService.Verify(
+                logger => logger.LogError(It.IsAny<string>(), It.IsAny<Exception>()),
+                Times.AtLeastOnce);
         }
 
         [TestMethod]

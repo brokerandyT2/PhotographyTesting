@@ -1,10 +1,14 @@
-﻿// SettingServiceGetAllSettingsTests.cs
+﻿// SettingServiceGetAllSettingsTests.cs - Fixed
 using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Business.Tests.Base;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
 using Locations.Core.Shared.ViewModels;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using MockFactory = Locations.Core.Business.Tests.TestHelpers.MockFactory;
 using TestDataFactory = Locations.Core.Business.Tests.TestHelpers.TestDataFactory;
 
@@ -28,11 +32,11 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
             _settingsService = new SettingsService<SettingViewModel>(
                 _mockSettingsRepository.Object,
                 MockAlertService.Object,
-                MockBusinessLoggerService.Object);
+                MockLoggerService.Object);
         }
 
         [TestMethod]
-        public void GetAllSettings_ShouldReturnNonNullResult()
+        public async Task GetAllAsync_ShouldReturnNonNullResult()
         {
             // Arrange
             var testSettings = new List<SettingViewModel>
@@ -46,14 +50,14 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
                 .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
 
             // Act
-            //   var result = _settingsService.GetAllSettings();
-            //TODO mock fix for null error coming from magicstrings.databasepath and DataBasePathEncrypted Entire File
+            var result = await _settingsService.GetAllAsync();
+
             // Assert
-            //  Assert.IsNotNull(result);
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]
-        public void GetAllSettings_WhenSettingsExist_ShouldReturnSettingsViewModel()
+        public async Task GetAllAsync_WhenSettingsExist_ShouldReturnSuccessResult()
         {
             // Arrange
             var testSettings = new List<SettingViewModel>
@@ -67,14 +71,14 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
                 .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
 
             // Act
-       //     var result = _settingsService.GetAllSettings();
+            var result = await _settingsService.GetAllAsync();
 
             // Assert
-         //   Assert.IsInstanceOfType(result, typeof(SettingsViewModel));
+            Assert.IsTrue(result.IsSuccess);
         }
 
         [TestMethod]
-        public void GetAllSettings_WhenHemisphereSettingExists_ShouldMapToHemisphereProperly()
+        public async Task GetAllAsync_WhenSettingsExist_ShouldReturnCorrectCount()
         {
             // Arrange
             var testSettings = new List<SettingViewModel>
@@ -88,80 +92,29 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
                 .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
 
             // Act
-         //   var result = _settingsService.GetAllSettings();
+            var result = await _settingsService.GetAllAsync();
 
             // Assert
-         //   Assert.IsNotNull(result.Hemisphere);
-          //  Assert.AreEqual("north", result.Hemisphere.Value);
+            Assert.AreEqual(3, result.Data.Count);
         }
 
         [TestMethod]
-        public void GetAllSettings_WhenDateFormatSettingExists_ShouldMapToDateFormatProperly()
+        public async Task GetAllAsync_WhenNoSettingsExist_ShouldReturnEmptyList()
         {
             // Arrange
-            var testSettings = new List<SettingViewModel>
-            {
-                TestDataFactory.CreateTestSetting("Hemisphere", "north"),
-                TestDataFactory.CreateTestSetting("DateFormat", "MM/dd/yyyy"),
-                TestDataFactory.CreateTestSetting("TimeFormat", "h:mm tt")
-            };
-
             _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
-                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(
+                    new List<SettingViewModel>()));
 
             // Act
-          //  var result = _settingsService.GetAllSettings();
+            var result = await _settingsService.GetAllAsync();
 
             // Assert
-          //  Assert.IsNotNull(result.DateFormat);
-          //  Assert.AreEqual("MM/dd/yyyy", result.DateFormat.Value);
+            Assert.AreEqual(0, result.Data.Count);
         }
 
         [TestMethod]
-        public void GetAllSettings_WhenTimeFormatSettingExists_ShouldMapToTimeFormatProperly()
-        {
-            // Arrange
-            var testSettings = new List<SettingViewModel>
-            {
-                TestDataFactory.CreateTestSetting("Hemisphere", "north"),
-                TestDataFactory.CreateTestSetting("DateFormat", "MM/dd/yyyy"),
-                TestDataFactory.CreateTestSetting("TimeFormat", "h:mm tt")
-            };
-
-            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
-                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
-
-            // Act
-       //     var result = _settingsService.GetAllSettings();
-
-            // Assert
-       //     Assert.IsNotNull(result.TimeFormat);
-       //     Assert.AreEqual("h:mm tt", result.TimeFormat.Value);
-        }
-
-        [TestMethod]
-        public void GetAllSettings_WhenSettingDoesNotExist_ShouldInitializeWithDefaultValue()
-        {
-            // Arrange
-            var testSettings = new List<SettingViewModel>
-            {
-                TestDataFactory.CreateTestSetting("Hemisphere", "north")
-                // DateFormat and TimeFormat are missing
-            };
-
-       //     _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
-     //           .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
-
-            // Act
-       //     var result = _settingsService.GetAllSettings();
-
-            // Assert
-          //  Assert.IsNotNull(result.DateFormat); // Should be initialized with default value
-         //   Assert.AreEqual(string.Empty, result.DateFormat.Value);
-        }
-
-        [TestMethod]
-        public void GetAllSettings_WhenRepositoryFails_ShouldReturnEmptySettingsViewModel()
+        public async Task GetAllAsync_WhenRepositoryFails_ShouldReturnFailureResult()
         {
             // Arrange
             string errorMessage = "Database error";
@@ -171,15 +124,49 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
                     ErrorSource.Database, errorMessage));
 
             // Act
-        //    var result = _settingsService.GetAllSettings();
+            var result = await _settingsService.GetAllAsync();
 
             // Assert
-         //   Assert.IsNotNull(result);
-         //   Assert.IsInstanceOfType(result, typeof(SettingsViewModel));
+            Assert.IsFalse(result.IsSuccess);
         }
 
         [TestMethod]
-        public void GetAllSettings_WhenExceptionOccurs_ShouldReturnEmptySettingsViewModel()
+
+        public async Task GetAllAsync_WhenRepositoryFails_ShouldReturnNullData()
+        {
+            // Arrange
+            string errorMessage = "Database error";
+
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Failure(
+                    ErrorSource.Database, errorMessage));
+
+            // Act
+            var result = await _settingsService.GetAllAsync();
+
+            // Assert
+            Assert.IsNull(result.Data);
+        }
+
+        [TestMethod]
+        public async Task GetAllAsync_WhenRepositoryFails_ShouldReturnCorrectErrorSource()
+        {
+            // Arrange
+            string errorMessage = "Database error";
+
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Failure(
+                    ErrorSource.Database, errorMessage));
+
+            // Act
+            var result = await _settingsService.GetAllAsync();
+
+            // Assert
+            Assert.AreEqual(ErrorSource.Database, result.ErrorSource);
+        }
+
+        [TestMethod]
+        public async Task GetAllAsync_WhenExceptionOccurs_ShouldReturnFailureResult()
         {
             // Arrange
             var expectedException = new Exception("Test exception");
@@ -188,15 +175,14 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
                 .ThrowsAsync(expectedException);
 
             // Act
-           // var result = _settingsService.GetAllSettings();
+            var result = await _settingsService.GetAllAsync();
 
             // Assert
-         //   Assert.IsNotNull(result);
-        //    Assert.IsInstanceOfType(result, typeof(SettingsViewModel));
+            Assert.IsFalse(result.IsSuccess);
         }
 
         [TestMethod]
-        public void GetAllSettings_WhenExceptionOccurs_ShouldLogError()
+        public async Task GetAllAsync_WhenExceptionOccurs_ShouldLogError()
         {
             // Arrange
             var expectedException = new Exception("Test exception");
@@ -205,14 +191,16 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
                 .ThrowsAsync(expectedException);
 
             // Act
-        //    _settingsService.GetAllSettings();
+            await _settingsService.GetAllAsync();
 
             // Assert
-        //    MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.AtLeastOnce);
+            MockLoggerService.Verify(
+                logger => logger.LogError(It.IsAny<string>(), It.IsAny<Exception>()),
+                Times.AtLeastOnce);
         }
 
         [TestMethod]
-        public void GetAllSettings_ShouldCallRepositoryGetAllAsync()
+        public async Task GetAllAsync_ShouldCallRepositoryGetAllAsync()
         {
             // Arrange
             var testSettings = new List<SettingViewModel>
@@ -225,10 +213,149 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
                 .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
 
             // Act
-           // _settingsService.GetAllSettings();
+            await _settingsService.GetAllAsync();
 
             // Assert
-           // _mockSettingsRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
+            _mockSettingsRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetAllSettings_ShouldReturnNonNullResult()
+        {
+            // Arrange
+            var testSettings = new List<SettingViewModel>
+            {
+                TestDataFactory.CreateTestSetting("Hemisphere", "north"),
+                TestDataFactory.CreateTestSetting("DateFormat", "MM/dd/yyyy"),
+                TestDataFactory.CreateTestSetting("TimeFormat", "h:mm tt"),
+                TestDataFactory.CreateTestSetting("Email", "test@example.com"),
+                TestDataFactory.CreateTestSetting("FirstName", "Test"),
+                TestDataFactory.CreateTestSetting("LastName", "User"),
+                TestDataFactory.CreateTestSetting("WindDirection", "towardsWind"),
+                TestDataFactory.CreateTestSetting("TemperatureFormat", "F")
+            };
+
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
+
+            // Act
+            var result = _settingsService.GetAllSettings();
+
+            // Assert
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void GetAllSettings_WhenSettingsExist_ShouldReturnSettingsViewModel()
+        {
+            // Arrange
+            var testSettings = new List<SettingViewModel>
+            {
+                TestDataFactory.CreateTestSetting("Hemisphere", "north"),
+                TestDataFactory.CreateTestSetting("DateFormat", "MM/dd/yyyy"),
+                TestDataFactory.CreateTestSetting("TimeFormat", "h:mm tt"),
+                TestDataFactory.CreateTestSetting("Email", "test@example.com"),
+                TestDataFactory.CreateTestSetting("FirstName", "Test"),
+                TestDataFactory.CreateTestSetting("LastName", "User"),
+                TestDataFactory.CreateTestSetting("WindDirection", "towardsWind"),
+                TestDataFactory.CreateTestSetting("TemperatureFormat", "F")
+            };
+
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
+
+            // Act
+            var result = _settingsService.GetAllSettings();
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(SettingsViewModel));
+        }
+
+        [TestMethod]
+        public void GetAllSettings_WhenHemisphereSettingExists_ShouldMapToHemisphereProperly()
+        {
+            // Arrange
+            var hemisphereKey = "Hemisphere";
+            var hemisphereValue = "north";
+
+            var testSettings = new List<SettingViewModel>
+            {
+                TestDataFactory.CreateTestSetting(hemisphereKey, hemisphereValue),
+                TestDataFactory.CreateTestSetting("DateFormat", "MM/dd/yyyy"),
+                TestDataFactory.CreateTestSetting("TimeFormat", "h:mm tt")
+            };
+
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
+
+            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(hemisphereKey))
+                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(
+                    TestDataFactory.CreateTestSetting(hemisphereKey, hemisphereValue)));
+
+            // Act
+            var result = _settingsService.GetAllSettings();
+
+            // Assert
+            Assert.IsNotNull(result.Hemisphere);
+            Assert.AreEqual(hemisphereValue, result.Hemisphere.Value);
+        }
+
+        [TestMethod]
+        public void GetAllSettings_WhenDateFormatSettingExists_ShouldMapToDateFormatProperly()
+        {
+            // Arrange
+            var dateFormatKey = "DateFormat";
+            var dateFormatValue = "MM/dd/yyyy";
+
+            var testSettings = new List<SettingViewModel>
+            {
+                TestDataFactory.CreateTestSetting("Hemisphere", "north"),
+                TestDataFactory.CreateTestSetting(dateFormatKey, dateFormatValue),
+                TestDataFactory.CreateTestSetting("TimeFormat", "h:mm tt")
+            };
+
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
+
+            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(dateFormatKey))
+                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(
+                    TestDataFactory.CreateTestSetting(dateFormatKey, dateFormatValue)));
+
+            // Act
+            var result = _settingsService.GetAllSettings();
+
+            // Assert
+            Assert.IsNotNull(result.DateFormat);
+            Assert.AreEqual(dateFormatValue, result.DateFormat.Value);
+        }
+
+        [TestMethod]
+        public void GetAllSettings_WhenTimeFormatSettingExists_ShouldMapToTimeFormatProperly()
+        {
+            // Arrange
+            var timeFormatKey = "TimeFormat";
+            var timeFormatValue = "h:mm tt";
+
+            var testSettings = new List<SettingViewModel>
+            {
+                TestDataFactory.CreateTestSetting("Hemisphere", "north"),
+                TestDataFactory.CreateTestSetting("DateFormat", "MM/dd/yyyy"),
+                TestDataFactory.CreateTestSetting(timeFormatKey, timeFormatValue)
+            };
+
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
+
+            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(timeFormatKey))
+                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(
+                    TestDataFactory.CreateTestSetting(timeFormatKey, timeFormatValue)));
+
+            // Act
+            var result = _settingsService.GetAllSettings();
+
+            // Assert
+            Assert.IsNotNull(result.TimeFormat);
+            Assert.AreEqual(timeFormatValue, result.TimeFormat.Value);
         }
     }
 }

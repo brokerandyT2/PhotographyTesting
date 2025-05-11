@@ -31,7 +31,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             _locationService = new LocationService<LocationViewModel>(
                 _mockLocationRepository.Object,
                 MockAlertService.Object,
-                MockBusinessLoggerService.Object,
+                MockLoggerService.Object,
                 _mockWeatherService.Object);
         }
 
@@ -123,7 +123,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             await _locationService.GetLocationsWithDetailsAsync();
 
             // Assert
-            MockBusinessLoggerService.Verify(
+            MockLoggerService.Verify(
                 logger => logger.LogWarning(It.IsAny<string>(), It.IsAny<Exception>()),
                 Times.AtLeastOnce);
         }
@@ -141,7 +141,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             var locationServiceWithoutWeather = new LocationService<LocationViewModel>(
                 _mockLocationRepository.Object,
                 MockAlertService.Object,
-                MockBusinessLoggerService.Object,
+                MockLoggerService.Object,
                 null); // No weather service
 
             // Act
@@ -201,7 +201,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             // Assert
 
             Assert.IsTrue(true);
-            MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Exactly(2));
+            MockLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Exactly(2));
         }
 
         [TestMethod]

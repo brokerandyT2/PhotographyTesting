@@ -30,7 +30,7 @@ namespace Locations.Core.Business.Tests.Services.TipServiceTests
             _tipService = new TipService<TipViewModel>(
                 _mockTipRepository.Object,
                 MockAlertService.Object,
-                MockBusinessLoggerService.Object,
+                MockLoggerService.Object,
                 _mockTipTypeService.Object);
         }
 
@@ -104,7 +104,7 @@ namespace Locations.Core.Business.Tests.Services.TipServiceTests
             var tipServiceWithoutTipTypeService = new TipService<TipViewModel>(
                 _mockTipRepository.Object,
                 MockAlertService.Object,
-                MockBusinessLoggerService.Object,
+                MockLoggerService.Object,
                 null); // No tip type service
 
             // Act
@@ -158,7 +158,7 @@ namespace Locations.Core.Business.Tests.Services.TipServiceTests
             await _tipService.GetTipTypesAsync();
 
             // Assert
-            MockBusinessLoggerService.Verify(
+            MockLoggerService.Verify(
                 logger => logger.LogError(It.IsAny<string>(), expectedException),
                 Times.AtLeastOnce);
         }

@@ -34,7 +34,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             _locationService = new LocationService<LocationViewModel>(
                 _mockLocationRepository.Object,
                 MockAlertService.Object,
-                MockBusinessLoggerService.Object,
+                MockLoggerService.Object,
                 _mockWeatherService.Object);
         }
 
@@ -218,7 +218,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             await _locationService.UpdateAsync(testLocation);
 
             // Assert
-            MockBusinessLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Exactly(2));
+            MockLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException),                Times.Exactly(2));
         }
 
         [TestMethod]
