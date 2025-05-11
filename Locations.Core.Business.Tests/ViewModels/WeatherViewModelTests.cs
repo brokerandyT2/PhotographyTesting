@@ -1,11 +1,13 @@
-﻿// WeatherViewModelTests.cs
-using Locations.Core.Shared.ViewModels;
+﻿using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Threading.Tasks;
-using OperationResult = Locations.Core.Shared.ViewModelServices.OperationResult<Locations.Core.Shared.ViewModels.WeatherViewModel>;
+using CommunityToolkit.Mvvm.Input;
+
+// Use explicit namespace to resolve ambiguity
+using ServiceOperationResult = Locations.Core.Shared.ViewModelServices.OperationResult<Locations.Core.Shared.ViewModels.WeatherViewModel>;
 
 namespace Locations.Core.Business.Tests.ViewModels
 {
@@ -115,13 +117,13 @@ namespace Locations.Core.Business.Tests.ViewModels
                 LastUpdate = DateTime.Now
             };
 
-            var result = new OperationResult<WeatherViewModel>(true, weatherData);
+            var result = new ServiceOperationResult(true, weatherData);
 
             _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
                 .ReturnsAsync(result);
 
             // Act
-            await _viewModel.RefreshWeatherCommand.ExecuteAsync(null);
+            await ((AsyncRelayCommand)_viewModel.RefreshWeatherCommand).ExecuteAsync(null);
 
             // Assert
             _mockWeatherService.Verify(service => service.GetWeatherForLocationAsync(1), Times.Once);
@@ -136,7 +138,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.LocationId = 0; // Invalid ID
 
             // Act
-            await _viewModel.RefreshWeatherCommand.ExecuteAsync(null);
+            await ((AsyncRelayCommand)_viewModel.RefreshWeatherCommand).ExecuteAsync(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -149,20 +151,19 @@ namespace Locations.Core.Business.Tests.ViewModels
             // Arrange
             _viewModel.LocationId = 1;
 
-            var result = new OperationResult<WeatherViewModel>(false, null, "Failed to fetch weather data");
+            var result = new ServiceOperationResult(false, null, "Failed to fetch weather data");
 
             _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
                 .ReturnsAsync(result);
 
             // Act
-            await _viewModel.RefreshWeatherCommand.ExecuteAsync(null);
+            await ((AsyncRelayCommand)_viewModel.RefreshWeatherCommand).ExecuteAsync(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
             Assert.AreEqual("Failed to fetch weather data", _viewModel.ErrorMessage);
         }
 
-        // WeatherViewModelTests.cs (continued)
         [TestMethod]
         public async Task RefreshWeatherAsync_WhenExceptionOccurs_ShouldSetErrorMessage()
         {
@@ -175,7 +176,7 @@ namespace Locations.Core.Business.Tests.ViewModels
                 .ThrowsAsync(exception);
 
             // Act
-            await _viewModel.RefreshWeatherCommand.ExecuteAsync(null);
+            await ((AsyncRelayCommand)_viewModel.RefreshWeatherCommand).ExecuteAsync(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -189,7 +190,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.LocationId = 1;
             string forecastData = "5-day forecast data";
 
-            var result = new OperationResult<string>(true, forecastData);
+            var result = new Locations.Core.Shared.ViewModelServices.OperationResult<string>(true, forecastData);
 
             _mockWeatherService.Setup(service => service.GetForecastForLocationAsync(1, 5))
                 .ReturnsAsync(result);
@@ -222,7 +223,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             // Arrange
             _viewModel.LocationId = 1;
 
-            var result = new OperationResult<string>(false, null, "Failed to fetch forecast data");
+            var result = new Locations.Core.Shared.ViewModelServices.OperationResult<string>(false, null, "Failed to fetch forecast data");
 
             _mockWeatherService.Setup(service => service.GetForecastForLocationAsync(1, 5))
                 .ReturnsAsync(result);

@@ -1,4 +1,4 @@
-﻿// TipsViewModelTests.cs
+﻿using CommunityToolkit.Mvvm.Input;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -6,6 +6,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Locations.Core.Shared.DTO;
 
 namespace Locations.Core.Business.Tests.ViewModels
 {
@@ -39,7 +40,6 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void Constructor_WithTipService_ShouldInitializePropertiesAndService()
         {
-            // TipsViewModelTests.cs (continued)
             // Assert
             Assert.IsNotNull(_viewModel.TipTypes);
             Assert.IsNotNull(_viewModel.SelectedTip);
@@ -59,14 +59,28 @@ namespace Locations.Core.Business.Tests.ViewModels
 
             var tip = new TipViewModel { Id = 1, TipTypeId = 1, Title = "Test Tip" };
 
+            var tipTypeDTOs = new List<TipTypeDTO>
+            {
+                new TipTypeDTO { Id = 1, Name = "Landscape" },
+                new TipTypeDTO { Id = 2, Name = "Portrait" }
+            };
+
+            var tipDTO = new TipDTO
+            {
+                Id = 1,
+                TipTypeID = 1,
+                Title = "Test Tip",
+                Content = "Test Content"
+            };
+
             _mockTipService.Setup(service => service.GetTipTypesAsync())
-                .ReturnsAsync(new OperationResult<List<TipTypeViewModel>>(true, tipTypes));
+                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<List<TipTypeDTO>>.Success(tipTypeDTOs));
 
             _mockTipService.Setup(service => service.GetRandomTipForTypeAsync(1))
-                .ReturnsAsync(new OperationResult<TipViewModel>(true, tip));
+                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<TipDTO>.Success(tipDTO));
 
             // Act - trigger LoadDataAsync via RefreshCommand
-            await _viewModel.RefreshCommand.ExecuteAsync(null);
+            await ((AsyncRelayCommand)_viewModel.RefreshCommand).ExecuteAsync(null);
 
             // Assert
             Assert.AreEqual(2, _viewModel.TipTypes.Count);
@@ -81,10 +95,12 @@ namespace Locations.Core.Business.Tests.ViewModels
             string errorMessage = "Failed to load tip types";
 
             _mockTipService.Setup(service => service.GetTipTypesAsync())
-                .ReturnsAsync(new OperationResult<List<TipTypeViewModel>>(false, null, errorMessage));
+                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<List<TipTypeDTO>>.Failure(
+                    Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
+                    errorMessage));
 
             // Act - trigger LoadDataAsync via RefreshCommand
-            await _viewModel.RefreshCommand.ExecuteAsync(null);
+            await ((AsyncRelayCommand)_viewModel.RefreshCommand).ExecuteAsync(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -101,7 +117,7 @@ namespace Locations.Core.Business.Tests.ViewModels
                 .ThrowsAsync(exception);
 
             // Act - trigger LoadDataAsync via RefreshCommand
-            await _viewModel.RefreshCommand.ExecuteAsync(null);
+            await ((AsyncRelayCommand)_viewModel.RefreshCommand).ExecuteAsync(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -109,7 +125,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         }
 
         [TestMethod]
-        public async Task SelectTip_WhenTipIsValid_ShouldSetSelectedTip()
+        public void SelectTip_WhenTipIsValid_ShouldSetSelectedTip()
         {
             // Arrange
             var newTip = new TipViewModel { Id = 2, TipTypeId = 1, Title = "New Test Tip" };
@@ -142,8 +158,6 @@ namespace Locations.Core.Business.Tests.ViewModels
             var tipType = new TipTypeViewModel();
             _viewModel.TipTypes.Add(tipType);
 
-            // Verify initial state - would need reflection to check events
-
             // Act
             _viewModel.Cleanup();
 
@@ -159,8 +173,16 @@ namespace Locations.Core.Business.Tests.ViewModels
             var tipType = new TipTypeViewModel { Id = 3, Name = "Wildlife" };
             var tip = new TipViewModel { Id = 5, TipTypeId = 3, Title = "Wildlife Test Tip" };
 
+            var tipDTO = new TipDTO
+            {
+                Id = 5,
+                TipTypeID = 3,
+                Title = "Wildlife Test Tip",
+                Content = "Wildlife Test Content"
+            };
+
             _mockTipService.Setup(service => service.GetRandomTipForTypeAsync(3))
-                .ReturnsAsync(new OperationResult<TipViewModel>(true, tip));
+                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<TipDTO>.Success(tipDTO));
 
             // Act - We need to use reflection to call the private method
             var method = typeof(TipsViewModel).GetMethod("LoadTipForTypeAsync",
@@ -180,7 +202,9 @@ namespace Locations.Core.Business.Tests.ViewModels
             string errorMessage = "Failed to load tip";
 
             _mockTipService.Setup(service => service.GetRandomTipForTypeAsync(3))
-                .ReturnsAsync(new OperationResult<TipViewModel>(false, null, errorMessage));
+                .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<TipDTO>.Failure(
+                    Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
+                    errorMessage));
 
             // Act - We need to use reflection to call the private method
             var method = typeof(TipsViewModel).GetMethod("LoadTipForTypeAsync",

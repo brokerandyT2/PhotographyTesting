@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 // Use explicit namespaces to resolve ambiguity
 using OperationErrorEventArgs = Locations.Core.Shared.ViewModelServices.OperationErrorEventArgs;
 using OperationErrorSource = Locations.Core.Shared.ViewModelServices.OperationErrorSource;
-using OperationResult<T> = Locations.Core.Shared.ViewModelServices.OperationResult<T>;
+using OperationResul = Locations.Core.Shared.ViewModelServices.OperationResult<Locations.Core.Shared.ViewModels.SettingViewModel>;
 
 namespace Locations.Core.Business.Tests.ViewModels
 {
@@ -200,7 +200,7 @@ namespace Locations.Core.Business.Tests.ViewModels
 
             // Setup for GetSettings_Async which is called when settings are saved
             var settingsViewModel = new SettingsViewModel();
-            var result = new OperationResult<SettingsViewModel>(true, settingsViewModel);
+            var result = new Shared.ViewModelServices.OperationResult<SettingsViewModel>(true, settingsViewModel);
 
             _mockSettingsService.Setup(service => service.GetSettings_Async())
                 .ReturnsAsync(result);
@@ -208,7 +208,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             // Setup the SaveSettingAsync method that will be called for individual settings
             _mockSettingsService.Setup(service => service.SaveSettingAsync(It.IsAny<SettingViewModel>()))
                 .Callback(() => tcs.SetResult(true))
-                .ReturnsAsync(new OperationResult<bool>(true, true));
+                .ReturnsAsync(new Shared.ViewModelServices.OperationResult<bool>(true, true));
 
             // Use reflection to set the private _settingsService field
             var fieldInfo = typeof(SettingsViewModel).GetField("_settingsService",
@@ -233,7 +233,7 @@ namespace Locations.Core.Business.Tests.ViewModels
 
             // Setup for GetSettings_Async which is called when settings are saved
             var settingsViewModel = new SettingsViewModel();
-            var result = new OperationResult<SettingsViewModel>(true, settingsViewModel);
+            var result = new Shared.ViewModelServices.OperationResult<SettingsViewModel>(true, settingsViewModel);
 
             _mockSettingsService.Setup(service => service.GetSettings_Async())
                 .ReturnsAsync(result);
@@ -241,7 +241,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             // Setup the SaveSettingAsync method to fail
             _mockSettingsService.Setup(service => service.SaveSettingAsync(It.IsAny<SettingViewModel>()))
                 .Callback(() => tcs.SetResult(true))
-                .ReturnsAsync(new OperationResult<bool>(false, false, "Failed to save settings"));
+                .ReturnsAsync(new Shared.ViewModelServices.OperationResult<bool>(false, false, "Failed to save settings"));
 
             // Use reflection to set the private _settingsService field
             var fieldInfo = typeof(SettingsViewModel).GetField("_settingsService",

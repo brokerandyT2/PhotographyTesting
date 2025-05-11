@@ -1,5 +1,4 @@
-﻿// LocationServiceCoordinatesTests.cs
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Threading.Tasks;
@@ -11,7 +10,12 @@ using Locations.Core.Shared.ViewModels;
 using Locations.Core.Business.Tests.Base;
 using MockFactory = Locations.Core.Business.Tests.TestHelpers.MockFactory;
 using TestDataFactory = Locations.Core.Business.Tests.TestHelpers.TestDataFactory;
-using Microsoft.Maui;
+
+// Use explicit namespaces to resolve ambiguity
+using ViewModelOperationResult = Locations.Core.Shared.ViewModels.OperationResult<Locations.Core.Shared.ViewModels.LocationViewModel>;
+using ServiceOperationResult = Locations.Core.Shared.ViewModelServices.OperationResult<Locations.Core.Shared.ViewModels.LocationViewModel>;
+using ServiceLocationChangedEventArgs = Locations.Core.Shared.ViewModelServices.LocationChangedEventArgs;
+using ViewModelLocationChangedEventArgs = Locations.Core.Shared.ViewModels.LocationChangedEventArgs;
 
 namespace Locations.Core.Business.Tests.Services.LocationServiceTests
 {
@@ -158,7 +162,7 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
 
             // Assert
             MockLoggerService.Verify(
-                logger => logger.LogWarning(It.IsAny<string>(), null),
+                logger => logger.LogWarning(It.IsAny<string>(), new Exception()),
                 Times.Once);
         }
 
