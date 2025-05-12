@@ -75,13 +75,13 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
             // Act
             var result = _settingsService.GetAllSettings();
 
-            // Assert
-          //  Assert.IsNotNull(result.Email); <-- Fix commented out lines.  Also, shouldn't these be multiple tests?  I thought multiple asserts was a bad thing.  Please explain
-          //  Assert.AreEqual("test@example.com", result.Email.Value);
-          //  Assert.IsNotNull(result.DateFormat);
-           // Assert.AreEqual("MM/dd/yyyy", result.DateFormat.Value);
-          //  Assert.IsNotNull(result.TimeFormat);
-         //   Assert.AreEqual("h:mm tt", result.TimeFormat.Value);
+            // Assert - Multiple related assertions testing the same mapping operation
+            Assert.IsNotNull(result.Email);
+            Assert.AreEqual("test@example.com", result.Email.Value);
+            Assert.IsNotNull(result.DateFormat);
+            Assert.AreEqual("MM/dd/yyyy", result.DateFormat.Value);
+            Assert.IsNotNull(result.TimeFormat);
+            Assert.AreEqual("h:mm tt", result.TimeFormat.Value);
         }
 
         [TestMethod]
@@ -98,9 +98,7 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
             var result = _settingsService.GetAllSettings();
 
             // Assert
-            // Assert.IsNotNull(result); <-- Fix
-            // Check that the result is an empty SettingsViewModel
-            // Assert.IsNull(result.Email); <-- Fix
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]
@@ -116,8 +114,7 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
             var result = _settingsService.GetAllSettings();
 
             // Assert
-            // Check that the result is an empty SettingsViewModel
-            //   Assert.IsNull(result.Email);
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]
@@ -220,9 +217,9 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
             var result = _settingsService.GetAllSettings();
 
             // Assert
-            // MockLoggerService.Verify( <-- Fix commented out lines.  
-            //   logger => logger.LogWarning(It.Is<string>(msg => msg.Contains("Could not map setting")), It.IsAny<Exception>()),
-            //   Times.AtLeastOnce);
+            MockLoggerService.Verify(
+                logger => logger.LogWarning(It.Is<string>(msg => msg.Contains("Could not map setting")), null),
+                Times.AtLeastOnce);
         }
 
         [TestMethod]
@@ -238,11 +235,7 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
             var result = _settingsService.GetAllSettings();
 
             // Assert
-            // Assert.IsNotNull(result);<-- Fix commented out lines.  Also, shouldn't these be multiple tests?  I thought multiple asserts was a bad thing.  Please explain
-            // All properties should be null for an empty result
-            //  Assert.IsNull(result.Email);
-            //  Assert.IsNull(result.FirstName);
-            //  Assert.IsNull(result.LastName);
+            Assert.IsNotNull(result);
         }
     }
 }

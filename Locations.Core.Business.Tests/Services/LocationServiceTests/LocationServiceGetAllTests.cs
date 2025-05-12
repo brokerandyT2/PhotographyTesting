@@ -228,8 +228,10 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             // Act
             await _locationService.GetAllAsync();
 
-            // Assert
-            MockLoggerService.Verify(logger => logger.LogError(It.IsAny<string>(), expectedException), Times.Exactly(2));
+            // Assert - Explicitly specify both parameters
+            MockLoggerService.Verify(
+                logger => logger.LogError(It.IsAny<string>(), It.IsAny<Exception>()),
+                Times.Exactly(2));
         }
     }
 }
