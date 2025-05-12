@@ -118,13 +118,11 @@ namespace Locations.Core.Business.Tests.ViewModels
                 .Setup(service => service.SaveLocationAsync(It.IsAny<LocationViewModel>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<LocationViewModel>.Success(_viewModel));
 
+            // Use reflection to call private SaveAsync
             var saveMethod = typeof(LocationViewModel).GetMethod("SaveAsync",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            if (saveMethod != null)
-            {
-                await (Task)saveMethod.Invoke(_viewModel, null);
-            }
+            await (Task)saveMethod.Invoke(_viewModel, null);
 
             _mockLocationService.Verify(service => service.SaveLocationAsync(It.IsAny<LocationViewModel>(),
                 It.IsAny<bool>(), It.IsAny<bool>()), Times.Once);
@@ -142,10 +140,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             var saveMethod = typeof(LocationViewModel).GetMethod("SaveAsync",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            if (saveMethod != null)
-            {
-                await (Task)saveMethod.Invoke(_viewModel, null);
-            }
+            await (Task)saveMethod.Invoke(_viewModel, null);
 
             Assert.IsTrue(_viewModel.IsError);
             Assert.IsTrue(_viewModel.ErrorMessage.Contains("Title is required"));
@@ -170,13 +165,10 @@ namespace Locations.Core.Business.Tests.ViewModels
             var saveMethod = typeof(LocationViewModel).GetMethod("SaveAsync",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            if (saveMethod != null)
-            {
-                await (Task)saveMethod.Invoke(_viewModel, null);
-            }
+            await (Task)saveMethod.Invoke(_viewModel, null);
 
             Assert.IsTrue(_viewModel.IsError);
-            Assert.IsTrue(_viewModel.ErrorMessage.Contains("Failed to save location"));
+            Assert.AreEqual("Failed to save location", _viewModel.ErrorMessage);
         }
 
         [TestMethod]
@@ -196,10 +188,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             var saveMethod = typeof(LocationViewModel).GetMethod("SaveAsync",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            if (saveMethod != null)
-            {
-                await (Task)saveMethod.Invoke(_viewModel, null);
-            }
+            await (Task)saveMethod.Invoke(_viewModel, null);
 
             Assert.IsTrue(_viewModel.IsError);
             Assert.IsTrue(_viewModel.ErrorMessage.Contains("Error saving location"));
@@ -219,10 +208,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             var deleteMethod = typeof(LocationViewModel).GetMethod("DeleteAsync",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            if (deleteMethod != null)
-            {
-                await (Task)deleteMethod.Invoke(_viewModel, null);
-            }
+            await (Task)deleteMethod.Invoke(_viewModel, null);
 
             _mockLocationService.Verify(service => service.DeleteLocationAsync(It.IsAny<LocationViewModel>()), Times.Once);
             Assert.IsTrue(_viewModel.IsDeleted);
@@ -244,13 +230,10 @@ namespace Locations.Core.Business.Tests.ViewModels
             var deleteMethod = typeof(LocationViewModel).GetMethod("DeleteAsync",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            if (deleteMethod != null)
-            {
-                await (Task)deleteMethod.Invoke(_viewModel, null);
-            }
+            await (Task)deleteMethod.Invoke(_viewModel, null);
 
             Assert.IsTrue(_viewModel.IsError);
-            Assert.IsTrue(_viewModel.ErrorMessage.Contains("Failed to delete location"));
+            Assert.AreEqual("Failed to delete location", _viewModel.ErrorMessage);
         }
 
         [TestMethod]
@@ -342,15 +325,24 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void OnLocationChanged_WithValidCoordinates_ShouldUpdateLocationCoordinates()
         {
+            // Arrange
             double latitude = 40.7128;
             double longitude = -74.0060;
 
-            var eventArgs = new LocationChangedEventArgs(latitude, longitude);
+            // Create new viewmodel with mocked service that we can control
+            var mockGeoService = new Mock<IGeolocationService>();
+            var viewModel = new LocationViewModel(
+                _mockLocationService.Object,
+                _mockMediaService.Object,
+                mockGeoService.Object);
 
-            _mockGeolocationService.Raise(service => service.LocationChanged += null, eventArgs);
+            // Raise the event
+            mockGeoService.Raise(service => service.LocationChanged += null,
+                new LocationChangedEventArgs(latitude, longitude));
 
-            Assert.AreEqual(latitude, _viewModel.Lattitude);
-            Assert.AreEqual(longitude, _viewModel.Longitude);
+            // Assert
+            Assert.AreEqual(latitude, viewModel.Lattitude);
+            Assert.AreEqual(longitude, viewModel.Longitude);
         }
 
         [TestMethod]

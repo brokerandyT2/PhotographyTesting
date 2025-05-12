@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System.Globalization;
 using static Locations.Core.Shared.Enums.SubscriptionType;
 using EncryptedSQLite;
+using Locations.Core.Shared.ViewModelServices;
 #if PHOTOGRAPHY
 
 #endif
@@ -32,7 +33,9 @@ namespace Location.Core
 
         public static SubscriptionTypeEnum SubscriptionType = _subType;
         public INativeStorageService nativeService;
-
+        private ISettingService _settingService;
+        private ILoggerService _loggerService;
+       
         public MainPage()
         {
             InitializeComponent();
@@ -41,14 +44,16 @@ namespace Location.Core
             EmailAddress = NativeStorageService.GetSetting(MagicStrings.Email);
             IsLoggedIn = !string.IsNullOrEmpty(EmailAddress);
             AppID = NativeStorageService.GetSetting(MagicStrings.UniqueID);
-            MainThread.BeginInvokeOnMainThread(() => {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
                 RequestPermissionsAsync();
             });
 
             if (!IsLoggedIn)
             {
                 // Use Device.InvokeOnMainThreadAsync for immediate execution
-                MainThread.BeginInvokeOnMainThread(async () => {
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
                     await Navigation.PushAsync(new NavigationPage(new Login()));
                 });
 
@@ -65,37 +70,42 @@ namespace Location.Core
                 _subType = SubscriptionTypeEnum.Free;
             }
 
-          //  DataAccess da = new DataAccess();
+            //  DataAccess da = new DataAccess();
 
 
 
             // Increment the app open counter
-            var z = ss.GetSettingByName(MagicStrings.AppOpenCounter);
-            var x = Convert.ToInt32(z.Value);
-            z.Value = (x + 1).ToString();
-            var q = ss.SaveAsync(z);
+            //var z = ss.GetSettingByName(MagicStrings.AppOpenCounter);
+            var z = _settingService.GetSettingAsync(MagicStrings.AppOpenCounter);
+
+            var x = Convert.ToInt32(z.Result.Data.Value);
+            z.Result.Data.Value = (x + 1).ToString();
+
+            var q = _settingService.SaveSettingAsync(z.Result.Data);
 
             var language = CultureInfo.CurrentCulture.Name;
-            var setting = ss.GetSettingByName(MagicStrings.DefaultLanguage);
-            var adSupport = Convert.ToBoolean(ss.GetSettingByName(MagicStrings.FreePremiumAdSupported).Value);
+            var languageStored = _settingService.GetSettingAsync(MagicStrings.DefaultLanguage);
+            var adSupport = Convert.ToBoolean(_settingService.GetSettingAsync(MagicStrings.FreePremiumAdSupported).Result.Data.Value);
 
             var subscription = SubscriptionType;
 
             // Make sure we have saved the systems language
-            if (setting.Value != language)
+            if (languageStored.Result.Data.Value != language)
             {
-                setting.Value = language;
-                var dispose = ss.SaveAsync(setting);
+                languageStored.Result.Data.Value = language;
+                var setvm = new SettingViewModel();
+
+                _settingService.SaveSettingAsync(languageStored.Result.Data);
             }
 
             // Capture the device information and save it to the settings
-            var settingDi = ss.GetSettingByName(MagicStrings.DeviceInformation);
+            var settingDi = _settingService.GetSettingAsync(MagicStrings.DeviceInformation);
             var deviceInfo = new Locations.Core.Shared.ViewModels.DeviceInformation();
             var serilized = JsonConvert.SerializeObject(deviceInfo);
-            if (settingDi.Value != serilized)
+            if (JsonConvert.SerializeObject(settingDi.Result.Data) != serilized)
             {
-                settingDi.Value = serilized;
-                ss.SaveAsync(settingDi);
+                settingDi.Result.Data.Value = serilized;
+                _settingService.SaveSettingAsync(settingDi.Result.Data);
             }
 
             if (IsLoggedIn)
@@ -105,20 +115,20 @@ namespace Location.Core
                 if ((subscription == SubscriptionTypeEnum.Professional || subscription == SubscriptionTypeEnum.Premium) || adSupport)
                 {
 #if PHOTOGRAPHY
-                  /*  this.Children.Add(new Views.Pro.SceneEvaluation());
-                    this.Children.Add(new Views.Pro.SunCalculations());*/
+                    /*  this.Children.Add(new Views.Pro.SceneEvaluation());
+                      this.Children.Add(new Views.Pro.SunCalculations());*/
                     this.Children.Add(new Location.Photography.Pro.SceneEvaluation());
-                    this.Children.Add(new Photography.Pro.SunCalculations()); 
+                    this.Children.Add(new Photography.Pro.SunCalculations());
 #endif
                     if ((subscription == SubscriptionTypeEnum.Premium) || adSupport)
                     {
 #if PHOTOGRAPHY
                         this.Children.Add(new Photography.Premium.ExposureCalculator());
                         this.Children.Add(new Photography.Premium.LightMeter());
-                        this.Children.Add(new Photography.Premium.SunLocation()); 
-                     /*   this.Children.Add(new Views.Premium.ExposureCalculator());
-                        this.Children.Add(new Views.Premium.LightMeter());
-                        this.Children.Add(new Views.Premium.SunLocation());*/
+                        this.Children.Add(new Photography.Premium.SunLocation());
+                        /*   this.Children.Add(new Views.Premium.ExposureCalculator());
+                           this.Children.Add(new Views.Premium.LightMeter());
+                           this.Children.Add(new Views.Premium.SunLocation());*/
 #endif
                     }
                 }
@@ -137,10 +147,11 @@ namespace Location.Core
         private void RequestPermissionsAsync()
         {
             // Make sure we're already on the main thread
-            
+
 
             // Now we're safely on the main thread
-            Task.Run(async () => {
+            Task.Run(async () =>
+            {
                 try
                 {
                     var locationStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
@@ -148,16 +159,18 @@ namespace Location.Core
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Permission request error: {ex.Message}");
+                    _loggerService.LogError($"Permission request error: {ex.Message}", ex);
                 }
             });
         }
-        public MainPage(INativeStorageService nativeService) : this()
+        public MainPage(INativeStorageService nativeService, ISettingService settingService, ILoggerService loggerService) : this()
         {
             this.nativeService = nativeService;
+            this._settingService = settingService;
+            this._loggerService = loggerService;
         }
 
-        
+
 
         private void AddDefault()
         {

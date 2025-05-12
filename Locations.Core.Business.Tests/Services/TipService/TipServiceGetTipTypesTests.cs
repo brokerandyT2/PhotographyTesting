@@ -131,7 +131,7 @@ namespace Locations.Core.Business.Tests.Services.TipServiceTests
         public async Task GetTipTypesAsync_WhenTipTypeServiceFails_ShouldReturnFailureResult()
         {
             // Arrange
-            string errorMessage = "Service error";
+            string errorMessage = "Failed to retrieve tip types";
 
             var result = new Locations.Core.Shared.ViewModels.OperationResult<List<TipTypeViewModel>>(
                 false, null, errorMessage);

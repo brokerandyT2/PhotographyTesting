@@ -1,4 +1,4 @@
-﻿// LocationServiceNearbyTests.cs
+﻿// LocationServiceNearbyTests.cs - Fixed
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -234,6 +234,13 @@ namespace Locations.Core.Business.Tests.Services.LocationServiceTests
             double longitude = -74.0060;
             double radiusKm = 0; // Zero radius
             var testLocations = TestDataFactory.CreateTestLocations(3);
+
+            // Ensure no locations are exactly at the same coordinates
+            foreach (var location in testLocations)
+            {
+                location.Lattitude = latitude + 0.001; // Slightly different
+                location.Longitude = longitude + 0.001;
+            }
 
             _mockLocationRepository.Setup(repo => repo.GetAllAsync())
                 .ReturnsAsync(DataOperationResult<IList<LocationViewModel>>.Success(testLocations));

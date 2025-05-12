@@ -1,4 +1,5 @@
-﻿using System;
+﻿// MagicStrings.cs - Fixed with Initialize method for tests
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,17 @@ namespace Locations.Core.Shared
 {
     public static class MagicStrings
     {
+        // Add static fields that would normally come from FileSystem
+        private static string _appDataDirectory = null;
+        private static string _documentsDirectory = null;
+
+        // Test-friendly initialization method
+        public static void Initialize()
+        {
+            _appDataDirectory = "C:\\TestAppData";
+            _documentsDirectory = "C:\\TestDocuments";
+        }
+
         public static string SunCalculatorViewed = "suncalculatorviewed";
         public static string SunLocationViewed = "suncalculatorviewed";
         public static string SceneEvaluationViewed = "sceneevaluationviewed";
@@ -42,7 +54,7 @@ namespace Locations.Core.Shared
         public static readonly string WithWind = "withwind";
         public static readonly string CameraRefresh = "camerarefresh";
         public static readonly string NoEmailEntered = "no_email_entered";
-        public static readonly string Dismiss_LightMeter_Alert= "dismiss_lightmeter_alert";
+        public static readonly string Dismiss_LightMeter_Alert = "dismiss_lightmeter_alert";
         public static readonly string RegEx_Email = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
         public const string ExposureCalculator = "exposurecalculator";
         public static string LocationListViewed = "locationlistviewed";
@@ -53,8 +65,14 @@ namespace Locations.Core.Shared
 
         public static string AppOpenCounter = "appopencounter";
 #if PHOTOGRAPHY
-        public static string DataBasePath = Path.Combine(FileSystem.AppDataDirectory,"photography.db3");
-        public static string DataBasePathEncrypted = Path.Combine(FileSystem.AppDataDirectory, "photography_encrypted.db3");
+        public static string DataBasePath => _appDataDirectory != null ?
+            System.IO.Path.Combine(_appDataDirectory, "photography.db3") :
+            "photography.db3";
+
+        public static string DataBasePathEncrypted => _appDataDirectory != null ?
+            System.IO.Path.Combine(_appDataDirectory, "photography_encrypted.db3") :
+            "photography_encrypted.db3";
+
         public static string USTimeformat_Pattern = "hh:mm tt";
         public static string InternationalTimeFormat_Pattern = "HH:mm";
         public static string FreePremiumAdSupported = "free_premium_ad_supported";
