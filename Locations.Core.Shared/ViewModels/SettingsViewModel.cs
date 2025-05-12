@@ -105,7 +105,20 @@ namespace Locations.Core.Shared.ViewModels
 
         // Wind direction setting
         public SettingViewModel WindDirection { get; set; }
-        public bool WindDirectionBoolean => WindDirection?.Value == MagicStrings.TowardsWind;
+        private bool _winddirectionbool;
+        public bool WindDirectionBoolean
+        {
+            get
+            {
+                _winddirectionbool = WindDirection.Value == MagicStrings.TowardsWind;
+                return _winddirectionbool;
+            }
+            set
+            {
+                _winddirectionbool = value;
+                OnPropertyChanging(nameof(WindDirectionBoolean));
+            }
+        }
 
         // View tracking settings
         public SettingViewModel HomePageViewed { get; set; }

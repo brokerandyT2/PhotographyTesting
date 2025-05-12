@@ -1,7 +1,9 @@
 ﻿
+using Location.Core.Helpers.AlertService;
 using Location.Core.Helpers.LoggingService;
-
+using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Business.StorageSvc;
+using Locations.Core.Data.Queries;
 using Locations.Core.Shared.ViewModelServices;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +15,7 @@ namespace Location.Core
 
         public App()
         {
+            SQLitePCL.Batteries_V2.Init();
             InitializeComponent();
             
 
@@ -35,7 +38,7 @@ namespace Location.Core
         protected override Window CreateWindow(IActivationState? activationState)
         {
             //MainPage = new NavigationPage(new MainPage());
-            return new Window(new NavigationPage(new MainPage(new NativeStorageService())));
+            return new Window(new NavigationPage(new MainPage()));
         }
     }
 }

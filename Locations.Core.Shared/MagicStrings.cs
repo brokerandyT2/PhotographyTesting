@@ -71,7 +71,7 @@ namespace Locations.Core.Shared
 
         public static string DataBasePathEncrypted => _appDataDirectory != null ?
             System.IO.Path.Combine(_appDataDirectory, "photography_encrypted.db3") :
-            "photography_encrypted.db3";
+            Path.Combine(FileSystem.AppDataDirectory, "photography_encrypted.db3");
 
         public static string USTimeformat_Pattern = "hh:mm tt";
         public static string InternationalTimeFormat_Pattern = "HH:mm";

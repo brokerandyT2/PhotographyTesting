@@ -31,6 +31,7 @@ namespace Locations.Core.Business
 
         {
             var _connection = DataEncrypted.GetAsyncConnection();
+     
 
             var _alertServ = new Location.Core.Helpers.AlertService.EventAlertService();
             var _loggingServ = new Location.Core.Helpers.LoggingService.LoggerService(_connection);

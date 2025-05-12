@@ -72,16 +72,33 @@ namespace Location.Core
 
             //  DataAccess da = new DataAccess();
 
+            if(_settingService == null)
+            {
+                IAlertService _alertService = new EventAlertService();
+                ILoggerService _loggerService = new LoggerService(DataEncrypted.GetAsyncConnection(), _alertService);
+               
+            }
 
+            var _alertServ = new Location.Core.Helpers.AlertService.EventAlertService();
+            var _loggingServ = new Location.Core.Helpers.LoggingService.LoggerService(DataEncrypted.GetAsyncConnection());
 
+            var _tipRepo = new Locations.Core.Data.Queries.TipRepository(_alertServ, _loggingServ);
+            var _locRepo = new LocationRepository(_alertServ, _loggingServ);
+            var _tipTypeRepo = new TipTypeRepository(_alertServ, _loggingServ);
+            var _settingRepo = new SettingsRepository(_alertServ, _loggingServ);
+
+            var _tipBusiness = new TipService<TipViewModel>(_tipRepo, _alertServ, _loggingServ);
+            var _tipTypeBusiness = new TipTypeService<TipTypeViewModel>(_tipTypeRepo, _alertServ, _loggingServ);
+            var _locBusiness = new LocationService<LocationViewModel>(_locRepo, _alertServ, _loggingServ);
+            var _settingsBusiness = new SettingsService<SettingViewModel>(_settingRepo, _alertServ, _loggingServ);
             // Increment the app open counter
             //var z = ss.GetSettingByName(MagicStrings.AppOpenCounter);
-            var z = _settingService.GetSettingAsync(MagicStrings.AppOpenCounter);
+            var z = _settingsBusiness.GetSettingByName(MagicStrings.AppOpenCounter);
 
-            var x = Convert.ToInt32(z.Result.Data.Value);
-            z.Result.Data.Value = (x + 1).ToString();
+            var x = Convert.ToInt32(z.Value);
+            z.Value = (x + 1).ToString();
 
-            var q = _settingService.SaveSettingAsync(z.Result.Data);
+            var q = _settingService.SaveSettingAsync(z);
 
             var language = CultureInfo.CurrentCulture.Name;
             var languageStored = _settingService.GetSettingAsync(MagicStrings.DefaultLanguage);
@@ -89,13 +106,21 @@ namespace Location.Core
 
             var subscription = SubscriptionType;
 
+
+
+
+
+
+
+
+
             // Make sure we have saved the systems language
             if (languageStored.Result.Data.Value != language)
             {
                 languageStored.Result.Data.Value = language;
                 var setvm = new SettingViewModel();
 
-                _settingService.SaveSettingAsync(languageStored.Result.Data);
+                _settingsBusiness.SaveAsync(languageStored.Result.Data);
             }
 
             // Capture the device information and save it to the settings
@@ -105,7 +130,7 @@ namespace Location.Core
             if (JsonConvert.SerializeObject(settingDi.Result.Data) != serilized)
             {
                 settingDi.Result.Data.Value = serilized;
-                _settingService.SaveSettingAsync(settingDi.Result.Data);
+                _settingsBusiness.SaveAsync(settingDi.Result.Data);
             }
 
             if (IsLoggedIn)

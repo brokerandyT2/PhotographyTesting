@@ -70,7 +70,11 @@ public partial class Login : ContentPage
     private void EmailAddress_TextChanged(object sender, TextChangedEventArgs e)
     {
         // Update validation message visibility when text changes
-        UpdateValidationMessageVisibility();
+        if (emailAddress.Text.Contains('.') && emailAddress.Text.Split('.')[1].Length >= 2)
+        {
+            // only execute validation if someone has entered at least 2 charaters (minimum) after a period.  This way we aren't showing an error until the user has had the chance to put in an actual address
+            UpdateValidationMessageVisibility();
+        }
     }
 
     private void UpdateValidationMessageVisibility()
@@ -166,15 +170,17 @@ public partial class Login : ContentPage
 
     private void WindDirectionSwitch_Toggled(object sender, ToggledEventArgs e)
     {
-        ((SettingsViewModel)BindingContext).WindDirection.Value = e.Value ? MagicStrings.TowardsWind : MagicStrings.WithWind;
-        if (((SettingsViewModel)BindingContext).WindDirection.Value == MagicStrings.TowardsWind)
-        {
-            WindDirection.Text = AppResources.TowardsWind.FirstCharToUpper();
-        }
-        else
-        {
-            WindDirection.Text = AppResources.WithWind.FirstCharToUpper();
-        }
+
+        var vm = (SettingsViewModel)BindingContext;
+
+        vm.WindDirection.Value = e.Value ? MagicStrings.TowardsWind : MagicStrings.WithWind;
+
+        // Notify that the derived bool property changed
+     
+
+        WindDirection.Text = e.Value
+            ? AppResources.TowardsWind.FirstCharToUpper()
+            : AppResources.WithWind.FirstCharToUpper();
     }
 
     private void TempFormatSwitch_Toggled(object sender, ToggledEventArgs e)

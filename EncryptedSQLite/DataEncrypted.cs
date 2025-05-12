@@ -17,24 +17,37 @@ namespace EncryptedSQLite
         /// Use this to use the default storage of email and guid
         /// </summary>
         /// <exception cref="NotImplementedException"></exception>
-
+        private const sql.SQLiteOpenFlags Flags =
+            // open the database in read/write mode
+            sql.SQLiteOpenFlags.ReadWrite |
+            // create the database if it doesn't exist
+            sql.SQLiteOpenFlags.Create |
+            // enable multi-threaded database access
+            sql.SQLiteOpenFlags.SharedCache;
         public DataEncrypted() {
            
         }
-
+        private static void CreateIfDoesntExist()
+        {
+            if (!(File.Exists(MagicStrings.DataBasePathEncrypted)))
+            {
+                var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, compKey);
+            }
+        }
       
         public static sql.SQLiteAsyncConnection GetAsyncConnection()
         {
-            var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, compKey);
-            return new sql.SQLiteAsyncConnection(x);
+            CreateIfDoesntExist();
+            //var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, compKey);
+            return new sql.SQLiteAsyncConnection(MagicStrings.DataBasePathEncrypted, Flags);
         }
               
         public static sql.SQLiteConnection GetSyncConnection()
         {
 
-            SQLitePCL.Batteries_V2.Init();
-            var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, key: compKey);
-            var conn = new sql.SQLiteConnection(x);
+            
+           // var x = new sql.SQLiteConnectionString(MagicStrings.DataBasePathEncrypted, true, key: compKey);
+            var conn = new sql.SQLiteConnection(MagicStrings.DataBasePathEncrypted, Flags);
             return conn;
         }
        

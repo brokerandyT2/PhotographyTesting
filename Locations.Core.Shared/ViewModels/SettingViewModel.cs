@@ -12,7 +12,7 @@ namespace Locations.Core.Shared.ViewModels
         private string _key;
         private string _value;
         private string _description;
-
+        
         // Properties with notification
         public int Id
         {
