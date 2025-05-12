@@ -98,7 +98,7 @@ namespace Locations.Core.Shared.ViewModels
                 OnPropertyChanged(nameof(DateFormat));
                 OnPropertyChanged(nameof(DateFormatToggle));
                 _propertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DateFormat)));
-            }
+            } 
         }
 
         public bool DateFormatToggle => DateFormat?.Value == MagicStrings.USDateFormat;
