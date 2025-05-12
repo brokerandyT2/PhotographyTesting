@@ -1,4 +1,4 @@
-﻿// WeatherViewModelTests.cs - Fixed for test failures
+﻿// WeatherViewModelTests.cs - Fixed Version 2
 using Locations.Core.Shared.ViewModels;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -113,8 +113,12 @@ namespace Locations.Core.Business.Tests.ViewModels
             _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
                 .ReturnsAsync(Shared.ViewModelServices.OperationResult<WeatherDTO>.Success(weatherDTO));
 
-            // Act
-             _viewModel.RefreshWeatherCommand.Execute(null);
+            // Act - fix: cast to AsyncRelayCommand
+            var command = _viewModel.RefreshWeatherCommand as AsyncRelayCommand;
+            if (command != null)
+            {
+                await command.ExecuteAsync(null);
+            }
 
             _mockWeatherService.Verify(service => service.GetWeatherForLocationAsync(1), Times.Once);
             Assert.AreEqual(72.5, _viewModel.Temperature);
@@ -128,8 +132,12 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.IsError = false;
             _viewModel.ErrorMessage = string.Empty;
 
-            // Act
-             _viewModel.RefreshWeatherCommand.Execute(null);
+            // Act - fix: cast to AsyncRelayCommand
+            var command = _viewModel.RefreshWeatherCommand as AsyncRelayCommand;
+            if (command != null)
+            {
+                await command.ExecuteAsync(null);
+            }
 
             Assert.IsTrue(_viewModel.IsError);
             Assert.IsTrue(_viewModel.ErrorMessage.Contains("Invalid location ID"));
@@ -147,8 +155,12 @@ namespace Locations.Core.Business.Tests.ViewModels
                     Shared.ViewModelServices.OperationErrorSource.Unknown,
                     "Failed to fetch weather data"));
 
-            // Act
-             _viewModel.RefreshWeatherCommand.Execute(null);
+            // Act - fix: cast to AsyncRelayCommand
+            var command = _viewModel.RefreshWeatherCommand as AsyncRelayCommand;
+            if (command != null)
+            {
+                await command.ExecuteAsync(null);
+            }
 
             Assert.IsTrue(_viewModel.IsError);
             Assert.AreEqual("Failed to fetch weather data", _viewModel.ErrorMessage);
@@ -166,8 +178,12 @@ namespace Locations.Core.Business.Tests.ViewModels
             _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
                 .ThrowsAsync(exception);
 
-            // Act
-             _viewModel.RefreshWeatherCommand.Execute(null);
+            // Act - fix: cast to AsyncRelayCommand
+            var command = _viewModel.RefreshWeatherCommand as AsyncRelayCommand;
+            if (command != null)
+            {
+                await command.ExecuteAsync(null);
+            }
 
             Assert.IsTrue(_viewModel.IsError);
             Assert.IsTrue(_viewModel.ErrorMessage.Contains("Error refreshing weather"));

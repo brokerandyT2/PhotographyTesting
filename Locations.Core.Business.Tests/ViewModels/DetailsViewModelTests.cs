@@ -1,4 +1,4 @@
-﻿// DetailsViewModelTests.cs - Fixed
+﻿// DetailsViewModelTests.cs - Fixed with reflection for event handling
 using CommunityToolkit.Mvvm.Input;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Threading.Tasks;
+using System.Reflection;
 using OperationErrorEventArgs = Locations.Core.Shared.ViewModelServices.OperationErrorEventArgs;
 using OperationErrorSource = Locations.Core.Shared.ViewModelServices.OperationErrorSource;
 
@@ -80,43 +81,50 @@ namespace Locations.Core.Business.Tests.ViewModels
             var testDetailsViewModel = new DetailsViewModel(testLocationViewModel, testWeatherViewModel);
 
             // Subscribe to the error event on the details view model
-            testDetailsViewModel.ErrorOccurred += (sender, e) => {
+            testDetailsViewModel.ErrorOccurred += (sender, e) =>
+            {
                 errorOccurred = true;
-                capturedArgs = new(OperationErrorSource.Unknown, e.Message, new Exception(), testDetailsViewModel);// e;
+                capturedArgs = e;
             };
 
             // Create the error event args
             var errorArgs = new OperationErrorEventArgs(
                 OperationErrorSource.Unknown,
-                errorMessage);
+                errorMessage,
+                new Exception("Test exception"));
 
-            // Use reflection to get the ErrorOccurred event field from LocationViewModel
-            var errorEventField = typeof(ViewModelBase).GetField("ErrorOccurred",
-                System.Reflection.BindingFlags.NonPublic |
-                System.Reflection.BindingFlags.Instance |
-                System.Reflection.BindingFlags.FlattenHierarchy);
+            // Fix: Use reflection to trigger the ErrorOccurred event from LocationViewModel
+            var errorOccurredEvent = typeof(ViewModelBase).GetEvent("ErrorOccurred",
+                BindingFlags.Public | BindingFlags.Instance);
 
-            if (errorEventField != null)
+            if (errorOccurredEvent != null)
             {
-                var eventDelegate = (EventHandler<OperationErrorEventArgs>)errorEventField.GetValue(testLocationViewModel);
+                // Get the backing field for the event
+                var errorOccurredField = typeof(ViewModelBase).GetField("ErrorOccurred",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
 
-                // Invoke the event if there are subscribers (the DetailsViewModel should have subscribed)
-                eventDelegate?.Invoke(testLocationViewModel, errorArgs);
-            }
-            else
-            {
-                // Alternative: Try to use the OnErrorOccurred method directly
-                var onErrorMethod = typeof(ViewModelBase).GetMethod("OnErrorOccurred",
-                    System.Reflection.BindingFlags.NonPublic |
-                    System.Reflection.BindingFlags.Public |
-                    System.Reflection.BindingFlags.Instance,
-                    null,
-                    new Type[] { typeof(OperationErrorEventArgs) },
-                    null);
-
-                if (onErrorMethod != null)
+                if (errorOccurredField != null)
                 {
-                    onErrorMethod.Invoke(testLocationViewModel, new object[] { errorArgs });
+                    var eventDelegate = errorOccurredField.GetValue(testLocationViewModel) as MulticastDelegate;
+                    if (eventDelegate != null)
+                    {
+                        // Invoke the event
+                        eventDelegate.DynamicInvoke(testLocationViewModel, errorArgs);
+                    }
+                    else
+                    {
+                        // Alternative: Use the RaisePropertyChanged to trigger the event indirectly
+                        var onErrorMethod = typeof(ViewModelBase).GetMethod("OnErrorOccurred",
+                            BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance,
+                            null,
+                            new Type[] { typeof(OperationErrorEventArgs) },
+                            null);
+
+                        if (onErrorMethod != null)
+                        {
+                            onErrorMethod.Invoke(testLocationViewModel, new object[] { errorArgs });
+                        }
+                    }
                 }
             }
 

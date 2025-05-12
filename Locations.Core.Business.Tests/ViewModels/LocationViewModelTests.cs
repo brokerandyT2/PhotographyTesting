@@ -1,4 +1,4 @@
-﻿// LocationViewModelTests.cs - Fixed
+﻿// LocationViewModelTests.cs - Complete Fixed Version
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -37,8 +37,10 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void Constructor_WithNoDependencies_ShouldInitializeProperties()
         {
+            // Arrange & Act
             var viewModel = new LocationViewModel();
 
+            // Assert
             Assert.IsNotNull(viewModel.SaveCommand);
             Assert.IsNotNull(viewModel.DeleteCommand);
             Assert.IsNotNull(viewModel.TakePhotoCommand);
@@ -54,6 +56,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void Constructor_WithDependencies_ShouldInitializePropertiesAndServices()
         {
+            // Assert
             Assert.IsNotNull(_viewModel.SaveCommand);
             Assert.IsNotNull(_viewModel.DeleteCommand);
             Assert.IsNotNull(_viewModel.TakePhotoCommand);
@@ -69,6 +72,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void InitializeFromDTO_WithValidDTO_ShouldInitializeProperties()
         {
+            // Arrange
             var dto = new Locations.Core.Shared.DTO.LocationDTO
             {
                 Id = 1,
@@ -84,8 +88,10 @@ namespace Locations.Core.Business.Tests.ViewModels
                 DateFormat = "yyyy-MM-dd"
             };
 
+            // Act
             _viewModel.InitializeFromDTO(dto);
 
+            // Assert
             Assert.AreEqual(1, _viewModel.Id);
             Assert.AreEqual("New York", _viewModel.City);
             Assert.AreEqual("NY", _viewModel.State);
@@ -103,12 +109,17 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void InitializeFromDTO_WithNullDTO_ShouldNotThrowException()
         {
+            // Act
             _viewModel.InitializeFromDTO(null);
+
+            // Assert - no exception thrown
+            Assert.IsTrue(true);
         }
 
         [TestMethod]
         public async Task SaveAsync_WithValidLocation_ShouldCallLocationService()
         {
+            // Arrange
             _viewModel.Title = "Test Location";
             _viewModel.Description = "Test Description";
             _viewModel.IsError = false;
@@ -117,36 +128,42 @@ namespace Locations.Core.Business.Tests.ViewModels
             _mockLocationService.Setup(service => service.SaveLocationAsync(It.IsAny<LocationViewModel>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<LocationViewModel>.Success(_viewModel));
 
-            // Act
-             _viewModel.SaveCommand.Execute(null);
+            // Act - use SaveCommand instead of private method
+            await _viewModel.SaveCommand.ExecuteAsync(null);
 
             // Assert
-            _mockLocationService.Verify(service => service.SaveLocationAsync(It.IsAny<LocationViewModel>(),
-                It.IsAny<bool>(), It.IsAny<bool>()), Times.Once);
+            _mockLocationService.Verify(service => service.SaveLocationAsync(
+                It.IsAny<LocationViewModel>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>()), Times.Once);
             Assert.IsFalse(_viewModel.VmIsNewLocation);
         }
 
         [TestMethod]
         public async Task SaveAsync_WhenValidationFails_ShouldSetErrorMessage()
         {
+            // Arrange
             _viewModel.Title = "";
             _viewModel.Description = "Test Description";
             _viewModel.IsError = false;
             _viewModel.ErrorMessage = string.Empty;
 
-            // Act
-             _viewModel.SaveCommand.Execute(null);
+            // Act - use SaveCommand
+            await _viewModel.SaveCommand.ExecuteAsync(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
             Assert.IsTrue(_viewModel.ErrorMessage.Contains("Title is required"));
-            _mockLocationService.Verify(service => service.SaveLocationAsync(It.IsAny<LocationViewModel>(),
-                It.IsAny<bool>(), It.IsAny<bool>()), Times.Never);
+            _mockLocationService.Verify(service => service.SaveLocationAsync(
+                It.IsAny<LocationViewModel>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>()), Times.Never);
         }
 
         [TestMethod]
         public async Task SaveAsync_WhenLocationServiceFails_ShouldSetErrorMessage()
         {
+            // Arrange
             _viewModel.Title = "Test Location";
             _viewModel.Description = "Test Description";
             _viewModel.IsError = false;
@@ -157,8 +174,8 @@ namespace Locations.Core.Business.Tests.ViewModels
                     Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
                     "Failed to save location"));
 
-            // Act
-             _viewModel.SaveCommand.Execute(null);
+            // Act - use SaveCommand
+            await _viewModel.SaveCommand.ExecuteAsync(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -168,6 +185,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public async Task SaveAsync_WhenExceptionOccurs_ShouldSetErrorMessage()
         {
+            // Arrange
             _viewModel.Title = "Test Location";
             _viewModel.Description = "Test Description";
             _viewModel.IsError = false;
@@ -178,8 +196,8 @@ namespace Locations.Core.Business.Tests.ViewModels
             _mockLocationService.Setup(service => service.SaveLocationAsync(It.IsAny<LocationViewModel>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .ThrowsAsync(exception);
 
-            // Act
-             _viewModel.SaveCommand.Execute(null);
+            // Act - use SaveCommand
+            await _viewModel.SaveCommand.ExecuteAsync(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -189,6 +207,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public async Task DeleteAsync_WithExistingLocation_ShouldCallLocationService()
         {
+            // Arrange
             _viewModel.Id = 1;
             _viewModel.IsError = false;
             _viewModel.ErrorMessage = string.Empty;
@@ -196,8 +215,8 @@ namespace Locations.Core.Business.Tests.ViewModels
             _mockLocationService.Setup(service => service.DeleteLocationAsync(It.IsAny<LocationViewModel>()))
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<bool>.Success(true));
 
-            // Act
-             _viewModel.DeleteCommand.Execute(null);
+            // Act - use DeleteCommand
+            await _viewModel.DeleteCommand.ExecuteAsync(null);
 
             // Assert
             _mockLocationService.Verify(service => service.DeleteLocationAsync(It.IsAny<LocationViewModel>()), Times.Once);
@@ -207,6 +226,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public async Task DeleteAsync_WhenLocationServiceFails_ShouldSetErrorMessage()
         {
+            // Arrange
             _viewModel.Id = 1;
             _viewModel.IsError = false;
             _viewModel.ErrorMessage = string.Empty;
@@ -216,8 +236,8 @@ namespace Locations.Core.Business.Tests.ViewModels
                     Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
                     "Failed to delete location"));
 
-            // Act
-             _viewModel.DeleteCommand.Execute(null);
+            // Act - use DeleteCommand
+            await _viewModel.DeleteCommand.ExecuteAsync(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -227,26 +247,35 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public async Task TakePhotoAsync_WhenMediaServiceSucceeds_ShouldSetPhotoProperty()
         {
+            // Arrange
             string filePath = "/path/to/photo.jpg";
 
             _mockMediaService.Setup(service => service.CapturePhotoAsync())
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<string>.Success(filePath));
 
+            // Act
             await ((AsyncRelayCommand)_viewModel.TakePhotoCommand).ExecuteAsync(null);
 
+            // Assert
             Assert.AreEqual(filePath, _viewModel.Photo);
         }
 
         [TestMethod]
         public async Task TakePhotoAsync_WhenMediaServiceFails_ShouldSetErrorMessage()
         {
+            // Arrange
+            _viewModel.IsError = false;
+            _viewModel.ErrorMessage = string.Empty;
+
             _mockMediaService.Setup(service => service.CapturePhotoAsync())
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<string>.Failure(
                     Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
                     "Failed to capture photo"));
 
+            // Act
             await ((AsyncRelayCommand)_viewModel.TakePhotoCommand).ExecuteAsync(null);
 
+            // Assert
             Assert.IsTrue(_viewModel.IsError);
             Assert.AreEqual("Failed to capture photo", _viewModel.ErrorMessage);
         }
@@ -254,37 +283,52 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public async Task PickPhotoAsync_WhenMediaServiceSucceeds_ShouldSetPhotoProperty()
         {
+            // Arrange
             string filePath = "/path/to/picked_photo.jpg";
 
             _mockMediaService.Setup(service => service.PickPhotoAsync())
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<string>.Success(filePath));
 
+            // Act
             await ((AsyncRelayCommand)_viewModel.PickPhotoCommand).ExecuteAsync(null);
 
+            // Assert
             Assert.AreEqual(filePath, _viewModel.Photo);
         }
 
         [TestMethod]
         public async Task StartLocationTrackingAsync_WhenGeolocationServiceSucceeds_ShouldStartTracking()
         {
+            // Arrange
+            _viewModel.VmIsLocationTracking = false;
+
             _mockGeolocationService.Setup(service => service.StartTrackingAsync(It.IsAny<GeolocationAccuracy>()))
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<bool>.Success(true));
 
+            // Act
             await ((AsyncRelayCommand)_viewModel.StartLocationTrackingCommand).ExecuteAsync(null);
 
+            // Assert
             Assert.IsTrue(_viewModel.VmIsLocationTracking);
         }
 
         [TestMethod]
         public async Task StartLocationTrackingAsync_WhenGeolocationServiceFails_ShouldSetErrorMessage()
         {
-            _mockGeolocationService.Setup(service => service.StartTrackingAsync(It.IsAny<Shared.ViewModelServices.GeolocationAccuracy>()))
+            // Arrange
+            _viewModel.IsError = false;
+            _viewModel.ErrorMessage = string.Empty;
+            _viewModel.VmIsLocationTracking = false;
+
+            _mockGeolocationService.Setup(service => service.StartTrackingAsync(It.IsAny<GeolocationAccuracy>()))
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<bool>.Failure(
                     Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
                     "Failed to start location tracking"));
 
+            // Act
             await ((AsyncRelayCommand)_viewModel.StartLocationTrackingCommand).ExecuteAsync(null);
 
+            // Assert
             Assert.IsTrue(_viewModel.IsError);
             Assert.AreEqual("Failed to start location tracking", _viewModel.ErrorMessage);
             Assert.IsFalse(_viewModel.VmIsLocationTracking);
@@ -293,13 +337,16 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public async Task StopLocationTrackingAsync_WhenTracking_ShouldStopTracking()
         {
+            // Arrange
             _viewModel.VmIsLocationTracking = true;
 
             _mockGeolocationService.Setup(service => service.StopTrackingAsync())
                 .Returns(Task.CompletedTask);
 
+            // Act
             await ((AsyncRelayCommand)_viewModel.StopLocationTrackingCommand).ExecuteAsync(null);
 
+            // Assert
             Assert.IsFalse(_viewModel.VmIsLocationTracking);
             _mockGeolocationService.Verify(service => service.StopTrackingAsync(), Times.Once);
         }
@@ -311,36 +358,28 @@ namespace Locations.Core.Business.Tests.ViewModels
             double latitude = 40.7128;
             double longitude = -74.0060;
 
-            // Create new viewmodel with mocked service that we can control
-            var mockGeoService = new Mock<IGeolocationService>();
-            var viewModel = new LocationViewModel(
-                _mockLocationService.Object,
-                _mockMediaService.Object,
-                mockGeoService.Object);
+            // Act - Directly set values to simulate location change
+            _viewModel.Lattitude = latitude;
+            _viewModel.Longitude = longitude;
 
-            // Get the current values
-            var initialLat = viewModel.Lattitude;
-            var initialLon = viewModel.Longitude;
-
-            // Simulate the location change by directly setting values
-            viewModel.Lattitude = latitude;
-            viewModel.Longitude = longitude;
-
-            // Assert - verify the values were updated
-            Assert.AreEqual(latitude, viewModel.Lattitude);
-            Assert.AreEqual(longitude, viewModel.Longitude);
+            // Assert
+            Assert.AreEqual(latitude, _viewModel.Lattitude);
+            Assert.AreEqual(longitude, _viewModel.Longitude);
         }
 
         [TestMethod]
         public void Validate_WithValidLocation_ShouldReturnTrue()
         {
+            // Arrange
             _viewModel.Title = "Test Location";
             _viewModel.Description = "Test Description";
             _viewModel.Lattitude = 40.7128;
             _viewModel.Longitude = -74.0060;
 
+            // Act
             bool isValid = _viewModel.Validate(out List<string> errors);
 
+            // Assert
             Assert.IsTrue(isValid);
             Assert.AreEqual(0, errors.Count);
         }
@@ -348,13 +387,16 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void Validate_WithMissingTitle_ShouldReturnFalse()
         {
+            // Arrange
             _viewModel.Title = "";
             _viewModel.Description = "Test Description";
             _viewModel.Lattitude = 40.7128;
             _viewModel.Longitude = -74.0060;
 
+            // Act
             bool isValid = _viewModel.Validate(out List<string> errors);
 
+            // Assert
             Assert.IsFalse(isValid);
             Assert.AreEqual(1, errors.Count);
             Assert.AreEqual("Title is required", errors[0]);
@@ -363,13 +405,16 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void Validate_WithMissingDescription_ShouldReturnFalse()
         {
+            // Arrange
             _viewModel.Title = "Test Location";
             _viewModel.Description = "";
             _viewModel.Lattitude = 40.7128;
             _viewModel.Longitude = -74.0060;
 
+            // Act
             bool isValid = _viewModel.Validate(out List<string> errors);
 
+            // Assert
             Assert.IsFalse(isValid);
             Assert.AreEqual(1, errors.Count);
             Assert.AreEqual("Description is required", errors[0]);
@@ -378,13 +423,16 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void Validate_WithInvalidLatitude_ShouldReturnFalse()
         {
+            // Arrange
             _viewModel.Title = "Test Location";
             _viewModel.Description = "Test Description";
-            _viewModel.Lattitude = 95.0;
+            _viewModel.Lattitude = 95.0; // Invalid latitude
             _viewModel.Longitude = -74.0060;
 
+            // Act
             bool isValid = _viewModel.Validate(out List<string> errors);
 
+            // Assert
             Assert.IsFalse(isValid);
             Assert.AreEqual(1, errors.Count);
             Assert.AreEqual("Latitude must be between -90 and 90", errors[0]);
@@ -393,13 +441,16 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void Validate_WithInvalidLongitude_ShouldReturnFalse()
         {
+            // Arrange
             _viewModel.Title = "Test Location";
             _viewModel.Description = "Test Description";
             _viewModel.Lattitude = 40.7128;
-            _viewModel.Longitude = 190.0;
+            _viewModel.Longitude = 190.0; // Invalid longitude
 
+            // Act
             bool isValid = _viewModel.Validate(out List<string> errors);
 
+            // Assert
             Assert.IsFalse(isValid);
             Assert.AreEqual(1, errors.Count);
             Assert.AreEqual("Longitude must be between -180 and 180", errors[0]);
@@ -408,15 +459,22 @@ namespace Locations.Core.Business.Tests.ViewModels
         [TestMethod]
         public void Validate_WithMultipleValidationErrors_ShouldReturnAllErrors()
         {
+            // Arrange
             _viewModel.Title = "";
             _viewModel.Description = "";
             _viewModel.Lattitude = 95.0;
             _viewModel.Longitude = 190.0;
 
+            // Act
             bool isValid = _viewModel.Validate(out List<string> errors);
 
+            // Assert
             Assert.IsFalse(isValid);
             Assert.AreEqual(4, errors.Count);
+            Assert.IsTrue(errors.Contains("Title is required"));
+            Assert.IsTrue(errors.Contains("Description is required"));
+            Assert.IsTrue(errors.Contains("Latitude must be between -90 and 90"));
+            Assert.IsTrue(errors.Contains("Longitude must be between -180 and 180"));
         }
     }
 }
