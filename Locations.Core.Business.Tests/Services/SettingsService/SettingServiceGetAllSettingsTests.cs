@@ -1,4 +1,4 @@
-﻿// SettingServiceSaveSettingTests.cs - Complete Fixed Version
+﻿// SettingServiceGetAllSettingsTests.cs - Fixed
 using Locations.Core.Business.DataAccess.Services;
 using Locations.Core.Business.Tests.Base;
 using Locations.Core.Data.Models;
@@ -7,6 +7,7 @@ using Locations.Core.Shared.ViewModels;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MockFactory = Locations.Core.Business.Tests.TestHelpers.MockFactory;
 using TestDataFactory = Locations.Core.Business.Tests.TestHelpers.TestDataFactory;
@@ -15,7 +16,7 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
 {
     [TestClass]
     [TestCategory("SettingsService")]
-    public class SettingServiceSaveSettingTests : BaseServiceTests
+    public class SettingServiceGetAllSettingsTests : BaseServiceTests
     {
         private Mock<ISettingsRepository> _mockSettingsRepository;
         private SettingsService<SettingViewModel> _settingsService;
@@ -35,168 +36,101 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
         }
 
         [TestMethod]
-        public void SaveSetting_WhenSettingExists_ShouldCallUpdateAsync()
+        public void GetAllSettings_ShouldReturnNonNullResult()
         {
             // Arrange
-            string settingName = "TestSetting";
-            string settingValue = "TestValue";
-            var existingSetting = TestDataFactory.CreateTestSetting(settingName, "OldValue");
+            var testSettings = new List<SettingViewModel>
+            {
+                TestDataFactory.CreateTestSetting("Hemisphere", "north"),
+                TestDataFactory.CreateTestSetting("FirstName", "Test"),
+                TestDataFactory.CreateTestSetting("LastName", "User"),
+                TestDataFactory.CreateTestSetting("Email", "test@example.com")
+            };
 
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(existingSetting));
-
-            _mockSettingsRepository.Setup(repo => repo.UpdateAsync(It.IsAny<SettingViewModel>()))
-                .ReturnsAsync(DataOperationResult<bool>.Success(true));
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
 
             // Act
-            var result = _settingsService.SaveSetting(settingName, settingValue);
+            var result = _settingsService.GetAllSettings();
 
             // Assert
-            _mockSettingsRepository.Verify(repo => repo.UpdateAsync(It.IsAny<SettingViewModel>()), Times.Once);
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]
-        public void SaveSetting_WhenSettingDoesNotExist_ShouldCallSaveAsync()
+        public void GetAllSettings_WhenSettingsExist_ShouldMapToSettingsViewModel()
         {
             // Arrange
-            string settingName = "NewSetting";
-            string settingValue = "NewValue";
+            var testSettings = new List<SettingViewModel>
+            {
+                TestDataFactory.CreateTestSetting("Email", "test@example.com"),
+                TestDataFactory.CreateTestSetting("DateFormat", "MM/dd/yyyy"),
+                TestDataFactory.CreateTestSetting("TimeFormat", "h:mm tt")
+            };
 
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Failure(
-                    ErrorSource.Database, "Setting not found"));
-
-            _mockSettingsRepository.Setup(repo => repo.SaveAsync(It.IsAny<SettingViewModel>()))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(
-                    TestDataFactory.CreateTestSetting(settingName, settingValue)));
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
 
             // Act
-            var result = _settingsService.SaveSetting(settingName, settingValue);
+            var result = _settingsService.GetAllSettings();
 
             // Assert
-            _mockSettingsRepository.Verify(repo => repo.SaveAsync(It.IsAny<SettingViewModel>()), Times.Once);
+            Assert.IsNotNull(result.Email);
+            Assert.AreEqual("test@example.com", result.Email.Value);
+            Assert.IsNotNull(result.DateFormat);
+            Assert.AreEqual("MM/dd/yyyy", result.DateFormat.Value);
+            Assert.IsNotNull(result.TimeFormat);
+            Assert.AreEqual("h:mm tt", result.TimeFormat.Value);
         }
 
         [TestMethod]
-        public void SaveSetting_WhenUpdateSucceeds_ShouldReturnTrue()
+        public void GetAllSettings_WhenRepositoryFails_ShouldReturnEmptySettingsViewModel()
         {
             // Arrange
-            string settingName = "TestSetting";
-            string settingValue = "TestValue";
-            var existingSetting = TestDataFactory.CreateTestSetting(settingName, "OldValue");
+            string errorMessage = "Database error";
 
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(existingSetting));
-
-            _mockSettingsRepository.Setup(repo => repo.UpdateAsync(It.IsAny<SettingViewModel>()))
-                .ReturnsAsync(DataOperationResult<bool>.Success(true));
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Failure(
+                    ErrorSource.Database, errorMessage));
 
             // Act
-            var result = _settingsService.SaveSetting(settingName, settingValue);
+            var result = _settingsService.GetAllSettings();
 
             // Assert
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
+            // Check that the result is an empty SettingsViewModel
+            Assert.IsNull(result.Email);
         }
 
         [TestMethod]
-        public void SaveSetting_WhenSaveSucceeds_ShouldReturnTrue()
+        public void GetAllSettings_WhenExceptionOccurs_ShouldReturnEmptySettingsViewModel()
         {
             // Arrange
-            string settingName = "NewSetting";
-            string settingValue = "NewValue";
-
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Failure(
-                    ErrorSource.Database, "Setting not found"));
-
-            _mockSettingsRepository.Setup(repo => repo.SaveAsync(It.IsAny<SettingViewModel>()))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(
-                    TestDataFactory.CreateTestSetting(settingName, settingValue)));
-
-            // Act
-            var result = _settingsService.SaveSetting(settingName, settingValue);
-
-            // Assert
-            Assert.IsTrue(result);
-        }
-
-        [TestMethod]
-        public void SaveSetting_WhenUpdateFails_ShouldReturnFalse()
-        {
-            // Arrange
-            string settingName = "TestSetting";
-            string settingValue = "TestValue";
-            var existingSetting = TestDataFactory.CreateTestSetting(settingName, "OldValue");
-
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(existingSetting));
-
-            _mockSettingsRepository.Setup(repo => repo.UpdateAsync(It.IsAny<SettingViewModel>()))
-                .ReturnsAsync(DataOperationResult<bool>.Failure(
-                    ErrorSource.Database, "Update failed"));
-
-            // Act
-            var result = _settingsService.SaveSetting(settingName, settingValue);
-
-            // Assert
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void SaveSetting_WhenSaveFails_ShouldReturnFalse()
-        {
-            // Arrange
-            string settingName = "NewSetting";
-            string settingValue = "NewValue";
-
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Failure(
-                    ErrorSource.Database, "Setting not found"));
-
-            _mockSettingsRepository.Setup(repo => repo.SaveAsync(It.IsAny<SettingViewModel>()))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Failure(
-                    ErrorSource.Database, "Save failed"));
-
-            // Act
-            var result = _settingsService.SaveSetting(settingName, settingValue);
-
-            // Assert
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void SaveSetting_WhenExceptionOccurs_ShouldReturnFalse()
-        {
-            // Arrange
-            string settingName = "TestSetting";
-            string settingValue = "TestValue";
             var expectedException = new Exception("Test exception");
 
-            // Fix: Use proper exception mocking for async methods
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .Returns(Task.FromException<DataOperationResult<SettingViewModel>>(expectedException));
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ThrowsAsync(expectedException);
 
             // Act
-            var result = _settingsService.SaveSetting(settingName, settingValue);
+            var result = _settingsService.GetAllSettings();
 
             // Assert
-            Assert.IsFalse(result);
+            Assert.IsNotNull(result);
+            // Check that the result is an empty SettingsViewModel
+            Assert.IsNull(result.Email);
         }
 
         [TestMethod]
-        public void SaveSetting_WhenExceptionOccurs_ShouldLogError()
+        public void GetAllSettings_WhenExceptionOccurs_ShouldLogError()
         {
             // Arrange
-            string settingName = "TestSetting";
-            string settingValue = "TestValue";
             var expectedException = new Exception("Test exception");
 
-            // Fix: Use proper exception mocking for async methods
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .Returns(Task.FromException<DataOperationResult<SettingViewModel>>(expectedException));
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ThrowsAsync(expectedException);
 
             // Act
-            _settingsService.SaveSetting(settingName, settingValue);
+            _settingsService.GetAllSettings();
 
             // Assert
             MockLoggerService.Verify(
@@ -205,108 +139,110 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
         }
 
         [TestMethod]
-        public void SaveSetting_ShouldPassCorrectNameAndValueToRepository()
+        public void GetAllSettings_ShouldMapMultipleSettings()
         {
             // Arrange
-            string settingName = "NewSetting";
-            string settingValue = "NewValue";
-            SettingViewModel capturedSetting = null;
+            var testSettings = new List<SettingViewModel>
+            {
+                TestDataFactory.CreateTestSetting("Hemisphere", "north"),
+                TestDataFactory.CreateTestSetting("FirstName", "Test"),
+                TestDataFactory.CreateTestSetting("LastName", "User"),
+                TestDataFactory.CreateTestSetting("Email", "test@example.com"),
+                TestDataFactory.CreateTestSetting("SubscriptionExpiration", DateTime.Now.AddDays(30).ToString()),
+                TestDataFactory.CreateTestSetting("UniqeID", "12345"),
+                TestDataFactory.CreateTestSetting("DeviceInfo", "Test Device"),
+                TestDataFactory.CreateTestSetting("TimeFormat", "h:mm tt"),
+                TestDataFactory.CreateTestSetting("DateFormat", "MM/dd/yyyy"),
+                TestDataFactory.CreateTestSetting("HomePageViewed", "True"),
+                TestDataFactory.CreateTestSetting("ListLocationsViewed", "False"),
+                TestDataFactory.CreateTestSetting("TipsViewed", "True"),
+                TestDataFactory.CreateTestSetting("ExposureCalcViewed", "False"),
+                TestDataFactory.CreateTestSetting("LightMeterViewed", "True"),
+                TestDataFactory.CreateTestSetting("SceneEvaluationViewed", "False"),
+                TestDataFactory.CreateTestSetting("LastBulkWeatherUpdate", DateTime.Now.ToString()),
+                TestDataFactory.CreateTestSetting("Language", "en-US")
+            };
 
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Failure(
-                    ErrorSource.Database, "Setting not found"));
-
-            _mockSettingsRepository.Setup(repo => repo.SaveAsync(It.IsAny<SettingViewModel>()))
-                .Callback<SettingViewModel>(setting => capturedSetting = setting)
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(
-                    TestDataFactory.CreateTestSetting(settingName, settingValue)));
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
 
             // Act
-            _settingsService.SaveSetting(settingName, settingValue);
+            var result = _settingsService.GetAllSettings();
 
             // Assert
-            Assert.IsNotNull(capturedSetting);
-            Assert.AreEqual(settingName, capturedSetting.Key);
-            Assert.AreEqual(settingValue, capturedSetting.Value);
+            Assert.IsNotNull(result.Hemisphere);
+            Assert.AreEqual("north", result.Hemisphere.Value);
+            Assert.IsNotNull(result.FirstName);
+            Assert.AreEqual("Test", result.FirstName.Value);
+            Assert.IsNotNull(result.LastName);
+            Assert.AreEqual("User", result.LastName.Value);
+            Assert.IsNotNull(result.Email);
+            Assert.AreEqual("test@example.com", result.Email.Value);
+            Assert.IsNotNull(result.UniqeID);
+            Assert.AreEqual("12345", result.UniqeID.Value);
+            Assert.IsNotNull(result.DeviceInfo);
+            Assert.AreEqual("Test Device", result.DeviceInfo.Value);
+            Assert.IsNotNull(result.TimeFormat);
+            Assert.AreEqual("h:mm tt", result.TimeFormat.Value);
+            Assert.IsNotNull(result.DateFormat);
+            Assert.AreEqual("MM/dd/yyyy", result.DateFormat.Value);
+            Assert.IsNotNull(result.HomePageViewed);
+            Assert.AreEqual("True", result.HomePageViewed.Value);
+            Assert.IsNotNull(result.ListLocationsViewed);
+            Assert.AreEqual("False", result.ListLocationsViewed.Value);
+            Assert.IsNotNull(result.TipsViewed);
+            Assert.AreEqual("True", result.TipsViewed.Value);
+            Assert.IsNotNull(result.ExposureCalcViewed);
+            Assert.AreEqual("False", result.ExposureCalcViewed.Value);
+            Assert.IsNotNull(result.LightMeterViewed);
+            Assert.AreEqual("True", result.LightMeterViewed.Value);
+            Assert.IsNotNull(result.SceneEvaluationViewed);
+            Assert.AreEqual("False", result.SceneEvaluationViewed.Value);
+            Assert.IsNotNull(result.LastBulkWeatherUpdate);
+            Assert.IsNotNull(result.Language);
+            Assert.AreEqual("en-US", result.Language.Value);
         }
 
         [TestMethod]
-        public void SaveSetting_WhenSettingExists_ShouldUpdateWithCorrectValue()
+        public void GetAllSettings_WithUnmappedSettings_ShouldLogWarning()
         {
             // Arrange
-            string settingName = "TestSetting";
-            string oldValue = "OldValue";
-            string newValue = "NewValue";
-            SettingViewModel capturedSetting = null;
+            var testSettings = new List<SettingViewModel>
+            {
+                TestDataFactory.CreateTestSetting("Email", "test@example.com"),
+                TestDataFactory.CreateTestSetting("UnknownSetting", "Unknown Value")
+            };
 
-            var existingSetting = TestDataFactory.CreateTestSetting(settingName, oldValue);
-
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(existingSetting));
-
-            _mockSettingsRepository.Setup(repo => repo.UpdateAsync(It.IsAny<SettingViewModel>()))
-                .Callback<SettingViewModel>(setting => capturedSetting = setting)
-                .ReturnsAsync(DataOperationResult<bool>.Success(true));
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
 
             // Act
-            var result = _settingsService.SaveSetting(settingName, newValue);
+            var result = _settingsService.GetAllSettings();
 
             // Assert
-            Assert.IsNotNull(capturedSetting);
-            Assert.AreEqual(settingName, capturedSetting.Key);
-            Assert.AreEqual(newValue, capturedSetting.Value);
-            Assert.IsTrue(result);
+            MockLoggerService.Verify(
+                logger => logger.LogWarning(It.Is<string>(msg => msg.Contains("Could not map setting")), It.IsAny<Exception>()),
+                Times.AtLeastOnce);
         }
 
         [TestMethod]
-        public void SaveSetting_WithNullName_ShouldReturnFalse()
+        public void GetAllSettings_WithEmptyResult_ShouldReturnEmptySettingsViewModel()
         {
             // Arrange
-            string settingName = null;
-            string settingValue = "TestValue";
+            var testSettings = new List<SettingViewModel>();
+
+            _mockSettingsRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<SettingViewModel>>.Success(testSettings));
 
             // Act
-            var result = _settingsService.SaveSetting(settingName, settingValue);
+            var result = _settingsService.GetAllSettings();
 
             // Assert
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void SaveSetting_WithEmptyName_ShouldReturnFalse()
-        {
-            // Arrange
-            string settingName = "";
-            string settingValue = "TestValue";
-
-            // Act
-            var result = _settingsService.SaveSetting(settingName, settingValue);
-
-            // Assert
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void SaveSetting_WithRepositoryReturningNullSetting_ShouldCreateNewSetting()
-        {
-            // Arrange
-            string settingName = "NullSetting";
-            string settingValue = "TestValue";
-
-            // Setup GetSettingByName to return a setting with null value
-            _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(null));
-
-            _mockSettingsRepository.Setup(repo => repo.SaveAsync(It.IsAny<SettingViewModel>()))
-                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(
-                    TestDataFactory.CreateTestSetting(settingName, settingValue)));
-
-            // Act
-            var result = _settingsService.SaveSetting(settingName, settingValue);
-
-            // Assert
-            _mockSettingsRepository.Verify(repo => repo.SaveAsync(It.IsAny<SettingViewModel>()), Times.Once);
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
+            // All properties should be null for an empty result
+            Assert.IsNull(result.Email);
+            Assert.IsNull(result.FirstName);
+            Assert.IsNull(result.LastName);
         }
     }
 }

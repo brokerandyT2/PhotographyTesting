@@ -128,8 +128,11 @@ namespace Locations.Core.Business.Tests.ViewModels
             _mockLocationService.Setup(service => service.SaveLocationAsync(It.IsAny<LocationViewModel>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<LocationViewModel>.Success(_viewModel));
 
-            // Act - use SaveCommand instead of private method
-            await _viewModel.SaveCommand.ExecuteAsync(null);
+            // Act - Fix: cast to AsyncRelayCommand
+            if (_viewModel.SaveCommand is AsyncRelayCommand saveCommand)
+            {
+                await saveCommand.ExecuteAsync(null);
+            }
 
             // Assert
             _mockLocationService.Verify(service => service.SaveLocationAsync(
@@ -148,8 +151,11 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.IsError = false;
             _viewModel.ErrorMessage = string.Empty;
 
-            // Act - use SaveCommand
-            await _viewModel.SaveCommand.ExecuteAsync(null);
+            // Act - Fix: cast to AsyncRelayCommand
+            if (_viewModel.SaveCommand is AsyncRelayCommand saveCommand)
+            {
+                await saveCommand.ExecuteAsync(null);
+            }
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -174,8 +180,11 @@ namespace Locations.Core.Business.Tests.ViewModels
                     Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
                     "Failed to save location"));
 
-            // Act - use SaveCommand
-            await _viewModel.SaveCommand.ExecuteAsync(null);
+            // Act - Fix: cast to AsyncRelayCommand
+            if (_viewModel.SaveCommand is AsyncRelayCommand saveCommand)
+            {
+                await saveCommand.ExecuteAsync(null);
+            }
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -196,8 +205,11 @@ namespace Locations.Core.Business.Tests.ViewModels
             _mockLocationService.Setup(service => service.SaveLocationAsync(It.IsAny<LocationViewModel>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .ThrowsAsync(exception);
 
-            // Act - use SaveCommand
-            await _viewModel.SaveCommand.ExecuteAsync(null);
+            // Act - Fix: cast to AsyncRelayCommand
+            if (_viewModel.SaveCommand is AsyncRelayCommand saveCommand)
+            {
+                await saveCommand.ExecuteAsync(null);
+            }
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -215,8 +227,11 @@ namespace Locations.Core.Business.Tests.ViewModels
             _mockLocationService.Setup(service => service.DeleteLocationAsync(It.IsAny<LocationViewModel>()))
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<bool>.Success(true));
 
-            // Act - use DeleteCommand
-            await _viewModel.DeleteCommand.ExecuteAsync(null);
+            // Act - Fix: cast to AsyncRelayCommand
+            if (_viewModel.DeleteCommand is AsyncRelayCommand deleteCommand)
+            {
+                await deleteCommand.ExecuteAsync(null);
+            }
 
             // Assert
             _mockLocationService.Verify(service => service.DeleteLocationAsync(It.IsAny<LocationViewModel>()), Times.Once);
@@ -236,8 +251,11 @@ namespace Locations.Core.Business.Tests.ViewModels
                     Locations.Core.Shared.ViewModelServices.OperationErrorSource.Unknown,
                     "Failed to delete location"));
 
-            // Act - use DeleteCommand
-            await _viewModel.DeleteCommand.ExecuteAsync(null);
+            // Act - Fix: cast to AsyncRelayCommand
+            if (_viewModel.DeleteCommand is AsyncRelayCommand deleteCommand)
+            {
+                await deleteCommand.ExecuteAsync(null);
+            }
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
