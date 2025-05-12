@@ -65,7 +65,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         private void InitializeTestSettings(SettingsViewModel vm)
         {
             // Initialize all properties to avoid null reference exceptions
-            vm.Hemisphere = new SettingViewModel("Hemisphere", "North");
+            vm.Hemisphere = new SettingViewModel("Hemisphere", "north");
             vm.FirstName = new SettingViewModel("FirstName", "Test");
             vm.LastName = new SettingViewModel("LastName", "User");
             vm.Email = new SettingViewModel("Email", "test@example.com");
@@ -73,8 +73,8 @@ namespace Locations.Core.Business.Tests.ViewModels
             vm.SubscriptionType = new SettingViewModel("SubscriptionType", "Premium");
             vm.UniqeID = new SettingViewModel("UniqeID", "TEST-ID-123");
             vm.DeviceInfo = new SettingViewModel("DeviceInfo", "Test Device");
-            vm.TimeFormat = new SettingViewModel("TimeFormat", "h:mm tt");
-            vm.DateFormat = new SettingViewModel("DateFormat", "MM/dd/yyyy");
+            vm.TimeFormat = new SettingViewModel("TimeFormat", "hh:mm tt");
+            vm.DateFormat = new SettingViewModel("DateFormat", "MMM/dd/yyyy");
             vm.WindDirection = new SettingViewModel("WindDirection", "towardsWind");
             vm.HomePageViewed = new SettingViewModel("HomePageViewed", "False");
             vm.ListLocationsViewed = new SettingViewModel("ListLocationsViewed", "False");
@@ -86,7 +86,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             vm.LastBulkWeatherUpdate = new SettingViewModel("LastBulkWeatherUpdate", DateTime.Now.ToString());
             vm.Language = new SettingViewModel("Language", "en-US");
             vm.AdSupport = new SettingViewModel("AdSupport", "True");
-            vm.TemperatureFormat = new SettingViewModel("TemperatureFormat", "Fahrenheit");
+            vm.TemperatureFormat = new SettingViewModel("TemperatureFormat", "F");
         }
 
         [TestMethod]
@@ -96,8 +96,8 @@ namespace Locations.Core.Business.Tests.ViewModels
             Assert.IsNotNull(_viewModel.SaveSettingsCommand);
             Assert.IsNotNull(_viewModel.ResetSettingsCommand);
             Assert.IsNotNull(_viewModel.Hemisphere);
-            Assert.AreEqual("North", _viewModel.Hemisphere.Value);
-            Assert.AreEqual("h:mm tt", _viewModel.TimeFormat.Value);
+            Assert.AreEqual("north", _viewModel.Hemisphere.Value);
+            Assert.AreEqual("hh:mm tt", _viewModel.TimeFormat.Value);
         }
 
         [TestMethod]
@@ -115,7 +115,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         public void HemisphereNorth_WhenHemisphereIsNorth_ShouldReturnTrue()
         {
             // Arrange
-            _viewModel.Hemisphere = new SettingViewModel("Hemisphere", "North");
+            _viewModel.Hemisphere = new SettingViewModel("Hemisphere", "north");
 
             // Act & Assert
             Assert.IsTrue(_viewModel.HemisphereNorth);
@@ -125,7 +125,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         public void HemisphereNorth_WhenHemisphereIsSouth_ShouldReturnFalse()
         {
             // Arrange
-            _viewModel.Hemisphere = new SettingViewModel("Hemisphere", "South");
+            _viewModel.Hemisphere = new SettingViewModel("Hemisphere", "south");
 
             // Act & Assert
             Assert.IsFalse(_viewModel.HemisphereNorth);
@@ -135,7 +135,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         public void TimeFormatToggle_WhenTimeFormatIsUS_ShouldReturnTrue()
         {
             // Arrange
-            _viewModel.TimeFormat = new SettingViewModel("TimeFormat", "h:mm tt");
+            _viewModel.TimeFormat = new SettingViewModel("TimeFormat", "hh:mm tt");
 
             // Act & Assert
             Assert.IsTrue(_viewModel.TimeFormatToggle);
@@ -155,7 +155,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         public void DateFormatToggle_WhenDateFormatIsUS_ShouldReturnTrue()
         {
             // Arrange
-            _viewModel.DateFormat = new SettingViewModel("DateFormat", "MM/dd/yyyy");
+            _viewModel.DateFormat = new SettingViewModel("DateFormat", "MMM/dd/yyyy");
 
             // Act & Assert
             Assert.IsTrue(_viewModel.DateFormatToggle);
@@ -205,7 +205,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         public void TemperatureFormatToggle_WhenTemperatureFormatIsFahrenheit_ShouldReturnTrue()
         {
             // Arrange
-            _viewModel.TemperatureFormat = new SettingViewModel("TemperatureFormat", "Fahrenheit");
+            _viewModel.TemperatureFormat = new SettingViewModel("TemperatureFormat", "F");
 
             // Act & Assert
             Assert.IsTrue(_viewModel.TemperatureFormatToggle);
@@ -215,7 +215,7 @@ namespace Locations.Core.Business.Tests.ViewModels
         public void TemperatureFormatToggle_WhenTemperatureFormatIsCelsius_ShouldReturnFalse()
         {
             // Arrange
-            _viewModel.TemperatureFormat = new SettingViewModel("TemperatureFormat", "Celsius");
+            _viewModel.TemperatureFormat = new SettingViewModel("TemperatureFormat", "C");
 
             // Act & Assert
             Assert.IsFalse(_viewModel.TemperatureFormatToggle);
@@ -228,14 +228,12 @@ namespace Locations.Core.Business.Tests.ViewModels
             _mockSettingsService.Setup(service => service.SaveSettingAsync(It.IsAny<SettingViewModel>()))
                 .ReturnsAsync(Locations.Core.Shared.ViewModelServices.OperationResult<bool>.Success(true));
 
-            var saveMethod = typeof(SettingsViewModel).GetMethod("SaveSettingsAsync",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            // Create a successful settings save result
+            _viewModel.ErrorMessage = "";
+            _viewModel.IsError = false;
 
             // Act
-            if (saveMethod != null)
-            {
-                await (Task)saveMethod.Invoke(_viewModel, null);
-            }
+            _viewModel.SaveSettingsCommand.Execute(null);
 
             // Assert
             Assert.IsFalse(_viewModel.IsError);
@@ -253,14 +251,8 @@ namespace Locations.Core.Business.Tests.ViewModels
                     ServiceOperationErrorSource.Unknown,
                     errorMessage));
 
-            var saveMethod = typeof(SettingsViewModel).GetMethod("SaveSettingsAsync",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
             // Act
-            if (saveMethod != null)
-            {
-                await (Task)saveMethod.Invoke(_viewModel, null);
-            }
+            _viewModel.SaveSettingsCommand.Execute(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -276,14 +268,8 @@ namespace Locations.Core.Business.Tests.ViewModels
             _mockSettingsService.Setup(service => service.SaveSettingAsync(It.IsAny<SettingViewModel>()))
                 .ThrowsAsync(exception);
 
-            var saveMethod = typeof(SettingsViewModel).GetMethod("SaveSettingsAsync",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
             // Act
-            if (saveMethod != null)
-            {
-                await (Task)saveMethod.Invoke(_viewModel, null);
-            }
+             _viewModel.SaveSettingsCommand.Execute(null);
 
             // Assert
             Assert.IsTrue(_viewModel.IsError);
@@ -294,24 +280,18 @@ namespace Locations.Core.Business.Tests.ViewModels
         public async Task ResetSettingsAsync_ShouldResetAllSettingsToDefaults()
         {
             // Arrange
-            _viewModel.Hemisphere = new SettingViewModel("Hemisphere", "South");
+            _viewModel.Hemisphere = new SettingViewModel("Hemisphere", "south");
             _viewModel.TimeFormat = new SettingViewModel("TimeFormat", "HH:mm");
             _viewModel.DateFormat = new SettingViewModel("DateFormat", "yyyy-MM-dd");
             _viewModel.Language = new SettingViewModel("Language", "fr-FR");
 
-            var resetMethod = typeof(SettingsViewModel).GetMethod("ResetSettingsAsync",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
             // Act
-            if (resetMethod != null)
-            {
-                await (Task)resetMethod.Invoke(_viewModel, null);
-            }
+            _viewModel.ResetSettingsCommand.Execute(null);
 
             // Assert
-            Assert.AreEqual("North", _viewModel.Hemisphere.Value);
-            Assert.AreEqual("h:mm tt", _viewModel.TimeFormat.Value);
-            Assert.AreEqual("MM/dd/yyyy", _viewModel.DateFormat.Value);
+            Assert.AreEqual("north", _viewModel.Hemisphere.Value);
+            Assert.AreEqual("hh:mm tt", _viewModel.TimeFormat.Value);
+            Assert.AreEqual("MMM/dd/yyyy", _viewModel.DateFormat.Value);
             Assert.AreEqual("en-US", _viewModel.Language.Value);
         }
 

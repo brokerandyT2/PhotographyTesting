@@ -2,11 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using Locations.Core.Shared.ViewModels;
 using Locations.Core.Shared.ViewModelServices;
-using Locations.Core.Shared.ViewModelServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Threading.Tasks;
+using OperationErrorEventArgs = Locations.Core.Shared.ViewModelServices.OperationErrorEventArgs;
+using OperationErrorSource = Locations.Core.Shared.ViewModelServices.OperationErrorSource;
 
 namespace Locations.Core.Business.Tests.ViewModels
 {
@@ -65,65 +66,64 @@ namespace Locations.Core.Business.Tests.ViewModels
             Assert.AreEqual(72.5, _viewModel.WeatherViewModel.Temperature);
         }
 
-        // DetailsViewModelTests.cs - Fixed OnSubViewModelErrorOccurred_ShouldBubbleUpError test method
         [TestMethod]
         public void OnSubViewModelErrorOccurred_ShouldBubbleUpError()
         {
             // Arrange
             bool errorOccurred = false;
             string errorMessage = "Test error message";
+            OperationErrorEventArgs capturedArgs = null;
 
-            // Create a test view model to properly handle events
-            var testDetailsViewModel = new DetailsViewModel(_locationViewModel, _weatherViewModel);
+            // Create test view models
+            var testLocationViewModel = new LocationViewModel();
+            var testWeatherViewModel = new WeatherViewModel();
+            var testDetailsViewModel = new DetailsViewModel(testLocationViewModel, testWeatherViewModel);
 
-            // Subscribe to the error event
+            // Subscribe to the error event on the details view model
             testDetailsViewModel.ErrorOccurred += (sender, e) => {
                 errorOccurred = true;
-                Assert.AreEqual(errorMessage, e.Message);
+                capturedArgs = new(OperationErrorSource.Unknown, e.Message, new Exception(), testDetailsViewModel);// e;
             };
 
-            // Create ViewModelServices OperationErrorEventArgs which is the type raised
-            var errorArgs = new Locations.Core.Shared.ViewModelServices.OperationErrorEventArgs(
-                Shared.ViewModelServices.OperationErrorSource.Unknown,
+            // Create the error event args
+            var errorArgs = new OperationErrorEventArgs(
+                OperationErrorSource.Unknown,
                 errorMessage);
 
-            // Use reflection to call the protected/private OnErrorOccurred method
-            var onErrorOccurredMethod = typeof(LocationViewModel).GetMethod("OnErrorOccurred",
+            // Use reflection to get the ErrorOccurred event field from LocationViewModel
+            var errorEventField = typeof(ViewModelBase).GetField("ErrorOccurred",
                 System.Reflection.BindingFlags.NonPublic |
-                System.Reflection.BindingFlags.Public |
-                System.Reflection.BindingFlags.Instance,
-                null,
-                new Type[] { typeof(Shared.ViewModelServices.OperationErrorEventArgs) },
-                null);
+                System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.FlattenHierarchy);
 
-            if (onErrorOccurredMethod != null)
+            if (errorEventField != null)
             {
-                onErrorOccurredMethod.Invoke(_locationViewModel, new object[] { errorArgs });
+                var eventDelegate = (EventHandler<OperationErrorEventArgs>)errorEventField.GetValue(testLocationViewModel);
+
+                // Invoke the event if there are subscribers (the DetailsViewModel should have subscribed)
+                eventDelegate?.Invoke(testLocationViewModel, errorArgs);
             }
             else
             {
-                // Alternative: Try to raise the error event directly
-                var errorOccurredEvent = typeof(LocationViewModel).GetEvent("ErrorOccurred",
+                // Alternative: Try to use the OnErrorOccurred method directly
+                var onErrorMethod = typeof(ViewModelBase).GetMethod("OnErrorOccurred",
                     System.Reflection.BindingFlags.NonPublic |
                     System.Reflection.BindingFlags.Public |
-                    System.Reflection.BindingFlags.Instance);
+                    System.Reflection.BindingFlags.Instance,
+                    null,
+                    new Type[] { typeof(OperationErrorEventArgs) },
+                    null);
 
-                if (errorOccurredEvent != null)
+                if (onErrorMethod != null)
                 {
-                    var fieldInfo = typeof(LocationViewModel).GetField("ErrorOccurred",
-                        System.Reflection.BindingFlags.NonPublic |
-                        System.Reflection.BindingFlags.Instance);
-
-                    if (fieldInfo != null)
-                    {
-                        var handler = (EventHandler<Shared.ViewModelServices.OperationErrorEventArgs>)fieldInfo.GetValue(_locationViewModel);
-                        handler?.Invoke(_locationViewModel, errorArgs);
-                    }
+                    onErrorMethod.Invoke(testLocationViewModel, new object[] { errorArgs });
                 }
             }
 
             // Assert
             Assert.IsTrue(errorOccurred);
+            Assert.IsNotNull(capturedArgs);
+            Assert.AreEqual(errorMessage, capturedArgs.Message);
             Assert.AreEqual(errorMessage, testDetailsViewModel.ErrorMessage);
         }
 
@@ -134,33 +134,27 @@ namespace Locations.Core.Business.Tests.ViewModels
             bool locationRefreshCalled = false;
             bool weatherRefreshCalled = false;
 
-            // Mock location view model
-            var mockLocationViewModel = new LocationViewModel();
-            // Set a custom command for testing
-            var locationField = typeof(ViewModelBase).GetField("_refreshCommand",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            // Create mock view models with command behavior
+            var mockLocationViewModel = new Mock<LocationViewModel>();
+            var mockWeatherViewModel = new Mock<WeatherViewModel>();
 
+            // Setup the refresh commands
             var locationRefreshCommand = new AsyncRelayCommand(async () =>
             {
                 locationRefreshCalled = true;
                 await Task.CompletedTask;
             });
-            locationField?.SetValue(mockLocationViewModel, locationRefreshCommand);
-
-            // Mock weather view model
-            var mockWeatherViewModel = new WeatherViewModel();
-            // Set a custom command for testing
-            var weatherField = typeof(ViewModelBase).GetField("_refreshCommand",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             var weatherRefreshCommand = new AsyncRelayCommand(async () =>
             {
                 weatherRefreshCalled = true;
                 await Task.CompletedTask;
             });
-            weatherField?.SetValue(mockWeatherViewModel, weatherRefreshCommand);
 
-            var testDetailsViewModel = new DetailsViewModel(mockLocationViewModel, mockWeatherViewModel);
+            mockLocationViewModel.Setup(m => m.RefreshCommand).Returns(locationRefreshCommand);
+            mockWeatherViewModel.Setup(m => m.RefreshCommand).Returns(weatherRefreshCommand);
+
+            var testDetailsViewModel = new DetailsViewModel(mockLocationViewModel.Object, mockWeatherViewModel.Object);
 
             // Act
             if (testDetailsViewModel.RefreshCommand is AsyncRelayCommand refreshCommand)

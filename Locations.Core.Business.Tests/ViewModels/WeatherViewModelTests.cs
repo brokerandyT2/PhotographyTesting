@@ -110,14 +110,11 @@ namespace Locations.Core.Business.Tests.ViewModels
                 LastUpdate = DateTime.Now
             };
 
-            _mockWeatherService
-                .Setup(service => service.GetWeatherForLocationAsync(1))
+            _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
                 .ReturnsAsync(Shared.ViewModelServices.OperationResult<WeatherDTO>.Success(weatherDTO));
 
-            var refreshMethod = typeof(WeatherViewModel).GetMethod("RefreshWeatherAsync",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            await (Task)refreshMethod.Invoke(_viewModel, null);
+            // Act
+             _viewModel.RefreshWeatherCommand.Execute(null);
 
             _mockWeatherService.Verify(service => service.GetWeatherForLocationAsync(1), Times.Once);
             Assert.AreEqual(72.5, _viewModel.Temperature);
@@ -131,10 +128,8 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.IsError = false;
             _viewModel.ErrorMessage = string.Empty;
 
-            var refreshMethod = typeof(WeatherViewModel).GetMethod("RefreshWeatherAsync",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            await (Task)refreshMethod.Invoke(_viewModel, null);
+            // Act
+             _viewModel.RefreshWeatherCommand.Execute(null);
 
             Assert.IsTrue(_viewModel.IsError);
             Assert.IsTrue(_viewModel.ErrorMessage.Contains("Invalid location ID"));
@@ -147,16 +142,13 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.IsError = false;
             _viewModel.ErrorMessage = string.Empty;
 
-            _mockWeatherService
-                .Setup(service => service.GetWeatherForLocationAsync(1))
+            _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
                 .ReturnsAsync(Shared.ViewModelServices.OperationResult<WeatherDTO>.Failure(
-           Shared.ViewModelServices.OperationErrorSource.Unknown,
+                    Shared.ViewModelServices.OperationErrorSource.Unknown,
                     "Failed to fetch weather data"));
 
-            var refreshMethod = typeof(WeatherViewModel).GetMethod("RefreshWeatherAsync",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            await (Task)refreshMethod.Invoke(_viewModel, null);
+            // Act
+             _viewModel.RefreshWeatherCommand.Execute(null);
 
             Assert.IsTrue(_viewModel.IsError);
             Assert.AreEqual("Failed to fetch weather data", _viewModel.ErrorMessage);
@@ -171,14 +163,11 @@ namespace Locations.Core.Business.Tests.ViewModels
 
             var exception = new Exception("Test exception");
 
-            _mockWeatherService
-                .Setup(service => service.GetWeatherForLocationAsync(1))
+            _mockWeatherService.Setup(service => service.GetWeatherForLocationAsync(1))
                 .ThrowsAsync(exception);
 
-            var refreshMethod = typeof(WeatherViewModel).GetMethod("RefreshWeatherAsync",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            await (Task)refreshMethod.Invoke(_viewModel, null);
+            // Act
+             _viewModel.RefreshWeatherCommand.Execute(null);
 
             Assert.IsTrue(_viewModel.IsError);
             Assert.IsTrue(_viewModel.ErrorMessage.Contains("Error refreshing weather"));
@@ -191,8 +180,7 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.IsError = false;
             string forecastData = "5-day forecast data";
 
-            _mockWeatherService
-                .Setup(service => service.GetForecastForLocationAsync(1, 5))
+            _mockWeatherService.Setup(service => service.GetForecastForLocationAsync(1, 5))
                 .ReturnsAsync(Shared.ViewModelServices.OperationResult<string>.Success(forecastData));
 
             await _viewModel.FetchForecastAsync(5);
@@ -221,10 +209,9 @@ namespace Locations.Core.Business.Tests.ViewModels
             _viewModel.IsError = false;
             _viewModel.ErrorMessage = string.Empty;
 
-            _mockWeatherService
-                .Setup(service => service.GetForecastForLocationAsync(1, 5))
+            _mockWeatherService.Setup(service => service.GetForecastForLocationAsync(1, 5))
                 .ReturnsAsync(Shared.ViewModelServices.OperationResult<string>.Failure(
-                  Shared.ViewModelServices.OperationErrorSource.Unknown,
+                    Shared.ViewModelServices.OperationErrorSource.Unknown,
                     "Failed to fetch forecast data"));
 
             await _viewModel.FetchForecastAsync(5);
@@ -242,8 +229,7 @@ namespace Locations.Core.Business.Tests.ViewModels
 
             var exception = new Exception("Test exception");
 
-            _mockWeatherService
-                .Setup(service => service.GetForecastForLocationAsync(1, 5))
+            _mockWeatherService.Setup(service => service.GetForecastForLocationAsync(1, 5))
                 .ThrowsAsync(exception);
 
             await _viewModel.FetchForecastAsync(5);
