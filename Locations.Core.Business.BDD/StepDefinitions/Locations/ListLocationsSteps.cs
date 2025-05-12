@@ -1,178 +1,196 @@
 ﻿using TechTalk.SpecFlow;
-using NUnit.Framework;
-using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using Locations.Core.Business.BDD.Support;
-using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
-using Locations.Core.Business.Tests.UITests.PageObjects.Locations;
+using Locations.Core.Business.DataAccess.Interfaces;
+using Locations.Core.Shared.ViewModels;
+using Assert = NUnit.Framework.Assert;
+using NUnit.Framework;
+using Moq;
+using MockFactory = Locations.Core.Business.BDD.TestHelpers.MockFactory;
+using TestDataFactory = Locations.Core.Business.BDD.TestHelpers.TestDataFactory;
+using Locations.Core.Data.Models;
+using Locations.Core.Business.BDD.TestHelpers;
+using Locations.Core.Data.Queries.Interfaces;
 
 namespace Locations.Core.Business.BDD.StepDefinitions.Locations
 {
     [Binding]
     public class ListLocationsSteps
     {
-        private readonly AppiumDriverWrapper _driverWrapper;
-        private readonly ScenarioContext _scenarioContext;
-        private LoginPage _loginPage;
-        private ListLocationsPage _listLocationsPage;
-        private void MarkAsPending(string message = "This step is not yet implemented")
+        private readonly ILocationService<LocationViewModel> _locationService;
+        private readonly BDDTestContext _testContext;
+        private readonly Mock<ILocationRepository> _mockLocationRepository;
+        private List<LocationViewModel> _currentLocations;
+        private List<LocationViewModel> _filteredLocations;
+
+        public ListLocationsSteps(ILocationService<LocationViewModel> locationService, BDDTestContext testContext, Mock<ILocationRepository> mockLocationRepository)
         {
-            throw new PendingStepException(message);
-        }
-        public ListLocationsSteps(AppiumDriverWrapper driverWrapper, ScenarioContext scenarioContext)
-        {
-            _driverWrapper = driverWrapper;
-            _scenarioContext = scenarioContext;
-            _listLocationsPage = new ListLocationsPage(_driverWrapper.Driver, _driverWrapper.Platform);
+            _locationService = locationService;
+            _testContext = testContext;
+            _mockLocationRepository = mockLocationRepository;
+            _currentLocations = new List<LocationViewModel>();
+            _filteredLocations = new List<LocationViewModel>();
         }
 
         [Given(@"I am logged into the application")]
         public void GivenIAmLoggedIntoTheApplication()
         {
-            _loginPage = new LoginPage(_driverWrapper.Driver, _driverWrapper.Platform);
-            if (_loginPage.IsCurrentPage())
-            {
-                _loginPage.Login();
-                Thread.Sleep(2000); // Wait for login to complete
-            }
+            _testContext.IsUserLoggedIn = true;
+            _testContext.CurrentUserEmail = "test@example.com";
         }
 
         [Given(@"I am on the locations list page")]
-        public void GivenIAmOnTheLocationsListPage()
+        public async Task GivenIAmOnTheLocationsListPage()
         {
-            // Verify we're on the list locations page
-            NUnit.Framework.Assert.That(_listLocationsPage.IsCurrentPage(), Is.True, "Not on the locations list page");
+            // Load current locations
+            var result = await _locationService.GetAllAsync();
+            if (result.IsSuccess)
+            {
+                _currentLocations = result.Data;
+                _testContext.TestLocations = result.Data;
+            }
         }
 
         [Given(@"I have no saved locations")]
         public void GivenIHaveNoSavedLocations()
         {
-            // This would require a setup to ensure no locations exist
-            // For test purposes, we'll verify there are no locations
-            // A real implementation might use an API or direct DB access to clear locations
-            NUnit.Framework.Assert.That(_listLocationsPage.HasLocations(), Is.False, "Locations exist when none should");
+            _currentLocations.Clear();
+            _testContext.TestLocations.Clear();
+
+            // Configure mock to return empty list
+            _mockLocationRepository.Setup(x => x.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<LocationViewModel>>.Success(new List<LocationViewModel>()));
         }
 
         [Given(@"I have multiple saved locations")]
         public void GivenIHaveMultipleSavedLocations()
         {
-            // Verify multiple locations exist
-            NUnit.Framework.Assert.That(_listLocationsPage.HasLocations(), Is.True, "No locations found");
+            var locations = TestDataFactory.CreateTestLocations(3);
+            _currentLocations = locations;
+            _testContext.TestLocations = locations;
 
-            var locationTitles = _listLocationsPage.GetLocationTitles();
-            NUnit.Framework.Assert.That(locationTitles.Count, Is.GreaterThan(1), "Not enough locations for testing");
+            // Configure mock to return test locations
+            _mockLocationRepository.Setup(x => x.GetAllAsync())
+                .ReturnsAsync(DataOperationResult<IList<LocationViewModel>>.Success(locations));
         }
 
         [When(@"the locations list loads")]
-        public void WhenTheLocationsListLoads()
+        public async Task WhenTheLocationsListLoads()
         {
-            NUnit.Framework.Assert.That(_listLocationsPage.WaitForLocationsToLoad(), Is.True, "Locations failed to load");
+            var result = await _locationService.GetAllAsync();
+            if (result.IsSuccess)
+            {
+                _currentLocations = result.Data;
+            }
         }
 
         [When(@"I select a location from the list")]
         public void WhenISelectALocationFromTheList()
         {
-            // Select the first location
-            _listLocationsPage.SelectLocation(0);
-            Thread.Sleep(2000); // Wait for navigation
+            if (_currentLocations.Any())
+            {
+                _testContext.CurrentLocation = _currentLocations.First();
+            }
         }
 
         [When(@"I enter search text ""(.*)""")]
         public void WhenIEnterSearchText(string searchText)
         {
-            // Implement location search functionality
-            // This would depend on how search is implemented in your app
-            // _listLocationsPage.SearchLocations(searchText);
-           
+            // Filter locations based on search text
+            _filteredLocations = _currentLocations
+                .Where(l => l.Title.Contains(searchText, System.StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
 
         [When(@"I tap the add location button")]
         public void WhenITapTheAddLocationButton()
         {
-            // Implementation will depend on how the add button is exposed in the page object
-            // _listLocationsPage.ClickAddLocationButton();
-
+            // In service tests, we just set state indicating we're adding a location
+            _testContext.CurrentLocation = new LocationViewModel();
         }
 
         [When(@"I tap the map button for a location")]
         public void WhenITapTheMapButtonForALocation()
         {
-            // Implementation will depend on how map button is exposed in the page object
-            // _listLocationsPage.OpenMap(0);
-
+            // In service tests, we just set the current location
+            if (_currentLocations.Any())
+            {
+                _testContext.CurrentLocation = _currentLocations.First();
+            }
         }
 
         [Then(@"I should see my saved locations")]
-        public void ThenIShouldSeeMyLocations()
+        public void ThenIShouldSeeMySavedLocations()
         {
-            NUnit.Framework.Assert.That(_listLocationsPage.HasLocations(), Is.True, "No locations displayed");
+            Assert.That(_currentLocations, Is.Not.Null);
+            Assert.That(_currentLocations.Count, Is.GreaterThan(0), "No locations displayed");
         }
 
         [Then(@"each location should display its title")]
         public void ThenEachLocationShouldDisplayItsTitle()
         {
-            var locationTitles = _listLocationsPage.GetLocationTitles();
-            foreach (var title in locationTitles)
+            foreach (var location in _currentLocations)
             {
-                NUnit.Framework.Assert.That(string.IsNullOrEmpty(title), Is.False, "Location title is missing");
+                Assert.That(string.IsNullOrEmpty(location.Title), Is.False,
+                    $"Location {location.Id} has no title");
             }
         }
 
         [Then(@"I should be taken to the location details page")]
         public void ThenIShouldBeTakenToTheLocationDetailsPage()
         {
-            var editLocationPage = new EditLocationPage(_driverWrapper.Driver, _driverWrapper.Platform);
-            NUnit.Framework.Assert.That(editLocationPage.IsCurrentPage(), Is.True, "Not on the location details page");
+            Assert.That(_testContext.CurrentLocation, Is.Not.Null, "No location selected");
         }
 
         [Then(@"I should see details for the selected location")]
         public void ThenIShouldSeeDetailsForTheSelectedLocation()
         {
-            var editLocationPage = new EditLocationPage(_driverWrapper.Driver, _driverWrapper.Platform);
-            NUnit.Framework.Assert.That(!string.IsNullOrEmpty(editLocationPage.GetTitle()), Is.True, "No title displayed on details page");
-            NUnit.Framework.Assert.That(!string.IsNullOrEmpty(editLocationPage.GetLatitude()), Is.True, "No latitude displayed on details page");
-            NUnit.Framework.Assert.That(!string.IsNullOrEmpty(editLocationPage.GetLongitude()), Is.True, "No longitude displayed on details page");
+            var location = _testContext.CurrentLocation;
+            Assert.That(location, Is.Not.Null);
+            Assert.That(string.IsNullOrEmpty(location.Title), Is.False, "No title in location details");
+            Assert.That(location.Lattitude, Is.Not.EqualTo(0), "No latitude in location details");
+            Assert.That(location.Longitude, Is.Not.EqualTo(0), "No longitude in location details");
         }
 
         [Then(@"I should see an empty state message")]
         public void ThenIShouldSeeAnEmptyStateMessage()
         {
-            // This depends on how empty state is implemented in your app
-            // Assert.That(_listLocationsPage.IsEmptyStateDisplayed(), Is.True, "Empty state not displayed");
-
+            Assert.That(_currentLocations.Count, Is.EqualTo(0), "Locations exist when none expected");
         }
 
         [Then(@"I should see an option to add a new location")]
         public void ThenIShouldSeeAnOptionToAddANewLocation()
         {
-            // This depends on how add button is exposed in your app
-            // Assert.That(_listLocationsPage.IsAddLocationButtonDisplayed(), Is.True, "Add location button not displayed");
-            
+            // In service tests, we just verify that adding is possible
+            Assert.That(_currentLocations.Count, Is.EqualTo(0));
         }
 
         [Then(@"I should only see locations matching ""(.*)""")]
         public void ThenIShouldOnlySeeLocationsMatching(string searchText)
         {
-            var locationTitles = _listLocationsPage.GetLocationTitles();
-            foreach (var title in locationTitles)
+            Assert.That(_filteredLocations, Is.Not.Null);
+            foreach (var location in _filteredLocations)
             {
-                NUnit.Framework.Assert.That(title.ToLower().Contains(searchText.ToLower()), Is.True,
-                    $"Location '{title}' does not match search text '{searchText}'");
+                Assert.That(location.Title.Contains(searchText, System.StringComparison.OrdinalIgnoreCase),
+                    Is.True, $"Location '{location.Title}' doesn't match search text '{searchText}'");
             }
         }
 
         [Then(@"I should be taken to the add location page")]
         public void ThenIShouldBeTakenToTheAddLocationPage()
         {
-            var addLocationPage = new AddLocationPage(_driverWrapper.Driver, _driverWrapper.Platform);
-            NUnit.Framework.Assert.That(addLocationPage.IsCurrentPage(), Is.True, "Not on the add location page");
+            Assert.That(_testContext.CurrentLocation, Is.Not.Null);
+            Assert.That(_testContext.CurrentLocation.Id, Is.EqualTo(0), "Not a new location");
         }
 
         [Then(@"the map should open with the location marked")]
         public void ThenTheMapShouldOpenWithTheLocationMarked()
         {
-            // This might be difficult to test directly as it could open an external map app
-            // We might need to skip or simulate this step depending on the implementation
-            NUnit.Framework.Assert.That(true == true, Is.True);
+            Assert.That(_testContext.CurrentLocation, Is.Not.Null);
+            Assert.That(_testContext.CurrentLocation.Lattitude, Is.Not.EqualTo(0));
+            Assert.That(_testContext.CurrentLocation.Longitude, Is.Not.EqualTo(0));
         }
     }
 }

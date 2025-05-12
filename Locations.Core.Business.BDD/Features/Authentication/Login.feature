@@ -13,26 +13,26 @@ Scenario: Login with valid email
   And I select "MM/DD/YYYY" date format
   And I select "Towards Wind" wind direction
   And I select "Fahrenheit" temperature format
-  And I tap the save button
+  And I tap the login save button
   Then I should be logged in successfully
   And I should be taken to the main page
 
 Scenario: Login validation for invalid email
   When I enter email "invalid-email"
-  And I tap the save button
+  And I tap the login save button
   Then I should see an email validation message
   And I should remain on the login page
 
 Scenario: Login with minimal settings
   When I enter email "user@example.com"
-  And I tap the save button
+  And I tap the login save button
   Then I should be logged in successfully
   And I should be taken to the main page
   And default settings should be applied
 
 Scenario Outline: Email validation scenarios
   When I enter email "<email>"
-  And I tap the save button
+  And I tap the login save button
   Then I should see "<result>"
 
   Examples:

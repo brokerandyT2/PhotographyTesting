@@ -1,300 +1,190 @@
 ﻿using TechTalk.SpecFlow;
-using System.Threading;
+using System.Threading.Tasks;
 using Locations.Core.Business.BDD.Support;
-using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
-using Locations.Core.Business.Tests.UITests.PageObjects.Configuration;
-using Locations.Core.Business.Tests.UITests.PageObjects.Shared;
-using System;
-using OpenQA.Selenium;
-using TechTalk.SpecFlow.Infrastructure;
+using Locations.Core.Business.DataAccess.Interfaces;
+using Locations.Core.Shared.ViewModels;
+using Locations.Core.Shared;
 using Assert = NUnit.Framework.Assert;
-using Locations.Core.Business.Tests.UITests;
 using NUnit.Framework;
+using Moq;
+using System.Collections.Generic;
+using Locations.Core.Data.Models;
+using Locations.Core.Business.BDD.TestHelpers;
+using Locations.Core.Data.Queries.Interfaces;
 
 namespace Locations.Core.Business.BDD.StepDefinitions.Configuration
 {
     [Binding]
     public class SettingsSteps
     {
-        private readonly AppiumDriverWrapper _driverWrapper;
-        private readonly ScenarioContext _scenarioContext;
-        private SettingsPage _settingsPage;
-        private LoginPage _loginPage;
+        private readonly ISettingService<SettingViewModel> _settingsService;
+        private readonly BDDTestContext _testContext;
+        private readonly Mock<ISettingsRepository> _mockSettingsRepository;
+        private Dictionary<string, string> _currentSettings;
 
-        // Store original settings to restore after tests
-        private bool _originalHemisphere;
-        private bool _originalTimeFormat;
-        private bool _originalDateFormat;
-        private bool _originalWindDirection;
-        private bool _originalTemperatureFormat;
-        private bool _originalAdSupport;
-
-        public SettingsSteps(AppiumDriverWrapper driverWrapper, ScenarioContext scenarioContext)
+        public SettingsSteps(ISettingService<SettingViewModel> settingsService, BDDTestContext testContext, Mock<ISettingsRepository> mockSettingsRepository)
         {
-            _driverWrapper = driverWrapper;
-            _scenarioContext = scenarioContext;
-            _settingsPage = new SettingsPage(_driverWrapper.Driver, _driverWrapper.Platform);
-            _loginPage = new LoginPage(_driverWrapper.Driver, _driverWrapper.Platform);
-        }
-
-        // Helper method for pending steps
-        private void MarkAsPending(string message = "This step is not yet implemented")
-        {
-            throw new PendingStepException(message);
+            _settingsService = settingsService;
+            _testContext = testContext;
+            _mockSettingsRepository = mockSettingsRepository;
+            _currentSettings = new Dictionary<string, string>();
         }
 
         [Given(@"I am on the settings page")]
         public void GivenIAmOnTheSettingsPage()
         {
-            // Navigate to settings page if not already there
-            if (!_settingsPage.IsCurrentPage())
+            // In service tests, we just ensure we have access to settings
+            _currentSettings.Clear();
+
+            // Load current settings
+            var allSettings = _settingsService.GetAllSettings();
+            if (allSettings != null)
             {
-                // Implementation depends on how navigation is structured
-                try
-                {
-                    // Look for settings/cog button - implementation will vary by platform
-                    switch (_driverWrapper.Platform)
-                    {
-                        case AppiumSetup.Platform.Android:
-                            _driverWrapper.Driver.FindElement(By.XPath("//android.widget.Button[@content-desc='cogbox.png']")).Click();
-                            break;
-                        case AppiumSetup.Platform.iOS:
-                            _driverWrapper.Driver.FindElement(By.XPath("//XCUIElementTypeButton[@name='cogbox.png']")).Click();
-                            break;
-                        case AppiumSetup.Platform.Windows:
-                            _driverWrapper.Driver.FindElement(By.XPath("//Button[@AutomationId='cogbox.png']")).Click();
-                            break;
-                    }
-
-                    // Wait for settings page to load
-                    Thread.Sleep(2000);
-                }
-                catch (Exception ex)
-                {
-                    Assert.Fail($"Failed to navigate to settings: {ex.Message}");
-                }
+                _currentSettings[MagicStrings.Hemisphere] = allSettings.Hemisphere?.Value ?? "North";
+                _currentSettings[MagicStrings.TimeFormat] = allSettings.TimeFormat?.Value ?? "12-hour";
+                _currentSettings[MagicStrings.DateFormat] = allSettings.DateFormat?.Value ?? "MM/DD/YYYY";
+                _currentSettings[MagicStrings.WindDirection] = allSettings.WindDirection?.Value ?? "Towards Wind";
+                _currentSettings[MagicStrings.TemperatureType] = allSettings.TemperatureFormat?.Value ?? "Fahrenheit";
+                _currentSettings[MagicStrings.FreePremiumAdSupported] = allSettings.AdSupport?.Value ?? "false";
             }
-
-            Assert.That(_settingsPage.IsCurrentPage(), Is.True, "Not on the settings page");
-
-            // Store original settings for restoration after tests
-            StoreOriginalSettings();
-        }
-
-        private void StoreOriginalSettings()
-        {
-            // This is a placeholder - actual implementation would depend on how
-            // to access the current state of toggles in the SettingsPage
-
-            // Example:
-            // _originalHemisphere = _settingsPage.GetHemisphereState();
-            // _originalTimeFormat = _settingsPage.GetTimeFormatState();
-            // etc.
         }
 
         [When(@"I toggle the hemisphere setting to ""(.*)""")]
-        public void WhenIToggleTheHemisphereSettingTo(string hemisphere)
+        public async Task WhenIToggleTheHemisphereSettingTo(string hemisphere)
         {
-            bool isNorth = hemisphere.Equals("North", StringComparison.OrdinalIgnoreCase);
-            _settingsPage.ToggleHemisphere(isNorth);
+            await SaveSettingAsync(MagicStrings.Hemisphere, hemisphere);
         }
 
         [When(@"I toggle the time format setting to ""(.*)""")]
-        public void WhenIToggleTheTimeFormatSettingTo(string timeFormat)
+        public async Task WhenIToggleTheTimeFormatSettingTo(string timeFormat)
         {
-            bool is12Hour = timeFormat.Equals("12-hour", StringComparison.OrdinalIgnoreCase);
-            _settingsPage.ToggleTimeFormat(is12Hour);
+            await SaveSettingAsync(MagicStrings.TimeFormat, timeFormat);
         }
 
         [When(@"I toggle the date format setting to ""(.*)""")]
-        public void WhenIToggleTheDateFormatSettingTo(string dateFormat)
+        public async Task WhenIToggleTheDateFormatSettingTo(string dateFormat)
         {
-            bool isMMDDYYYY = dateFormat.Equals("MM/DD/YYYY", StringComparison.OrdinalIgnoreCase);
-            _settingsPage.ToggleDateFormat(isMMDDYYYY);
+            await SaveSettingAsync(MagicStrings.DateFormat, dateFormat);
         }
 
         [When(@"I toggle the wind direction setting to ""(.*)""")]
-        public void WhenIToggleTheWindDirectionSettingTo(string windDirection)
+        public async Task WhenIToggleTheWindDirectionSettingTo(string windDirection)
         {
-            bool isTowardsWind = windDirection.Equals("Towards Wind", StringComparison.OrdinalIgnoreCase);
-            _settingsPage.ToggleWindDirection(isTowardsWind);
+            await SaveSettingAsync(MagicStrings.WindDirection, windDirection);
         }
 
         [When(@"I toggle the temperature format setting to ""(.*)""")]
-        public void WhenIToggleTheTemperatureFormatSettingTo(string temperatureFormat)
+        public async Task WhenIToggleTheTemperatureFormatSettingTo(string temperatureFormat)
         {
-            bool isFahrenheit = temperatureFormat.Equals("Fahrenheit", StringComparison.OrdinalIgnoreCase);
-            _settingsPage.ToggleTemperatureFormat(isFahrenheit);
+            await SaveSettingAsync(MagicStrings.TemperatureType, temperatureFormat);
         }
 
         [When(@"I toggle the ad support setting to ""(.*)""")]
-        public void WhenIToggleTheAdSupportSettingTo(string adSupport)
+        public async Task WhenIToggleTheAdSupportSettingTo(string adSupport)
         {
-            bool isEnabled = adSupport.Equals("Enabled", StringComparison.OrdinalIgnoreCase);
-            _settingsPage.ToggleAdSupport(isEnabled);
+            var value = adSupport == "Enabled" ? "true" : "false";
+            await SaveSettingAsync(MagicStrings.FreePremiumAdSupported, value);
         }
 
         [When(@"I set all settings to custom values")]
-        public void WhenISetAllSettingsToCustomValues()
+        public async Task WhenISetAllSettingsToCustomValues()
         {
-            // Set all settings to specific values for testing
-            _settingsPage.ToggleHemisphere(true); // North
-            _settingsPage.ToggleTimeFormat(true); // 12-hour
-            _settingsPage.ToggleDateFormat(true); // MM/DD/YYYY
-            _settingsPage.ToggleWindDirection(true); // Towards Wind
-            _settingsPage.ToggleTemperatureFormat(true); // Fahrenheit
-            _settingsPage.ToggleAdSupport(false); // Disabled
+            await SaveSettingAsync(MagicStrings.Hemisphere, "North");
+            await SaveSettingAsync(MagicStrings.TimeFormat, "12-hour");
+            await SaveSettingAsync(MagicStrings.DateFormat, "MM/DD/YYYY");
+            await SaveSettingAsync(MagicStrings.WindDirection, "Towards Wind");
+            await SaveSettingAsync(MagicStrings.TemperatureType, "Fahrenheit");
+            await SaveSettingAsync(MagicStrings.FreePremiumAdSupported, "false");
         }
 
         [When(@"I close and reopen the application")]
-        public void WhenICloseAndReopenTheApplication()
+        public async Task WhenICloseAndReopenTheApplication()
         {
-            // This is challenging to implement in automated tests
-            // For now, we'll just simulate by navigating away and back
+            // In service tests, we simulate this by clearing in-memory data
+            // and reloading from the repository
+            _currentSettings.Clear();
 
-            // Navigate away
-            try
+            // Simulate app restart by retrieving settings again
+            var allSettings = _settingsService.GetAllSettings();
+            if (allSettings != null)
             {
-                // Look for a back button or other navigation element
-                _driverWrapper.Driver.Navigate().Back();
-                Thread.Sleep(2000);
-
-                // Navigate back to settings
-                GivenIAmOnTheSettingsPage();
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Failed to simulate app restart: {ex.Message}");
+                _currentSettings[MagicStrings.Hemisphere] = allSettings.Hemisphere?.Value ?? "";
+                _currentSettings[MagicStrings.TimeFormat] = allSettings.TimeFormat?.Value ?? "";
+                _currentSettings[MagicStrings.DateFormat] = allSettings.DateFormat?.Value ?? "";
+                _currentSettings[MagicStrings.WindDirection] = allSettings.WindDirection?.Value ?? "";
+                _currentSettings[MagicStrings.TemperatureType] = allSettings.TemperatureFormat?.Value ?? "";
+                _currentSettings[MagicStrings.FreePremiumAdSupported] = allSettings.AdSupport?.Value ?? "";
             }
         }
 
         [Then(@"the hemisphere value should be saved as ""(.*)""")]
         public void ThenTheHemisphereValueShouldBeSavedAs(string hemisphere)
         {
-            bool expectedValue = hemisphere.Equals("North", StringComparison.OrdinalIgnoreCase);
-
-            // Refresh settings page to ensure values are loaded from storage
-            // This might require navigating away and back
-            WhenICloseAndReopenTheApplication();
-
-            // Verify the setting using VerifySettingsApplied
-        /*    Assert.That(_settingsPage.VerifySettingsApplied(
-                north: expectedValue,
-                useUSTimeFormat: true,
-                useUSDateFormat: true,
-                towardsWind: true,
-                useFahrenheit: true,
-                adSupport: true
-            ), Is.True, $"Hemisphere setting was not saved as {hemisphere}"); */
+            AssertSettingValue(MagicStrings.Hemisphere, hemisphere);
         }
 
         [Then(@"the time format value should be saved as ""(.*)""")]
         public void ThenTheTimeFormatValueShouldBeSavedAs(string timeFormat)
         {
-            bool expectedValue = timeFormat.Equals("12-hour", StringComparison.OrdinalIgnoreCase);
-
-            // Refresh settings page to ensure values are loaded from storage
-            WhenICloseAndReopenTheApplication();
-
-            // Verify the setting
-            Assert.That(_settingsPage.VerifySettingsApplied(
-                north: true,
-                useUSTimeFormat: expectedValue,
-                useUSDateFormat: true,
-                towardsWind: true,
-                useFahrenheit: true,
-                adSupport: true
-            ), Is.True, $"Time format setting was not saved as {timeFormat}");
+            AssertSettingValue(MagicStrings.TimeFormat, timeFormat);
         }
 
         [Then(@"the date format value should be saved as ""(.*)""")]
         public void ThenTheDateFormatValueShouldBeSavedAs(string dateFormat)
         {
-            bool expectedValue = dateFormat.Equals("MM/DD/YYYY", StringComparison.OrdinalIgnoreCase);
-
-            // Refresh settings page to ensure values are loaded from storage
-            WhenICloseAndReopenTheApplication();
-
-            // Verify the setting
-            Assert.That(_settingsPage.VerifySettingsApplied(
-                north: true,
-                useUSTimeFormat: true,
-                useUSDateFormat: expectedValue,
-                towardsWind: true,
-                useFahrenheit: true,
-                adSupport: true
-            ), Is.True, $"Date format setting was not saved as {dateFormat}");
+            AssertSettingValue(MagicStrings.DateFormat, dateFormat);
         }
 
         [Then(@"the wind direction value should be saved as ""(.*)""")]
         public void ThenTheWindDirectionValueShouldBeSavedAs(string windDirection)
         {
-            bool expectedValue = windDirection.Equals("Towards Wind", StringComparison.OrdinalIgnoreCase);
-
-            // Refresh settings page to ensure values are loaded from storage
-            WhenICloseAndReopenTheApplication();
-
-            // Verify the setting
-            Assert.That(_settingsPage.VerifySettingsApplied(
-                north: true,
-                useUSTimeFormat: true,
-                useUSDateFormat: true,
-                towardsWind: expectedValue,
-                useFahrenheit: true,
-                adSupport: true
-            ), Is.True, $"Wind direction setting was not saved as {windDirection}");
+            AssertSettingValue(MagicStrings.WindDirection, windDirection);
         }
 
         [Then(@"the temperature format value should be saved as ""(.*)""")]
         public void ThenTheTemperatureFormatValueShouldBeSavedAs(string temperatureFormat)
         {
-            bool expectedValue = temperatureFormat.Equals("Fahrenheit", StringComparison.OrdinalIgnoreCase);
-
-            // Refresh settings page to ensure values are loaded from storage
-            WhenICloseAndReopenTheApplication();
-
-            // Verify the setting
-            Assert.That(_settingsPage.VerifySettingsApplied(
-                north: true,
-                useUSTimeFormat: true,
-                useUSDateFormat: true,
-                towardsWind: true,
-                useFahrenheit: expectedValue,
-                adSupport: true
-            ), Is.True, $"Temperature format setting was not saved as {temperatureFormat}");
+            AssertSettingValue(MagicStrings.TemperatureType, temperatureFormat);
         }
 
         [Then(@"the ad support value should be saved as ""(.*)""")]
         public void ThenTheAdSupportValueShouldBeSavedAs(string adSupport)
         {
-            bool expectedValue = adSupport.Equals("Enabled", StringComparison.OrdinalIgnoreCase);
-
-            // Refresh settings page to ensure values are loaded from storage
-            WhenICloseAndReopenTheApplication();
-
-            // Verify the setting
-            Assert.That(_settingsPage.VerifySettingsApplied(
-                north: true,
-                useUSTimeFormat: true,
-                useUSDateFormat: true,
-                towardsWind: true,
-                useFahrenheit: true,
-                adSupport: expectedValue
-            ), Is.True, $"Ad support setting was not saved as {adSupport}");
+            var expectedValue = adSupport == "Enabled" ? "true" : "false";
+            AssertSettingValue(MagicStrings.FreePremiumAdSupported, expectedValue);
         }
 
         [Then(@"all my custom settings should be preserved")]
         public void ThenAllMyCustomSettingsShouldBePreserved()
         {
-            // Verify all settings match the custom values set earlier
-            Assert.That(_settingsPage.VerifySettingsApplied(
-                north: true, // North
-                useUSTimeFormat: true, // 12-hour
-                useUSDateFormat: true, // MM/DD/YYYY
-                towardsWind: true, // Towards Wind
-                useFahrenheit: true, // Fahrenheit
-                adSupport: false // Disabled
-            ), Is.True, "Custom settings were not preserved");
+            AssertSettingValue(MagicStrings.Hemisphere, "North");
+            AssertSettingValue(MagicStrings.TimeFormat, "12-hour");
+            AssertSettingValue(MagicStrings.DateFormat, "MM/DD/YYYY");
+            AssertSettingValue(MagicStrings.WindDirection, "Towards Wind");
+            AssertSettingValue(MagicStrings.TemperatureType, "Fahrenheit");
+            AssertSettingValue(MagicStrings.FreePremiumAdSupported, "false");
+        }
+
+        private async Task SaveSettingAsync(string key, string value)
+        {
+            var setting = new SettingViewModel { Key = key, Value = value };
+
+            // Update mock to return the saved value
+            _mockSettingsRepository.Setup(x => x.GetByNameAsync(key))
+                .ReturnsAsync(DataOperationResult<SettingViewModel>.Success(setting));
+
+            var result = await _settingsService.SaveAsync(setting);
+            Assert.That(result.IsSuccess, Is.True, $"Failed to save setting {key}");
+
+            _currentSettings[key] = value;
+        }
+
+        private void AssertSettingValue(string key, string expectedValue)
+        {
+            var setting = _settingsService.GetSettingByName(key);
+            Assert.That(setting, Is.Not.Null, $"Setting {key} not found");
+            Assert.That(setting.Value, Is.EqualTo(expectedValue),
+                $"Setting {key} has value '{setting.Value}' but expected '{expectedValue}'");
         }
     }
 }

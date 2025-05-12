@@ -6,19 +6,34 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseVSTest>true</UseVSTest>
+    <!-- Test Results Configuration -->
+    <VSTestLogger>trx;LogFileName=testresultsCoreBDD.trx</VSTestLogger>
+    <VSTestResultsDirectory>$(MSBuildProjectDirectory)\TestResults</VSTestResultsDirectory>
+    <VSTestTraceDataCollectorDirectoryPath>$(MSBuildProjectDirectory)\TestResults</VSTestTraceDataCollectorDirectoryPath>
+    <VSTestCancelAfterDataCollectionStart>false</VSTestCancelAfterDataCollectionStart>
+    <CollectCoverage>true</CollectCoverage>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Locations.Core.Business.Tests.UITests\Locations.Core.Business.Tests.UITests.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Appium.WebDriver" Version="7.2.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="NUnit" Version="4.3.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
     <PackageReference Include="SpecFlow" Version="4.0.31-beta" />
     <PackageReference Include="SpecFlow.NUnit" Version="4.0.31-beta" />
     <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="4.0.31-beta" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Support\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Location.Core.Helpers\Location.Core.Helpers.csproj" />
+    <ProjectReference Include="..\Location.Photography.Shared\Location.Photography.Shared.csproj" />
+    <ProjectReference Include="..\Locations.Core.Business\Locations.Core.Business.csproj" />
+    <ProjectReference Include="..\Locations.Core.Data\Locations.Core.Data.csproj" />
+    <ProjectReference Include="..\Locations.Core.Shared\Locations.Core.Shared.csproj" />
   </ItemGroup>
 
 </Project>

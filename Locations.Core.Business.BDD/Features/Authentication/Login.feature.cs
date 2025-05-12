@@ -122,7 +122,7 @@ await this.FeatureBackgroundAsync();
   await testRunner.AndAsync("I select \"Fahrenheit\" temperature format", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
 #line 16
-  await testRunner.AndAsync("I tap the save button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+  await testRunner.AndAsync("I tap the login save button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
 #line 17
   await testRunner.ThenAsync("I should be logged in successfully", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
@@ -158,7 +158,7 @@ await this.FeatureBackgroundAsync();
   await testRunner.WhenAsync("I enter email \"invalid-email\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 22
-  await testRunner.AndAsync("I tap the save button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+  await testRunner.AndAsync("I tap the login save button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
 #line 23
   await testRunner.ThenAsync("I should see an email validation message", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
@@ -194,7 +194,7 @@ await this.FeatureBackgroundAsync();
   await testRunner.WhenAsync("I enter email \"user@example.com\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 28
-  await testRunner.AndAsync("I tap the save button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+  await testRunner.AndAsync("I tap the login save button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
 #line 29
   await testRunner.ThenAsync("I should be logged in successfully", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
@@ -240,7 +240,7 @@ await this.FeatureBackgroundAsync();
   await testRunner.WhenAsync(string.Format("I enter email \"{0}\"", email), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 35
-  await testRunner.AndAsync("I tap the save button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+  await testRunner.AndAsync("I tap the login save button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
 #line 36
   await testRunner.ThenAsync(string.Format("I should see \"{0}\"", result), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");

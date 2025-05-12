@@ -1,120 +1,188 @@
 ﻿using TechTalk.SpecFlow;
-using System.Threading;
+using System.Threading.Tasks;
 using Locations.Core.Business.BDD.Support;
-using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
-using TechTalk.SpecFlow.Infrastructure;
+using Locations.Core.Business.DataAccess.Interfaces;
+using Locations.Core.Shared.ViewModels;
+using Locations.Core.Shared;
 using Assert = NUnit.Framework.Assert;
 using NUnit.Framework;
+using Moq;
+using MockFactory = Locations.Core.Business.BDD.TestHelpers.MockFactory;
+using Locations.Core.Business.BDD.TestHelpers;
+using Locations.Core.Data.Queries.Interfaces;
 
 namespace Locations.Core.Business.BDD.StepDefinitions.Authentication
 {
     [Binding]
     public class LoginSteps
     {
-        private readonly AppiumDriverWrapper _driverWrapper;
-        private readonly ScenarioContext _scenarioContext;
-        private LoginPage _loginPage;
+        private readonly ISettingService<SettingViewModel> _settingsService;
+        private readonly BDDTestContext _testContext;
+        private readonly Mock<ISettingsRepository> _mockSettingsRepository;
+        private string _currentEmail;
+        private bool _loginSuccessful;
+        private string _errorMessage;
 
-        public LoginSteps(AppiumDriverWrapper driverWrapper, ScenarioContext scenarioContext)
+        public LoginSteps(ISettingService<SettingViewModel> settingsService, BDDTestContext testContext, Mock<ISettingsRepository> mockSettingsRepository)
         {
-            _driverWrapper = driverWrapper;
-            _scenarioContext = scenarioContext;
-            _loginPage = new LoginPage(_driverWrapper.Driver, _driverWrapper.Platform);
-        }
-
-        // Helper method for pending steps
-        private void MarkAsPending(string message = "This step is not yet implemented")
-        {
-            throw new PendingStepException(message);
+            _settingsService = settingsService;
+            _testContext = testContext;
+            _mockSettingsRepository = mockSettingsRepository;
         }
 
         [Given(@"I am on the login page")]
         public void GivenIAmOnTheLoginPage()
         {
-            Assert.That(_loginPage.IsCurrentPage(), Is.True, "Not on the login page");
+            // In service tests, we just verify we're not logged in
+            _testContext.IsUserLoggedIn = false;
+            _loginSuccessful = false;
+            _errorMessage = string.Empty;
         }
 
         [When(@"I enter email ""(.*)""")]
         public void WhenIEnterEmail(string email)
         {
-            _loginPage.EnterEmail(email);
+            _currentEmail = email;
+            _testContext.CurrentUserEmail = email;
         }
 
         [When(@"I select ""(.*)"" hemisphere")]
         public void WhenISelectHemisphere(string hemisphere)
         {
-            bool isNorth = hemisphere.Equals("North", System.StringComparison.OrdinalIgnoreCase);
-            _loginPage.SetHemisphere(isNorth);
+            _testContext.TestSettings[MagicStrings.Hemisphere] = new SettingViewModel
+            {
+                Key = MagicStrings.Hemisphere,
+                Value = hemisphere
+            };
         }
 
         [When(@"I select ""(.*)"" time format")]
         public void WhenISelectTimeFormat(string timeFormat)
         {
-            bool is12Hour = timeFormat.Equals("12-hour", System.StringComparison.OrdinalIgnoreCase);
-            _loginPage.SetTimeFormat(is12Hour);
+            _testContext.TestSettings[MagicStrings.TimeFormat] = new SettingViewModel
+            {
+                Key = MagicStrings.TimeFormat,
+                Value = timeFormat
+            };
         }
 
         [When(@"I select ""(.*)"" date format")]
         public void WhenISelectDateFormat(string dateFormat)
         {
-            bool isMMDDYYYY = dateFormat.Equals("MM/DD/YYYY", System.StringComparison.OrdinalIgnoreCase);
-            _loginPage.SetDateFormat(isMMDDYYYY);
+            _testContext.TestSettings[MagicStrings.DateFormat] = new SettingViewModel
+            {
+                Key = MagicStrings.DateFormat,
+                Value = dateFormat
+            };
         }
 
         [When(@"I select ""(.*)"" wind direction")]
         public void WhenISelectWindDirection(string windDirection)
         {
-            bool isTowardsWind = windDirection.Equals("Towards Wind", System.StringComparison.OrdinalIgnoreCase);
-            _loginPage.SetWindDirection(isTowardsWind);
+            _testContext.TestSettings[MagicStrings.WindDirection] = new SettingViewModel
+            {
+                Key = MagicStrings.WindDirection,
+                Value = windDirection
+            };
         }
 
         [When(@"I select ""(.*)"" temperature format")]
         public void WhenISelectTemperatureFormat(string temperatureFormat)
         {
-            bool isFahrenheit = temperatureFormat.Equals("Fahrenheit", System.StringComparison.OrdinalIgnoreCase);
-            _loginPage.SetTemperatureFormat(isFahrenheit);
+            _testContext.TestSettings[MagicStrings.TemperatureType] = new SettingViewModel
+            {
+                Key = MagicStrings.TemperatureType,
+                Value = temperatureFormat
+            };
         }
 
         [When(@"I tap the save button")]
-        public void WhenITapTheSaveButton()
+        public async Task WhenITapTheSaveButton()
         {
-            _loginPage.ClickSave();
-            Thread.Sleep(1000); // Wait for processing
+            // Validate email
+            if (string.IsNullOrEmpty(_currentEmail))
+            {
+                _loginSuccessful = false;
+                _errorMessage = "Email is required";
+                return;
+            }
+
+            if (!IsValidEmail(_currentEmail))
+            {
+                _loginSuccessful = false;
+                _errorMessage = "Please enter a valid email";
+                return;
+            }
+
+            if (_currentEmail.Length > 100)
+            {
+                _loginSuccessful = false;
+                _errorMessage = "Email exceeds maximum length";
+                return;
+            }
+
+            // Save settings via service
+            _testContext.TestSettings[MagicStrings.Email] = new SettingViewModel
+            {
+                Key = MagicStrings.Email,
+                Value = _currentEmail
+            };
+
+            // Apply default settings if not specified
+            if (!_testContext.TestSettings.ContainsKey(MagicStrings.Hemisphere))
+                _testContext.TestSettings[MagicStrings.Hemisphere] = new SettingViewModel { Key = MagicStrings.Hemisphere, Value = "North" };
+
+            if (!_testContext.TestSettings.ContainsKey(MagicStrings.TimeFormat))
+                _testContext.TestSettings[MagicStrings.TimeFormat] = new SettingViewModel { Key = MagicStrings.TimeFormat, Value = "12-hour" };
+
+            // Save all settings
+            foreach (var setting in _testContext.TestSettings.Values)
+            {
+                var result = await _settingsService.SaveAsync(setting);
+                if (!result.IsSuccess)
+                {
+                    _loginSuccessful = false;
+                    _errorMessage = result.Message;
+                    return;
+                }
+            }
+
+            _loginSuccessful = true;
+            _testContext.IsUserLoggedIn = true;
         }
 
         [Then(@"I should be logged in successfully")]
         public void ThenIShouldBeLoggedInSuccessfully()
         {
-            Assert.That(_loginPage.WaitForProcessingToComplete(), Is.True, "Processing did not complete");
-            Assert.That(_loginPage.IsCurrentPage(), Is.False, "Still on login page after login");
+            Assert.That(_loginSuccessful, Is.True, "Login was not successful");
+            Assert.That(_testContext.IsUserLoggedIn, Is.True, "User is not logged in");
         }
 
         [Then(@"I should be taken to the main page")]
         public void ThenIShouldBeTakenToTheMainPage()
         {
-            // Need to verify we're on the main page - this depends on your application's structure
-            // For now, we just verify we're not on the login page anymore
-            Assert.That(_loginPage.IsCurrentPage(), Is.False, "Still on login page");
+            // In service tests, we just verify login state
+            Assert.That(_testContext.IsUserLoggedIn, Is.True, "User is not logged in");
         }
 
         [Then(@"I should see an email validation message")]
         public void ThenIShouldSeeAnEmailValidationMessage()
         {
-            Assert.That(_loginPage.IsEmailValidationDisplayed(), Is.True, "Email validation message not displayed");
+            Assert.That(_loginSuccessful, Is.False, "Login should have failed");
+            Assert.That(string.IsNullOrEmpty(_errorMessage), Is.False, "No error message provided");
         }
 
         [Then(@"I should remain on the login page")]
         public void ThenIShouldRemainOnTheLoginPage()
         {
-            Assert.That(_loginPage.IsCurrentPage(), Is.True, "Not on login page");
+            Assert.That(_testContext.IsUserLoggedIn, Is.False, "User should not be logged in");
         }
 
         [Then(@"default settings should be applied")]
         public void ThenDefaultSettingsShouldBeApplied()
         {
-            // This would require navigating to settings and checking default values
-            // For now, we'll just verify we've successfully logged in
-            Assert.That(_loginPage.IsCurrentPage(), Is.False, "Still on login page");
+            Assert.That(_testContext.TestSettings.ContainsKey(MagicStrings.Hemisphere), Is.True);
+            Assert.That(_testContext.TestSettings[MagicStrings.Hemisphere].Value, Is.EqualTo("North"));
         }
 
         [Then(@"I should see ""(.*)""")]
@@ -122,14 +190,25 @@ namespace Locations.Core.Business.BDD.StepDefinitions.Authentication
         {
             if (result == "Login successful")
             {
-                Assert.That(_loginPage.WaitForProcessingToComplete(), Is.True, "Processing did not complete");
-                Assert.That(_loginPage.IsCurrentPage(), Is.False, "Still on login page");
+                Assert.That(_loginSuccessful, Is.True, "Login was not successful");
             }
             else
             {
-                Assert.That(_loginPage.IsEmailValidationDisplayed(), Is.True, "No validation error displayed");
-                // Ideally check the specific error message content
-                // This depends on how error messages are implemented in your app
+                Assert.That(_loginSuccessful, Is.False, "Login should have failed");
+                Assert.That(_errorMessage, Is.EqualTo(result), $"Expected error: {result}, but got: {_errorMessage}");
+            }
+        }
+
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

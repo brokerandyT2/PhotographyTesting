@@ -12,6 +12,7 @@ using OpenQA.Selenium.Appium.Android;
 using OpenQA.Selenium.Appium.iOS;
 using OpenQA.Selenium.Appium.Windows;
 using AppiumDriver = OpenQA.Selenium.Appium.AppiumDriver;
+
 namespace Locations.Core.Business.Tests.UITests
 {
     public class AppiumSetup
@@ -40,83 +41,115 @@ namespace Locations.Core.Business.Tests.UITests
             var options = new AppiumOptions();
             var appConfig = LoadAppiumConfig();
 
-            // Common capabilities for Appium
-            Dictionary<string, object> appiumOptions = new Dictionary<string, object>();
-
             switch (platform)
             {
                 case Platform.Windows:
                     options.PlatformName = "Windows";
-                    appiumOptions.Add("app", GetWindowsAppPath());
-                    appiumOptions.Add("deviceName", appConfig.Windows.DeviceName);
+                    options.AutomationName = "Windows";
+                    options.DeviceName = appConfig.Windows.DeviceName;
+                    options.App = GetWindowsAppPath();
                     break;
 
                 case Platform.Android:
                     options.PlatformName = "Android";
-                    appiumOptions.Add("deviceName", appConfig.Android.DeviceName);
-                    appiumOptions.Add("automationName", appConfig.Android.AutomationName);
+                    options.AutomationName = appConfig.Android.AutomationName;
+                    options.DeviceName = appConfig.Android.DeviceName;
+                    options.PlatformVersion = appConfig.Android.PlatformVersion;
 
                     // Check if we should use an APK file or an installed app
                     if (!string.IsNullOrEmpty(appConfig.Android.AppPath) && File.Exists(appConfig.Android.AppPath))
                     {
-                        appiumOptions.Add("app", appConfig.Android.AppPath);
+                        options.App = appConfig.Android.AppPath;
                     }
                     else
                     {
                         // Use installed app package and activity
-                        appiumOptions.Add("appPackage", appConfig.Android.AppPackage);
-                        appiumOptions.Add("appActivity", appConfig.Android.AppActivity);
+                        options.AddAdditionalAppiumOption("appPackage", appConfig.Android.AppPackage);
+                        options.AddAdditionalAppiumOption("appActivity", appConfig.Android.AppActivity);
                     }
 
                     // Add additional capabilities for Android
-                    appiumOptions.Add("platformVersion", appConfig.Android.PlatformVersion);
-                    appiumOptions.Add("noReset", appConfig.Android.NoReset);
-                    appiumOptions.Add("fullReset", appConfig.Android.FullReset);
+                    options.AddAdditionalAppiumOption("noReset", appConfig.Android.NoReset);
+                    options.AddAdditionalAppiumOption("fullReset", appConfig.Android.FullReset);
 
+                    // Add any additional capabilities from config
                     if (appConfig.Android.AdditionalCapabilities != null)
                     {
                         foreach (var cap in appConfig.Android.AdditionalCapabilities)
                         {
-                            appiumOptions.Add(cap.Key, cap.Value);
+                            // Don't add capabilities that already have dedicated properties
+                            if (!IsReservedCapability(cap.Key))
+                            {
+                                options.AddAdditionalAppiumOption(cap.Key, cap.Value);
+                            }
                         }
                     }
                     break;
 
                 case Platform.iOS:
                     options.PlatformName = "iOS";
-                    appiumOptions.Add("deviceName", appConfig.iOS.DeviceName);
-                    appiumOptions.Add("automationName", appConfig.iOS.AutomationName);
+                    options.AutomationName = appConfig.iOS.AutomationName;
+                    options.DeviceName = appConfig.iOS.DeviceName;
+                    options.PlatformVersion = appConfig.iOS.PlatformVersion;
 
                     // Check if we should use an app file or an installed app
                     if (!string.IsNullOrEmpty(appConfig.iOS.AppPath) && File.Exists(appConfig.iOS.AppPath))
                     {
-                        appiumOptions.Add("app", appConfig.iOS.AppPath);
+                        options.App = appConfig.iOS.AppPath;
                     }
                     else
                     {
                         // Use installed app bundle ID
-                        appiumOptions.Add("bundleId", appConfig.iOS.BundleId);
+                        options.AddAdditionalAppiumOption("bundleId", appConfig.iOS.BundleId);
                     }
 
                     // Add additional capabilities for iOS
-                    appiumOptions.Add("platformVersion", appConfig.iOS.PlatformVersion);
-                    appiumOptions.Add("noReset", appConfig.iOS.NoReset);
-                    appiumOptions.Add("fullReset", appConfig.iOS.FullReset);
+                    options.AddAdditionalAppiumOption("noReset", appConfig.iOS.NoReset);
+                    options.AddAdditionalAppiumOption("fullReset", appConfig.iOS.FullReset);
 
+                    // Add any additional capabilities from config
                     if (appConfig.iOS.AdditionalCapabilities != null)
                     {
                         foreach (var cap in appConfig.iOS.AdditionalCapabilities)
                         {
-                            appiumOptions.Add(cap.Key, cap.Value);
+                            // Don't add capabilities that already have dedicated properties
+                            if (!IsReservedCapability(cap.Key))
+                            {
+                                options.AddAdditionalAppiumOption(cap.Key, cap.Value);
+                            }
                         }
                     }
                     break;
             }
 
-            // Add the appium options to the main options object
-            options.AddAdditionalOption("appium:options", appiumOptions);
-
             return options;
+        }
+
+        // Check if a capability name is reserved (has a dedicated property)
+        private bool IsReservedCapability(string capabilityName)
+        {
+            var reservedCapabilities = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "platformName",
+                "automationName",
+                "platformVersion",
+                "deviceName",
+                "app",
+                "browserName",
+                "newCommandTimeout",
+                "language",
+                "locale",
+                "udid",
+                "orientation",
+                "autoWebview",
+                "noReset",
+                "fullReset",
+                "eventTimings",
+                "enablePerformanceLogging",
+                "printPageSourceOnFindFailure"
+            };
+
+            return reservedCapabilities.Contains(capabilityName);
         }
 
         // Helper methods to get app paths
@@ -163,6 +196,7 @@ namespace Locations.Core.Business.Tests.UITests
         }
 
         // Start Appium server if needed
+        // Updated StartAppiumServer method
         private void StartAppiumServer()
         {
             var appConfig = LoadAppiumConfig();
@@ -173,27 +207,64 @@ namespace Locations.Core.Business.Tests.UITests
                 {
                     TestContext.Progress.WriteLine("Starting local Appium server...");
 
+                    // First, check if Appium is already running
+                    if (IsAppiumServerRunning(appConfig.AppiumServer.Host, appConfig.AppiumServer.Port))
+                    {
+                        TestContext.Progress.WriteLine("Appium server is already running");
+                        return;
+                    }
+
                     var startInfo = new ProcessStartInfo
                     {
                         FileName = appConfig.AppiumServer.ExecutablePath,
-                        Arguments = $"--address {appConfig.AppiumServer.Host} --port {appConfig.AppiumServer.Port}",
-                        UseShellExecute = true,
-                        CreateNoWindow = false
+                        Arguments = $"--port {appConfig.AppiumServer.Port}",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
                     };
 
                     _appiumServerProcess = Process.Start(startInfo);
                     _isLocalAppiumServer = true;
 
-                    // Give the server time to start
-                    System.Threading.Thread.Sleep(5000);
+                    // Wait for the server to start properly
+                    int retries = 0;
+                    while (retries < 30) // Wait up to 30 seconds
+                    {
+                        if (IsAppiumServerRunning(appConfig.AppiumServer.Host, appConfig.AppiumServer.Port))
+                        {
+                            TestContext.Progress.WriteLine("Appium server started successfully");
+                            return;
+                        }
+                        Thread.Sleep(1000);
+                        retries++;
+                    }
 
-                    TestContext.Progress.WriteLine("Appium server started");
+                    throw new Exception("Appium server failed to start within timeout period");
                 }
                 catch (Exception ex)
                 {
                     TestContext.Progress.WriteLine($"Failed to start Appium server: {ex.Message}");
                     throw;
                 }
+            }
+        }
+
+        // Add this helper method to check if Appium is running
+        private bool IsAppiumServerRunning(string host, int port)
+        {
+            try
+            {
+                using (var client = new System.Net.Http.HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(1);
+                    var response = client.GetAsync($"http://{host}:{port}/status").Result;
+                    return response.IsSuccessStatusCode;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -228,10 +299,6 @@ namespace Locations.Core.Business.Tests.UITests
 
             // Build the Appium server URI
             string serverUri = $"http://{appConfig.AppiumServer.Host}:{appConfig.AppiumServer.Port}";
-            if (!serverUri.EndsWith("/wd/hub") && platform != Platform.Windows)
-            {
-                serverUri += "/wd/hub";
-            }
 
             TestContext.Progress.WriteLine($"Connecting to Appium server at {serverUri}");
 
@@ -240,19 +307,15 @@ namespace Locations.Core.Business.Tests.UITests
                 switch (platform)
                 {
                     case Platform.Android:
-                        // For Android
                         Driver = new AndroidDriver(new Uri(serverUri), options);
                         break;
-                        case Platform.iOS:
-                        // For iOS
+                    case Platform.iOS:
                         Driver = new IOSDriver(new Uri(serverUri), options);
                         break;
                     default:
-                        // For Windows
                         Driver = new WindowsDriver(new Uri(serverUri), options);
                         break;
                 }
-                // Create a single AppiumDriver for all platforms
 
                 Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(appConfig.DefaultTimeoutSeconds);
 

@@ -172,9 +172,12 @@ namespace Locations.Core.Business.Tests.Services.SettingsServiceTests
             string settingValue = "TestValue";
             var expectedException = new Exception("Test exception");
 
-            // The exception thrown from an async method in Task.Run might get wrapped in AggregateException
             _mockSettingsRepository.Setup(repo => repo.GetByNameAsync(settingName))
-                .Returns(() => Task.FromException<DataOperationResult<SettingViewModel>>(expectedException));
+                .ReturnsAsync(DataOperationResult<SettingViewModel>.Failure(
+                    ErrorSource.Database, "Setting not found"));
+
+            _mockSettingsRepository.Setup(repo => repo.SaveAsync(It.IsAny<SettingViewModel>()))
+                .ThrowsAsync(expectedException);
 
             // Act
             var result = _settingsService.SaveSetting(settingName, settingValue);

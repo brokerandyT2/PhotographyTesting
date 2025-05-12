@@ -1,0 +1,30 @@
+﻿{
+    "DefaultTimeoutSeconds": 10,
+    "LongTimeoutSeconds": 30,
+    "AppiumServer": {
+        "Host": "127.0.0.1",
+        "Port": 4723,
+        "AutoStart": true,
+        "ExecutablePath": "appium"
+    },
+    "Android": {
+        "DeviceName": "Android Emulator",
+        "AutomationName": "UiAutomator2",
+        "PlatformVersion": "13.0",
+        "AppPackage": "com.x3squaredcircles.locations",
+        "AppActivity": "com.x3squaredcircles.locations.MainActivity",
+        "NoReset": true,
+        "FullReset": false
+    },
+    "iOS": {
+        "DeviceName": "iPhone Simulator",
+        "AutomationName": "XCUITest",
+        "PlatformVersion": "15.0",
+        "BundleId": "com.x3squaredcircles.locations",
+        "NoReset": true,
+        "FullReset": false
+    },
+    "Windows": {
+        "DeviceName": "WindowsPC"
+    }
+}

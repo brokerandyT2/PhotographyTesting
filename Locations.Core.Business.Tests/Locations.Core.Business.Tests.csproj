@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <UseVSTest>true</UseVSTest>
     <!-- Test Results Configuration -->
-    <VSTestLogger>trx;LogFileName=testresults.trx</VSTestLogger>
+    <VSTestLogger>trx;LogFileName=testresultsCoreTDD.trx</VSTestLogger>
     <VSTestResultsDirectory>$(MSBuildProjectDirectory)\TestResults</VSTestResultsDirectory>
     <VSTestTraceDataCollectorDirectoryPath>$(MSBuildProjectDirectory)\TestResults</VSTestTraceDataCollectorDirectoryPath>
     <VSTestCancelAfterDataCollectionStart>false</VSTestCancelAfterDataCollectionStart>
