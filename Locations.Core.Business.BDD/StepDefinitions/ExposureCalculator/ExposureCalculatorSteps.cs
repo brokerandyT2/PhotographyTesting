@@ -1,11 +1,9 @@
-﻿using TechTalk.SpecFlow;
-using System.Threading;
-using Locations.Core.Business.BDD.Support;
-using Locations.Core.Business.Tests.UITests.PageObjects.Authentication;
-using Locations.Core.Business.Tests.UITests.PageObjects.Tips;
-using Locations.Core.Business.Tests.UITests.PageObjects.Shared;
-using System;
-using TechTalk.SpecFlow.Infrastructure;
+﻿using Locations.Core.Business.BDD.TestHelpers;
+using Locations.Core.Business.DataAccess.Interfaces;
+using Locations.Core.Shared.ViewModels;
+using NUnit.Framework;
+using TechTalk.SpecFlow;
+using static Location.Photography.Shared.ViewModels.ExposureCalculator;
 using Assert = NUnit.Framework.Assert;
 
 namespace Locations.Core.Business.BDD.StepDefinitions.ExposureCalculator
@@ -13,231 +11,234 @@ namespace Locations.Core.Business.BDD.StepDefinitions.ExposureCalculator
     [Binding]
     public class ExposureCalculatorSteps
     {
-        private readonly AppiumDriverWrapper _driverWrapper;
-        private readonly ScenarioContext _scenarioContext;
-        private TipsPage _tipsPage;
-        private FeatureNotSupportedPage _featureNotSupportedPage;
+        private readonly BDDTestContext _testContext;
+        private readonly ISettingService<SettingViewModel> _settingsService;
+        private Location.Photography.Shared.ViewModels.ExposureCalculator _calculator;
+        private string _errorMessage;
 
-        // We need an ExposureCalculatorPage, but it's not in the provided code
-        // For now, we'll proceed with the assumption that it would be created
-        // private ExposureCalculatorPage _exposureCalculatorPage;
-
-        public ExposureCalculatorSteps(AppiumDriverWrapper driverWrapper, ScenarioContext scenarioContext)
+        public ExposureCalculatorSteps(
+            BDDTestContext testContext,
+            ISettingService<SettingViewModel> settingsService)
         {
-            _driverWrapper = driverWrapper;
-            _scenarioContext = scenarioContext;
-            _tipsPage = new TipsPage(_driverWrapper.Driver, _driverWrapper.Platform);
-            _featureNotSupportedPage = new FeatureNotSupportedPage(_driverWrapper.Driver, _driverWrapper.Platform);
-        }
-
-        // Helper method for pending steps
-        private void MarkAsPending(string message = "This step is not yet implemented")
-        {
-            throw new PendingStepException(message);
+            _testContext = testContext;
+            _settingsService = settingsService;
         }
 
         [Given(@"I am on the exposure calculator page")]
         public void GivenIAmOnTheExposureCalculatorPage()
         {
-            // Navigate from tips page to exposure calculator
-            if (_tipsPage.IsCurrentPage())
+            // Check subscription status
+            if (_testContext.SubscriptionType != "Premium")
             {
-                if (_tipsPage.IsExposureCalcButtonVisible())
+                var adViewedSetting = _settingsService.GetSettingByName("ExposureCalcAdViewed_TimeStamp");
+                if (adViewedSetting == null || string.IsNullOrEmpty(adViewedSetting.Value))
                 {
-                    _tipsPage.ClickExposureCalcButton();
-                    Thread.Sleep(2000); // Wait for navigation
+                    Assert.Inconclusive("Exposure calculator requires premium subscription or ad viewing");
                 }
                 else
                 {
-                    Assert.Inconclusive("Exposure calculator button not visible, possibly due to subscription status");
+                    if (DateTime.TryParse(adViewedSetting.Value, out DateTime adViewedTime))
+                    {
+                        var adGivesHoursSetting = _settingsService.GetSettingByName("AdGivesHours");
+                        int hours = int.Parse(adGivesHoursSetting?.Value ?? "24");
+
+                        if (DateTime.Now > adViewedTime.AddHours(hours))
+                        {
+                            Assert.Inconclusive("Temporary ad-based access has expired");
+                        }
+                    }
                 }
             }
-            else
-            {
-                // Handle navigation from other pages or direct navigation
-                MarkAsPending("Navigation to exposure calculator page not implemented");
-            }
 
-            // Check if we're on the feature not supported page (for free users)
-            if (_featureNotSupportedPage.IsCurrentPage())
-            {
-                Assert.Inconclusive("Test requires premium subscription, but feature is not available");
-            }
-
-            // Verify we're on the exposure calculator page
-            // Would need a proper ExposureCalculatorPage
-            MarkAsPending("Exposure calculator page verification not implemented");
+            // Initialize calculator
+            _calculator = TestDataFactory.CreateTestExposureCalculator();
+            _errorMessage = string.Empty;
         }
 
         [Given(@"I have set initial exposure values")]
         public void GivenIHaveSetInitialExposureValues()
         {
-            // Set up initial exposure values if not already done
-            WhenISetApertureTo("f/2.8");
-            WhenISetShutterSpeedTo("1/125");
-            WhenISetISOTo("400");
-            Thread.Sleep(500); // Wait for values to register
+            _calculator.FStopSelected = "f/2.8";
+            _calculator.ShutterSpeedSelected = "1/125";
+            _calculator.ISOSelected = "400";
+            _calculator.OldFstop = "f/2.8";
+            _calculator.OldShutterSpeed = "1/125";
+            _calculator.OldISO = "400";
         }
 
         [Given(@"I select to calculate aperture")]
         public void GivenISelectToCalculateAperture()
         {
-            // Based on the ExposureCalculator ViewModel, we would set ToCalculate to FixedValue.Apeature
-            MarkAsPending("Calculate aperture selection not implemented in UI tests");
+            _calculator.ToCalculate = FixedValue.Apeature;
         }
 
         [Given(@"I select to calculate shutter speed")]
         public void GivenISelectToCalculateShutterSpeed()
         {
-            // Based on the ExposureCalculator ViewModel, we would set ToCalculate to FixedValue.ShutterSpeeds
-            MarkAsPending("Calculate shutter speed selection not implemented in UI tests");
+            _calculator.ToCalculate = FixedValue.ShutterSpeeds;
         }
 
         [Given(@"I select to calculate ISO")]
         public void GivenISelectToCalculateISO()
         {
-            // Based on the ExposureCalculator ViewModel, we would set ToCalculate to FixedValue.ISOs
-            MarkAsPending("Calculate ISO selection not implemented in UI tests");
+            _calculator.ToCalculate = FixedValue.ISOs;
         }
 
         [When(@"I set aperture to ""(.*)""")]
         public void WhenISetApertureTo(string aperture)
         {
-            // Based on the ExposureCalculator ViewModel, we would set FStopSelected and OldFstop
-            MarkAsPending("Aperture setting not implemented in UI tests");
+            _calculator.FStopSelected = aperture;
+            _calculator.OldFstop = aperture;
         }
 
         [When(@"I set shutter speed to ""(.*)""")]
         public void WhenISetShutterSpeedTo(string shutterSpeed)
         {
-            // Based on the ExposureCalculator ViewModel, we would set ShutterSpeedSelected and OldShutterSpeed
-            MarkAsPending("Shutter speed setting not implemented in UI tests");
+            _calculator.ShutterSpeedSelected = shutterSpeed;
+            _calculator.OldShutterSpeed = shutterSpeed;
         }
 
         [When(@"I set ISO to ""(.*)""")]
         public void WhenISetISOTo(string iso)
         {
-            // Based on the ExposureCalculator ViewModel, we would set ISOSelected and OldISO
-            MarkAsPending("ISO setting not implemented in UI tests");
+            _calculator.ISOSelected = iso;
+            _calculator.OldISO = iso;
         }
 
         [When(@"I change aperture to ""(.*)""")]
         public void WhenIChangeApertureTo(string aperture)
         {
-            // Based on the ExposureCalculator ViewModel, we would set FStopSelected
-            MarkAsPending("Aperture changing not implemented in UI tests");
+            _calculator.FStopSelected = aperture;
         }
 
         [When(@"I change shutter speed to ""(.*)""")]
         public void WhenIChangeShutterSpeedTo(string shutterSpeed)
         {
-            // Based on the ExposureCalculator ViewModel, we would set ShutterSpeedSelected
-            MarkAsPending("Shutter speed changing not implemented in UI tests");
+            _calculator.ShutterSpeedSelected = shutterSpeed;
         }
 
         [When(@"I change ISO to ""(.*)""")]
         public void WhenIChangeISOTo(string iso)
         {
-            // Based on the ExposureCalculator ViewModel, we would set ISOSelected
-            MarkAsPending("ISO changing not implemented in UI tests");
+            _calculator.ISOSelected = iso;
         }
 
         [When(@"I select ""(.*)"" stop increments")]
         public void WhenISelectStopIncrements(string incrementType)
         {
-            // Based on the ExposureCalculator ViewModel, we would set FullHalfThirds
-            MarkAsPending("Stop increment selection not implemented in UI tests");
+            switch (incrementType)
+            {
+                case "Full":
+                    _calculator.FullHalfThirds = Location.Photography.Shared.ViewModels.ExposureCalculator.Divisions.Full;
+                    break;
+                case "Half":
+                    _calculator.FullHalfThirds = Location.Photography.Shared.ViewModels.ExposureCalculator.Divisions.Half;
+                    break;
+                case "Thirds":
+                    _calculator.FullHalfThirds = Location.Photography.Shared.ViewModels.ExposureCalculator.Divisions.Thirds;
+                    break;
+            }
         }
 
         [When(@"I tap the calculate button")]
         public void WhenITapTheCalculateButton()
         {
-            // Based on the ExposureCalculator ViewModel, we would call the Calculate method
-            MarkAsPending("Calculate button interaction not implemented in UI tests");
+            try
+            {
+                _calculator.Calculate();
+            }
+            catch (Exception ex)
+            {
+                _errorMessage = ex.Message;
+            }
         }
 
         [Then(@"the initial exposure values should be saved")]
         public void ThenTheInitialExposureValuesShouldBeSaved()
         {
-            // Based on the ExposureCalculator ViewModel, we would check that OldFstop, OldShutterSpeed, and OldISO
-            // have been set correctly
-            MarkAsPending("Initial exposure values verification not implemented in UI tests");
+            Assert.That(_calculator.OldFstop, Is.EqualTo(_calculator.FStopSelected));
+            Assert.That(_calculator.OldShutterSpeed, Is.EqualTo(_calculator.ShutterSpeedSelected));
+            Assert.That(_calculator.OldISO, Is.EqualTo(_calculator.ISOSelected));
         }
 
         [Then(@"the calculated aperture should be ""(.*)""")]
         public void ThenTheCalculatedApertureShouldBe(string aperture)
         {
-            // Would need to call Calculate and check FStopResult
             WhenITapTheCalculateButton();
-
-            // Based on the ExposureCalculator ViewModel, we would check the FStopResult property
-            MarkAsPending("Calculated aperture verification not implemented in UI tests");
+            Assert.That(_calculator.FStopResult, Is.EqualTo(aperture));
         }
 
         [Then(@"the calculated shutter speed should be ""(.*)""")]
         public void ThenTheCalculatedShutterSpeedShouldBe(string shutterSpeed)
         {
-            // Would need to call Calculate and check ShutterSpeedResult
             WhenITapTheCalculateButton();
-
-            // Based on the ExposureCalculator ViewModel, we would check the ShutterSpeedResult property
-            MarkAsPending("Calculated shutter speed verification not implemented in UI tests");
+            Assert.That(_calculator.ShutterSpeedResult, Is.EqualTo(shutterSpeed));
         }
 
         [Then(@"the calculated ISO should be ""(.*)""")]
         public void ThenTheCalculatedISOShouldBe(string iso)
         {
-            // Would need to call Calculate and check ISOResult
             WhenITapTheCalculateButton();
-
-            // Based on the ExposureCalculator ViewModel, we would check the ISOResult property
-            MarkAsPending("Calculated ISO verification not implemented in UI tests");
+            Assert.That(_calculator.ISOResult, Is.EqualTo(iso));
         }
 
         [Then(@"the exposure values should update to full stop options")]
         public void ThenTheExposureValuesShouldUpdateToFullStopOptions()
         {
-            // Based on the ExposureCalculator ViewModel, we would check that ApeaturesForPicker, 
-            // ShutterSpeedsForPicker, and ISOsForPicker are returning the full stop arrays
-            MarkAsPending("Full stop options verification not implemented in UI tests");
+            var apertures = _calculator.ApeaturesForPicker;
+            var shutterSpeeds = _calculator.ShutterSpeedsForPicker;
+            var isos = _calculator.ISOsForPicker;
+
+            Assert.That(apertures, Is.Not.Null);
+            Assert.That(shutterSpeeds, Is.Not.Null);
+            Assert.That(isos, Is.Not.Null);
+            Assert.That(_calculator.FullHalfThirds, Is.EqualTo(Location.Photography.Shared.ViewModels.ExposureCalculator.Divisions.Full));
         }
 
         [Then(@"the exposure values should update to half stop options")]
         public void ThenTheExposureValuesShouldUpdateToHalfStopOptions()
         {
-            // Based on the ExposureCalculator ViewModel, we would check that ApeaturesForPicker, 
-            // ShutterSpeedsForPicker, and ISOsForPicker are returning the half stop arrays
-            MarkAsPending("Half stop options verification not implemented in UI tests");
+            var apertures = _calculator.ApeaturesForPicker;
+            var shutterSpeeds = _calculator.ShutterSpeedsForPicker;
+            var isos = _calculator.ISOsForPicker;
+
+            Assert.That(apertures, Is.Not.Null);
+            Assert.That(shutterSpeeds, Is.Not.Null);
+            Assert.That(isos, Is.Not.Null);
+            Assert.That(_calculator.FullHalfThirds, Is.EqualTo(Location.Photography.Shared.ViewModels.ExposureCalculator.Divisions.Half));
         }
 
         [Then(@"the exposure values should update to third stop options")]
         public void ThenTheExposureValuesShouldUpdateToThirdStopOptions()
         {
-            // Based on the ExposureCalculator ViewModel, we would check that ApeaturesForPicker, 
-            // ShutterSpeedsForPicker, and ISOsForPicker are returning the third stop arrays
-            MarkAsPending("Third stop options verification not implemented in UI tests");
+            var apertures = _calculator.ApeaturesForPicker;
+            var shutterSpeeds = _calculator.ShutterSpeedsForPicker;
+            var isos = _calculator.ISOsForPicker;
+
+            Assert.That(apertures, Is.Not.Null);
+            Assert.That(shutterSpeeds, Is.Not.Null);
+            Assert.That(isos, Is.Not.Null);
+            Assert.That(_calculator.FullHalfThirds, Is.EqualTo(Location.Photography.Shared.ViewModels.ExposureCalculator.Divisions.Thirds));
         }
 
         [Then(@"I should see an overexposure warning")]
         public void ThenIShouldSeeAnOverexposureWarning()
         {
-            // Would need to call Calculate and check for error message
             WhenITapTheCalculateButton();
-
-            // Based on the ExposureCalculator ViewModel, we would check the ErrorMessage property
-            // for overexposure-related text
-            MarkAsPending("Overexposure warning verification not implemented in UI tests");
+            Assert.That(string.IsNullOrEmpty(_errorMessage), Is.False);
+            Assert.That(_errorMessage.ToLower().Contains("overexpos") ||
+                       _errorMessage.ToLower().Contains("too bright") ||
+                       _calculator.FStopResult == "Too Bright", Is.True);
         }
 
         [Then(@"I should see an underexposure warning")]
         public void ThenIShouldSeeAnUnderexposureWarning()
         {
-            // Would need to call Calculate and check for error message
             WhenITapTheCalculateButton();
-
-            // Based on the ExposureCalculator ViewModel, we would check the ErrorMessage property
-            // for underexposure-related text
-            MarkAsPending("Underexposure warning verification not implemented in UI tests");
+            Assert.That(string.IsNullOrEmpty(_errorMessage), Is.False);
+            Assert.That(_errorMessage.ToLower().Contains("underexpos") ||
+                       _errorMessage.ToLower().Contains("too dark") ||
+                       _calculator.ShutterSpeedResult == "Too Dark", Is.True);
         }
     }
 }

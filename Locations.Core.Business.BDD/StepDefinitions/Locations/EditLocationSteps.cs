@@ -1,16 +1,13 @@
 ﻿
-using TechTalk.SpecFlow;
-using System.Threading.Tasks;
-using System.Linq;
-using Locations.Core.Business.BDD.Support;
-using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Business.BDD.TestHelpers;
-using Locations.Core.Shared.ViewModels;
-using Assert = NUnit.Framework.Assert;
-using NUnit.Framework;
-using Moq;
+using Locations.Core.Business.DataAccess.Interfaces;
 using Locations.Core.Data.Models;
 using Locations.Core.Data.Queries.Interfaces;
+using Locations.Core.Shared.ViewModels;
+using Moq;
+using NUnit.Framework;
+using TechTalk.SpecFlow;
+using Assert = NUnit.Framework.Assert;
 
 namespace Locations.Core.Business.BDD.StepDefinitions.Locations
 {
