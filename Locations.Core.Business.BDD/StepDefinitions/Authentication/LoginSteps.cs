@@ -11,6 +11,7 @@ using Assert = NUnit.Framework.Assert;
 namespace Locations.Core.Business.BDD.StepDefinitions.Authentication
 {
     [Binding]
+    [Scope(Feature = "Login")]
     public class LoginSteps
     {
         private readonly ISettingService<SettingViewModel> _settingsService;
@@ -93,8 +94,8 @@ namespace Locations.Core.Business.BDD.StepDefinitions.Authentication
             };
         }
 
-        [When(@"I tap the save button")]
-        public async Task WhenITapTheSaveButton()
+        [When(@"I tap the login save button")]
+        public async Task WhenITapTheLoginSaveButton()
         {
             // Validate email
             if (string.IsNullOrEmpty(_currentEmail))

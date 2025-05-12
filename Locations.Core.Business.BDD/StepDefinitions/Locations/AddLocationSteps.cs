@@ -11,6 +11,7 @@ using Assert = NUnit.Framework.Assert;
 namespace Locations.Core.Business.BDD.StepDefinitions.Locations
 {
     [Binding]
+    [Scope(Feature = "AddLocation")]
     public class AddLocationSteps
     {
         private readonly ILocationService<LocationViewModel> _locationService;
@@ -174,6 +175,7 @@ namespace Locations.Core.Business.BDD.StepDefinitions.Locations
             _newLocation.Photo = "test_photo.jpg";
             Assert.That(string.IsNullOrEmpty(_newLocation.Photo), Is.False, "Photo not set");
         }
+
         [Then(@"the photo should be attached to the location")]
         public void ThenThePhotoShouldBeAttachedToTheLocation()
         {

@@ -11,6 +11,7 @@ using Assert = NUnit.Framework.Assert;
 namespace Locations.Core.Business.BDD.StepDefinitions.Weather
 {
     [Binding]
+    [Scope(Feature = "WeatherDisplay")]
     public class WeatherDisplaySteps
     {
         private readonly IWeatherService<WeatherViewModel> _weatherService;
@@ -209,20 +210,29 @@ namespace Locations.Core.Business.BDD.StepDefinitions.Weather
             Assert.That(_currentWeather.Pressure, Is.GreaterThan(0));
         }
 
+        [Then(@"I should see forecast information for multiple days")]
+        public void ThenIShouldSeeForecastInformationForMultipleDays()
+        {
+            Assert.That(_currentWeather, Is.Not.Null);
+            // Check multi-day forecast properties
+            Assert.That(_currentWeather.Temperature_day_two, Is.Not.Null);
+            Assert.That(_currentWeather.Temperature_day_three, Is.Not.Null);
+        }
+
         [Then(@"I should see day two's weather details")]
         public void ThenIShouldSeeDayTwosWeatherDetails()
         {
             Assert.That(_currentWeather, Is.Not.Null);
-            Assert.That(_currentWeather.Forecast, Is.Not.Null);
-            // Additional forecast data would be in a more complex weather model
+            Assert.That(_currentWeather.Forecast_day_two, Is.Not.Null);
+           // Assert.That(_currentWeather.Temperature_day_two, Is.GreaterThan(0));
         }
 
         [Then(@"I should see day three's weather details")]
         public void ThenIShouldSeeDayThreesWeatherDetails()
         {
             Assert.That(_currentWeather, Is.Not.Null);
-            Assert.That(_currentWeather.Forecast, Is.Not.Null);
-            // Additional forecast data would be in a more complex weather model
+            Assert.That(_currentWeather.Forecast_day_three, Is.Not.Null);
+            Assert.That(_currentWeather.Temperature_day_three, Is.GreaterThan(0));
         }
 
         [Then(@"I should see temperatures in Fahrenheit units")]
